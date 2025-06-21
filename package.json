@@ -1,0 +1,14 @@
+{
+  "name": "choirapp-monorepo",
+  "private": true,
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "frontend": "npm run start -w @choirapp/frontend",
+    "backend": "npm run start -w @choirapp/backend"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.0"
+  }
+}
