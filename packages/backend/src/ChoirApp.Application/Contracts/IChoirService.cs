@@ -1,0 +1,17 @@
+using ChoirApp.Application.Dtos;
+using ChoirApp.Domain.Entities;
+using FluentResults;
+using System;
+using System.Threading.Tasks;
+
+namespace ChoirApp.Application.Contracts
+{
+    public interface IChoirService
+    {
+        Task<Result<Choir>> CreateChoirAsync(CreateChoirDto choirDto, Guid adminId);
+        Task<Result> RemoveMemberAsync(Guid choirId, Guid memberId, Guid adminId);
+        Task<Result<Choir>> GetChoirByIdAsync(Guid choirId);
+        Task<Result> UpdateChoirAsync(Guid choirId, CreateChoirDto choirDto, Guid adminId);
+        Task<Result> DeleteChoirAsync(Guid choirId, Guid adminId);
+    }
+}
