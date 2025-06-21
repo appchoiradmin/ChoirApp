@@ -1,8 +1,0 @@
-{
-  "name": "@choirapp/backend",
-  "version": "0.1.0",
-  "private": true,
-  "scripts": {
-    "start": "echo 'Backend start script not implemented yet'"
-  }
-}

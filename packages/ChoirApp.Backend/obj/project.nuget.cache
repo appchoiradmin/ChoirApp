@@ -1,0 +1,11 @@
+{
+  "version": 2,
+  "dgSpecHash": "+v8S583HdT0=",
+  "success": true,
+  "projectFilePath": "C:\\ChoirAppV2\\packages\\ChoirApp.Backend\\ChoirApp.Backend.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\CarlosFaria_l3n0w6b\\.nuget\\packages\\microsoft.aspnetcore.openapi\\9.0.6\\microsoft.aspnetcore.openapi.9.0.6.nupkg.sha512",
+    "C:\\Users\\CarlosFaria_l3n0w6b\\.nuget\\packages\\microsoft.openapi\\1.6.17\\microsoft.openapi.1.6.17.nupkg.sha512"
+  ],
+  "logs": []
+}
