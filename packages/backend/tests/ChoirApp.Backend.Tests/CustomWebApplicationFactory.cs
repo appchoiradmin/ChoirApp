@@ -1,13 +1,16 @@
-using ChoirApp.Infrastructure.Persistence;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Configuration;
+using ChoirApp.Infrastructure.Persistence;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
+using System.Text.Encodings.Web;
 using System;
 using System.Collections.Generic;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Configuration;
 
 namespace ChoirApp.Backend.Tests;
 
@@ -23,7 +26,11 @@ public class CustomWebApplicationFactory<TProgram> : WebApplicationFactory<TProg
         {
             conf.AddInMemoryCollection(new Dictionary<string, string?>
             {
-                {"Jwt:Secret", "super-secret-key-that-is-long-enough"}
+                {"Jwt:Key", "super-secret-key-that-is-long-enough"},
+                {"Jwt:Audience", "test-audience"},
+                {"Jwt:Issuer", "test-issuer"},
+                {"Authentication:Google:ClientId", "test-client-id"},
+                {"Authentication:Google:ClientSecret", "test-client-secret"}
             });
         });
 
@@ -52,6 +59,19 @@ public class CustomWebApplicationFactory<TProgram> : WebApplicationFactory<TProg
             {
                 options.UseInMemoryDatabase(_dbName);
             });
+
+            // Configure authentication for testing - override default schemes
+            services.PostConfigure<AuthenticationOptions>(options =>
+            {
+                options.DefaultAuthenticateScheme = "Test";
+                options.DefaultChallengeScheme = "Test";
+                options.DefaultScheme = "Test";
+            });
+
+            // Add the test authentication scheme
+            services.AddAuthentication()
+                .AddScheme<AuthenticationSchemeOptions, TestAuthenticationHandler>(
+                    "Test", options => { });
 
             // Configure logging
             services.AddLogging(loggingBuilder =>

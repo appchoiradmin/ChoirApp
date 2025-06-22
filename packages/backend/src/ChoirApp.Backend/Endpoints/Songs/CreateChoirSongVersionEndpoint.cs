@@ -20,7 +20,7 @@ namespace ChoirApp.Backend.Endpoints.Songs
 
         public override void Configure()
         {
-            Post("/api/choirs/{ChoirId}/songs");
+            Post("/choirs/{ChoirId}/songs");
             Roles("ChoirAdmin", "ChoirMember");
         }
 

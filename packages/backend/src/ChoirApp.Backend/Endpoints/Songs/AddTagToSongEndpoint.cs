@@ -17,7 +17,7 @@ namespace ChoirApp.Backend.Endpoints.Songs
 
         public override void Configure()
         {
-            Post("/api/mastersongs/{SongId}/tags");
+            Post("/mastersongs/{SongId}/tags");
             Roles("ChoirAdmin", "SuperAdmin");
         }
 
