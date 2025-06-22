@@ -1,5 +1,6 @@
 ---
-trigger: always_on
+trigger: model_decision
+description: When adding new features, mainly when the features are more focus on UI/UX
 ---
 
 ChoirApp: Product Blueprint - UI/UX, Requirements, & Acceptance Criteria

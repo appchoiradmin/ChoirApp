@@ -45,7 +45,7 @@ public class ChoirInvitationTests
     public void Create_WithInvalidEmail_ShouldFail(string? invalidEmail)
     {
         // Act
-        var result = ChoirInvitation.Create(Guid.NewGuid(), invalidEmail);
+        var result = ChoirInvitation.Create(Guid.NewGuid(), invalidEmail!);
 
         // Assert
         result.IsFailed.Should().BeTrue();

@@ -56,7 +56,8 @@ namespace ChoirApp.Backend.Endpoints.Auth
             var user = result.Value;
             var token = _tokenService.CreateToken(user);
 
-            await SendAsync(new AuthResponse { Token = token }, cancellation: ct);
+            var frontendUrl = "http://localhost:5173"; // This should be read from configuration
+                        HttpContext.Response.Redirect($"{frontendUrl}/auth/callback?token={token}", permanent: false, preserveMethod: false);
         }
     }
 }
