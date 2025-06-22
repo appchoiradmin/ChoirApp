@@ -1,4 +1,4 @@
-/// <reference types="vitest" />
+import '@testing-library/jest-dom/vitest';
 import '@testing-library/jest-dom';
 import { vi, type Mock } from 'vitest';
 import * as userService from './services/userService';

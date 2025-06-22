@@ -7,9 +7,8 @@ const CreateMasterSongPage: React.FC = () => {
   const navigate = useNavigate();
   const [title, setTitle] = useState('');
   const [artist, setArtist] = useState('');
-  const [songKey, setSongKey] = useState('');
   const [tags, setTags] = useState('');
-  const [content, setContent] = useState('');
+  const [lyricsChordPro, setLyricsChordPro] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -20,16 +19,15 @@ const CreateMasterSongPage: React.FC = () => {
 
     const songDto: CreateMasterSongDto = {
       title,
-      artist,
-      key: songKey,
-      content,
-      tags: tags.split(',').map(tag => tag.trim()),
+      artist: artist || null,
+      lyricsChordPro,
+      tags: tags.split(',').map(tag => tag.trim()).filter(tag => tag),
     };
 
     try {
       const newSong = await createMasterSong(songDto);
       navigate(`/master-songs/${newSong.id}`);
-    } catch (err) {
+    } catch {
       setError('Failed to create song. Please check your input and try again.');
     } finally {
       setIsSubmitting(false);
@@ -63,20 +61,6 @@ const CreateMasterSongPage: React.FC = () => {
                 type="text"
                 value={artist}
                 onChange={(e) => setArtist(e.target.value)}
-                required
-              />
-            </div>
-          </div>
-          <div className="field">
-            <label className="label" htmlFor="songKey">Key</label>
-            <div className="control">
-              <input
-                id="songKey"
-                className="input"
-                type="text"
-                value={songKey}
-                onChange={(e) => setSongKey(e.target.value)}
-                required
               />
             </div>
           </div>
@@ -93,13 +77,13 @@ const CreateMasterSongPage: React.FC = () => {
             </div>
           </div>
           <div className="field">
-            <label className="label" htmlFor="content">Content (ChordPro format)</label>
+            <label className="label" htmlFor="lyricsChordPro">Content (ChordPro format)</label>
             <div className="control">
               <textarea
-                id="content"
+                id="lyricsChordPro"
                 className="textarea"
-                value={content}
-                onChange={(e) => setContent(e.target.value)}
+                value={lyricsChordPro}
+                onChange={(e) => setLyricsChordPro(e.target.value)}
                 rows={15}
                 required
               />

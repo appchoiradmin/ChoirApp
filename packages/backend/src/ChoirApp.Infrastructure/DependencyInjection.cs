@@ -5,16 +5,20 @@ using ChoirApp.Infrastructure.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 
 namespace ChoirApp.Infrastructure;
 
 public static class DependencyInjection
 {
-    public static IServiceCollection AddInfrastructureServices(this IServiceCollection services, IConfiguration configuration)
+    public static IServiceCollection AddInfrastructureServices(this IServiceCollection services, IConfiguration configuration, IHostEnvironment environment)
     {
-        services.AddDbContext<ApplicationDbContext>(
-            options => options.UseNpgsql(configuration.GetConnectionString("DefaultConnection"))
-        );
+        if (!environment.IsEnvironment("Testing"))
+        {
+            services.AddDbContext<ApplicationDbContext>(
+                options => options.UseNpgsql(configuration.GetConnectionString("DefaultConnection"))
+            );
+        }
 
         services.AddScoped<ITokenService, TokenService>();
         services.AddScoped<IUserService, UserService>();

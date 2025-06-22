@@ -19,3 +19,7 @@ export interface CreateChoirSongVersionDto {
   masterSongId: string;
   editedLyricsChordPro: string;
 }
+
+export interface UpdateChoirSongVersionDto {
+  editedLyricsChordPro: string;
+}
