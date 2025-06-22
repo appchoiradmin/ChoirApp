@@ -28,7 +28,7 @@ public class UserTests
     public void Create_WithInvalidGoogleId_ShouldFail(string? invalidGoogleId)
     {
         // Act
-        var result = User.Create(invalidGoogleId, "Test User", "test@example.com");
+        var result = User.Create(invalidGoogleId!, "Test User", "test@example.com");
 
         // Assert
         result.IsFailed.Should().BeTrue();
@@ -42,7 +42,7 @@ public class UserTests
     public void Create_WithInvalidName_ShouldFail(string? invalidName)
     {
         // Act
-        var result = User.Create("google-id-123", invalidName, "test@example.com");
+        var result = User.Create("google-id-123", invalidName!, "test@example.com");
 
         // Assert
         result.IsFailed.Should().BeTrue();
@@ -57,7 +57,7 @@ public class UserTests
     public void Create_WithInvalidEmail_ShouldFail(string? invalidEmail)
     {
         // Act
-        var result = User.Create("google-id-123", "Test User", invalidEmail);
+        var result = User.Create("google-id-123", "Test User", invalidEmail!);
 
         // Assert
         result.IsFailed.Should().BeTrue();

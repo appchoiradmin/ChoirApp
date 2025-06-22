@@ -93,7 +93,7 @@ public class UserServiceTests : IDisposable
         // Assert
         result.IsSuccess.Should().BeTrue();
         var updatedUser = await _context.Users.FindAsync(user.UserId);
-        updatedUser.Role.Should().Be(UserRole.ChoirAdmin);
+        updatedUser?.Role.Should().Be(UserRole.ChoirAdmin);
     }
 
     [Fact]

@@ -1,0 +1,13 @@
+using System;
+using System.Collections.Generic;
+
+namespace ChoirApp.Application.Dtos;
+
+public class UserDto
+{
+    public Guid Id { get; set; }
+    public string Email { get; set; } = string.Empty;
+    public string? FirstName { get; set; }
+    public string? LastName { get; set; }
+    public List<ChoirDto> Choirs { get; set; } = new();
+}
