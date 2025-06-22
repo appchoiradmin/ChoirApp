@@ -1,7 +1,6 @@
-using ChoirApp.Application.Contracts;
-using ChoirApp.Domain.Services;
-using ChoirApp.Infrastructure.Persistence;
-using ChoirApp.Infrastructure.Services;
+using ChoirApp.Application;
+using ChoirApp.Infrastructure;
+using Microsoft.Extensions.DependencyInjection;
 using FastEndpoints;
 using FastEndpoints.Swagger;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -21,9 +20,9 @@ var builder = WebApplication.CreateBuilder(new WebApplicationOptions
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 builder.Services.AddProblemDetails();
 
-builder.Services.AddDbContext<ApplicationDbContext>(
-    options => options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"))
-);
+builder.Services
+    .AddApplicationServices()
+    .AddInfrastructureServices(builder.Configuration);
 
 builder.Services.AddFastEndpoints();
 builder.Services.SwaggerDocument(o =>
@@ -34,13 +33,6 @@ builder.Services.SwaggerDocument(o =>
         s.Version = "v1";
     };
 });
-
-builder.Services.AddScoped<ITokenService, TokenService>();
-builder.Services.AddScoped<IUserService, UserService>();
-builder.Services.AddScoped<IChoirService, ChoirService>();
-builder.Services.AddScoped<IInvitationService, InvitationService>();
-builder.Services.AddScoped<IChoirUniquenessChecker, ChoirUniquenessChecker>();
-builder.Services.AddScoped<IInvitationPolicy, InvitationPolicy>();
 
 // JWT and Google Auth Configuration
 var jwtKey = builder.Configuration["Jwt:Key"];
@@ -81,6 +73,8 @@ builder.Services.AddAuthentication(options =>
         options.ClientSecret = googleClientSecret;
         options.CallbackPath = "/api/auth/google-callback"; // This will be handled by a FastEndpoint
     });
+
+builder.Services.AddAuthorization();
 
 var app = builder.Build();
 

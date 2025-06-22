@@ -107,7 +107,7 @@ public class ChoirServiceTests : IDisposable
         // Assert
         result.IsSuccess.Should().BeTrue();
         var choirInDb = await _context.Choirs.FindAsync(choir.ChoirId);
-        choirInDb.ChoirName.Should().Be("New Name");
+        choirInDb?.ChoirName.Should().Be("New Name");
     }
 
     [Fact]
