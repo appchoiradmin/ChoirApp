@@ -6,16 +6,14 @@ export interface TagDto {
 export interface MasterSongDto {
   id: string;
   title: string;
-  artist: string;
-  key: string;
-  content: string;
+  artist: string | null;
+  lyricsChordPro: string;
   tags: TagDto[];
 }
 
 export interface CreateMasterSongDto {
   title: string;
-  artist: string;
-  key: string;
-  content: string;
+  artist: string | null;
+  lyricsChordPro: string;
   tags: string[];
 }

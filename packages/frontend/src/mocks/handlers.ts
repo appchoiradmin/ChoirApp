@@ -1,15 +1,15 @@
 import { http, HttpResponse } from 'msw';
 
-const API_BASE_URL = 'http://localhost:5000';
+const API_BASE_URL = 'http://localhost:5014';
 
 export const handlers = [
-  http.get(`${API_BASE_URL}/api/mastersongs`, () => {
+  http.get(`${API_BASE_URL}/api/master-songs`, () => {
     return HttpResponse.json([
       { id: '1', title: 'Test Song 1', artist: 'Test Artist 1', key: 'C', tags: [], content: '' },
       { id: '2', title: 'Test Song 2', artist: 'Test Artist 2', key: 'G', tags: [], content: '' },
     ]);
   }),
-  http.get(`${API_BASE_URL}/api/mastersongs/:id`, ({ params }) => {
+  http.get(`${API_BASE_URL}/api/master-songs/:id`, ({ params }) => {
     const { id } = params;
 
     if (id === '1') {
@@ -19,7 +19,7 @@ export const handlers = [
         artist: 'Test Artist 1',
         key: 'C',
         tags: [{ tagId: 't1', tagName: 'test' }],
-        content: '{title: Test Song 1}',
+        lyricsChordPro: '{title: Test Song 1}',
       });
     }
 
@@ -36,7 +36,7 @@ export const handlers = [
 
     return new HttpResponse(null, { status: 404 });
   }),
-  http.post(`${API_BASE_URL}/api/mastersongs`, async ({ request }) => {
+  http.post(`${API_BASE_URL}/api/master-songs`, async ({ request }) => {
     const newSong = (await request.json()) as { songDto: { title: string } };
     return HttpResponse.json(
       { id: '3', title: newSong.songDto.title, artist: 'New Artist', key: 'D', tags: [], content: 'New Content' },

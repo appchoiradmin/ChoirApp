@@ -1,5 +1,6 @@
 import { render, screen, waitFor } from '@testing-library/react';
-import { UserProvider, useUser } from '../../src/contexts/UserContext.tsx';
+import { UserProvider } from '../../src/contexts/UserContext.tsx';
+import { useUser } from '../../src/hooks/useUser';
 
 const TestComponent = () => {
   const { user, loading } = useUser();

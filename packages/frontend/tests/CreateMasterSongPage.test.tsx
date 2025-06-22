@@ -4,7 +4,7 @@ import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import { describe, it, expect, beforeAll, afterEach, afterAll } from 'vitest';
 import CreateMasterSongPage from '../src/pages/CreateMasterSongPage';
 import MasterSongDetailPage from '../src/pages/MasterSongDetailPage';
-import { UserProvider } from '../src/contexts/UserContext';
+import { UserProvider } from '../src/contexts/UserContext.tsx';
 import { server } from '../src/mocks/server';
 
 beforeAll(() => server.listen());
@@ -30,7 +30,7 @@ describe('CreateMasterSongPage', () => {
 
     await user.type(screen.getByLabelText(/title/i), 'New Awesome Song');
     await user.type(screen.getByLabelText(/artist/i), 'The Testers');
-    await user.type(screen.getByLabelText(/key/i), 'A');
+
     await user.type(screen.getByLabelText(/tags/i), 'worship, fast');
     await user.type(screen.getByLabelText(/content/i), '{{c:New song content}');
 

@@ -8,4 +8,5 @@ public interface IChoirSongService
     Task<Result<IEnumerable<ChoirSongVersionDto>>> GetChoirSongVersionsAsync(Guid choirId);
     Task<Result<ChoirSongVersionDto>> GetChoirSongVersionByIdAsync(Guid choirId, Guid songId);
     Task<Result<ChoirSongVersionDto>> CreateChoirSongVersionAsync(Guid choirId, Guid userId, CreateChoirSongVersionDto createChoirSongVersionDto);
+    Task<Result<ChoirSongVersionDto>> UpdateChoirSongVersionAsync(Guid choirId, Guid songId, UpdateChoirSongVersionDto updateDto);
 }

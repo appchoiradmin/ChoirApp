@@ -1,6 +1,9 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '';
+console.log('Attempting to build sign-in URL with API_BASE_URL:', API_BASE_URL);
+
 const HomePage: React.FC = () => {
   return (
     <section className="hero is-fullheight">
@@ -12,7 +15,7 @@ const HomePage: React.FC = () => {
           <h2 className="subtitle">
             Your digital tool for managing songs and playlists.
           </h2>
-          <a href="http://localhost:5001/api/auth/signin-google" className="button is-primary is-large">
+                    <a href={`${API_BASE_URL}/api/auth/signin-google`} className="button is-primary is-large">
             Sign In with Google
           </a>
           <p className="mt-4">

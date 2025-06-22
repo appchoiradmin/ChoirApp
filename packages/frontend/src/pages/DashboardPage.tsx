@@ -9,7 +9,10 @@ const DashboardPage: React.FC = () => {
         <p className="subtitle">
           Welcome to your choir's central hub!
         </p>
-        <Link to="/master-songs" className="button is-primary">Manage Master Songs</Link>
+        <div className="buttons">
+          <Link to="/master-songs" className="button is-primary">Manage Master Songs</Link>
+          <Link to="/choir-songs" className="button is-info">Manage Choir Songs</Link>
+        </div>
         {/* Further dashboard content will go here */}
       </div>
     </section>

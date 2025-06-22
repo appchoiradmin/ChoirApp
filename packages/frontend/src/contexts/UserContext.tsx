@@ -1,13 +1,7 @@
-import React, { createContext, useContext, useState, useEffect, type ReactNode } from 'react';
-import type { User } from '../types/user.ts';
+import React, { useState, useEffect, type ReactNode } from 'react';
+import type { User } from '../types/user';
 import { getCurrentUser } from '../services/userService';
-
-interface UserContextType {
-  user: User | null;
-  loading: boolean;
-}
-
-const UserContext = createContext<UserContextType | undefined>(undefined);
+import { UserContext } from './UserContext.ts';
 
 export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
@@ -36,10 +30,4 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   );
 };
 
-export const useUser = () => {
-  const context = useContext(UserContext);
-  if (context === undefined) {
-    throw new Error('useUser must be used within a UserProvider');
-  }
-  return context;
-};
+

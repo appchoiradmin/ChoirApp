@@ -6,16 +6,17 @@ const AuthCallbackPage: React.FC = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
+    console.log("AuthCallbackPage loaded. Checking for token...");
     const token = searchParams.get('token');
+    console.log("Token from URL:", token);
+
     if (token) {
-      // Store the token in local storage for future API calls
-      localStorage.setItem('authToken', token);
-      // Redirect to the dashboard or another appropriate page
+      console.log("Token found. Storing in localStorage...");
+      localStorage.setItem('token', token);
+      console.log("Redirecting to dashboard...");
       navigate('/dashboard');
     } else {
-      // Handle the case where the token is missing
-      console.error('Authentication failed: No token received.');
-      // Redirect to the home page with an error message if you want
+      console.error('Authentication failed: No token received in URL.');
       navigate('/');
     }
   }, [searchParams, navigate]);

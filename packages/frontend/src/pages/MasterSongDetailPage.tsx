@@ -1,18 +1,22 @@
 import React, { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { getMasterSongById } from '../services/masterSongService';
-import { createChoirSongVersion } from '../services/choirSongService';
+import { createChoirSongVersion, getChoirSongById } from '../services/choirSongService';
 import type { MasterSongDto } from '../types/song';
-import { useUser } from '../contexts/UserContext.tsx';
+import { useUser } from '../hooks/useUser';
+import ChordProViewer from '../components/ChordProViewer';
 
 const MasterSongDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
   const { user, loading: userLoading } = useUser();
   const [song, setSong] = useState<MasterSongDto | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
-  const [isCreating, setIsCreating] = useState<boolean>(false);
-  const [creationSuccess, setCreationSuccess] = useState<boolean>(false);
+  const [isProcessing, setIsProcessing] = useState<boolean>(false);
+  const [selectedChoirId, setSelectedChoirId] = useState<string | null>(null);
+  const [choirSongExists, setChoirSongExists] = useState<boolean>(false);
+  const [isCheckingVersion, setIsCheckingVersion] = useState<boolean>(true);
 
   useEffect(() => {
     const fetchSong = async () => {
@@ -20,7 +24,7 @@ const MasterSongDetailPage: React.FC = () => {
       try {
         const data = await getMasterSongById(id);
         setSong(data);
-      } catch (err) {
+      } catch {
         setError('Failed to fetch song details');
       } finally {
         setLoading(false);
@@ -30,24 +34,52 @@ const MasterSongDetailPage: React.FC = () => {
     fetchSong();
   }, [id]);
 
+  useEffect(() => {
+    if (user && user.choirs && user.choirs.length > 0) {
+      setSelectedChoirId(user.choirs[0].id);
+    }
+  }, [user]);
+
+  useEffect(() => {
+    const checkVersionExists = async () => {
+      if (!selectedChoirId || !id) return;
+
+      setIsCheckingVersion(true);
+      try {
+        await getChoirSongById(selectedChoirId, id);
+        setChoirSongExists(true);
+      } catch (error) {
+        setChoirSongExists(false);
+      } finally {
+        setIsCheckingVersion(false);
+      }
+    };
+
+    checkVersionExists();
+  }, [selectedChoirId, id]);
+
   const handleCreateChoirVersion = async () => {
-    if (!song || !user || !user.choirs || user.choirs.length === 0) return;
+    if (!song || !selectedChoirId) return;
 
-    const choirId = user.choirs[0].id;
-
-    setIsCreating(true);
-    setCreationSuccess(false);
-
+    setIsProcessing(true);
     try {
-      await createChoirSongVersion(choirId, {
+      await createChoirSongVersion(selectedChoirId, {
         masterSongId: song.id,
-        editedLyricsChordPro: song.content,
+        editedLyricsChordPro: song.lyricsChordPro,
       });
-      setCreationSuccess(true);
-    } catch (err) {
+      navigate(`/choirs/${selectedChoirId}/songs/${song.id}/edit`);
+    } catch {
       setError('Failed to create choir version');
     } finally {
-      setIsCreating(false);
+      setIsProcessing(false);
+    }
+  };
+
+  const handleEditOrCreate = () => {
+    if (choirSongExists) {
+      navigate(`/choirs/${selectedChoirId}/songs/${id}/edit`);
+    } else {
+      handleCreateChoirVersion();
     }
   };
 
@@ -63,7 +95,7 @@ const MasterSongDetailPage: React.FC = () => {
     return <div>Song not found.</div>;
   }
 
-  const canCreateVersion = user && user.choirs && user.choirs.length > 0;
+  const canManageVersions = user && user.choirs && user.choirs.length > 0;
 
   return (
     <section className="section">
@@ -72,19 +104,44 @@ const MasterSongDetailPage: React.FC = () => {
           <div className="level-left">
             <div>
               <h1 className="title">{song.title}</h1>
-              <h2 className="subtitle">By {song.artist}</h2>
+              <p className="subtitle is-6">Artist: {song.artist}</p>
             </div>
           </div>
           <div className="level-right">
-            {canCreateVersion && (
-              <div className="field">
+            {canManageVersions && user.choirs.length > 1 && (
+              <div className="field is-horizontal">
+                <div className="field-label is-normal">
+                  <label className="label">For Choir:</label>
+                </div>
+                <div className="field-body">
+                  <div className="field">
+                    <div className="control">
+                      <div className="select">
+                        <select
+                          value={selectedChoirId || ''}
+                          onChange={(e) => setSelectedChoirId(e.target.value)}
+                        >
+                          {user.choirs.map((choir) => (
+                            <option key={choir.id} value={choir.id}>
+                              {choir.name}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+            {canManageVersions && (
+              <div className="field ml-4">
                 <div className="control">
                   <button
-                    className={`button is-primary ${isCreating ? 'is-loading' : ''}`}
-                    onClick={handleCreateChoirVersion}
-                    disabled={isCreating || creationSuccess}
+                    className={`button is-primary ${isProcessing || isCheckingVersion ? 'is-loading' : ''}`}
+                    onClick={handleEditOrCreate}
+                    disabled={isProcessing || isCheckingVersion || !selectedChoirId}
                   >
-                    {creationSuccess ? 'Version Created!' : 'Create Choir Version'}
+                    {choirSongExists ? 'Edit Choir Version' : 'Create Choir Version'}
                   </button>
                 </div>
               </div>
@@ -92,20 +149,13 @@ const MasterSongDetailPage: React.FC = () => {
           </div>
         </div>
 
-        {creationSuccess && (
-          <div className="notification is-success is-light">
-            Successfully created a new version for your choir.
-          </div>
-        )}
-
         <div className="tags">
-          <span className="tag is-info">Key: {song.key}</span>
           {song.tags.map(tag => (
             <span key={tag.tagId} className="tag is-primary">{tag.tagName}</span>
           ))}
         </div>
         <div className="content">
-          <pre>{song.content}</pre>
+          <ChordProViewer source={song.lyricsChordPro} />
         </div>
       </div>
     </section>

@@ -7,6 +7,8 @@ import AuthCallbackPage from './pages/AuthCallbackPage.tsx';
 import MasterSongsListPage from './pages/MasterSongsListPage.tsx';
 import CreateMasterSongPage from './pages/CreateMasterSongPage.tsx';
 import MasterSongDetailPage from './pages/MasterSongDetailPage.tsx';
+import ChoirSongsListPage from './pages/ChoirSongsListPage.tsx';
+import ChoirSongEditorPage from './pages/ChoirSongEditorPage.tsx';
 
 function App() {
   return (
@@ -19,6 +21,8 @@ function App() {
       <Route path="/master-songs" element={<MasterSongsListPage />} />
       <Route path="/master-songs/create" element={<CreateMasterSongPage />} />
       <Route path="/master-songs/:id" element={<MasterSongDetailPage />} />
+      <Route path="/choir-songs" element={<ChoirSongsListPage />} />
+      <Route path="/choirs/:choirId/songs/:songId/edit" element={<ChoirSongEditorPage />} />
     </Routes>
   );
 }

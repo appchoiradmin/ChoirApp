@@ -2,7 +2,7 @@ import { render, screen, waitFor } from '@testing-library/react';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import { describe, it, expect, beforeAll, afterEach, afterAll } from 'vitest';
 import MasterSongDetailPage from '../src/pages/MasterSongDetailPage';
-import { UserProvider } from '../src/contexts/UserContext';
+import { UserProvider } from '../src/contexts/UserContext.tsx';
 import { server } from '../src/mocks/server';
 
 beforeAll(() => server.listen());
@@ -24,11 +24,11 @@ describe('MasterSongDetailPage', () => {
     expect(screen.getByText(/loading/i)).toBeInTheDocument();
 
     await waitFor(() => {
-      expect(screen.getByText('Test Song 1')).toBeInTheDocument();
-      expect(screen.getByText(/by test artist 1/i)).toBeInTheDocument();
-      expect(screen.getByText(/key: c/i)).toBeInTheDocument();
+      expect(screen.getByRole('heading', { name: 'Test Song 1', level: 1 })).toBeInTheDocument();
+      expect(screen.getByText(/Artist: Test Artist 1/i)).toBeInTheDocument();
+      
       expect(screen.getByText('test')).toBeInTheDocument();
-      expect(screen.getByText('{title: Test Song 1}')).toBeInTheDocument();
+      expect(screen.getByRole('heading', { name: 'Test Song 1', level: 2 })).toBeInTheDocument();
     });
   });
 });
