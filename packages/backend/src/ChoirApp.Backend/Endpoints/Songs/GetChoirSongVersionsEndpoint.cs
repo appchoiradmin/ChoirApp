@@ -19,7 +19,7 @@ namespace ChoirApp.Backend.Endpoints.Songs
 
         public override void Configure()
         {
-            Get("/api/choirs/{ChoirId}/songs");
+            Get("/choirs/{ChoirId}/songs");
             Roles("ChoirAdmin", "ChoirMember");
         }
 
