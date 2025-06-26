@@ -71,7 +71,11 @@ namespace ChoirApp.Infrastructure.Services
 
         public async Task<Result<User>> GetUserByIdAsync(Guid userId)
         {
-            var user = await _context.Users.FindAsync(userId);
+            var user = await _context.Users
+                .Include(u => u.UserChoirs)
+                    .ThenInclude(uc => uc.Choir)
+                .FirstOrDefaultAsync(u => u.UserId == userId);
+            
             if (user == null)
             {
                 return Result.Fail("User not found.");

@@ -16,7 +16,7 @@ public class GetCurrentUserEndpoint : EndpointWithoutRequest<UserDto>
 
     public override void Configure()
     {
-        Get("/api/me");
+        Get("/me");
         Roles("General", "ChoirAdmin", "SuperAdmin");
     }
 
