@@ -12,6 +12,11 @@ const ChoirSongsListPage: React.FC = () => {
 
   useEffect(() => {
     const fetchSongs = async () => {
+      if (user?.loading) {
+        setLoading(true);
+        return;
+      }
+
       if (user && user.choirId) {
         try {
           setLoading(true);
@@ -24,9 +29,13 @@ const ChoirSongsListPage: React.FC = () => {
         } finally {
           setLoading(false);
         }
-      } else {
+      } else if (user && !user.choirId) {
         setLoading(false);
         setError('You must be part of a choir to see its songs.');
+      } else {
+        // user is null, and not loading, likely means not authenticated
+        setLoading(false);
+        setError('Please log in to see choir songs.');
       }
     };
 
