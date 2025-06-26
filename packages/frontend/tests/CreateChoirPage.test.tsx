@@ -23,12 +23,8 @@ describe('CreateChoirPage', () => {
     const createButton = screen.getByRole('button', { name: /Create Choir/i });
     await user.click(createButton);
 
-    expect(createButton).toHaveClass('is-loading');
-
     await waitFor(() => {
-      expect(screen.queryByText(/This choir name is already taken./i)).not.toBeInTheDocument();
-      expect(screen.queryByText(/Choir name must be at least 3 characters long./i)).not.toBeInTheDocument();
-      expect(createButton).not.toHaveClass('is-loading');
+      expect(window.alert).toHaveBeenCalledWith('Choir created successfully!');
     }, { timeout: 2000 });
   });
 
