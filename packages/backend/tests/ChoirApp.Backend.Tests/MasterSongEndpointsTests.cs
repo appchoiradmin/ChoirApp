@@ -1,4 +1,5 @@
 using ChoirApp.Application.Dtos;
+using ChoirApp.Backend.Endpoints.Songs;
 using ChoirApp.Domain.Entities;
 using ChoirApp.Infrastructure.Persistence;
 using FluentAssertions;
@@ -61,11 +62,16 @@ public class MasterSongEndpointsTests : IClassFixture<CustomWebApplicationFactor
             LyricsChordPro = "{t: Amazing Grace}\n[G]Amazing [C]grace, how [G]sweet the [D]sound"
         };
 
+        var request = new CreateMasterSongRequest
+        {
+            SongDto = createDto
+        };
+
         // Act
-        var response = await _client.PostAsJsonAsync("/api/mastersongs", createDto);
+        var response = await _client.PostAsJsonAsync("/api/mastersongs", request);
 
         // Assert
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        response.StatusCode.Should().Be(HttpStatusCode.Created);
         var createdSong = await response.Content.ReadFromJsonAsync<MasterSongDto>();
         createdSong.Should().NotBeNull();
         createdSong!.SongId.Should().NotBe(Guid.Empty);
@@ -110,7 +116,7 @@ public class MasterSongEndpointsTests : IClassFixture<CustomWebApplicationFactor
         var response = await _client.GetAsync($"/api/mastersongs/{nonExistentId}");
 
         // Assert
-        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+        response.StatusCode.Should().Be(HttpStatusCode.NotFound);
     }
 
     [Fact]

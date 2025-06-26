@@ -18,7 +18,7 @@ namespace ChoirApp.Backend.Endpoints.Songs
 
         public override void Configure()
         {
-            Get("/api/songs/search");
+            Get("/songs/search");
             AllowAnonymous();
         }
 

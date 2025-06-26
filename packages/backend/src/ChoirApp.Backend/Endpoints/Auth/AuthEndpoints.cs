@@ -7,20 +7,29 @@ using Microsoft.AspNetCore.Authorization;
 
 namespace ChoirApp.Backend.Endpoints.Auth;
 
-[HttpGet("/auth/signin-google"), AllowAnonymous]
 public class SignInGoogleEndpoint : EndpointWithoutRequest
 {
+    public override void Configure()
+    {
+        Get("/auth/signin-google");
+        AllowAnonymous();
+    }
+
     public override async Task HandleAsync(CancellationToken ct)
     {
-        var properties = new AuthenticationProperties { RedirectUri = "/api/auth/signin-success" };
+        var properties = new AuthenticationProperties { RedirectUri = "/auth/signin-success" };
         await HttpContext.ChallengeAsync(GoogleDefaults.AuthenticationScheme, properties);
-        await HttpContext.Response.CompleteAsync(); // Manually complete response to prevent 204
     }
 }
 
-[HttpGet("/auth/signin-success"), AllowAnonymous]
 public class SignInSuccessEndpoint : EndpointWithoutRequest
 {
+    public override void Configure()
+    {
+        Get("/auth/signin-success");
+        AllowAnonymous();
+    }
+
     public override async Task HandleAsync(CancellationToken ct)
     {
         var authenticateResult = await HttpContext.AuthenticateAsync();
