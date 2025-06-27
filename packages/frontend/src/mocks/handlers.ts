@@ -36,6 +36,16 @@ export const handlers = [
 
     return new HttpResponse(null, { status: 404 });
   }),
+  http.get(`${API_BASE_URL}/api/master-songs/search`, ({ request }) => {
+    const url = new URL(request.url);
+    const title = url.searchParams.get('title');
+    if (title === 'Song 1') {
+      return HttpResponse.json([
+        { id: '1', title: 'Test Song 1', artist: 'Test Artist 1', key: 'C', tags: [], content: '' },
+      ]);
+    }
+    return HttpResponse.json([]);
+  }),
   http.post(`${API_BASE_URL}/api/master-songs`, async ({ request }) => {
     const newSong = (await request.json()) as { title: string };
     return HttpResponse.json(

@@ -22,7 +22,9 @@ const ChoirSongEditorPage: React.FC = () => {
             try {
                 const data = await getChoirSongById(choirId, songId);
                 setSong(data);
-                setLyrics(data.editedLyricsChordPro || data.masterSong?.lyricsChordPro || '');
+                if (data) {
+                    setLyrics(data.editedLyricsChordPro || data.masterSong?.lyricsChordPro || '');
+                }
             } catch (err) {
                 setError('Failed to fetch song details.');
                 console.error(err);
