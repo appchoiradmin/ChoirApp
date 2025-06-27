@@ -18,10 +18,10 @@ describe('ChoirSongsListPage', () => {
     server.close();
   });
 
-  it('displays loading message initially', async () => {
+  it('displays message when user is not logged in', async () => {
     vi.spyOn(useUserHook, 'useUser').mockReturnValue({
       user: null,
-      loading: true,
+      loading: false,
     });
 
     render(
@@ -29,7 +29,7 @@ describe('ChoirSongsListPage', () => {
         <ChoirSongsListPage />
       </BrowserRouter>
     );
-    expect(screen.getByText(/Please log in to see choir songs./i)).toBeInTheDocument();
+    expect(await screen.findByText(/Please log in to see choir songs./i)).toBeInTheDocument();
   });
 
   it('displays choir songs when fetched successfully', async () => {

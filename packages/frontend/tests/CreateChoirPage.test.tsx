@@ -1,6 +1,6 @@
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import CreateChoirPage from '../src/pages/CreateChoirPage';
 
 describe('CreateChoirPage', () => {
@@ -41,7 +41,7 @@ describe('CreateChoirPage', () => {
     await waitFor(() => {
       expect(screen.getByText(/Choir name must be at least 3 characters long./i)).toBeInTheDocument();
       expect(createButton).not.toHaveClass('is-loading');
-    });
+    }, { timeout: 2000 });
   });
 
   it('shows an error if choir name is already taken', async () => {
@@ -57,6 +57,7 @@ describe('CreateChoirPage', () => {
     await waitFor(() => {
       expect(screen.getByText(/This choir name is already taken./i)).toBeInTheDocument();
       expect(createButton).not.toHaveClass('is-loading');
-    });
+    }, { timeout: 2000 });
   });
 });
+

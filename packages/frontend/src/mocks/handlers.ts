@@ -37,9 +37,9 @@ export const handlers = [
     return new HttpResponse(null, { status: 404 });
   }),
   http.post(`${API_BASE_URL}/api/master-songs`, async ({ request }) => {
-    const newSong = (await request.json()) as { songDto: { title: string } };
+    const newSong = (await request.json()) as { title: string };
     return HttpResponse.json(
-      { id: '3', title: newSong.songDto.title, artist: 'New Artist', key: 'D', tags: [], content: 'New Content' },
+      { id: '3', title: newSong.title, artist: 'New Artist', key: 'D', tags: [], content: 'New Content' },
       { status: 201 }
     );
   }),

@@ -5,14 +5,14 @@ import { getChoirSongsByChoirId } from '../services/choirSongService';
 import type { ChoirSongVersionDto } from '../types/choir';
 
 const ChoirSongsListPage: React.FC = () => {
-  const { user } = useUser();
+  const { user, loading: userContextLoading } = useUser();
   const [songs, setSongs] = useState<ChoirSongVersionDto[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchSongs = async () => {
-      if (user?.loading) {
+      if (userContextLoading) {
         setLoading(true);
         return;
       }
