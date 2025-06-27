@@ -6,7 +6,7 @@
 .pnp.js
 
 # Testing
-/coverage
+**/coverage/
 
 # Production
 /build
@@ -307,3 +307,4 @@ __pycache__/
 
 # ChoirApp Specific - Ignore sensitive development settings
 appsettings.Development.json
+node_modules/.package-lock.json
