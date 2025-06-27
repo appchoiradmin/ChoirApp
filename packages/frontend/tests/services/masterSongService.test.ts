@@ -34,6 +34,16 @@ describe('masterSongService', () => {
       const result = await getAllMasterSongs();
       expect(result).toEqual(expectedResponse);
     });
+
+    it('should throw an error if the fetch fails', async () => {
+      server.use(
+        http.get(`${API_BASE_URL}/api/master-songs`, () => {
+          return new HttpResponse(null, { status: 500 });
+        })
+      );
+
+      await expect(getAllMasterSongs()).rejects.toThrow('Failed to fetch master songs');
+    });
   });
 
   describe('getMasterSongById', () => {
@@ -50,6 +60,17 @@ describe('masterSongService', () => {
       const result = await getMasterSongById(songId);
       expect(result).toEqual(expectedResponse);
     });
+
+    it('should throw an error if the fetch fails', async () => {
+      const songId = '1';
+      server.use(
+        http.get(`${API_BASE_URL}/api/master-songs/${songId}`, () => {
+          return new HttpResponse(null, { status: 500 });
+        })
+      );
+
+      await expect(getMasterSongById(songId)).rejects.toThrow('Failed to fetch master song');
+    });
   });
 
   describe('createMasterSong', () => {
@@ -65,6 +86,17 @@ describe('masterSongService', () => {
 
       const result = await createMasterSong(createDto);
       expect(result).toEqual(expectedResponse);
+    });
+
+    it('should throw an error if the creation fails', async () => {
+      const createDto: CreateMasterSongDto = { title: 'New Song', artist: 'New Artist', lyricsChordPro: 'D', tags: [] };
+      server.use(
+        http.post(`${API_BASE_URL}/api/master-songs`, () => {
+          return new HttpResponse(null, { status: 500 });
+        })
+      );
+
+      await expect(createMasterSong(createDto)).rejects.toThrow('Failed to create master song');
     });
   });
 
@@ -83,6 +115,17 @@ describe('masterSongService', () => {
 
       const result = await searchMasterSongs(searchParams);
       expect(result).toEqual(expectedResponse);
+    });
+
+    it('should throw an error if the search fails', async () => {
+      const searchParams = { title: 'Song' };
+      server.use(
+        http.get(`${API_BASE_URL}/api/songs/search`, () => {
+          return new HttpResponse(null, { status: 500 });
+        })
+      );
+
+      await expect(searchMasterSongs(searchParams)).rejects.toThrow('Failed to search songs');
     });
   });
 });

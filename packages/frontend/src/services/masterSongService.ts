@@ -12,6 +12,9 @@ export const getAllMasterSongs = async (): Promise<MasterSongDto[]> => {
 
 export const getMasterSongById = async (id: string): Promise<MasterSongDto> => {
   const response = await fetch(`${API_BASE_URL}/api/master-songs/${id}`);
+  if (response.status === 404) {
+    throw new Error('Song not found');
+  }
   if (!response.ok) {
     throw new Error('Failed to fetch master song');
   }
