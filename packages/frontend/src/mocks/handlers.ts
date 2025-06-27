@@ -58,4 +58,18 @@ export const handlers = [
       ],
     });
   }),
+  http.get(`${API_BASE_URL}/api/choirs/:choirId/songs/:songId`, ({ params }) => {
+    const { songId } = params;
+    if (songId === '1') {
+      return HttpResponse.json({
+        choirSongId: 'existing-song-1',
+        masterSongId: '1',
+        choirId: 'choir-abc',
+        editedLyricsChordPro: 'G C D',
+        lastEditedDate: new Date().toISOString(),
+        editorUserId: 'user-123',
+      });
+    }
+    return new HttpResponse(null, { status: 404 });
+  }),
 ];

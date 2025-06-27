@@ -24,8 +24,12 @@ const MasterSongDetailPage: React.FC = () => {
       try {
         const data = await getMasterSongById(id);
         setSong(data);
-      } catch {
-        setError('Failed to fetch song details');
+      } catch (err) {
+        if (err instanceof Error && err.message === 'Song not found') {
+          setSong(null);
+        } else {
+          setError('Failed to fetch song details');
+        }
       } finally {
         setLoading(false);
       }
