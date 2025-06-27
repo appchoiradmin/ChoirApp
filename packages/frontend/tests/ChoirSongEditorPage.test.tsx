@@ -11,12 +11,14 @@ import type { ChoirSongVersionDto } from '../src/types/choir';
 vi.mock('../src/services/choirSongService');
 
 const mockNavigate = vi.fn();
+const mockUseParams = vi.fn();
+
 vi.mock('react-router-dom', async () => {
     const actual = await vi.importActual('react-router-dom');
     return {
         ...actual,
         useNavigate: () => mockNavigate,
-        useParams: () => ({ choirId: '1', songId: '123' }),
+        useParams: () => mockUseParams(),
     };
 });
 
@@ -39,6 +41,7 @@ const mockSong: ChoirSongVersionDto = {
 describe('ChoirSongEditorPage', () => {
     beforeEach(() => {
         vi.resetAllMocks();
+        mockUseParams.mockReturnValue({ choirId: '1', songId: '123' });
     });
 
     it('should render a loading state initially', () => {
@@ -145,9 +148,7 @@ describe('ChoirSongEditorPage', () => {
         });
         expect(consoleErrorSpy).toHaveBeenCalledWith(new Error('Failed to save'));
         consoleErrorSpy.mockRestore();
-    });
-
-    it('should navigate back on cancel button click', async () => {
+    });    it('should navigate back on cancel button click', async () => {
         (choirSongService.getChoirSongById as Mock).mockResolvedValue(mockSong);
         render(
             <MemoryRouter initialEntries={['/choirs/1/songs/123/edit']}>
@@ -161,5 +162,131 @@ describe('ChoirSongEditorPage', () => {
         fireEvent.click(cancelButton);
 
         expect(mockNavigate).toHaveBeenCalledWith(-1);
+    });
+
+    it('should display error message when choirId is missing', () => {
+        mockUseParams.mockReturnValue({ choirId: undefined as any, songId: '123' });
+        render(
+            <MemoryRouter initialEntries={['/choirs/undefined/songs/123/edit']}>
+                <Routes>
+                    <Route path="/choirs/:choirId/songs/:songId/edit" element={<ChoirSongEditorPage />} />
+                </Routes>
+            </MemoryRouter>
+        );
+
+        expect(screen.getByText('Choir ID or Song ID is missing.')).toBeInTheDocument();
+    });
+
+    it('should display error message when songId is missing', () => {
+        mockUseParams.mockReturnValue({ choirId: '1', songId: undefined as any });
+        render(
+            <MemoryRouter initialEntries={['/choirs/1/songs/undefined/edit']}>
+                <Routes>
+                    <Route path="/choirs/:choirId/songs/:songId/edit" element={<ChoirSongEditorPage />} />
+                </Routes>
+            </MemoryRouter>
+        );
+
+        expect(screen.getByText('Choir ID or Song ID is missing.')).toBeInTheDocument();
+    });
+
+    it('should display "Song not found" when song is null', async () => {
+        (choirSongService.getChoirSongById as Mock).mockResolvedValue(null);
+        render(
+            <MemoryRouter initialEntries={['/choirs/1/songs/123/edit']}>
+                <Routes>
+                    <Route path="/choirs/:choirId/songs/:songId/edit" element={<ChoirSongEditorPage />} />
+                </Routes>
+            </MemoryRouter>
+        );
+
+        await waitFor(() => {
+            expect(screen.getByText('Song not found.')).toBeInTheDocument();
+        });
+    });
+
+    it('should handle song with null masterSong', async () => {
+        const songWithoutMasterSong = {
+            ...mockSong,
+            masterSong: null,
+        };
+        (choirSongService.getChoirSongById as Mock).mockResolvedValue(songWithoutMasterSong);
+        render(
+            <MemoryRouter initialEntries={['/choirs/1/songs/123/edit']}>
+                <Routes>
+                    <Route path="/choirs/:choirId/songs/:songId/edit" element={<ChoirSongEditorPage />} />
+                </Routes>
+            </MemoryRouter>
+        );
+
+        await waitFor(() => {
+            expect(screen.getByText(/edit song:/i)).toBeInTheDocument();
+            expect(screen.getByDisplayValue(songWithoutMasterSong.editedLyricsChordPro!)).toBeInTheDocument();
+        });
+    });
+
+    it('should use masterSong lyrics when editedLyricsChordPro is null', async () => {
+        const songWithMasterSongLyrics = {
+            ...mockSong,
+            editedLyricsChordPro: null,
+        };
+        (choirSongService.getChoirSongById as Mock).mockResolvedValue(songWithMasterSongLyrics);
+        render(
+            <MemoryRouter initialEntries={['/choirs/1/songs/123/edit']}>
+                <Routes>
+                    <Route path="/choirs/:choirId/songs/:songId/edit" element={<ChoirSongEditorPage />} />
+                </Routes>
+            </MemoryRouter>
+        );
+
+        await waitFor(() => {
+            expect(screen.getByDisplayValue(mockSong.masterSong!.lyricsChordPro)).toBeInTheDocument();
+        });
+    });
+
+    it('should use empty string when both editedLyricsChordPro and masterSong are null', async () => {
+        const songWithNoLyrics = {
+            ...mockSong,
+            editedLyricsChordPro: null,
+            masterSong: null,
+        };
+        (choirSongService.getChoirSongById as Mock).mockResolvedValue(songWithNoLyrics);
+        render(
+            <MemoryRouter initialEntries={['/choirs/1/songs/123/edit']}>
+                <Routes>
+                    <Route path="/choirs/:choirId/songs/:songId/edit" element={<ChoirSongEditorPage />} />
+                </Routes>
+            </MemoryRouter>
+        );
+
+        await waitFor(() => {
+            expect(screen.getByRole('textbox')).toHaveValue('');
+        });
+    });
+
+    it('should show error when trying to save without choirId', async () => {
+        mockUseParams.mockReturnValue({ choirId: undefined as any, songId: '123' });
+        render(
+            <MemoryRouter initialEntries={['/choirs/undefined/songs/123/edit']}>
+                <Routes>
+                    <Route path="/choirs/:choirId/songs/:songId/edit" element={<ChoirSongEditorPage />} />
+                </Routes>
+            </MemoryRouter>
+        );
+
+        expect(screen.getByText('Choir ID or Song ID is missing.')).toBeInTheDocument();
+    });
+
+    it('should show error when trying to save without songId', async () => {
+        mockUseParams.mockReturnValue({ choirId: '1', songId: undefined as any });
+        render(
+            <MemoryRouter initialEntries={['/choirs/1/songs/undefined/edit']}>
+                <Routes>
+                    <Route path="/choirs/:choirId/songs/:songId/edit" element={<ChoirSongEditorPage />} />
+                </Routes>
+            </MemoryRouter>
+        );
+
+        expect(screen.getByText('Choir ID or Song ID is missing.')).toBeInTheDocument();
     });
 });
