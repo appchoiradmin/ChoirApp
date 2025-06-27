@@ -81,3 +81,18 @@ The frontend is a modern single-page application (SPA) that leverages establishe
 -   **Playlist:** A collection of songs organized into sections. Belongs to a choir and can be public or private.
 -   **PlaylistTemplate:** A reusable structure for creating new playlists. Belongs to a choir.
 -   **Tag:** A unique, lowercase tag that can be applied to songs and playlists.
+
+## 6. Development Workflow & Best Practices
+
+### 6.1. General Principles
+- **Verify, Don't Assume:** Before writing or modifying code, always read the relevant files to understand the existing implementation, data structures, and conventions. This is especially critical when working with DTOs, service layers, and UI components.
+- **Incremental Changes:** Make small, incremental changes and run tests frequently to catch errors early.
+
+### 6.2. Frontend Testing
+- **Check Existing Tests:** Before writing a new test, review existing tests (`/packages/frontend/tests`) to understand the established patterns, libraries, and mocking strategies.
+- **Type Definitions are Critical:** Always read the TypeScript type definition files (`/packages/frontend/src/types/*.ts`) before creating mock objects or interacting with data structures in tests. This prevents type mismatch errors.
+- **MSW Usage:** The project uses **MSW** for API mocking. Handlers are defined in `/packages/frontend/src/mocks/handlers.ts`. Use `http` and `HttpResponse` from `msw`, not `rest`.
+- **`renderHook`:** The `renderHook` function is available directly from `@testing-library/react`. Do not install or import from `@testing-library/react-hooks`.
+- **API Base URL:** The API base URL for testing is `http://localhost:5014`. Ensure that MSW handlers use this same URL.
+- **File Paths:** Pay close attention to relative paths when importing modules within test files. Tests are in `/packages/frontend/tests`, and source files are in `/packages/frontend/src`.
+- **Context Providers:** When testing custom hooks that consume a React Context, ensure the component is wrapped in the correct Provider (e.g., `UserProvider` from `UserContext.tsx`, not `UserContext.ts`).

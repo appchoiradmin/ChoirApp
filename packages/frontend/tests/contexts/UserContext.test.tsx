@@ -1,6 +1,11 @@
 import { render, screen, waitFor } from '@testing-library/react';
+import { vi } from 'vitest';
 import { UserProvider } from '../../src/contexts/UserContext.tsx';
 import { useUser } from '../../src/hooks/useUser';
+import * as userService from '../../src/services/userService';
+import type { User } from '../../src/types/user';
+
+vi.mock('../../src/services/userService');
 
 const TestComponent = () => {
   const { user, loading } = useUser();
@@ -18,6 +23,15 @@ const TestComponent = () => {
 
 describe('UserContext', () => {
   it('fetches and provides user data', async () => {
+    const mockUser: User = {
+      id: 'user-123',
+      email: 'test@example.com',
+      firstName: 'Test',
+      lastName: 'User',
+      choirs: [],
+    };
+    vi.mocked(userService.getCurrentUser).mockResolvedValue(mockUser);
+
     render(
       <UserProvider>
         <TestComponent />
@@ -30,9 +44,5 @@ describe('UserContext', () => {
       expect(screen.getByText('Welcome, Test')).toBeInTheDocument();
     });
   });
-
-  // Note: The global mock handles the success case. A separate test for the error case
-  // would require overriding the global mock, which adds complexity.
-  // For now, we rely on the global setup for simplicity.
 });
 
