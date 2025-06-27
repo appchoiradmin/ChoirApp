@@ -73,7 +73,7 @@ const ChoirSongsListPage: React.FC = () => {
                     <td>{song.masterSong?.artist || 'N/A'}</td>
                     <td>{new Date(song.lastEditedDate).toLocaleDateString()}</td>
                     <td>
-                      <Link to={`/choir-songs/${song.choirSongId}`} className="button is-small is-info">
+                      <Link to={`/choirs/${user?.choirId}/songs/${song.choirSongId}/edit`} className="button is-small is-info">
                         View/Edit
                       </Link>
                     </td>
