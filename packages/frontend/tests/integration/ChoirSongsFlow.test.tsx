@@ -145,6 +145,17 @@ const TestWrapper: React.FC<{ initialPath?: string }> = ({ initialPath = "/dashb
 
 describe('Choir Songs Management Flow - Integration Test', () => {
   beforeEach(async () => {
+    // Mock localStorage to have an auth token
+    Object.defineProperty(window, 'localStorage', {
+      value: {
+        getItem: vi.fn((key) => key === 'authToken' ? 'mock-token' : null),
+        setItem: vi.fn(),
+        removeItem: vi.fn(),
+        clear: vi.fn(),
+      },
+      writable: true,
+    });
+
     // Reset mock implementations
     const choirSongService = await import('../../src/services/choirSongService');
     const masterSongService = await import('../../src/services/masterSongService');

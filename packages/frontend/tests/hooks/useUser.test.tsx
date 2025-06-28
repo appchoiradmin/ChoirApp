@@ -1,5 +1,5 @@
 import { renderHook, waitFor } from '@testing-library/react';
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { UserProvider } from '../../src/contexts/UserContext.tsx';
 import { useUser } from '../../src/hooks/useUser';
 import * as userService from '../../src/services/userService';
@@ -16,6 +16,23 @@ const mockUser: User = {
 };
 
 describe('useUser', () => {
+  beforeEach(() => {
+    // Mock localStorage to have an auth token for tests that expect user fetching
+    Object.defineProperty(window, 'localStorage', {
+      value: {
+        getItem: vi.fn((key) => key === 'authToken' ? 'mock-token' : null),
+        setItem: vi.fn(),
+        removeItem: vi.fn(),
+        clear: vi.fn(),
+      },
+      writable: true,
+    });
+  });
+
+  afterEach(() => {
+    vi.clearAllMocks();
+  });
+
   it('throws an error when used outside of a UserProvider', () => {
     const originalError = console.error;
     console.error = (...args) => {

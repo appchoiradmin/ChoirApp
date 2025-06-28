@@ -10,11 +10,21 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   useEffect(() => {
     const fetchUser = async () => {
       try {
+        // Only try to fetch user if we have a token
+        const token = localStorage.getItem('authToken');
+        if (!token) {
+          setUser(null);
+          setLoading(false);
+          return;
+        }
+
         const userData = await getCurrentUser();
         setUser(userData);
       } catch (error) {
         console.error('Failed to fetch user', error);
         setUser(null);
+        // If token is invalid, remove it
+        localStorage.removeItem('authToken');
       } finally {
         setLoading(false);
       }

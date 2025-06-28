@@ -1,5 +1,5 @@
 import { render, screen, waitFor } from '@testing-library/react';
-import { vi } from 'vitest';
+import { vi, describe, it, beforeEach, afterEach, expect } from 'vitest';
 import { UserProvider } from '../../src/contexts/UserContext.tsx';
 import { useUser } from '../../src/hooks/useUser';
 import * as userService from '../../src/services/userService';
@@ -22,6 +22,23 @@ const TestComponent = () => {
 };
 
 describe('UserContext', () => {
+  beforeEach(() => {
+    // Mock localStorage to have an auth token
+    Object.defineProperty(window, 'localStorage', {
+      value: {
+        getItem: vi.fn((key) => key === 'authToken' ? 'mock-token' : null),
+        setItem: vi.fn(),
+        removeItem: vi.fn(),
+        clear: vi.fn(),
+      },
+      writable: true,
+    });
+  });
+
+  afterEach(() => {
+    vi.clearAllMocks();
+  });
+
   it('fetches and provides user data', async () => {
     const mockUser: User = {
       id: 'user-123',
