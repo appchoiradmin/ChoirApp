@@ -7,4 +7,6 @@ export interface User {
   lastName?: string;
   choirs: Choir[];
   choirId?: string;
+  hasCompletedOnboarding: boolean;
+  isNewUser: boolean;
 }

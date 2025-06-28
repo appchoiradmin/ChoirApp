@@ -161,6 +161,38 @@ public class UserServiceTests : IDisposable
         result.Errors.Should().ContainSingle(e => e.Message == "User not found.");
     }
 
+    [Fact]
+    public async Task CompleteOnboardingAsync_WhenUserExists_ShouldMarkAsCompleted()
+    {
+        // Arrange
+        var user = User.Create("google-id-123", "Test User", "test@example.com").Value;
+        _context.Users.Add(user);
+        await _context.SaveChangesAsync();
+        
+        user.HasCompletedOnboarding.Should().BeFalse();
+
+        // Act
+        var result = await _userService.CompleteOnboardingAsync(user.UserId);
+
+        // Assert
+        result.IsSuccess.Should().BeTrue();
+        
+        var updatedUser = await _context.Users.FindAsync(user.UserId);
+        updatedUser.Should().NotBeNull();
+        updatedUser!.HasCompletedOnboarding.Should().BeTrue();
+    }
+
+    [Fact]
+    public async Task CompleteOnboardingAsync_WhenUserDoesNotExist_ShouldFail()
+    {
+        // Act
+        var result = await _userService.CompleteOnboardingAsync(Guid.NewGuid());
+
+        // Assert
+        result.IsFailed.Should().BeTrue();
+        result.Errors.Should().ContainSingle().Which.Message.Should().Contain("not found");
+    }
+
     public void Dispose()
     {
         _context.Database.EnsureDeleted();

@@ -26,9 +26,14 @@ namespace ChoirApp.Backend.Tests
             // Mode 1: Simulate Google Callback
             if (Request.Headers.ContainsKey("X-Test-Auth-Mode") && Request.Headers["X-Test-Auth-Mode"] == "GoogleCallback")
             {
+                // Allow tests to specify custom Google ID via header
+                var googleId = Request.Headers.ContainsKey("X-Test-Google-Id") 
+                    ? Request.Headers["X-Test-Google-Id"].ToString()
+                    : "google-test-id";
+                    
                 var claims = new[]
                 {
-                    new Claim(ClaimTypes.NameIdentifier, "google-test-id"),
+                    new Claim(ClaimTypes.NameIdentifier, googleId),
                     new Claim(ClaimTypes.Email, "test.user@gmail.com"),
                     new Claim(ClaimTypes.Name, "Test User")
                 };

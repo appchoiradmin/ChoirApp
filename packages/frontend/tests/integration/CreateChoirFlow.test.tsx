@@ -47,6 +47,49 @@ describe('Create Choir Flow - Integration Test', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     vi.spyOn(window, 'alert').mockImplementation(() => {});
+    
+    // Mock localStorage with auth token
+    Object.defineProperty(window, 'localStorage', {
+      value: {
+        getItem: vi.fn((key) => key === 'authToken' ? 'mock-auth-token' : null),
+        setItem: vi.fn(),
+        removeItem: vi.fn(),
+        clear: vi.fn(),
+      },
+      writable: true,
+    });
+
+    // Mock fetch for API calls
+    global.fetch = vi.fn((url, options) => {
+      if (url.includes('/complete-onboarding')) {
+        return Promise.resolve({
+          ok: true,
+          json: () => Promise.resolve({}),
+        } as Response);
+      }
+      if (url.includes('/choirs') && options?.method === 'POST') {
+        const body = JSON.parse(options.body as string);
+        if (body.name === 'taken') {
+          return Promise.resolve({
+            ok: false,
+            status: 409,
+            json: () => Promise.resolve({ message: 'A choir with this name already exists' }),
+          } as Response);
+        }
+        if (body.name.length < 3) {
+          return Promise.resolve({
+            ok: false,
+            status: 400,
+            json: () => Promise.resolve({ message: 'Choir name must be at least 3 characters long' }),
+          } as Response);
+        }
+        return Promise.resolve({
+          ok: true,
+          json: () => Promise.resolve({ id: 'choir-123', name: body.name }),
+        } as Response);
+      }
+      return Promise.reject(new Error('Unhandled fetch call'));
+    });
   });
 
   afterEach(() => {
@@ -68,21 +111,25 @@ describe('Create Choir Flow - Integration Test', () => {
     await user.click(onboardingLink);
 
     // Step 3: Verify we're on OnboardingPage
-    expect(screen.getByRole('heading', { name: /Onboarding/i })).toBeInTheDocument();
-    expect(screen.getByText(/What would you like to do?/i)).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: /Welcome to ChoirApp!/i })).toBeInTheDocument();
+    expect(screen.getByText(/Choose how you'd like to use ChoirApp:/i)).toBeInTheDocument();
 
-    // Step 4: Click "Create a Choir" button
-    const createChoirButton = screen.getByRole('link', { name: /Create a Choir/i });
-    await user.click(createChoirButton);
+    // Step 4: Select "Administrator" option
+    const adminButton = screen.getByRole('button', { name: /Select Administrator/i });
+    await user.click(adminButton);
 
-    // Step 5: Verify we're on CreateChoirPage
+    // Step 5: Click the "Create My Choir" button to complete onboarding and go to choir creation
+    const createMyChoirButton = screen.getByRole('button', { name: /Create My Choir/i });
+    await user.click(createMyChoirButton);
+
+    // Step 6: Verify we're on CreateChoirPage
     expect(screen.getByRole('heading', { name: /Create a New Choir/i })).toBeInTheDocument();
 
-    // Step 6: Fill out the choir creation form
+    // Step 7: Fill out the choir creation form
     const choirNameInput = screen.getByLabelText(/Choir Name/i);
     await user.type(choirNameInput, 'Integration Test Choir');
 
-    // Step 7: Submit the form
+    // Step 8: Submit the form
     const submitButton = screen.getByRole('button', { name: /Create Choir/i });
     await user.click(submitButton);
 
@@ -107,11 +154,15 @@ describe('Create Choir Flow - Integration Test', () => {
     const onboardingLink = screen.getByRole('link', { name: /Proceed to Onboarding/i });
     await user.click(onboardingLink);
 
-    // Step 3: Verify we're on OnboardingPage and navigate to create choir
-    expect(screen.getByRole('heading', { name: /Onboarding/i })).toBeInTheDocument();
+    // Step 3: Verify we're on OnboardingPage and select administrator
+    expect(screen.getByRole('heading', { name: /Welcome to ChoirApp!/i })).toBeInTheDocument();
     
-    const createChoirButton = screen.getByRole('link', { name: /Create a Choir/i });
-    await user.click(createChoirButton);
+    const adminButton = screen.getByRole('button', { name: /Select Administrator/i });
+    await user.click(adminButton);
+
+    // Step 4: Click the "Create My Choir" button to complete onboarding and go to choir creation
+    const createMyChoirButton = screen.getByRole('button', { name: /Create My Choir/i });
+    await user.click(createMyChoirButton);
 
     // Try to create a choir with a name that's too short
     const choirNameInput = screen.getByLabelText(/Choir Name/i);
@@ -142,11 +193,15 @@ describe('Create Choir Flow - Integration Test', () => {
     const onboardingLink = screen.getByRole('link', { name: /Proceed to Onboarding/i });
     await user.click(onboardingLink);
 
-    // Step 3: Verify we're on OnboardingPage and navigate to create choir
-    expect(screen.getByRole('heading', { name: /Onboarding/i })).toBeInTheDocument();
+    // Step 3: Verify we're on OnboardingPage and select administrator
+    expect(screen.getByRole('heading', { name: /Welcome to ChoirApp!/i })).toBeInTheDocument();
     
-    const createChoirButton = screen.getByRole('link', { name: /Create a Choir/i });
-    await user.click(createChoirButton);
+    const adminButton = screen.getByRole('button', { name: /Select Administrator/i });
+    await user.click(adminButton);
+
+    // Step 4: Click the "Create My Choir" button to complete onboarding and go to choir creation
+    const createMyChoirButton = screen.getByRole('button', { name: /Create My Choir/i });
+    await user.click(createMyChoirButton);
 
     // Try to create a choir with the special "taken" name
     const choirNameInput = screen.getByLabelText(/Choir Name/i);
