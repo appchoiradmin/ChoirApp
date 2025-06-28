@@ -46,6 +46,8 @@ public class GetCurrentUserEndpoint : EndpointWithoutRequest<UserDto>
             Email = user.Email,
             FirstName = nameParts.Length > 0 ? nameParts[0] : string.Empty,
             LastName = nameParts.Length > 1 ? nameParts[1] : string.Empty,
+            HasCompletedOnboarding = user.HasCompletedOnboarding,
+            IsNewUser = user.IsNewUser(),
             Choirs = user.UserChoirs
                 .Where(uc => uc.Choir != null)
                 .Select(uc => new ChoirDto

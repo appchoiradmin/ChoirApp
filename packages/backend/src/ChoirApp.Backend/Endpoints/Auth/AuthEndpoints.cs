@@ -68,7 +68,11 @@ public class SignInSuccessEndpoint : EndpointWithoutRequest
                 return;
             }
 
-            await SendRedirectAsync($"{frontendUrl}/auth/callback?token={token}", false, true);
+            // Check if this is a new user and redirect accordingly
+            var redirectUrl = user.IsNewUser() 
+                ? $"{frontendUrl}/auth/callback?isNewUser=true&token={token}"
+                : $"{frontendUrl}/auth/callback?token={token}";
+            await SendRedirectAsync(redirectUrl, false, true);
         }
         catch (Exception ex)
         {

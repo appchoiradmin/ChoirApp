@@ -82,5 +82,18 @@ namespace ChoirApp.Infrastructure.Services
             }
             return Result.Ok(user);
         }
+
+        public async Task<Result> CompleteOnboardingAsync(Guid userId)
+        {
+            var user = await _context.Users.FindAsync(userId);
+            if (user == null)
+            {
+                return Result.Fail($"User with ID {userId} not found.");
+            }
+
+            user.CompleteOnboarding();
+            await _context.SaveChangesAsync();
+            return Result.Ok();
+        }
     }
 }

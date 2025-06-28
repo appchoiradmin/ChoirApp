@@ -9,6 +9,7 @@ const AuthCallbackPage: React.FC = () => {
     console.log("AuthCallbackPage loaded. Checking for token...");
     const token = searchParams.get('token');
     const error = searchParams.get('error');
+    const isNewUser = searchParams.get('isNewUser') === 'true';
     
     // Check for errors first
     if (error) {
@@ -18,13 +19,21 @@ const AuthCallbackPage: React.FC = () => {
     }
 
     console.log("Token from URL:", token ? "Token received" : "No token");
+    console.log("Is new user:", isNewUser);
 
     if (token && token.trim().length > 0) {
       try {
         console.log("Token found. Storing in localStorage...");
         localStorage.setItem('authToken', token);
-        console.log("Redirecting to dashboard...");
-        navigate('/dashboard', { replace: true }); // Use replace to avoid back button issues
+        
+        // Redirect based on whether user is new or returning
+        if (isNewUser) {
+          console.log("New user detected. Redirecting to onboarding...");
+          navigate('/onboarding', { replace: true });
+        } else {
+          console.log("Returning user. Redirecting to dashboard...");
+          navigate('/dashboard', { replace: true });
+        }
       } catch (error) {
         console.error('Error storing token:', error);
         navigate('/auth/error?message=Failed+to+store+authentication+token');

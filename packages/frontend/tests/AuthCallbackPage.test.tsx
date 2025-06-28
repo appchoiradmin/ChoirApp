@@ -50,6 +50,44 @@ describe('AuthCallbackPage', () => {
     });
   });
 
+  it('redirects to onboarding page if new user token is present', async () => {
+    const token = 'test-token-123';
+    render(
+      <MemoryRouter initialEntries={[`/auth/callback?token=${token}&isNewUser=true`]}>
+        <Routes>
+          <Route path="/auth/callback" element={<AuthCallbackPage />} />
+          <Route path="/onboarding" element={<div>Onboarding Page</div>} />
+        </Routes>
+      </MemoryRouter>
+    );
+
+    expect(screen.getByText(/Authenticating.../i)).toBeInTheDocument();
+
+    await waitFor(() => {
+      expect(window.localStorage.setItem).toHaveBeenCalledWith('authToken', token);
+      expect(mockNavigate).toHaveBeenCalledWith('/onboarding', { replace: true });
+    });
+  });
+
+  it('redirects to dashboard page if returning user token is present', async () => {
+    const token = 'test-token-123';
+    render(
+      <MemoryRouter initialEntries={[`/auth/callback?token=${token}&isNewUser=false`]}>
+        <Routes>
+          <Route path="/auth/callback" element={<AuthCallbackPage />} />
+          <Route path="/dashboard" element={<DashboardPage />} />
+        </Routes>
+      </MemoryRouter>
+    );
+
+    expect(screen.getByText(/Authenticating.../i)).toBeInTheDocument();
+
+    await waitFor(() => {
+      expect(window.localStorage.setItem).toHaveBeenCalledWith('authToken', token);
+      expect(mockNavigate).toHaveBeenCalledWith('/dashboard', { replace: true });
+    });
+  });
+
   it('redirects to error page if no token is present', async () => {
     render(
       <MemoryRouter initialEntries={['/auth/callback']}>

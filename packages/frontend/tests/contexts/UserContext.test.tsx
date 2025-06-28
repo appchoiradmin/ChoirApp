@@ -46,6 +46,8 @@ describe('UserContext', () => {
       firstName: 'Test',
       lastName: 'User',
       choirs: [],
+      hasCompletedOnboarding: true,
+      isNewUser: false,
     };
     vi.mocked(userService.getCurrentUser).mockResolvedValue(mockUser);
 

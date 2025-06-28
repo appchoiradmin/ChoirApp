@@ -36,6 +36,14 @@ public class User
     [Column("role")]
     public UserRole Role { get; private set; }
 
+    [Required]
+    [Column("has_completed_onboarding")]
+    public bool HasCompletedOnboarding { get; private set; }
+
+    [Required]
+    [Column("created_at")]
+    public DateTime CreatedAt { get; private set; }
+
     public ICollection<Choir> AdminOfChoirs { get; private set; } = new List<Choir>();
     public ICollection<ChoirSongVersion> EditedSongs { get; private set; } = new List<ChoirSongVersion>();
     public ICollection<UserChoir> UserChoirs { get; private set; } = new List<UserChoir>();
@@ -46,6 +54,7 @@ public class User
         GoogleId = string.Empty;
         Name = string.Empty;
         Email = string.Empty;
+        CreatedAt = DateTime.UtcNow;
     }
 
     private User(string googleId, string name, string email)
@@ -55,6 +64,8 @@ public class User
         Name = name;
         Email = email;
         Role = UserRole.General; // Default role
+        HasCompletedOnboarding = false; // New users haven't completed onboarding
+        CreatedAt = DateTime.UtcNow;
     }
 
     public static Result<User> Create(string googleId, string name, string email)
@@ -88,5 +99,15 @@ public class User
     {
         if(Role == UserRole.ChoirAdmin)
             Role = UserRole.General;
+    }
+
+    public void CompleteOnboarding()
+    {
+        HasCompletedOnboarding = true;
+    }
+
+    public bool IsNewUser()
+    {
+        return !HasCompletedOnboarding;
     }
 }

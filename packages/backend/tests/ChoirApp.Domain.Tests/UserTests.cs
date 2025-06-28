@@ -117,4 +117,33 @@ public class UserTests
         // Assert
         user.Role.Should().Be(UserRole.General);
     }
+
+    [Fact]
+    public void Create_ShouldInitializeAsNewUser()
+    {
+        // Act
+        var result = User.Create("google-id-123", "Test User", "test@example.com");
+
+        // Assert
+        result.IsSuccess.Should().BeTrue();
+        var user = result.Value;
+        user.HasCompletedOnboarding.Should().BeFalse();
+        user.IsNewUser().Should().BeTrue();
+        user.CreatedAt.Should().BeCloseTo(DateTime.UtcNow, TimeSpan.FromSeconds(5));
+    }
+
+    [Fact]
+    public void CompleteOnboarding_ShouldMarkAsCompleted()
+    {
+        // Arrange
+        var user = User.Create("google-id-123", "Test User", "test@example.com").Value;
+        user.IsNewUser().Should().BeTrue();
+
+        // Act
+        user.CompleteOnboarding();
+
+        // Assert
+        user.HasCompletedOnboarding.Should().BeTrue();
+        user.IsNewUser().Should().BeFalse();
+    }
 }

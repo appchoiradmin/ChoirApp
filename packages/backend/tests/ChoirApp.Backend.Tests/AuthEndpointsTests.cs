@@ -51,7 +51,7 @@ public class AuthEndpointsTests : IClassFixture<CustomWebApplicationFactory<Prog
     #region SignInSuccess Tests
 
     [Fact]
-    public async Task SignInSuccess_ShouldRedirectToFrontend_WhenValidCallback()
+    public async Task SignInSuccess_ShouldRedirectWithNewUserFlag_WhenNewUser()
     {
         // Arrange
         var client = _factory.CreateClient(new WebApplicationFactoryClientOptions
@@ -61,6 +61,7 @@ public class AuthEndpointsTests : IClassFixture<CustomWebApplicationFactory<Prog
 
         // Add the special header to trigger the simulated Google callback in the TestAuthenticationHandler
         client.DefaultRequestHeaders.Add("X-Test-Auth-Mode", "GoogleCallback");
+        client.DefaultRequestHeaders.Add("X-Test-Google-Id", "google-new-user-test");
 
         // Act
         var response = await client.GetAsync("/api/auth/signin-success");
@@ -68,7 +69,41 @@ public class AuthEndpointsTests : IClassFixture<CustomWebApplicationFactory<Prog
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.Redirect);
         response.Headers.Location.Should().NotBeNull();
-        response.Headers.Location.ToString().Should().StartWith("http://localhost:5173/auth/callback?token=");
+        var location = response.Headers.Location.ToString();
+        location.Should().StartWith("http://localhost:5173/auth/callback?isNewUser=true&token=");
+    }
+
+    [Fact]
+    public async Task SignInSuccess_ShouldRedirectWithoutNewUserFlag_WhenExistingUser()
+    {
+        // Arrange
+        using var scope = _factory.Services.CreateScope();
+        var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+        
+        // Create an existing user with the same Google ID that the test handler uses
+        var existingUser = User.Create("google-existing-user-test", "Existing User", "test.user@gmail.com").Value;
+        existingUser.CompleteOnboarding(); // Mark as completed onboarding
+        context.Users.Add(existingUser);
+        await context.SaveChangesAsync();
+
+        var client = _factory.CreateClient(new WebApplicationFactoryClientOptions
+        {
+            AllowAutoRedirect = false // Prevent the client from following the redirect automatically
+        });
+
+        // Add the special header to trigger the simulated Google callback in the TestAuthenticationHandler
+        client.DefaultRequestHeaders.Add("X-Test-Auth-Mode", "GoogleCallback");
+        client.DefaultRequestHeaders.Add("X-Test-Google-Id", "google-existing-user-test");
+
+        // Act
+        var response = await client.GetAsync("/api/auth/signin-success");
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.Redirect);
+        response.Headers.Location.Should().NotBeNull();
+        var location = response.Headers.Location.ToString();
+        location.Should().StartWith("http://localhost:5173/auth/callback?token=");
+        location.Should().NotContain("isNewUser=true");
     }
 
     #endregion
@@ -109,6 +144,8 @@ public class AuthEndpointsTests : IClassFixture<CustomWebApplicationFactory<Prog
         userDto!.Email.Should().Be("test@example.com");
         userDto.FirstName.Should().Be("Test");
         userDto.LastName.Should().Be("User");
+        userDto.HasCompletedOnboarding.Should().BeFalse();
+        userDto.IsNewUser.Should().BeTrue();
     }
 
     [Fact]
@@ -119,6 +156,7 @@ public class AuthEndpointsTests : IClassFixture<CustomWebApplicationFactory<Prog
         var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
         
         var user = User.Create("google-456", "Choir User", "choir@example.com").Value;
+        user.CompleteOnboarding(); // Mark as completed onboarding
         context.Users.Add(user);
         
         var choir = Choir.Create("Test Choir", user.UserId).Value;
@@ -149,6 +187,8 @@ public class AuthEndpointsTests : IClassFixture<CustomWebApplicationFactory<Prog
         userDto!.Email.Should().Be("choir@example.com");
         userDto.FirstName.Should().Be("Choir");
         userDto.LastName.Should().Be("User");
+        userDto.HasCompletedOnboarding.Should().BeTrue();
+        userDto.IsNewUser.Should().BeFalse();
         userDto.Choirs.Should().HaveCount(1);
         userDto.Choirs.First().Name.Should().Be("Test Choir");
     }
@@ -192,6 +232,70 @@ public class AuthEndpointsTests : IClassFixture<CustomWebApplicationFactory<Prog
         userDto!.Email.Should().Be("madonna@example.com");
         userDto.FirstName.Should().Be("Madonna");
         userDto.LastName.Should().BeEmpty();
+        userDto.HasCompletedOnboarding.Should().BeFalse();
+        userDto.IsNewUser.Should().BeTrue();
+    }
+
+    #endregion
+
+    #region CompleteOnboarding Tests
+
+    [Fact]
+    public async Task CompleteOnboarding_ShouldReturnUnauthorized_WhenNotAuthenticated()
+    {
+        // Act
+        var response = await _client.PostAsync("/api/complete-onboarding", null);
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
+    }
+
+    [Fact]
+    public async Task CompleteOnboarding_ShouldMarkUserAsCompleted_WhenAuthenticated()
+    {
+        // Arrange
+        using var scope = _factory.Services.CreateScope();
+        var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+        
+        var user = User.Create("google-onboarding", "Onboarding User", "onboarding@example.com").Value;
+        context.Users.Add(user);
+        await context.SaveChangesAsync();
+        
+        var token = JwtTokenGenerator.Generate("super-secret-key-that-is-long-enough", user.UserId, new[] { "General" });
+        _client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+
+        // Verify user starts as new user
+        user.IsNewUser().Should().BeTrue();
+
+        // Act
+        var response = await _client.PostAsync("/api/complete-onboarding", null);
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        
+        // Verify the user is marked as completed onboarding in the database
+        // Create a new scope to ensure we get fresh data from the database
+        using var verificationScope = _factory.Services.CreateScope();
+        var verificationContext = verificationScope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+        var updatedUser = await verificationContext.Users.FindAsync(user.UserId);
+        updatedUser.Should().NotBeNull();
+        updatedUser!.HasCompletedOnboarding.Should().BeTrue();
+        updatedUser.IsNewUser().Should().BeFalse();
+    }
+
+    [Fact]
+    public async Task CompleteOnboarding_ShouldReturnNotFound_WhenUserDoesNotExist()
+    {
+        // Arrange
+        var nonExistentUserId = Guid.NewGuid();
+        var token = JwtTokenGenerator.Generate("super-secret-key-that-is-long-enough", nonExistentUserId, new[] { "General" });
+        _client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+
+        // Act
+        var response = await _client.PostAsync("/api/complete-onboarding", null);
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
     }
 
     #endregion
