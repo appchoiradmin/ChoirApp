@@ -60,7 +60,7 @@ public class CustomWebApplicationFactory<TProgram> : WebApplicationFactory<TProg
                 options.UseInMemoryDatabase(_dbName);
             });
 
-            // Configure authentication for testing - override default schemes
+            // Configure authentication for testing
             services.PostConfigure<AuthenticationOptions>(options =>
             {
                 options.DefaultAuthenticateScheme = "Test";

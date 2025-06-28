@@ -15,7 +15,7 @@ const HomePage: React.FC = () => {
           <h2 className="subtitle">
             Your digital tool for managing songs and playlists.
           </h2>
-                    <a href={`${API_BASE_URL}/api/auth/signin-google`} className="button is-primary is-large">
+          <a href={`${API_BASE_URL}/api/auth/signin-google`} className="button is-primary is-large">
             Sign In with Google
           </a>
           <p className="mt-4">
