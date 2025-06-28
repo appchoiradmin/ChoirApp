@@ -45,12 +45,12 @@ describe('AuthCallbackPage', () => {
     expect(screen.getByText(/Authenticating.../i)).toBeInTheDocument();
 
     await waitFor(() => {
-      expect(window.localStorage.setItem).toHaveBeenCalledWith('token', token);
-      expect(mockNavigate).toHaveBeenCalledWith('/dashboard');
+      expect(window.localStorage.setItem).toHaveBeenCalledWith('authToken', token);
+      expect(mockNavigate).toHaveBeenCalledWith('/dashboard', { replace: true });
     });
   });
 
-  it('redirects to home page if no token is present', async () => {
+  it('redirects to error page if no token is present', async () => {
     render(
       <MemoryRouter initialEntries={['/auth/callback']}>
         <Routes>
@@ -64,7 +64,7 @@ describe('AuthCallbackPage', () => {
 
     await waitFor(() => {
       expect(window.localStorage.setItem).not.toHaveBeenCalled();
-      expect(mockNavigate).toHaveBeenCalledWith('/');
+      expect(mockNavigate).toHaveBeenCalledWith('/auth/error?message=No+authentication+token+received');
     });
   });
 });

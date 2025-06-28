@@ -20,6 +20,9 @@ builder.Services
 
 builder.Services.AddFastEndpoints();
 
+// Add controller support for OAuth endpoints
+builder.Services.AddControllers();
+
 // Configure authentication
 builder.Services.AddAuth(builder.Configuration, builder.Environment);
 
@@ -31,7 +34,8 @@ builder.Services.AddCors(options =>
             policy.WithOrigins("http://localhost:5173")
                   .AllowAnyHeader()
                   .AllowAnyMethod()
-                  .AllowCredentials();
+                  .AllowCredentials()
+                  .WithExposedHeaders("Location"); // Expose the Location header for CORS
         });
 });
 
@@ -56,6 +60,9 @@ app.UseFastEndpoints(c =>
 {
     c.Endpoints.RoutePrefix = "api";
 });
+
+// Add controller routing
+app.MapControllers();
 
 app.Run();
 

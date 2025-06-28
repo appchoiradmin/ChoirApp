@@ -30,6 +30,7 @@ public static class AuthExtensions
             {
                 options.DefaultAuthenticateScheme = CookieAuthenticationDefaults.AuthenticationScheme;
                 options.DefaultSignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+                options.DefaultChallengeScheme = GoogleDefaults.AuthenticationScheme;
             })
             .AddCookie(options =>
             {
@@ -37,6 +38,8 @@ public static class AuthExtensions
                 {
                     options.Cookie.SameSite = SameSiteMode.Lax;
                     options.Cookie.SecurePolicy = CookieSecurePolicy.None;
+                    options.Cookie.HttpOnly = true;
+                    options.Cookie.Path = "/";
                 }
             })
             .AddJwtBearer(options =>
@@ -57,12 +60,35 @@ public static class AuthExtensions
                 options.ClientId = googleClientId;
                 options.ClientSecret = googleClientSecret;
                 options.CallbackPath = "/api/auth/google-callback";
+                
+                // Add required scopes explicitly
+                options.Scope.Add("openid");
+                options.Scope.Add("profile");
+                options.Scope.Add("email");
 
                 if (environment.IsDevelopment())
                 {
                     options.CorrelationCookie.SameSite = SameSiteMode.Lax;
                     options.CorrelationCookie.SecurePolicy = CookieSecurePolicy.None;
                     options.CorrelationCookie.Path = "/";
+                    options.CorrelationCookie.HttpOnly = true;
+                    
+                    // Additional settings to help with correlation issues
+                    options.Events.OnRemoteFailure = context =>
+                    {
+                        var errorMessage = Uri.EscapeDataString(context.Failure?.Message ?? "Authentication failed");
+                        context.Response.Redirect($"/auth/error?message={errorMessage}");
+                        context.HandleResponse();
+                        return Task.CompletedTask;
+                    };
+                }
+                else
+                {
+                    // Production settings
+                    options.CorrelationCookie.SameSite = SameSiteMode.None;
+                    options.CorrelationCookie.SecurePolicy = CookieSecurePolicy.Always;
+                    options.CorrelationCookie.Path = "/";
+                    options.CorrelationCookie.HttpOnly = true;
                 }
             });
             
