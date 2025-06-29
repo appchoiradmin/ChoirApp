@@ -61,7 +61,7 @@ const DashboardPage: React.FC = () => {
               <div className="list">
                 {adminOfChoirs.map(choir => (
                   <div key={choir.id} className="list-item">
-                    <Link to={`/choir/${choir.id}`}>{choir.name}</Link>
+                    <Link to={`/choir/${choir.id}/admin`}>{choir.name}</Link>
                   </div>
                 ))}
               </div>
