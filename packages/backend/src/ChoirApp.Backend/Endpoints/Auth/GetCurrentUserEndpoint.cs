@@ -1,6 +1,8 @@
 using ChoirApp.Application.Contracts;
 using ChoirApp.Application.Dtos;
 using FastEndpoints;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
 
 namespace ChoirApp.Backend.Endpoints.Auth;
@@ -16,7 +18,9 @@ public class GetCurrentUserEndpoint : EndpointWithoutRequest<UserDto>
 
     public override void Configure()
     {
-        Get("/me");
+        Verbs("GET", "OPTIONS");
+        Routes("/me");
+        AuthSchemes(JwtBearerDefaults.AuthenticationScheme);
         Roles("General", "ChoirAdmin", "SuperAdmin");
     }
 

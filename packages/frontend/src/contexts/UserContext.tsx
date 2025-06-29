@@ -23,8 +23,6 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       } catch (error) {
         console.error('Failed to fetch user', error);
         setUser(null);
-        // If token is invalid, remove it
-        localStorage.removeItem('authToken');
       } finally {
         setLoading(false);
       }
@@ -39,5 +37,3 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     </UserContext.Provider>
   );
 };
-
-

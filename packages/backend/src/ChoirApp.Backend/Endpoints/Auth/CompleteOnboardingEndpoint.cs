@@ -1,5 +1,7 @@
 using ChoirApp.Application.Contracts;
 using FastEndpoints;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
 
 namespace ChoirApp.Backend.Endpoints.Auth;
@@ -15,7 +17,9 @@ public class CompleteOnboardingEndpoint : EndpointWithoutRequest
 
     public override void Configure()
     {
-        Post("/complete-onboarding");
+        Verbs("POST", "OPTIONS");
+        Routes("/auth/complete-onboarding");
+        AuthSchemes(JwtBearerDefaults.AuthenticationScheme);
         Roles("General", "ChoirAdmin", "SuperAdmin");
     }
 

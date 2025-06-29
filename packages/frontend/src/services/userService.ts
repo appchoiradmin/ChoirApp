@@ -11,6 +11,7 @@ export const getCurrentUser = async (): Promise<User> => {
   const response = await fetch(`${API_BASE_URL}/api/me`, {
     headers: {
       Authorization: `Bearer ${token}`,
+      'Content-Type': 'application/json',
     },
   });
 
@@ -27,10 +28,11 @@ export const completeOnboarding = async (): Promise<void> => {
     throw new Error('No auth token found');
   }
 
-  const response = await fetch(`${API_BASE_URL}/api/complete-onboarding`, {
+  const response = await fetch(`${API_BASE_URL}/api/auth/complete-onboarding`, {
     method: 'POST',
     headers: {
       Authorization: `Bearer ${token}`,
+      'Content-Type': 'application/json',
     },
   });
 

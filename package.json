@@ -9,6 +9,7 @@
     "backend": "npm run start -w @choirapp/backend"
   },
   "devDependencies": {
+    "@types/node": "^24.0.7",
     "typescript": "^5.0.0"
   }
 }

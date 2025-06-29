@@ -59,7 +59,7 @@ public static class AuthExtensions
             {
                 options.ClientId = googleClientId;
                 options.ClientSecret = googleClientSecret;
-                options.CallbackPath = "/api/auth/google-callback";
+                options.CallbackPath = "/api/auth/google-callback"; // Ensure this matches Google Console
                 
                 // Add required scopes explicitly
                 options.Scope.Add("openid");
