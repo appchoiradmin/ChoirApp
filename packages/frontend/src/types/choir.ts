@@ -1,8 +1,11 @@
 import type { MasterSongDto } from './song';
 
+export type ChoirRole = 'Admin' | 'Member';
+
 export interface Choir {
   id: string;
   name: string;
+  role: ChoirRole;
 }
 
 export interface ChoirSongVersionDto {
