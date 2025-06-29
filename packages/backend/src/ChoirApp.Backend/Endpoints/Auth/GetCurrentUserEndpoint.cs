@@ -58,7 +58,8 @@ public class GetCurrentUserEndpoint : EndpointWithoutRequest<UserDto>
             {
                 Id = uc.Choir!.ChoirId,
                 Name = uc.Choir.ChoirName,
-                AdminId = uc.Choir.AdminUserId
+                AdminId = uc.Choir.AdminUserId,
+                Role = uc.IsAdmin ? "Admin" : "Member"
             }).ToList()
         };
 

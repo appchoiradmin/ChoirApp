@@ -19,4 +19,8 @@ public class UserChoir
 
     [ForeignKey("ChoirId")]
     public Choir? Choir { get; set; }
+
+    [Required]
+    [Column("is_admin")]
+    public bool IsAdmin { get; set; }
 }
