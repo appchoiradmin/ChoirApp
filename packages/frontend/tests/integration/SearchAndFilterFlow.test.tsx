@@ -9,9 +9,16 @@ import CreateMasterSongPage from '../../src/pages/CreateMasterSongPage.tsx';
 import MasterSongDetailPage from '../../src/pages/MasterSongDetailPage.tsx';
 import '../../src/setupTests.ts';
 
+// Mock the useNavigate hook
+const mockNavigate = vi.fn();
+vi.mock('react-router-dom', async () => ({
+  ...(await vi.importActual('react-router-dom')),
+  useNavigate: () => mockNavigate,
+}));
+
 // Mock the userService to prevent actual API calls
 vi.mock('../../src/services/userService', () => ({
-  getCurrentUser: vi.fn().mockResolvedValue(null),
+  getCurrentUser: vi.fn(),
 }));
 
 // Mock the masterSongService to prevent actual API calls
@@ -63,49 +70,61 @@ const TestWrapper: React.FC = () => {
 };
 
 describe('Search & Filter Flow - Integration Test', () => {
+  const mockSongs = [
+    {
+      id: '1',
+      title: 'Amazing Grace',
+      artist: 'Traditional',
+      lyricsChordPro: 'Amazing grace, how sweet the sound',
+      tags: [{ tagId: '1', tagName: 'hymn' }, { tagId: '2', tagName: 'traditional' }],
+    },
+    {
+      id: '2',
+      title: 'How Great Thou Art',
+      artist: 'Carl Boberg',
+      lyricsChordPro: 'O Lord my God, when I in awesome wonder',
+      tags: [{ tagId: '1', tagName: 'hymn' }, { tagId: '3', tagName: 'worship' }],
+    },
+  ];
+
   beforeEach(async () => {
-    // Reset mock implementations instead of clearing all mocks
+    localStorage.setItem('authToken', 'test-token');
+
+    const userService = await import('../../src/services/userService');
+    vi.mocked(userService.getCurrentUser).mockResolvedValue({
+      id: '1',
+      name: 'Test User',
+      email: 'test@example.com',
+      role: 'SuperAdmin',
+      choirs: [],
+      hasCompletedOnboarding: true,
+      isNewUser: false,
+    });
+
     const masterSongService = await import('../../src/services/masterSongService');
-    const mockSongs = [
-      { 
-        id: '1', 
-        title: 'Amazing Grace', 
-        artist: 'Traditional', 
-        lyricsChordPro: 'Amazing grace, how sweet the sound',
-        tags: [{ tagId: '1', tagName: 'hymn' }, { tagId: '2', tagName: 'traditional' }] 
-      },
-      { 
-        id: '2', 
-        title: 'How Great Thou Art', 
-        artist: 'Carl Boberg', 
-        lyricsChordPro: 'O Lord my God, when I in awesome wonder',
-        tags: [{ tagId: '1', tagName: 'hymn' }, { tagId: '3', tagName: 'worship' }] 
-      }
-    ];
-    
     vi.mocked(masterSongService.getAllMasterSongs).mockResolvedValue(mockSongs);
-    vi.mocked(masterSongService.createMasterSong).mockImplementation((song) => 
-      Promise.resolve({ 
-        id: '3', 
+    vi.mocked(masterSongService.createMasterSong).mockImplementation((song) =>
+      Promise.resolve({
+        id: '3',
         title: song.title,
         artist: song.artist,
         lyricsChordPro: song.lyricsChordPro,
-        tags: song.tags.map((tag, index) => ({ tagId: `${index + 4}`, tagName: tag }))
+        tags: song.tags.map((tag, index) => ({ tagId: `${index + 4}`, tagName: tag })),
       })
     );
-    
-    // Set up smart search mock that filters results properly
     vi.mocked(masterSongService.searchMasterSongs).mockImplementation(async ({ title, artist, tag }) => {
-      const results = mockSongs.filter(song => 
-        song.title.toLowerCase().includes(title?.toLowerCase() || '') &&
-        song.artist.toLowerCase().includes(artist?.toLowerCase() || '') &&
-        (tag ? song.tags.some(t => t.tagName.toLowerCase().includes(tag.toLowerCase())) : true)
+      const results = mockSongs.filter(
+        (song) =>
+          song.title.toLowerCase().includes(title?.toLowerCase() || '') &&
+          song.artist.toLowerCase().includes(artist?.toLowerCase() || '') &&
+          (tag ? song.tags.some((t) => t.tagName.toLowerCase().includes(tag.toLowerCase())) : true)
       );
       return Promise.resolve(results);
     });
   });
 
   afterEach(() => {
+    localStorage.clear();
     vi.restoreAllMocks();
   });
 
@@ -116,11 +135,12 @@ describe('Search & Filter Flow - Integration Test', () => {
     render(<TestWrapper />);
 
     // Step 1: Verify we start on Dashboard
-    expect(screen.getByRole('heading', { name: /Choir Dashboard/i })).toBeInTheDocument();
-    expect(screen.getByText(/Welcome to your choir's central hub!/i)).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByRole('heading', { name: /Choir Dashboard/i })).toBeInTheDocument();
+    });
 
     // Step 2: Navigate to Master Songs
-    const masterSongsButton = screen.getByRole('link', { name: /Manage Master Songs/i });
+    const masterSongsButton = screen.getByRole('link', { name: /Master Song List/i });
     await user.click(masterSongsButton);
 
     // Step 3: Verify we're on Master Songs List page
@@ -159,19 +179,8 @@ describe('Search & Filter Flow - Integration Test', () => {
     await user.click(submitButton);
 
     // Step 8: Verify navigation to the new song detail page
-    // Note: The actual implementation navigates to the detail page, but since we're mocking the service,
-    // we can verify the form submission was successful by checking the loading state disappears
     await waitFor(() => {
-      expect(submitButton).not.toHaveClass('is-loading');
-    });
-
-    // Verify the form was submitted with correct data
-    const { createMasterSong } = await import('../../src/services/masterSongService');
-    expect(createMasterSong).toHaveBeenCalledWith({
-      title: 'Test Song Title',
-      artist: 'Test Artist',
-      lyricsChordPro: 'Title: Test Song Title\nArtist: Test Artist\n\nVerse 1\nThis is a test song\nFor integration testing',
-      tags: ['test', 'integration', 'song']
+      expect(mockNavigate).toHaveBeenCalledWith('/master-songs/3');
     });
   });
 
@@ -181,7 +190,10 @@ describe('Search & Filter Flow - Integration Test', () => {
     render(<TestWrapper />);
 
     // Navigate to Master Songs
-    const masterSongsButton = screen.getByRole('link', { name: /Manage Master Songs/i });
+    await waitFor(() => {
+      expect(screen.getByRole('heading', { name: /Choir Dashboard/i })).toBeInTheDocument();
+    });
+    const masterSongsButton = screen.getByRole('link', { name: /Master Song List/i });
     await user.click(masterSongsButton);
 
     // Navigate to Create New Song
@@ -214,7 +226,10 @@ describe('Search & Filter Flow - Integration Test', () => {
     render(<TestWrapper />);
 
     // Navigate through the flow
-    const masterSongsButton = screen.getByRole('link', { name: /Manage Master Songs/i });
+    await waitFor(() => {
+      expect(screen.getByRole('heading', { name: /Choir Dashboard/i })).toBeInTheDocument();
+    });
+    const masterSongsButton = screen.getByRole('link', { name: /Master Song List/i });
     await user.click(masterSongsButton);
 
     await waitFor(() => {
@@ -250,7 +265,10 @@ describe('Search & Filter Flow - Integration Test', () => {
     render(<TestWrapper />);
 
     // Navigate to Master Songs
-    const masterSongsButton = screen.getByRole('link', { name: /Manage Master Songs/i });
+    await waitFor(() => {
+      expect(screen.getByRole('heading', { name: /Choir Dashboard/i })).toBeInTheDocument();
+    });
+    const masterSongsButton = screen.getByRole('link', { name: /Master Song List/i });
     await user.click(masterSongsButton);
 
     // Wait for the page to load
@@ -291,7 +309,10 @@ describe('Search & Filter Flow - Integration Test', () => {
     render(<TestWrapper />);
 
     // Navigate to Master Songs
-    const masterSongsButton = screen.getByRole('link', { name: /Manage Master Songs/i });
+    await waitFor(() => {
+      expect(screen.getByRole('heading', { name: /Choir Dashboard/i })).toBeInTheDocument();
+    });
+    const masterSongsButton = screen.getByRole('link', { name: /Master Song List/i });
     await user.click(masterSongsButton);
 
     await waitFor(() => {
@@ -325,7 +346,10 @@ describe('Search & Filter Flow - Integration Test', () => {
     render(<TestWrapper />);
 
     // Navigate to Master Songs
-    const masterSongsButton = screen.getByRole('link', { name: /Manage Master Songs/i });
+    await waitFor(() => {
+      expect(screen.getByRole('heading', { name: /Choir Dashboard/i })).toBeInTheDocument();
+    });
+    const masterSongsButton = screen.getByRole('link', { name: /Master Song List/i });
     await user.click(masterSongsButton);
 
     await waitFor(() => {

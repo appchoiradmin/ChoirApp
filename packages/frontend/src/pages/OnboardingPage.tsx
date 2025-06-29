@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+import { completeOnboarding } from '../services/userService';
 
 const OnboardingPage: React.FC = () => {
   const navigate = useNavigate();
@@ -9,36 +8,16 @@ const OnboardingPage: React.FC = () => {
 
   const handleCompleteOnboarding = async (userType: 'admin' | 'general') => {
     try {
-      const token = localStorage.getItem('authToken');
-      if (!token) {
-        navigate('/auth/error?message=Authentication+required');
-        return;
-      }
+      await completeOnboarding(userType);
 
-      // Call the complete onboarding endpoint
-      const response = await fetch(`${API_BASE_URL}/api/auth/complete-onboarding`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ userType })
-      });
-
-      if (response.ok) {
-        // Redirect based on user type choice
-        if (userType === 'admin') {
-          navigate('/create-choir');
-        } else {
-          navigate('/dashboard');
-        }
+      if (userType === 'admin') {
+        navigate('/create-choir');
       } else {
-        console.error('Failed to complete onboarding');
-        navigate('/auth/error?message=Failed+to+complete+onboarding');
+        navigate('/dashboard');
       }
     } catch (error) {
       console.error('Error completing onboarding:', error);
-      navigate('/auth/error?message=Network+error');
+      navigate('/auth/error?message=Failed+to+complete+onboarding');
     }
   };
 
