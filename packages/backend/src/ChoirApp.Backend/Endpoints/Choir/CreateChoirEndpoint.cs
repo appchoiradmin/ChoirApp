@@ -9,12 +9,7 @@ using System.Threading.Tasks;
 
 namespace ChoirApp.Backend.Endpoints.Choir
 {
-    public class CreateChoirRequest
-    {
-        public CreateChoirDto ChoirDto { get; set; } = null!;
-    }
-
-    public class CreateChoirEndpoint : Endpoint<CreateChoirRequest, ChoirDto>
+    public class CreateChoirEndpoint : Endpoint<CreateChoirDto, ChoirDto>
     {
         private readonly IChoirService _choirService;
 
@@ -25,11 +20,13 @@ namespace ChoirApp.Backend.Endpoints.Choir
 
         public override void Configure()
         {
-            Post("/choirs");
+            Verbs("POST", "OPTIONS");
+            Routes("/choirs");
+            AuthSchemes("Bearer");
             Roles("General", "ChoirAdmin", "SuperAdmin");
         }
 
-        public override async Task HandleAsync(CreateChoirRequest req, CancellationToken ct)
+        public override async Task HandleAsync(CreateChoirDto req, CancellationToken ct)
         {
             var userIdClaim = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
             if (!System.Guid.TryParse(userIdClaim, out var adminId))
@@ -38,7 +35,7 @@ namespace ChoirApp.Backend.Endpoints.Choir
                 return;
             }
 
-            var result = await _choirService.CreateChoirAsync(req.ChoirDto, adminId);
+            var result = await _choirService.CreateChoirAsync(req, adminId);
 
             if (result.IsFailed)
             {

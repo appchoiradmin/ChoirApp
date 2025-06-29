@@ -1,6 +1,9 @@
 import type { MasterSongDto, CreateMasterSongDto } from '../types/song';
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+if (!API_BASE_URL) {
+  throw new Error('VITE_API_BASE_URL is not defined. Please check your .env file.');
+}
 
 export const getAllMasterSongs = async (): Promise<MasterSongDto[]> => {
   const response = await fetch(`${API_BASE_URL}/api/master-songs`);

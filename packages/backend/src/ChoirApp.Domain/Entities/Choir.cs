@@ -97,7 +97,7 @@ public class Choir
         return Result.Ok();
     }
 
-    public Result AddMember(User user)
+    public Result AddMember(User user, bool isAdmin = false)
     {
         if (UserChoirs.Any(uc => uc.UserId == user.UserId && uc.ChoirId == ChoirId))
         {
@@ -109,7 +109,8 @@ public class Choir
             UserId = user.UserId,
             ChoirId = ChoirId,
             User = user,
-            Choir = this
+            Choir = this,
+            IsAdmin = isAdmin
         };
 
         UserChoirs.Add(userChoir);
