@@ -37,6 +37,14 @@ builder.Services.AddCors(options =>
                   .AllowCredentials()
                   .WithExposedHeaders("Location"); // Expose the Location header for CORS
         });
+
+    options.AddPolicy("AllowAll",
+        policy =>
+        {
+            policy.AllowAnyOrigin()
+                  .AllowAnyHeader()
+                  .AllowAnyMethod();
+        });
 });
 
 builder.Services.AddAuthorization();
@@ -49,9 +57,9 @@ if (app.Environment.IsDevelopment())
     // app.UseSwaggerGen();
 }
 
-app.UseRouting();
-
 app.UseCors("AllowFrontend");
+
+app.UseRouting();
 
 app.UseAuthentication();
 app.UseAuthorization();
@@ -67,4 +75,3 @@ app.MapControllers();
 app.Run();
 
 public partial class Program { }
-

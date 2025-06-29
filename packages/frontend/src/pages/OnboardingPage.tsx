@@ -16,12 +16,13 @@ const OnboardingPage: React.FC = () => {
       }
 
       // Call the complete onboarding endpoint
-      const response = await fetch(`${API_BASE_URL}/complete-onboarding`, {
+      const response = await fetch(`${API_BASE_URL}/api/auth/complete-onboarding`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
-        }
+        },
+        body: JSON.stringify({ userType })
       });
 
       if (response.ok) {
