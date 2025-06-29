@@ -244,7 +244,7 @@ public class AuthEndpointsTests : IClassFixture<CustomWebApplicationFactory<Prog
     public async Task CompleteOnboarding_ShouldReturnUnauthorized_WhenNotAuthenticated()
     {
         // Act
-        var response = await _client.PostAsync("/api/complete-onboarding", null);
+        var response = await _client.PostAsync("/api/auth/complete-onboarding", new StringContent("{\"userType\":\"general\"}", System.Text.Encoding.UTF8, "application/json"));
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
@@ -262,13 +262,16 @@ public class AuthEndpointsTests : IClassFixture<CustomWebApplicationFactory<Prog
         await context.SaveChangesAsync();
         
         var token = JwtTokenGenerator.Generate("super-secret-key-that-is-long-enough", user.UserId, new[] { "General" });
-        _client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+        
+        // Use a fresh HttpClient to avoid header issues
+        var client = _factory.CreateClient();
+        client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
 
         // Verify user starts as new user
         user.IsNewUser().Should().BeTrue();
 
         // Act
-        var response = await _client.PostAsync("/api/complete-onboarding", null);
+        var response = await client.PostAsync("/api/auth/complete-onboarding", new StringContent("{\"userType\":\"general\"}", System.Text.Encoding.UTF8, "application/json"));
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -292,7 +295,7 @@ public class AuthEndpointsTests : IClassFixture<CustomWebApplicationFactory<Prog
         _client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
 
         // Act
-        var response = await _client.PostAsync("/api/complete-onboarding", null);
+        var response = await _client.PostAsync("/api/auth/complete-onboarding", new StringContent("{\"userType\":\"general\"}", System.Text.Encoding.UTF8, "application/json"));
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);

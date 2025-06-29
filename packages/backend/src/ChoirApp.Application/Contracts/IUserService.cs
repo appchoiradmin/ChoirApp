@@ -11,6 +11,6 @@ namespace ChoirApp.Application.Contracts
         Task<Result> UpdateUserRoleAsync(Guid userId, UserRole newRole);
         Task<Result<User>> GetUserByEmailAsync(string email);
         Task<Result<User>> GetUserByIdAsync(Guid userId);
-        Task<Result> CompleteOnboardingAsync(Guid userId);
+        Task<Result> CompleteOnboardingAsync(Guid userId, string userType);
     }
 }

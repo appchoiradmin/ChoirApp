@@ -1,4 +1,5 @@
 using ChoirApp.Application.Contracts;
+using ChoirApp.Application.Dtos;
 using FastEndpoints;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
@@ -6,7 +7,7 @@ using System.Security.Claims;
 
 namespace ChoirApp.Backend.Endpoints.Auth;
 
-public class CompleteOnboardingEndpoint : EndpointWithoutRequest
+public class CompleteOnboardingEndpoint : Endpoint<CompleteOnboardingRequest>
 {
     private readonly IUserService _userService;
 
@@ -23,16 +24,16 @@ public class CompleteOnboardingEndpoint : EndpointWithoutRequest
         Roles("General", "ChoirAdmin", "SuperAdmin");
     }
 
-    public override async Task HandleAsync(CancellationToken ct)
+    public override async Task HandleAsync(CompleteOnboardingRequest req, CancellationToken ct)
     {
         var userIdClaim = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
         if (!Guid.TryParse(userIdClaim, out var userId))
         {
-            ThrowError("User not authenticated properly.");
+            await SendUnauthorizedAsync(ct);
             return;
         }
 
-        var result = await _userService.CompleteOnboardingAsync(userId);
+        var result = await _userService.CompleteOnboardingAsync(userId, req.UserType);
 
         if (result.IsFailed)
         {

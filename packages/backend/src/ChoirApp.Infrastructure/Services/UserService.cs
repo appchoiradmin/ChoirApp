@@ -3,8 +3,6 @@ using ChoirApp.Domain.Entities;
 using ChoirApp.Infrastructure.Persistence;
 using FluentResults;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Threading.Tasks;
 
 namespace ChoirApp.Infrastructure.Services
 {
@@ -83,7 +81,7 @@ namespace ChoirApp.Infrastructure.Services
             return Result.Ok(user);
         }
 
-        public async Task<Result> CompleteOnboardingAsync(Guid userId)
+        public async Task<Result> CompleteOnboardingAsync(Guid userId, string userType)
         {
             var user = await _context.Users.FindAsync(userId);
             if (user == null)
@@ -92,6 +90,12 @@ namespace ChoirApp.Infrastructure.Services
             }
 
             user.CompleteOnboarding();
+
+            if (userType == "admin")
+            {
+                user.PromoteToAdmin();
+            }
+
             await _context.SaveChangesAsync();
             return Result.Ok();
         }

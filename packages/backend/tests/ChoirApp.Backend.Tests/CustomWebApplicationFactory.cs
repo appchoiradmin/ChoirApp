@@ -6,16 +6,13 @@ using Microsoft.Extensions.Configuration;
 using ChoirApp.Infrastructure.Persistence;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
-using System.Text.Encodings.Web;
-using System;
-using System.Collections.Generic;
 using Microsoft.Extensions.Hosting;
 
 namespace ChoirApp.Backend.Tests;
 
 public class CustomWebApplicationFactory<TProgram> : WebApplicationFactory<TProgram> where TProgram : class
 {
+    // Use a unique database name for each test run to avoid data leakage between tests
     private readonly string _dbName = $"TestDb_{Guid.NewGuid()}";
 
     protected override void ConfigureWebHost(IWebHostBuilder builder)
@@ -63,15 +60,17 @@ public class CustomWebApplicationFactory<TProgram> : WebApplicationFactory<TProg
             // Configure authentication for testing
             services.PostConfigure<AuthenticationOptions>(options =>
             {
-                options.DefaultAuthenticateScheme = "Test";
-                options.DefaultChallengeScheme = "Test";
-                options.DefaultScheme = "Test";
+                options.DefaultAuthenticateScheme = "Bearer";
+                options.DefaultChallengeScheme = "Bearer";
+                options.DefaultScheme = "Bearer";
             });
 
-            // Add the test authentication scheme
+            // Add the test authentication scheme for all required schemes
             services.AddAuthentication()
-                .AddScheme<AuthenticationSchemeOptions, TestAuthenticationHandler>(
-                    "Test", options => { });
+                .AddScheme<AuthenticationSchemeOptions, TestAuthenticationHandler>("Test", options => { })
+                .AddScheme<AuthenticationSchemeOptions, TestAuthenticationHandler>("Bearer", options => { })
+                .AddScheme<AuthenticationSchemeOptions, TestAuthenticationHandler>("Cookies", options => { })
+                .AddScheme<AuthenticationSchemeOptions, TestAuthenticationHandler>("Google", options => { });
 
             // Configure logging
             services.AddLogging(loggingBuilder =>

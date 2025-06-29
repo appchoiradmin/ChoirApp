@@ -144,21 +144,22 @@ public class ChoirSongEndpointsTests : IClassFixture<CustomWebApplicationFactory
     {
         // Arrange
         _client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", _memberToken);
-        
-        var choirSongVersion = new ChoirSongVersion
+
+        var createDto = new CreateChoirSongVersionDto
         {
-            ChoirSongId = Guid.NewGuid(),
             MasterSongId = _testMasterSong.SongId,
-            ChoirId = _testChoir.ChoirId,
-            EditedLyricsChordPro = "[C]Choir specific lyrics",
-            LastEditedDate = DateTimeOffset.UtcNow,
-            EditorUserId = _adminUser.UserId
+            EditedLyricsChordPro = "[C]Choir specific lyrics"
         };
-        _context.ChoirSongVersions.Add(choirSongVersion);
-        await _context.SaveChangesAsync();
+        var requestBody = new { SongDto = createDto };
+
+        // Create the version via API to ensure correct context and ID
+        var postResponse = await _client.PostAsJsonAsync($"/api/choirs/{_testChoir.ChoirId}/songs", requestBody);
+        postResponse.StatusCode.Should().Be(HttpStatusCode.Created);
+        var createdVersion = await postResponse.Content.ReadFromJsonAsync<ChoirSongVersionDto>();
+        createdVersion.Should().NotBeNull();
 
         // Act
-        var response = await _client.GetAsync($"/api/choirs/{_testChoir.ChoirId}/songs/{choirSongVersion.ChoirSongId}");
+        var response = await _client.GetAsync($"/api/choirs/{_testChoir.ChoirId}/songs/{createdVersion!.ChoirSongId}");
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);

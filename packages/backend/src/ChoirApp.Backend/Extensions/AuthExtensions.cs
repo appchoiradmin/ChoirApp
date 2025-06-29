@@ -26,6 +26,12 @@ public static class AuthExtensions
             throw new InvalidOperationException("Google authentication is not configured.");
         }
 
+        if (environment.EnvironmentName == "Testing")
+        {
+            // In test environment, authentication is configured in the test project (CustomWebApplicationFactory)
+            return services;
+        }
+        
         services.AddAuthentication(options =>
             {
                 options.DefaultAuthenticateScheme = CookieAuthenticationDefaults.AuthenticationScheme;

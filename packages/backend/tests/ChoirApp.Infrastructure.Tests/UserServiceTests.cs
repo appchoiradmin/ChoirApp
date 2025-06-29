@@ -172,7 +172,7 @@ public class UserServiceTests : IDisposable
         user.HasCompletedOnboarding.Should().BeFalse();
 
         // Act
-        var result = await _userService.CompleteOnboardingAsync(user.UserId);
+        var result = await _userService.CompleteOnboardingAsync(user.UserId, "general");
 
         // Assert
         result.IsSuccess.Should().BeTrue();
@@ -186,7 +186,7 @@ public class UserServiceTests : IDisposable
     public async Task CompleteOnboardingAsync_WhenUserDoesNotExist_ShouldFail()
     {
         // Act
-        var result = await _userService.CompleteOnboardingAsync(Guid.NewGuid());
+        var result = await _userService.CompleteOnboardingAsync(Guid.NewGuid(), "general");
 
         // Assert
         result.IsFailed.Should().BeTrue();
