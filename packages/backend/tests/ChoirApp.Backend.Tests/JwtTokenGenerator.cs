@@ -16,7 +16,8 @@ public static class JwtTokenGenerator
         
         var claims = new List<Claim>
         {
-            new Claim(ClaimTypes.NameIdentifier, userId.ToString())
+            new Claim(ClaimTypes.NameIdentifier, userId.ToString()),
+            new Claim("nameid", userId.ToString()) // Add this for test handler compatibility
         };
         
         // Add individual role claims
