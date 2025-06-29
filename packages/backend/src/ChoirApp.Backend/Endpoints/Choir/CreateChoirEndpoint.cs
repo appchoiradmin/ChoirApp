@@ -29,7 +29,7 @@ namespace ChoirApp.Backend.Endpoints.Choir
         public override async Task HandleAsync(CreateChoirDto req, CancellationToken ct)
         {
             var userIdClaim = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
-            if (!System.Guid.TryParse(userIdClaim, out var adminId))
+            if (!Guid.TryParse(userIdClaim, out var adminId))
             {
                 ThrowError("User not authenticated properly.");
                 return;

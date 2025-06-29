@@ -12,6 +12,10 @@ const ChoirAdminPage: React.FC = () => {
             <h1 className="title">Choir Admin</h1>
           </div>
           <div className="level-right">
+            <Link to="/master-songs" className="button is-link">
+              <span className="icon"><i className="fas fa-music"></i></span>
+              <span>Master Song List</span>
+            </Link>
             <Link to="/dashboard" className="button">
               Go Back to Dashboard
             </Link>

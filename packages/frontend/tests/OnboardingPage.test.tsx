@@ -74,7 +74,7 @@ describe('OnboardingPage', () => {
 
     await waitFor(() => {
       expect(fetch).toHaveBeenCalledWith(
-        'http://localhost:5014/complete-onboarding',
+        'http://localhost:5014/api/auth/complete-onboarding',
         expect.objectContaining({
           method: 'POST',
           headers: expect.objectContaining({
@@ -108,7 +108,7 @@ describe('OnboardingPage', () => {
 
     await waitFor(() => {
       expect(fetch).toHaveBeenCalledWith(
-        'http://localhost:5014/complete-onboarding',
+        'http://localhost:5014/api/auth/complete-onboarding',
         expect.objectContaining({
           method: 'POST',
           headers: expect.objectContaining({
@@ -159,7 +159,7 @@ describe('OnboardingPage', () => {
     fireEvent.click(completeButton);
 
     await waitFor(() => {
-      expect(mockNavigate).toHaveBeenCalledWith('/auth/error?message=Authentication+required');
+      expect(mockNavigate).toHaveBeenCalledWith('/auth/error?message=Failed+to+complete+onboarding');
     });
   });
 });

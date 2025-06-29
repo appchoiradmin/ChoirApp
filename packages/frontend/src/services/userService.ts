@@ -25,7 +25,7 @@ export const getCurrentUser = async (): Promise<User> => {
   return response.json();
 };
 
-export const completeOnboarding = async (): Promise<void> => {
+export const completeOnboarding = async (userType: 'admin' | 'general'): Promise<void> => {
   const token = localStorage.getItem('authToken');
   if (!token) {
     throw new Error('No auth token found');
@@ -37,6 +37,7 @@ export const completeOnboarding = async (): Promise<void> => {
       Authorization: `Bearer ${token}`,
       'Content-Type': 'application/json',
     },
+    body: JSON.stringify({ userType }),
   });
 
   if (!response.ok) {

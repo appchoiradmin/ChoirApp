@@ -59,10 +59,10 @@ public class ChoirEndpointsTests : IClassFixture<CustomWebApplicationFactory<Pro
         {
             Name = "Amazing Grace Choir"
         };
-        var request = new { ChoirDto = createDto };
+        // Send the DTO directly, not wrapped in an object
 
         // Act
-        var response = await _client.PostAsJsonAsync("/api/choirs", request);
+        var response = await _client.PostAsJsonAsync("/api/choirs", createDto);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.Created);

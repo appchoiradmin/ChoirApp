@@ -39,13 +39,17 @@ const DashboardPage: React.FC = () => {
         <div className="level">
           <div className="level-left">
             <div>
-              <h1 className="title">Dashboard</h1>
+              <h1 className="title">Choir Dashboard</h1>
               <p className="subtitle">
                 Welcome, <strong>{name}</strong>! ({email})
               </p>
             </div>
           </div>
           <div className="level-right">
+            <Link to="/master-songs" className="button is-link">
+              <span className="icon"><i className="fas fa-music"></i></span>
+              <span>Master Song List</span>
+            </Link>
             <Link to="/create-choir" className="button is-primary">
               <span className="icon"><i className="fas fa-plus"></i></span>
               <span>Create New Choir</span>
