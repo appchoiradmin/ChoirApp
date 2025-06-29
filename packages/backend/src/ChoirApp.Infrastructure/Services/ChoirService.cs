@@ -38,6 +38,13 @@ namespace ChoirApp.Infrastructure.Services
 
             var choir = choirResult.Value;
 
+            var admin = await _context.Users.FindAsync(adminId);
+            if (admin == null)
+            {
+                return Result.Fail("Admin user not found.");
+            }
+            choir.AddMember(admin, true);
+
             _context.Choirs.Add(choir);
             await _context.SaveChangesAsync();
 

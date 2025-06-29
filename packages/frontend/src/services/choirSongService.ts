@@ -1,6 +1,9 @@
 import type { ChoirSongVersionDto, CreateChoirSongVersionDto, UpdateChoirSongVersionDto } from '../types/choir';
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+if (!API_BASE_URL) {
+  throw new Error('VITE_API_BASE_URL is not defined. Please check your .env file.');
+}
 
 export const createChoirSongVersion = async (choirId: string, createDto: CreateChoirSongVersionDto): Promise<ChoirSongVersionDto> => {
   const token = localStorage.getItem('token');
