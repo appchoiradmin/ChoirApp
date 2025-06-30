@@ -1,7 +1,7 @@
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach, beforeAll, afterAll } from 'vitest';
 import { createMemoryRouter, RouterProvider } from 'react-router-dom';
 import { UserProvider } from '../../src/contexts/UserContext.tsx';
 import HomePage from '../../src/pages/HomePage.tsx';
@@ -9,7 +9,8 @@ import OnboardingPage from '../../src/pages/OnboardingPage.tsx';
 import CreateChoirPage from '../../src/pages/CreateChoirPage.tsx';
 import DashboardPage from '../../src/pages/DashboardPage.tsx';
 import '../../src/setupTests.ts';
-
+import { http, HttpResponse } from 'msw';
+import { setupServer } from 'msw/node';
 
 // Mock services
 vi.mock('../../src/services/userService', () => ({
@@ -47,6 +48,22 @@ const TestWrapper: React.FC = () => {
   );
 };
 
+const mockInvitations = [
+  {
+    invitationToken: 'token-1',
+    choirId: 'choir-1',
+    choirName: 'Test Choir',
+    email: 'invitee@example.com',
+    status: 'Pending',
+    sentAt: new Date().toISOString(),
+  },
+];
+const API_BASE_URL = 'http://localhost:5014';
+const server = setupServer();
+beforeAll(() => server.listen());
+afterEach(() => server.resetHandlers());
+afterAll(() => server.close());
+
 describe('Create Choir Flow - Integration Test', () => {
   beforeEach(async () => {
     localStorage.setItem('authToken', 'test-token');
@@ -82,6 +99,12 @@ describe('Create Choir Flow - Integration Test', () => {
       // Ensure the promise resolves asynchronously
       await new Promise(res => setTimeout(res, 0));
     });
+
+    server.use(
+      http.get(`${API_BASE_URL}/api/invitations`, () => {
+        return HttpResponse.json(mockInvitations);
+      })
+    );
   });
 
   afterEach(() => {

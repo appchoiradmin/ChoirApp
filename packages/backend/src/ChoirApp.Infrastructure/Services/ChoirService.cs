@@ -160,11 +160,14 @@ namespace ChoirApp.Infrastructure.Services
                 return Result.Fail("Member not found in this choir.");
             }
 
-            // Accept both "Admin" and "ChoirAdmin" as admin role
             var normalizedRole = role;
             if (string.Equals(role, "Admin", StringComparison.OrdinalIgnoreCase))
             {
                 normalizedRole = "ChoirAdmin";
+            }
+            else if (string.Equals(role, "Member", StringComparison.OrdinalIgnoreCase))
+            {
+                normalizedRole = "General";
             }
 
             if (!Enum.TryParse<UserRole>(normalizedRole, true, out var userRole))
@@ -173,8 +176,6 @@ namespace ChoirApp.Infrastructure.Services
             }
 
             member.IsAdmin = userRole == UserRole.ChoirAdmin;
-
-            // Also update the user's global role if promoted/demoted
             var user = await _context.Users.FindAsync(member.UserId);
             if (user != null)
             {
@@ -186,7 +187,6 @@ namespace ChoirApp.Infrastructure.Services
                 {
                     user.DemoteToGeneral();
                 }
-                await _context.SaveChangesAsync();
             }
 
             await _context.SaveChangesAsync();

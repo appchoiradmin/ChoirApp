@@ -7,7 +7,7 @@ import { http, HttpResponse } from 'msw';
 import { setupServer } from 'msw/node';
 import { User } from '../../src/types/user';
 import { ChoirDetails } from '../../src/types/choir';
-import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest';
+import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 import '@testing-library/jest-dom';
 
 const server = setupServer();
@@ -26,15 +26,33 @@ const mockUser: User = {
   isNewUser: false,
 };
 
-const mockChoirDetails: ChoirDetails = {
-  id: 'choir-1',
-  name: 'Test Choir',
-  role: 'Admin',
-  members: [
-    { id: 'user-1', name: 'Test User', email: 'test@example.com', role: 'Admin' },
-    { id: 'user-2', name: 'Member User', email: 'member@example.com', role: 'Member' },
-  ],
-};
+let currentChoirDetails: ChoirDetails;
+
+beforeEach(() => {
+  currentChoirDetails = {
+    id: 'choir-1',
+    name: 'Test Choir',
+    role: 'Admin',
+    members: [
+      { id: 'user-1', name: 'Test User', email: 'test@example.com', role: 'Admin' },
+      { id: 'user-2', name: 'Member User', email: 'member@example.com', role: 'Member' },
+    ],
+  };
+  localStorage.setItem('authToken', 'test-token');
+  server.use(
+    http.get('*/api/users/me', () => HttpResponse.json(mockUser)),
+    http.get('*/api/choirs/choir-1', () => HttpResponse.json(currentChoirDetails)),
+    http.get('*/api/choirs/choir-1/invitations', () => HttpResponse.json([]))
+  );
+});
+
+// Add a mock for invitationService to avoid conflicts with vi.mock in other tests
+vi.mock('../../src/services/invitationService', () => ({
+  getInvitations: vi.fn().mockResolvedValue([]),
+  getInvitationsByChoir: vi.fn().mockResolvedValue([]),
+  acceptInvitation: vi.fn().mockResolvedValue(undefined),
+  rejectInvitation: vi.fn().mockResolvedValue(undefined),
+}));
 
 const renderWithProviders = (ui: React.ReactElement) => {
   return render(
@@ -49,18 +67,6 @@ const renderWithProviders = (ui: React.ReactElement) => {
 };
 
 describe('ChoirAdminPage', () => {
-  beforeEach(() => {
-    localStorage.setItem('authToken', 'test-token');
-    server.use(
-      http.get('*/api/users/me', () => {
-        return HttpResponse.json(mockUser);
-      }),
-      http.get('*/api/choirs/choir-1', () => {
-        return HttpResponse.json(mockChoirDetails);
-      })
-    );
-  });
-
   it('should display the choir admin page with members and songs', async () => {
     renderWithProviders(<ChoirAdminPage />);
 
@@ -70,6 +76,7 @@ describe('ChoirAdminPage', () => {
   });
 
   it('should allow inviting a new member', async () => {
+    const alertMock = vi.spyOn(window, 'alert').mockImplementation(() => {});
     server.use(
       http.post('*/api/choirs/choir-1/invitations', () => {
         return new HttpResponse(null, { status: 200 });
@@ -85,25 +92,60 @@ describe('ChoirAdminPage', () => {
     });
     fireEvent.click(screen.getByText('Send Invitation'));
 
-    expect(await screen.findByText('Invite New Member')).toBeInTheDocument();
+    await waitFor(() => {
+      expect(alertMock).toHaveBeenCalledWith('Invitation sent successfully!');
+    });
+    alertMock.mockRestore();
   });
 
   it('should allow promoting a member to admin', async () => {
     server.use(
       http.put('*/api/choirs/choir-1/members/user-2/role', () => {
+        currentChoirDetails.members[1].role = 'Admin';
         return new HttpResponse(null, { status: 200 });
       })
     );
 
     renderWithProviders(<ChoirAdminPage />);
 
-    // Wait for the loading state to finish by checking for the table row with the member's email
-    expect(await screen.findByText((content, element) =>
-      content.includes('member@example.com')
-    )).toBeInTheDocument();
+    fireEvent.click(await screen.findByText('Member User'));
+    fireEvent.click(await screen.findByText('Promote to Admin'));
 
-    fireEvent.click(screen.getByText('Promote to Admin'));
+    await waitFor(() => {
+      // Robust: check for Demote button or Admin tag
+      expect(
+        screen.getByText((content) => content.toLowerCase().includes('demote to member'))
+      ).toBeInTheDocument();
+      // Optionally, check for updated role tag
+      expect(
+        screen.getAllByText((content) => content.toLowerCase().includes('admin')).length
+      ).toBeGreaterThan(1); // Both users now admin
+    });
+  });
 
-    expect(await screen.findByText('Demote to Member')).toBeInTheDocument();
+  it('should allow demoting an admin to member', async () => {
+    // First, set user-2 as Admin
+    currentChoirDetails.members[1].role = 'Admin';
+    server.use(
+      http.put('*/api/choirs/choir-1/members/user-2/role', () => {
+        currentChoirDetails.members[1].role = 'Member';
+        return new HttpResponse(null, { status: 200 });
+      })
+    );
+
+    renderWithProviders(<ChoirAdminPage />);
+
+    // Click on the member to open actions
+    fireEvent.click(await screen.findByText('Member User'));
+
+    // Should see 'Demote to Member' since user-2 is currently Admin
+    fireEvent.click(await screen.findByRole('button', { name: /demote to member/i }));
+
+    // Wait for the UI to update to show 'Promote to Admin' again
+    await waitFor(() => {
+      expect(
+        screen.getByRole('button', { name: /promote to admin/i })
+      ).toBeInTheDocument();
+    });
   });
 });

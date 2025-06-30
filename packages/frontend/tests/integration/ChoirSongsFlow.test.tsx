@@ -1,6 +1,6 @@
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach, beforeAll, afterAll } from 'vitest';
 import { createMemoryRouter, RouterProvider } from 'react-router-dom';
 import { UserProvider } from '../../src/contexts/UserContext.tsx';
 import DashboardPage from '../../src/pages/DashboardPage.tsx';
@@ -9,6 +9,8 @@ import MasterSongsListPage from '../../src/pages/MasterSongsListPage.tsx';
 import MasterSongDetailPage from '../../src/pages/MasterSongDetailPage.tsx';
 import ChoirSongEditorPage from '../../src/pages/ChoirSongEditorPage.tsx';
 import '../../src/setupTests.ts';
+import { http, HttpResponse } from 'msw';
+import { setupServer } from 'msw/node';
 
 // Mock the userService and provide a mock user with choir
 vi.mock('../../src/services/userService', () => ({
@@ -145,6 +147,54 @@ const TestWrapper: React.FC<{ initialPath?: string }> = ({ initialPath = "/dashb
   );
 };
 
+const mockInvitations = [
+  {
+    invitationToken: 'token-1',
+    choirId: 'choir-1',
+    choirName: 'Test Choir',
+    email: 'invitee@example.com',
+    status: 'Pending',
+    sentAt: new Date().toISOString(),
+  },
+];
+const API_BASE_URL = 'http://localhost:5014';
+const server = setupServer();
+beforeAll(() => server.listen());
+afterEach(() => server.resetHandlers());
+afterAll(() => server.close());
+
+// --- Example pattern for mutable choir details and MSW handlers ---
+// Place this at the top of your test file, after imports
+
+const initialChoirDetails = {
+  id: 'choir-1',
+  name: 'Test Choir',
+  role: 'Admin',
+  members: [
+    { id: 'user-1', name: 'Test User', email: 'test@example.com', role: 'Admin' },
+    { id: 'user-2', name: 'Member User', email: 'member@example.com', role: 'Admin' },
+  ],
+};
+let currentChoirDetails = JSON.parse(JSON.stringify(initialChoirDetails));
+
+server.use(
+  http.get(`${API_BASE_URL}/api/choirs/choir-1`, () => {
+    return HttpResponse.json(currentChoirDetails);
+  }),
+  http.put(`${API_BASE_URL}/api/choirs/choir-1/members/user-2/role`, async (req) => {
+    // Handle both promote and demote based on request body
+    const body = await req.request.json();
+    const newRole = (body && typeof body === 'object' && 'role' in body) ? body.role : undefined;
+    if (newRole) {
+      currentChoirDetails.members = currentChoirDetails.members.map(m =>
+        m.id === 'user-2' ? { ...m, role: newRole } : m
+      );
+    }
+    return new HttpResponse(null, { status: 200 });
+  })
+);
+// --- End pattern ---
+
 describe('Choir Songs Management Flow - Integration Test', () => {
   beforeEach(async () => {
     // Mock localStorage to have an auth token
@@ -245,6 +295,12 @@ describe('Choir Songs Management Flow - Integration Test', () => {
       Promise.resolve(mockMasterSongs.find(song => song.id === id) || mockMasterSongs[0])
     );
     vi.mocked(masterSongService.searchMasterSongs).mockResolvedValue(mockMasterSongs);
+
+    server.use(
+      http.get(`${API_BASE_URL}/api/invitations`, () => {
+        return HttpResponse.json(mockInvitations);
+      })
+    );
   });
 
   afterEach(() => {

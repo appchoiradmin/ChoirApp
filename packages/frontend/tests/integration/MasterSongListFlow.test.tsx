@@ -35,6 +35,14 @@ vi.mock('../../src/services/choirService', () => ({
   }),
 }));
 
+// Mock invitationService for ChoirAdminPage and DashboardPage
+vi.mock('../../src/services/invitationService', () => ({
+  getInvitations: vi.fn().mockResolvedValue([]),
+  getInvitationsByChoir: vi.fn().mockResolvedValue([]),
+  acceptInvitation: vi.fn().mockResolvedValue(undefined),
+  rejectInvitation: vi.fn().mockResolvedValue(undefined),
+}));
+
 const createTestRouter = (initialEntries: string[]) => {
   return createMemoryRouter(
     [
