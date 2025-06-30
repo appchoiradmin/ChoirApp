@@ -151,7 +151,7 @@ const ChoirAdminPage: React.FC = () => {
           <div className="column is-two-fifths">
             <InviteMember onInviteMember={handleInviteMember} />
             <div className="mt-5">
-              <SentInvitationsList invitations={invitations} />
+              <SentInvitationsList invitations={invitations || []} />
             </div>
           </div>
         </div>

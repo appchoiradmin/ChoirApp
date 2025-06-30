@@ -1,12 +1,14 @@
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter, Routes, Route } from 'react-router-dom';
-import { describe, test, expect, vi, beforeEach } from 'vitest';
+import { describe, test, expect, vi, beforeEach, beforeAll, afterEach, afterAll } from 'vitest';
 import DashboardPage from '../../src/pages/DashboardPage';
 import ChoirAdminPage from '../../src/pages/ChoirAdminPage';
 import { UserContext, UserContextType } from '../../src/contexts/UserContext';
 import { User } from '../../src/types/user';
 import '@testing-library/jest-dom';
+import { http, HttpResponse } from 'msw';
+import { setupServer } from 'msw/node';
 
 describe('Admin Dashboard Flow', () => {
   const adminUser: User = {
@@ -29,7 +31,29 @@ describe('Admin Dashboard Flow', () => {
     refetchUser: async () => {},
   };
 
+  const mockInvitations = [
+    {
+      invitationToken: 'token-1',
+      choirId: 'choir-1',
+      choirName: 'Test Choir',
+      email: 'invitee@example.com',
+      status: 'Pending',
+      sentAt: new Date().toISOString(),
+    },
+  ];
+  const API_BASE_URL = 'http://localhost:5014';
+  const server = setupServer();
+  beforeAll(() => server.listen());
+  afterEach(() => server.resetHandlers());
+  afterAll(() => server.close());
+
   beforeEach(() => {
+    server.use(
+      http.get(`${API_BASE_URL}/api/invitations`, () => {
+        return HttpResponse.json(mockInvitations);
+      })
+    );
+
     // Mock getChoirDetails to return a valid choir for choir-1
     vi.mock('../../src/services/choirService', () => ({
       getChoirDetails: vi.fn().mockResolvedValue({

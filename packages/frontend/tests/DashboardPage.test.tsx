@@ -1,8 +1,10 @@
 import { render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach, vi, beforeAll, afterEach, afterAll } from 'vitest';
 import DashboardPage from '../src/pages/DashboardPage';
 import { UserProvider } from '../src/contexts/UserContext.tsx';
+import { http, HttpResponse } from 'msw';
+import { setupServer } from 'msw/node';
 
 // Mock userService to provide a user for dashboard rendering
 vi.mock('../src/services/userService', () => ({
@@ -18,6 +20,25 @@ vi.mock('../src/services/userService', () => ({
   }),
 }));
 
+// Mock invitations for dashboard
+const mockInvitations = [
+  {
+    invitationToken: 'token-1',
+    choirId: 'choir-1',
+    choirName: 'Test Choir',
+    email: 'invitee@example.com',
+    status: 'Pending',
+    sentAt: new Date().toISOString(),
+  },
+];
+
+const API_BASE_URL = 'http://localhost:5014';
+const server = setupServer();
+
+beforeAll(() => server.listen());
+afterEach(() => server.resetHandlers());
+afterAll(() => server.close());
+
 describe('DashboardPage', () => {
   beforeEach(() => {
     // Mock localStorage to have an auth token
@@ -30,6 +51,12 @@ describe('DashboardPage', () => {
       },
       writable: true,
     });
+    // MSW handler for invitations
+    server.use(
+      http.get(`${API_BASE_URL}/api/invitations`, () => {
+        return HttpResponse.json(mockInvitations);
+      })
+    );
   });
 
   it('renders the dashboard content and navigation links', async () => {

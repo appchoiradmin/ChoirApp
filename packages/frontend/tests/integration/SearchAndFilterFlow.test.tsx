@@ -1,6 +1,6 @@
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach, beforeAll, afterAll } from 'vitest';
 import { createMemoryRouter, RouterProvider } from 'react-router-dom';
 import { UserProvider } from '../../src/contexts/UserContext.tsx';
 import DashboardPage from '../../src/pages/DashboardPage.tsx';
@@ -8,6 +8,8 @@ import MasterSongsListPage from '../../src/pages/MasterSongsListPage.tsx';
 import CreateMasterSongPage from '../../src/pages/CreateMasterSongPage.tsx';
 import MasterSongDetailPage from '../../src/pages/MasterSongDetailPage.tsx';
 import '../../src/setupTests.ts';
+import { http, HttpResponse } from 'msw';
+import { setupServer } from 'msw/node';
 
 // Mock the useNavigate hook
 const mockNavigate = vi.fn();
@@ -69,6 +71,25 @@ const TestWrapper: React.FC = () => {
   );
 };
 
+// Mock invitations for dashboard
+const mockInvitations = [
+  {
+    invitationToken: 'token-1',
+    choirId: 'choir-1',
+    choirName: 'Test Choir',
+    email: 'invitee@example.com',
+    status: 'Pending',
+    sentAt: new Date().toISOString(),
+  },
+];
+
+const API_BASE_URL = 'http://localhost:5014';
+const server = setupServer();
+
+beforeAll(() => server.listen());
+afterEach(() => server.resetHandlers());
+afterAll(() => server.close());
+
 describe('Search & Filter Flow - Integration Test', () => {
   const mockSongs = [
     {
@@ -121,6 +142,12 @@ describe('Search & Filter Flow - Integration Test', () => {
       );
       return Promise.resolve(results);
     });
+
+    server.use(
+      http.get(`${API_BASE_URL}/api/invitations`, () => {
+        return HttpResponse.json(mockInvitations);
+      })
+    );
   });
 
   afterEach(() => {
