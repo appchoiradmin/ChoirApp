@@ -37,16 +37,8 @@ describe('choirSongService', () => {
         })
       );
 
-      localStorage.setItem('token', 'test-token');
-      const result = await createChoirSongVersion(choirId, createDto);
+      const result = await createChoirSongVersion(choirId, createDto, 'test-token');
       expect(result).toEqual(expectedResponse);
-    });
-
-    it('should throw an error if no token is found', async () => {
-      localStorage.removeItem('token');
-      const choirId = 'choir-1';
-      const createDto: CreateChoirSongVersionDto = { masterSongId: 'song-1', editedLyricsChordPro: 'C' };
-      await expect(createChoirSongVersion(choirId, createDto)).rejects.toThrow('No token found');
     });
 
     it('should throw an error if the fetch fails', async () => {
@@ -58,8 +50,7 @@ describe('choirSongService', () => {
         })
       );
 
-      localStorage.setItem('token', 'test-token');
-      await expect(createChoirSongVersion(choirId, createDto)).rejects.toThrow('Failed to create choir song version');
+      await expect(createChoirSongVersion(choirId, createDto, 'test-token')).rejects.toThrow('Failed to create choir song version');
     });
   });
 
@@ -83,15 +74,8 @@ describe('choirSongService', () => {
         })
       );
 
-      localStorage.setItem('token', 'test-token');
-      const result = await getChoirSongsByChoirId(choirId);
+      const result = await getChoirSongsByChoirId(choirId, 'test-token');
       expect(result).toEqual(expectedResponse);
-    });
-
-    it('should throw an error if no token is found', async () => {
-      localStorage.removeItem('token');
-      const choirId = 'choir-1';
-      await expect(getChoirSongsByChoirId(choirId)).rejects.toThrow('No token found');
     });
 
     it('should throw an error if the fetch fails', async () => {
@@ -102,8 +86,7 @@ describe('choirSongService', () => {
         })
       );
 
-      localStorage.setItem('token', 'test-token');
-      await expect(getChoirSongsByChoirId(choirId)).rejects.toThrow('Failed to fetch choir songs');
+      await expect(getChoirSongsByChoirId(choirId, 'test-token')).rejects.toThrow('Failed to fetch choir songs');
     });
   });
 
@@ -126,16 +109,8 @@ describe('choirSongService', () => {
         })
       );
 
-      localStorage.setItem('token', 'test-token');
-      const result = await getChoirSongById(choirId, songId);
+      const result = await getChoirSongById(choirId, songId, 'test-token');
       expect(result).toEqual(expectedResponse);
-    });
-
-    it('should throw an error if no token is found', async () => {
-      localStorage.removeItem('token');
-      const choirId = 'choir-1';
-      const songId = 'song-1';
-      await expect(getChoirSongById(choirId, songId)).rejects.toThrow('No token found');
     });
 
     it('should throw an error if the fetch fails', async () => {
@@ -147,8 +122,7 @@ describe('choirSongService', () => {
         })
       );
 
-      localStorage.setItem('token', 'test-token');
-      await expect(getChoirSongById(choirId, songId)).rejects.toThrow('Failed to fetch choir song');
+      await expect(getChoirSongById(choirId, songId, 'test-token')).rejects.toThrow('Failed to fetch choir song');
     });
   });
 
@@ -172,17 +146,8 @@ describe('choirSongService', () => {
         })
       );
 
-      localStorage.setItem('token', 'test-token');
-      const result = await updateChoirSongVersion(choirId, songId, updateDto);
+      const result = await updateChoirSongVersion(choirId, songId, updateDto, 'test-token');
       expect(result).toEqual(expectedResponse);
-    });
-
-    it('should throw an error if no token is found', async () => {
-      localStorage.removeItem('token');
-      const choirId = 'choir-1';
-      const songId = 'song-1';
-      const updateDto: UpdateChoirSongVersionDto = { editedLyricsChordPro: 'A D E' };
-      await expect(updateChoirSongVersion(choirId, songId, updateDto)).rejects.toThrow('No token found');
     });
 
     it('should throw an error if the fetch fails', async () => {
@@ -195,9 +160,9 @@ describe('choirSongService', () => {
         })
       );
 
-      localStorage.setItem('token', 'test-token');
-      await expect(updateChoirSongVersion(choirId, songId, updateDto)).rejects.toThrow('Failed to update choir song version');
+      await expect(updateChoirSongVersion(choirId, songId, updateDto, 'test-token')).rejects.toThrow(
+        'Failed to update choir song version'
+      );
     });
   });
 });
-

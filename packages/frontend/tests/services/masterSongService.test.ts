@@ -31,7 +31,7 @@ describe('masterSongService', () => {
         })
       );
 
-      const result = await getAllMasterSongs();
+      const result = await getAllMasterSongs('token');
       expect(result).toEqual(expectedResponse);
     });
 
@@ -42,7 +42,7 @@ describe('masterSongService', () => {
         })
       );
 
-      await expect(getAllMasterSongs()).rejects.toThrow('Failed to fetch master songs');
+      await expect(getAllMasterSongs('token')).rejects.toThrow('Failed to fetch master songs');
     });
   });
 
@@ -57,7 +57,7 @@ describe('masterSongService', () => {
         })
       );
 
-      const result = await getMasterSongById(songId);
+      const result = await getMasterSongById(songId, 'token');
       expect(result).toEqual(expectedResponse);
     });
 
@@ -69,7 +69,7 @@ describe('masterSongService', () => {
         })
       );
 
-      await expect(getMasterSongById(songId)).rejects.toThrow('Failed to fetch master song');
+      await expect(getMasterSongById(songId, 'token')).rejects.toThrow('Failed to fetch master song');
     });
   });
 
@@ -84,7 +84,7 @@ describe('masterSongService', () => {
         })
       );
 
-      const result = await createMasterSong(createDto);
+      const result = await createMasterSong(createDto, 'token');
       expect(result).toEqual(expectedResponse);
     });
 
@@ -96,7 +96,7 @@ describe('masterSongService', () => {
         })
       );
 
-      await expect(createMasterSong(createDto)).rejects.toThrow('Failed to create master song');
+      await expect(createMasterSong(createDto, 'token')).rejects.toThrow('Failed to create master song');
     });
   });
 
@@ -113,7 +113,7 @@ describe('masterSongService', () => {
         })
       );
 
-      const result = await searchMasterSongs(searchParams);
+      const result = await searchMasterSongs(searchParams, 'token');
       expect(result).toEqual(expectedResponse);
     });
 
@@ -125,7 +125,7 @@ describe('masterSongService', () => {
         })
       );
 
-      await expect(searchMasterSongs(searchParams)).rejects.toThrow('Failed to search songs');
+      await expect(searchMasterSongs(searchParams, 'token')).rejects.toThrow('Failed to search songs');
     });
   });
 });

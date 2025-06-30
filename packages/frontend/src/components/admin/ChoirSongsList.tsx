@@ -24,10 +24,10 @@ const ChoirSongsList: React.FC<ChoirSongsListProps> = ({ choirId }) => {
         setLoading(true);
         try {
           if (showMasterList) {
-            const masterSongs = await getAllMasterSongs();
+            const masterSongs = await getAllMasterSongs(token);
             setSongs(masterSongs);
           } else {
-            const choirSongs = await getChoirSongsByChoirId(choirId);
+            const choirSongs = await getChoirSongsByChoirId(choirId, token);
             setSongs(choirSongs);
           }
         } catch (error) {

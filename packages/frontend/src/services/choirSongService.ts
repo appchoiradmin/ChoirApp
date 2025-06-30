@@ -5,12 +5,7 @@ if (!API_BASE_URL) {
   throw new Error('VITE_API_BASE_URL is not defined. Please check your .env file.');
 }
 
-export const createChoirSongVersion = async (choirId: string, createDto: CreateChoirSongVersionDto): Promise<ChoirSongVersionDto> => {
-  const token = localStorage.getItem('token');
-  if (!token) {
-    throw new Error('No token found');
-  }
-
+export const createChoirSongVersion = async (choirId: string, createDto: CreateChoirSongVersionDto, token: string): Promise<ChoirSongVersionDto> => {
   const response = await fetch(`${API_BASE_URL}/api/choirs/${choirId}/songs`, {
     method: 'POST',
     headers: {
@@ -27,12 +22,7 @@ export const createChoirSongVersion = async (choirId: string, createDto: CreateC
   return response.json();
 };
 
-export const getChoirSongsByChoirId = async (choirId: string): Promise<ChoirSongVersionDto[]> => {
-    const token = localStorage.getItem('token');
-    if (!token) {
-        throw new Error('No token found');
-    }
-
+export const getChoirSongsByChoirId = async (choirId: string, token: string): Promise<ChoirSongVersionDto[]> => {
     const response = await fetch(`${API_BASE_URL}/api/choirs/${choirId}/songs`, {
         headers: {
             Authorization: `Bearer ${token}`,
@@ -46,12 +36,7 @@ export const getChoirSongsByChoirId = async (choirId: string): Promise<ChoirSong
     return response.json();
 };
 
-export const getChoirSongById = async (choirId: string, songId: string): Promise<ChoirSongVersionDto> => {
-    const token = localStorage.getItem('token');
-    if (!token) {
-        throw new Error('No token found');
-    }
-
+export const getChoirSongById = async (choirId: string, songId: string, token: string): Promise<ChoirSongVersionDto> => {
     const response = await fetch(`${API_BASE_URL}/api/choirs/${choirId}/songs/${songId}`, {
         headers: {
             Authorization: `Bearer ${token}`,
@@ -65,12 +50,7 @@ export const getChoirSongById = async (choirId: string, songId: string): Promise
     return response.json();
 };
 
-export const updateChoirSongVersion = async (choirId: string, songId: string, updateDto: UpdateChoirSongVersionDto): Promise<ChoirSongVersionDto> => {
-    const token = localStorage.getItem('token');
-    if (!token) {
-        throw new Error('No token found');
-    }
-
+export const updateChoirSongVersion = async (choirId: string, songId: string, updateDto: UpdateChoirSongVersionDto, token: string): Promise<ChoirSongVersionDto> => {
     const response = await fetch(`${API_BASE_URL}/api/choirs/${choirId}/songs/${songId}`, {
         method: 'PUT',
         headers: {
