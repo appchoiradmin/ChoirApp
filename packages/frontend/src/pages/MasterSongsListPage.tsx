@@ -1,9 +1,12 @@
 import React, { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { getAllMasterSongs, searchMasterSongs } from '../services/masterSongService';
 import type { MasterSongDto } from '../types/song';
+import { useUser } from '../hooks/useUser';
 
 const MasterSongsListPage: React.FC = () => {
+  const { token } = useUser();
+  const navigate = useNavigate();
   const [songs, setSongs] = useState<MasterSongDto[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -13,8 +16,13 @@ const MasterSongsListPage: React.FC = () => {
 
   useEffect(() => {
     const fetchSongs = async () => {
+      if (!token) {
+        setError('Authentication token not found.');
+        setLoading(false);
+        return;
+      }
       try {
-        const data = await getAllMasterSongs();
+        const data = await getAllMasterSongs(token);
         setSongs(data);
       } catch {
         setError('Failed to fetch songs');
@@ -24,16 +32,23 @@ const MasterSongsListPage: React.FC = () => {
     };
 
     fetchSongs();
-  }, []);
+  }, [token]);
 
   const handleSearch = async () => {
+    if (!token) {
+      setError('Authentication token not found.');
+      return;
+    }
     setLoading(true);
     try {
-      const results = await searchMasterSongs({
-        title: searchTitle,
-        artist: searchArtist,
-        tag: searchTag,
-      });
+      const results = await searchMasterSongs(
+        {
+          title: searchTitle,
+          artist: searchArtist,
+          tag: searchTag,
+        },
+        token
+      );
       setSongs(results);
       setError(null);
     } catch (err) {
@@ -99,12 +114,15 @@ const MasterSongsListPage: React.FC = () => {
             </div>
           </div>
         </div>
-        <Link to="/master-songs/create" className="button is-primary mb-4">Create New Song</Link>
+        <div className="buttons">
+          <button className="button is-light" onClick={() => navigate(-1)}>Go Back</button>
+          <Link to="/master-songs/create" className="button is-primary">Create New Song</Link>
+        </div>
         <div className="list">
           {songs.map(song => (
-            <div key={song.id} className="list-item">
-              <Link to={`/master-songs/${song.id}`}>{song.title}</Link>
-            </div>
+            <Link key={song.songId} to={`/master-songs/${song.songId}`} className="list-item">
+              {song.title}
+            </Link>
           ))}
         </div>
       </div>

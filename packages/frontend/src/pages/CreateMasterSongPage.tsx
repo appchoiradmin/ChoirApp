@@ -1,13 +1,17 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { createMasterSong } from '../services/masterSongService';
 import type { CreateMasterSongDto } from '../types/song';
+import { UserContext } from '../contexts/UserContext';
+import TagInput from '../components/TagInput';
 
 const CreateMasterSongPage: React.FC = () => {
+  const userContext = useContext(UserContext);
+  const token = userContext?.token;
   const navigate = useNavigate();
   const [title, setTitle] = useState('');
   const [artist, setArtist] = useState('');
-  const [tags, setTags] = useState('');
+  const [tags, setTags] = useState<string[]>([]);
   const [lyricsChordPro, setLyricsChordPro] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -21,13 +25,18 @@ const CreateMasterSongPage: React.FC = () => {
       title,
       artist: artist || null,
       lyricsChordPro,
-      tags: tags.split(',').map(tag => tag.trim()).filter(tag => tag),
+      tags: tags,
     };
 
     try {
-      const newSong = await createMasterSong(songDto);
-      navigate(`/master-songs/${newSong.id}`);
-    } catch {
+      if (!token) {
+        setError('You must be logged in to create a song.');
+        return;
+      }
+      const newSong = await createMasterSong(songDto, token);
+      navigate(`/master-songs/${newSong.songId}`);
+    } catch (err) {
+      console.error(err);
       setError('Failed to create song. Please check your input and try again.');
     } finally {
       setIsSubmitting(false);
@@ -64,18 +73,10 @@ const CreateMasterSongPage: React.FC = () => {
               />
             </div>
           </div>
-          <div className="field">
-            <label className="label" htmlFor="tags">Tags (comma-separated)</label>
-            <div className="control">
-              <input
-                id="tags"
-                className="input"
-                type="text"
-                value={tags}
-                onChange={(e) => setTags(e.target.value)}
-              />
-            </div>
-          </div>
+          <fieldset className="field">
+            <legend className="label">Tags</legend>
+            <TagInput tags={tags} setTags={setTags} />
+          </fieldset>
           <div className="field">
             <label className="label" htmlFor="lyricsChordPro">Content (ChordPro format)</label>
             <div className="control">

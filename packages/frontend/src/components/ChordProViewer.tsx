@@ -62,6 +62,10 @@ const ChordProViewer: React.FC<ChordProViewerProps> = ({ source }) => {
 
   const parsedSong = parseChordPro(source);
 
+  if (!source) {
+    return <div className="chord-pro-viewer">No song content to display.</div>;
+  }
+
   return (
     <div className="chord-pro-viewer" data-testid="chord-pro-viewer">
       {parsedSong.map((line, lineIndex) => {

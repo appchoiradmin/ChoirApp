@@ -20,9 +20,18 @@ const MasterSongDetailPage: React.FC = () => {
 
   useEffect(() => {
     const fetchSong = async () => {
-      if (!id) return;
+      if (userLoading) {
+        return; // Wait for user to load
+      }
+
+      if (!id || !user?.token) {
+        setLoading(false); // Nothing to fetch
+        return;
+      }
+
       try {
-        const data = await getMasterSongById(id);
+        const data = await getMasterSongById(id, user.token);
+        console.log('Song data:', data);
         setSong(data);
       } catch (err) {
         if (err instanceof Error && err.message === 'Song not found') {
@@ -36,7 +45,7 @@ const MasterSongDetailPage: React.FC = () => {
     };
 
     fetchSong();
-  }, [id]);
+  }, [id, user, userLoading]);
 
   useEffect(() => {
     if (user && user.choirs && user.choirs.length > 0) {
@@ -46,11 +55,11 @@ const MasterSongDetailPage: React.FC = () => {
 
   useEffect(() => {
     const checkVersionExists = async () => {
-      if (!selectedChoirId || !id) return;
+      if (!selectedChoirId || !id || !user?.token) return;
 
       setIsCheckingVersion(true);
       try {
-        await getChoirSongById(selectedChoirId, id);
+        await getChoirSongById(selectedChoirId, id, user.token);
         setChoirSongExists(true);
       } catch (error) {
         setChoirSongExists(false);
@@ -60,18 +69,22 @@ const MasterSongDetailPage: React.FC = () => {
     };
 
     checkVersionExists();
-  }, [selectedChoirId, id]);
+  }, [selectedChoirId, id, user?.token]);
 
   const handleCreateChoirVersion = async () => {
-    if (!song || !selectedChoirId) return;
+    if (!song || !selectedChoirId || !user?.token) return;
 
     setIsProcessing(true);
     try {
-      await createChoirSongVersion(selectedChoirId, {
-        masterSongId: song.id,
-        editedLyricsChordPro: song.lyricsChordPro,
-      });
-      navigate(`/choirs/${selectedChoirId}/songs/${song.id}/edit`);
+      await createChoirSongVersion(
+        selectedChoirId,
+        {
+          masterSongId: song.songId,
+          editedLyricsChordPro: song.lyricsChordPro,
+        },
+        user.token
+      );
+      navigate(`/choirs/${selectedChoirId}/songs/${song.songId}/edit`);
     } catch {
       setError('Failed to create choir version');
     } finally {
@@ -110,6 +123,11 @@ const MasterSongDetailPage: React.FC = () => {
               <h1 className="title">{song.title}</h1>
               <p className="subtitle is-6">Artist: {song.artist}</p>
             </div>
+          </div>
+          <div className="level-right">
+            <button className="button" onClick={() => navigate(-1)}>
+              Go Back
+            </button>
           </div>
           <div className="level-right">
             {canManageVersions && user.choirs.length > 1 && (

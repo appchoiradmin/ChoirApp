@@ -175,7 +175,7 @@ public class MasterSongService : IMasterSongService
         }
     }
 
-    public async Task<Result<IEnumerable<MasterSongDto>>> SearchSongsAsync(string? title, string? artist, string? tag)
+        public async Task<Result<IEnumerable<MasterSongDto>>> SearchSongsAsync(string? title, string? artist, string? tag)
     {
         try
         {
@@ -216,6 +216,26 @@ public class MasterSongService : IMasterSongService
                 .ToListAsync();
 
             return Result.Ok<IEnumerable<MasterSongDto>>(songs);
+        }
+        catch (Exception ex)
+        {
+            return Result.Fail(new Error(ex.Message));
+        }
+    }
+
+    public async Task<Result<IEnumerable<TagDto>>> GetAllTagsAsync()
+    {
+        try
+        {
+            var tags = await _context.Tags
+                .Select(t => new TagDto
+                {
+                    TagId = t.TagId,
+                    TagName = t.TagName
+                })
+                .ToListAsync();
+
+            return Result.Ok<IEnumerable<TagDto>>(tags);
         }
         catch (Exception ex)
         {

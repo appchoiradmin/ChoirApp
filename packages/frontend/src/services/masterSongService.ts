@@ -1,4 +1,4 @@
-import type { MasterSongDto, CreateMasterSongDto } from '../types/song';
+import type { MasterSongDto, CreateMasterSongDto, TagDto } from '../types/song';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 if (!API_BASE_URL) {
@@ -57,13 +57,25 @@ export const searchMasterSongs = async (
   if (params.artist) query.append('artist', params.artist);
   if (params.tag) query.append('tag', params.tag);
 
-  const response = await fetch(`${API_BASE_URL}/api/songs/search?${query.toString()}`, {
+  const response = await fetch(`${API_BASE_URL}/api/master-songs/search?${query.toString()}`, {
     headers: {
       Authorization: `Bearer ${token}`,
     },
   });
   if (!response.ok) {
     throw new Error('Failed to search songs');
+  }
+  return response.json();
+};
+
+export const getAllTags = async (token: string): Promise<TagDto[]> => {
+  const response = await fetch(`${API_BASE_URL}/api/tags`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+  if (!response.ok) {
+    throw new Error('Failed to fetch tags');
   }
   return response.json();
 };

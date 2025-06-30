@@ -21,7 +21,7 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({
       }
 
       setToken(storedToken);
-      const userData = await getCurrentUser();
+      const userData = await getCurrentUser(storedToken);
       setUser(userData);
     } catch (error) {
       console.error('Failed to fetch user', error);
