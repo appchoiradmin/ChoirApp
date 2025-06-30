@@ -54,13 +54,12 @@ public class GetCurrentUserEndpoint : EndpointWithoutRequest<UserDto>
             IsNewUser = user.IsNewUser(),
             Choirs = user.UserChoirs
                 .Where(uc => uc.Choir != null)
-                .Select(uc => new ChoirDto
-            {
-                Id = uc.Choir!.ChoirId,
-                Name = uc.Choir.ChoirName,
-                AdminId = uc.Choir.AdminUserId,
-                Role = uc.IsAdmin ? "Admin" : "Member"
-            }).ToList()
+                .Select(uc => new UserChoirDto
+                {
+                    Id = uc.Choir!.ChoirId,
+                    Name = uc.Choir.ChoirName,
+                    Role = uc.IsAdmin ? "Admin" : "Member"
+                }).ToList()
         };
 
         await SendOkAsync(userDto, ct);

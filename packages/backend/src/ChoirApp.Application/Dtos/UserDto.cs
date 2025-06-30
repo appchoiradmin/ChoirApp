@@ -9,7 +9,7 @@ public class UserDto
     public string Email { get; set; } = string.Empty;
     public string? FirstName { get; set; }
     public string? LastName { get; set; }
-    public List<ChoirDto> Choirs { get; set; } = new();
+    public List<UserChoirDto> Choirs { get; set; } = new();
     public bool HasCompletedOnboarding { get; set; }
     public bool IsNewUser { get; set; }
 }

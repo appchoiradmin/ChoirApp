@@ -36,7 +36,14 @@ namespace ChoirApp.Backend.Endpoints.Choir
             {
                 Id = choir.ChoirId,
                 Name = choir.ChoirName,
-                AdminId = choir.AdminUserId
+                AdminId = choir.AdminUserId,
+                Members = choir.UserChoirs.Select(uc => new ChoirMemberDto
+                {
+                    Id = uc.UserId,
+                    Name = uc.User!.Name,
+                    Email = uc.User!.Email,
+                    Role = uc.IsAdmin ? "Admin" : "Member"
+                }).ToList()
             };
 
             await SendAsync(response, cancellation: ct);

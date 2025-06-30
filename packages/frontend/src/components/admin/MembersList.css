@@ -1,0 +1,52 @@
+@media screen and (max-width: 768px) {
+  .members-table thead {
+    display: none;
+  }
+
+  .members-table tbody,
+  .members-table tr,
+  .members-table td {
+    display: block;
+    width: 100%;
+  }
+
+  .members-table tr {
+    margin-bottom: 1rem;
+    border-bottom: 2px solid #dbdbdb;
+    padding-bottom: 1rem;
+  }
+
+  .members-table tr:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+    padding-bottom: 0;
+  }
+
+  .members-table td {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    text-align: right;
+    position: relative;
+    border: none;
+    padding: 0.5rem 0.75rem;
+    flex-wrap: wrap;
+  }
+
+  .members-table td::before {
+    content: attr(data-label);
+    font-weight: bold;
+    text-align: left;
+    margin-right: 1rem;
+    flex-basis: 50%;
+  }
+
+  .members-table td span {
+    flex-basis: 50%;
+    text-align: right;
+  }
+
+  .members-table td .buttons {
+    justify-content: flex-end;
+  }
+}

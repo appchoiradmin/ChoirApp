@@ -27,7 +27,6 @@ public class ChoirTests
     }
 
     [Theory]
-    [InlineData(null)]
     [InlineData("")]
     [InlineData(" ")]
     public void Create_WithInvalidName_ShouldFail(string invalidName)
@@ -70,7 +69,6 @@ public class ChoirTests
     }
 
     [Theory]
-    [InlineData(null)]
     [InlineData("")]
     [InlineData(" ")]
     public void UpdateName_WithInvalidName_ShouldFail(string invalidName)

@@ -127,6 +127,25 @@ public class ChoirServiceTests : IDisposable
         choirInDb.Should().BeNull();
     }
 
+    [Fact]
+    public async Task UpdateMemberRoleAsync_WhenAuthorized_ShouldSucceed()
+    {
+        // Arrange
+        var choir = Choir.Create("Test Choir", _adminUser.UserId).Value;
+        choir.AddMember(_memberUser);
+        _context.Choirs.Add(choir);
+        await _context.SaveChangesAsync();
+
+        // Act
+        var result = await _choirService.UpdateMemberRoleAsync(choir.ChoirId, _memberUser.UserId, "Admin", _adminUser.UserId);
+
+        // Assert
+        result.IsSuccess.Should().BeTrue();
+        var choirInDb = await _context.Choirs.Include(c => c.UserChoirs).FirstAsync();
+        var memberInDb = choirInDb.UserChoirs.First(uc => uc.UserId == _memberUser.UserId);
+        memberInDb.IsAdmin.Should().BeTrue();
+    }
+
     public void Dispose()
     {
         _context.Database.EnsureDeleted();

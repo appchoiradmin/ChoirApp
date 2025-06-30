@@ -1,7 +1,7 @@
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter, Routes, Route } from 'react-router-dom';
-import { describe, test, expect } from 'vitest';
+import { describe, test, expect, vi, beforeEach } from 'vitest';
 import DashboardPage from '../../src/pages/DashboardPage';
 import ChoirAdminPage from '../../src/pages/ChoirAdminPage';
 import { UserContext, UserContextType } from '../../src/contexts/UserContext';
@@ -29,6 +29,18 @@ describe('Admin Dashboard Flow', () => {
     refetchUser: async () => {},
   };
 
+  beforeEach(() => {
+    // Mock getChoirDetails to return a valid choir for choir-1
+    vi.mock('../../src/services/choirService', () => ({
+      getChoirDetails: vi.fn().mockResolvedValue({
+        id: 'choir-1',
+        name: 'Admin Choir',
+        role: 'Admin',
+        members: [],
+      }),
+    }));
+  });
+
   test('clicking on an admin choir navigates to the choir admin page and back', async () => {
     const user = userEvent.setup();
     render(
@@ -46,16 +58,13 @@ describe('Admin Dashboard Flow', () => {
     const adminChoirLink = screen.getByText('Admin Choir');
     await user.click(adminChoirLink);
 
-    await waitFor(() => {
-      expect(screen.getByText(/This is the admin page for choir choir-1/)).toBeInTheDocument();
-    });
+    // Wait for the admin page heading (matches the actual heading in ChoirAdminPage)
+    expect(await screen.findByRole('heading', { name: /Admin Choir - Admin/i })).toBeInTheDocument();
 
     // Navigate back to dashboard
     const goBackButton = screen.getByText('Go Back to Dashboard');
     await user.click(goBackButton);
 
-    await waitFor(() => {
-      expect(screen.getByText('My Choirs (Admin)')).toBeInTheDocument();
-    });
+    expect(await screen.findByText('My Choirs (Admin)')).toBeInTheDocument();
   });
 });
