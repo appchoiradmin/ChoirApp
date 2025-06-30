@@ -19,12 +19,15 @@ namespace ChoirApp.Backend.Endpoints.Songs
 
         public override void Configure()
         {
-            Get("/choirs/{ChoirId}/songs");
+            Verbs("GET", "OPTIONS");
+            Routes("/choirs/{ChoirId}/songs");
+            AuthSchemes("Bearer");
             Roles("ChoirAdmin", "ChoirMember");
         }
 
         public override async Task HandleAsync(GetChoirSongVersionsRequest req, CancellationToken ct)
         {
+            req.ChoirId = Route<Guid>("ChoirId");
             var result = await _choirSongService.GetChoirSongVersionsAsync(req.ChoirId);
 
             if (result.IsFailed)

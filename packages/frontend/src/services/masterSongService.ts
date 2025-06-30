@@ -5,16 +5,24 @@ if (!API_BASE_URL) {
   throw new Error('VITE_API_BASE_URL is not defined. Please check your .env file.');
 }
 
-export const getAllMasterSongs = async (): Promise<MasterSongDto[]> => {
-  const response = await fetch(`${API_BASE_URL}/api/master-songs`);
+export const getAllMasterSongs = async (token: string): Promise<MasterSongDto[]> => {
+  const response = await fetch(`${API_BASE_URL}/api/master-songs`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
   if (!response.ok) {
     throw new Error('Failed to fetch master songs');
   }
   return response.json();
 };
 
-export const getMasterSongById = async (id: string): Promise<MasterSongDto> => {
-  const response = await fetch(`${API_BASE_URL}/api/master-songs/${id}`);
+export const getMasterSongById = async (id: string, token: string): Promise<MasterSongDto> => {
+  const response = await fetch(`${API_BASE_URL}/api/master-songs/${id}`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
   if (response.status === 404) {
     throw new Error('Song not found');
   }
@@ -24,13 +32,14 @@ export const getMasterSongById = async (id: string): Promise<MasterSongDto> => {
   return response.json();
 };
 
-export const createMasterSong = async (songDto: CreateMasterSongDto): Promise<MasterSongDto> => {
+export const createMasterSong = async (songDto: CreateMasterSongDto, token: string): Promise<MasterSongDto> => {
   const response = await fetch(`${API_BASE_URL}/api/master-songs`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
     },
-    body: JSON.stringify({ songDto }),
+    body: JSON.stringify(songDto),
   });
 
   if (!response.ok) {
@@ -39,13 +48,20 @@ export const createMasterSong = async (songDto: CreateMasterSongDto): Promise<Ma
   return response.json();
 };
 
-export const searchMasterSongs = async (params: { title?: string; artist?: string; tag?: string }): Promise<MasterSongDto[]> => {
+export const searchMasterSongs = async (
+  params: { title?: string; artist?: string; tag?: string },
+  token: string
+): Promise<MasterSongDto[]> => {
   const query = new URLSearchParams();
   if (params.title) query.append('title', params.title);
   if (params.artist) query.append('artist', params.artist);
   if (params.tag) query.append('tag', params.tag);
 
-  const response = await fetch(`${API_BASE_URL}/api/songs/search?${query.toString()}`);
+  const response = await fetch(`${API_BASE_URL}/api/songs/search?${query.toString()}`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
   if (!response.ok) {
     throw new Error('Failed to search songs');
   }
