@@ -91,10 +91,15 @@ const CreateMasterSongPage: React.FC = () => {
             </div>
           </div>
           {error && <div className="notification is-danger">{error}</div>}
-          <div className="field">
+          <div className="field is-grouped">
             <div className="control">
               <button type="submit" className={`button is-primary ${isSubmitting ? 'is-loading' : ''}`} disabled={isSubmitting}>
                 Create Song
+              </button>
+            </div>
+            <div className="control">
+              <button type="button" className="button is-light" onClick={() => navigate(-1)}>
+                Go Back
               </button>
             </div>
           </div>

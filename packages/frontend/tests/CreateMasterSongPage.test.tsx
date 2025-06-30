@@ -40,4 +40,27 @@ describe('CreateMasterSongPage', () => {
       expect(screen.getByText('New Awesome Song')).toBeInTheDocument();
     });
   });
+
+  it('navigates back when "Go Back" is clicked', async () => {
+    const user = userEvent.setup();
+    render(
+      <UserProvider>
+        <MemoryRouter initialEntries={['/previous-page', '/master-songs/create']}>
+          <Routes>
+            <Route path="/previous-page" element={<div>Previous Page</div>} />
+            <Route
+              path="/master-songs/create"
+              element={<CreateMasterSongPage />}
+            />
+          </Routes>
+        </MemoryRouter>
+      </UserProvider>
+    );
+
+    await user.click(screen.getByRole('button', { name: /go back/i }));
+
+    await waitFor(() => {
+      expect(screen.getByText('Previous Page')).toBeInTheDocument();
+    });
+  });
 });
