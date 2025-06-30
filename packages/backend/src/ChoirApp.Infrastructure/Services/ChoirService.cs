@@ -77,7 +77,11 @@ namespace ChoirApp.Infrastructure.Services
 
         public async Task<Result<Choir>> GetChoirByIdAsync(Guid choirId)
         {
-            var choir = await _context.Choirs.FindAsync(choirId);
+            var choir = await _context.Choirs
+                .Include(c => c.UserChoirs)
+                .ThenInclude(uc => uc.User)
+                .FirstOrDefaultAsync(c => c.ChoirId == choirId);
+
             if (choir == null)
             {
                 return Result.Fail("Choir not found.");
@@ -130,6 +134,61 @@ namespace ChoirApp.Infrastructure.Services
             }
 
             _context.Choirs.Remove(choir);
+            await _context.SaveChangesAsync();
+            return Result.Ok();
+        }
+
+        public async Task<Result> UpdateMemberRoleAsync(Guid choirId, Guid memberId, string role, Guid adminId)
+        {
+            var choir = await _context.Choirs
+                .Include(c => c.UserChoirs)
+                .FirstOrDefaultAsync(c => c.ChoirId == choirId);
+
+            if (choir == null)
+            {
+                return Result.Fail("Choir not found.");
+            }
+
+            if (choir.AdminUserId != adminId)
+            {
+                return Result.Fail("Only the choir admin can update member roles.");
+            }
+
+            var member = choir.UserChoirs.FirstOrDefault(uc => uc.UserId == memberId);
+            if (member == null)
+            {
+                return Result.Fail("Member not found in this choir.");
+            }
+
+            // Accept both "Admin" and "ChoirAdmin" as admin role
+            var normalizedRole = role;
+            if (string.Equals(role, "Admin", StringComparison.OrdinalIgnoreCase))
+            {
+                normalizedRole = "ChoirAdmin";
+            }
+
+            if (!Enum.TryParse<UserRole>(normalizedRole, true, out var userRole))
+            {
+                return Result.Fail("Invalid role specified.");
+            }
+
+            member.IsAdmin = userRole == UserRole.ChoirAdmin;
+
+            // Also update the user's global role if promoted/demoted
+            var user = await _context.Users.FindAsync(member.UserId);
+            if (user != null)
+            {
+                if (userRole == UserRole.ChoirAdmin)
+                {
+                    user.PromoteToAdmin();
+                }
+                else if (userRole == UserRole.General)
+                {
+                    user.DemoteToGeneral();
+                }
+                await _context.SaveChangesAsync();
+            }
+
             await _context.SaveChangesAsync();
             return Result.Ok();
         }

@@ -2,6 +2,7 @@ using ChoirApp.Application.Dtos;
 using ChoirApp.Domain.Entities;
 using ChoirApp.Infrastructure.Persistence;
 using FluentAssertions;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using System.Net;
 using System.Net.Http.Json;
@@ -364,6 +365,44 @@ public class ChoirEndpointsTests : IClassFixture<CustomWebApplicationFactory<Pro
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.Forbidden);
+    }
+
+    #endregion
+
+    #region Update Member Role Tests
+
+    [Fact]
+    public async Task UpdateMemberRole_ShouldUpdateRole_WhenValidDataAndAuthorized()
+    {
+        // Arrange
+        _client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", _adminToken);
+        var choir = await SeedTestChoir();
+        // Add a non-admin member to the choir for this test
+        var addMemberResult = choir.AddMember(_memberUser, false);
+        addMemberResult.IsSuccess.Should().BeTrue();
+        await _context.SaveChangesAsync();
+        var member = choir.UserChoirs.First(uc => uc.UserId == _memberUser.UserId);
+        var updateDto = new UpdateMemberRoleRequest
+        {
+            Role = "Admin"
+        };
+
+        // Act
+        var response = await _client.PutAsJsonAsync($"/api/choirs/{choir.ChoirId}/members/{member.UserId}/role", updateDto);
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.NoContent);
+
+        // Detach tracked UserChoir entity to force fresh read from database
+        var local = _context.UserChoirs.Local.FirstOrDefault(uc => uc.UserId == member.UserId && uc.ChoirId == choir.ChoirId);
+        if (local != null)
+        {
+            _context.Entry(local).State = EntityState.Detached;
+        }
+        // Verify update
+        var updatedMember = await _context.UserChoirs.FirstOrDefaultAsync(uc => uc.UserId == member.UserId && uc.ChoirId == choir.ChoirId);
+        updatedMember.Should().NotBeNull();
+        updatedMember!.IsAdmin.Should().BeTrue();
     }
 
     #endregion

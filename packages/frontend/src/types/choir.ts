@@ -8,6 +8,17 @@ export interface Choir {
   role: ChoirRole;
 }
 
+export interface ChoirMember {
+  id: string;
+  name: string;
+  email: string;
+  role: ChoirRole;
+}
+
+export interface ChoirDetails extends Choir {
+  members: ChoirMember[];
+}
+
 export interface ChoirSongVersionDto {
   choirSongId: string;
   masterSongId: string;

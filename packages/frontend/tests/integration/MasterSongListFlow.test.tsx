@@ -30,8 +30,8 @@ vi.mock('../../src/services/choirService', () => ({
   getChoirDetails: vi.fn().mockResolvedValue({
     id: 'choir-1',
     name: 'Admin Choir',
+    role: 'Admin',
     members: [],
-    joinCode: 'ADMIN123',
   }),
 }));
 
@@ -85,6 +85,14 @@ describe('Master Song List Flow', () => {
 
     const masterSongService = await import('../../src/services/masterSongService');
     vi.mocked(masterSongService.getAllMasterSongs).mockResolvedValue(mockSongs);
+
+    const choirService = await import('../../src/services/choirService');
+    vi.mocked(choirService.getChoirDetails).mockResolvedValue({
+      id: 'choir-1',
+      name: 'Admin Choir',
+      role: 'Admin',
+      members: [],
+    });
   });
 
   afterEach(() => {
@@ -114,17 +122,13 @@ describe('Master Song List Flow', () => {
     const user = userEvent.setup();
     render(<TestWrapper initialEntries={['/choir/choir-1/admin']} />);
 
-    await waitFor(() => {
-      expect(screen.getByRole('heading', { name: /Choir Admin/i })).toBeInTheDocument();
-    });
+    // Wait for the admin page heading (matches the actual heading in ChoirAdminPage)
+    expect(await screen.findByRole('heading', { name: /Admin Choir - Admin/i })).toBeInTheDocument();
 
     const masterSongListLink = screen.getByRole('link', { name: /Master Song List/i });
     await user.click(masterSongListLink);
 
-    await waitFor(() => {
-      expect(screen.getByRole('heading', { name: /Master Songs/i })).toBeInTheDocument();
-    });
-
+    expect(await screen.findByRole('heading', { name: /Master Songs/i })).toBeInTheDocument();
     expect(screen.getByText('Amazing Grace')).toBeInTheDocument();
   });
 });
