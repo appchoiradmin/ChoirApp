@@ -11,4 +11,5 @@ public interface IMasterSongService
     Task<Result<MasterSongDto>> AddTagToSongAsync(Guid songId, string tagName);
     Task<Result<bool>> RemoveTagFromSongAsync(Guid songId, Guid tagId);
     Task<Result<IEnumerable<MasterSongDto>>> SearchSongsAsync(string? title, string? artist, string? tag);
+    Task<Result<IEnumerable<TagDto>>> GetAllTagsAsync();
 }

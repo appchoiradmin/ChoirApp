@@ -11,4 +11,5 @@ export interface User {
   choirId?: string;
   hasCompletedOnboarding: boolean;
   isNewUser: boolean;
+  token: string;
 }

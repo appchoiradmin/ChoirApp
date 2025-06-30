@@ -18,8 +18,10 @@ namespace ChoirApp.Backend.Endpoints.Songs
 
         public override void Configure()
         {
-            Get("/songs/search");
-            AllowAnonymous();
+            Verbs("GET");
+            Routes("/master-songs/search");
+            AuthSchemes("Bearer");
+            Roles("ChoirAdmin", "SuperAdmin", "ChoirMember", "GeneralUser");
         }
 
         public override async Task HandleAsync(SearchSongsRequest req, CancellationToken ct)

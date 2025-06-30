@@ -17,7 +17,9 @@ namespace ChoirApp.Backend.Endpoints.Songs
 
         public override void Configure()
         {
-            Delete("/mastersongs/{SongId}/tags/{TagId}");
+            Verbs("DELETE");
+            Routes("/master-songs/{SongId}/tags/{TagId}");
+            AuthSchemes("Bearer");
             Roles("ChoirAdmin", "SuperAdmin");
         }
 

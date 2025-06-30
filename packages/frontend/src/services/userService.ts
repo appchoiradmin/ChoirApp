@@ -5,11 +5,7 @@ if (!API_BASE_URL) {
   throw new Error('VITE_API_BASE_URL is not defined. Please check your .env file.');
 }
 
-export const getCurrentUser = async (): Promise<User> => {
-  const token = localStorage.getItem('authToken');
-  if (!token) {
-    throw new Error('No auth token found');
-  }
+export const getCurrentUser = async (token: string): Promise<User> => {
 
   const response = await fetch(`${API_BASE_URL}/api/me`, {
     headers: {
@@ -22,7 +18,18 @@ export const getCurrentUser = async (): Promise<User> => {
     throw new Error('Failed to fetch current user');
   }
 
-  return response.json();
+  const dto = await response.json();
+
+  return {
+    id: dto.id,
+    email: dto.email,
+    name: `${dto.firstName} ${dto.lastName}`,
+    role: dto.role,
+    choirs: dto.choirs,
+    hasCompletedOnboarding: dto.hasCompletedOnboarding,
+    isNewUser: dto.isNewUser,
+    token: token,
+  };
 };
 
 export const completeOnboarding = async (userType: 'admin' | 'general'): Promise<void> => {

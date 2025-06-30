@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace ChoirApp.Backend.Endpoints.Songs
 {
-    public class CreateMasterSongEndpoint : Endpoint<CreateMasterSongRequest, MasterSongDto>
+    public class CreateMasterSongEndpoint : Endpoint<CreateMasterSongDto, MasterSongDto>
     {
         private readonly IMasterSongService _masterSongService;
 
@@ -17,13 +17,15 @@ namespace ChoirApp.Backend.Endpoints.Songs
 
         public override void Configure()
         {
-            Post("/mastersongs");
-            Roles("ChoirAdmin", "SuperAdmin");
+            Verbs("POST");
+            Routes("/master-songs");
+            AuthSchemes("Bearer");
+            Roles("ChoirAdmin", "SuperAdmin");          
         }
 
-        public override async Task HandleAsync(CreateMasterSongRequest req, CancellationToken ct)
+        public override async Task HandleAsync(CreateMasterSongDto req, CancellationToken ct)
         {
-            var result = await _masterSongService.CreateMasterSongAsync(req.SongDto);
+            var result = await _masterSongService.CreateMasterSongAsync(req);
 
             if (result.IsFailed)
             {

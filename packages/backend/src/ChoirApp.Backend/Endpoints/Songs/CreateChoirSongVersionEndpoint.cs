@@ -20,7 +20,9 @@ namespace ChoirApp.Backend.Endpoints.Songs
 
         public override void Configure()
         {
-            Post("/choirs/{ChoirId}/songs");
+            Verbs("POST");
+            Routes("/choirs/{ChoirId}/songs");
+            AuthSchemes("Bearer");
             Roles("ChoirAdmin", "ChoirMember");
         }
 

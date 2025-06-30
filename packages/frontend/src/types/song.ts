@@ -4,7 +4,7 @@ export interface TagDto {
 }
 
 export interface MasterSongDto {
-  id: string;
+  songId: string;
   title: string;
   artist: string | null;
   lyricsChordPro: string;
