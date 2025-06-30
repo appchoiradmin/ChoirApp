@@ -6,16 +6,20 @@ import {
   removeMember,
   updateMemberRole,
 } from '../services/choirService';
+import { getInvitationsByChoir } from '../services/invitationService';
 import { useUser } from '../hooks/useUser';
 import { ChoirDetails, ChoirRole } from '../types/choir';
+import { Invitation } from '../types/invitation';
 import MembersList from '../components/admin/MembersList';
 import InviteMember from '../components/admin/InviteMember';
 import ChoirSongsList from '../components/admin/ChoirSongsList';
+import SentInvitationsList from '../components/admin/SentInvitationsList';
 
 const ChoirAdminPage: React.FC = () => {
   const { choirId } = useParams<{ choirId: string }>();
   const { token } = useUser();
   const [choir, setChoir] = useState<ChoirDetails | null>(null);
+  const [invitations, setInvitations] = useState<Invitation[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -24,7 +28,9 @@ const ChoirAdminPage: React.FC = () => {
       try {
         setLoading(true);
         const details = await getChoirDetails(choirId, token);
+        const invitations = await getInvitationsByChoir(choirId, token);
         setChoir(details);
+        setInvitations(invitations);
       } catch (err) {
         setError('Failed to fetch choir details.');
       } finally {
@@ -41,6 +47,7 @@ const ChoirAdminPage: React.FC = () => {
     if (choirId && token) {
       try {
         await inviteUser(choirId, email, token);
+        alert('Invitation sent successfully!');
         fetchChoirDetails(); // Refresh the list
       } catch (error) {
         console.error('Failed to invite member:', error);
@@ -143,6 +150,9 @@ const ChoirAdminPage: React.FC = () => {
           </div>
           <div className="column is-two-fifths">
             <InviteMember onInviteMember={handleInviteMember} />
+            <div className="mt-5">
+              <SentInvitationsList invitations={invitations} />
+            </div>
           </div>
         </div>
       </div>

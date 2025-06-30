@@ -19,7 +19,9 @@ namespace ChoirApp.Backend.Endpoints.Choir
 
         public override void Configure()
         {
-            Post("/choirs/invitations");
+            Verbs("POST", "OPTIONS");
+            Routes("/choirs/{ChoirId}/invitations");
+            AuthSchemes("Bearer");
             Roles("ChoirAdmin", "SuperAdmin");
         }
 
@@ -31,6 +33,8 @@ namespace ChoirApp.Backend.Endpoints.Choir
                 ThrowError("User not authenticated properly.");
                 return;
             }
+
+            req.ChoirId = Route<Guid>("ChoirId");
 
             var result = await _invitationService.CreateInvitationAsync(req, inviterId);
 

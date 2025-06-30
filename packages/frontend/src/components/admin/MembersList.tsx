@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { ChoirMember, ChoirRole } from '../../types/choir';
 import './MembersList.css';
 
@@ -13,6 +13,12 @@ const MembersList: React.FC<MembersListProps> = ({
   onRemoveMember,
   onUpdateMemberRole,
 }) => {
+  const [expandedMember, setExpandedMember] = useState<string | null>(null);
+
+  const toggleExpand = (memberId: string) => {
+    setExpandedMember(expandedMember === memberId ? null : memberId);
+  };
+
   return (
     <div className="card">
       <header className="card-header">
@@ -20,22 +26,22 @@ const MembersList: React.FC<MembersListProps> = ({
       </header>
       <div className="card-content">
         <div className="content">
-          <table className="table is-fullwidth members-table">
-            <thead>
-              <tr>
-                <th>Name</th>
-                <th>Email</th>
-                <th>Role</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {members.map(member => (
-                <tr key={member.id}>
-                  <td data-label="Name"><span>{member.name}</span></td>
-                  <td data-label="Email"><span>{member.email}</span></td>
-                  <td data-label="Role"><span>{member.role}</span></td>
-                  <td data-label="Actions">
+          <div className="list">
+            {members.map(member => (
+              <div key={member.id} className="list-item">
+                <div onClick={() => toggleExpand(member.id)} style={{ cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <div>
+                    <span className="has-text-link">{member.name}</span>
+                    <span className={`tag is-${member.role === 'Admin' ? 'primary' : 'info'}`}>{member.role}</span>
+                  </div>
+                  <span className="icon">
+                    <i className={`fas fa-angle-${expandedMember === member.id ? 'up' : 'down'}`}></i>
+                  </span>
+                </div>
+                {expandedMember === member.id && (
+                  <div>
+                    <p><strong>Email:</strong> {member.email}</p>
+                    <p><strong>Role:</strong> {member.role}</p>
                     <div className="buttons">
                       {member.role === 'Admin' ? (
                         <button
@@ -63,11 +69,11 @@ const MembersList: React.FC<MembersListProps> = ({
                         Remove
                       </button>
                     </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     </div>

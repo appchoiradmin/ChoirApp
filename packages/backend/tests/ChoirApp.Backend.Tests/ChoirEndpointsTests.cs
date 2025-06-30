@@ -238,7 +238,7 @@ public class ChoirEndpointsTests : IClassFixture<CustomWebApplicationFactory<Pro
         };
 
         // Act
-        var response = await _client.PostAsJsonAsync("/api/choirs/invitations", inviteDto);
+        var response = await _client.PostAsJsonAsync($"/api/choirs/{choir.ChoirId}/invitations", inviteDto);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -256,7 +256,7 @@ public class ChoirEndpointsTests : IClassFixture<CustomWebApplicationFactory<Pro
         };
 
         // Act (no auth header)
-        var response = await _client.PostAsJsonAsync("/api/choirs/invitations", inviteDto);
+        var response = await _client.PostAsJsonAsync($"/api/choirs/{choir.ChoirId}/invitations", inviteDto);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
@@ -275,7 +275,7 @@ public class ChoirEndpointsTests : IClassFixture<CustomWebApplicationFactory<Pro
         };
 
         // Act
-        var response = await _client.PostAsJsonAsync("/api/choirs/invitations", inviteDto);
+        var response = await _client.PostAsJsonAsync($"/api/choirs/{choir.ChoirId}/invitations", inviteDto);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.Forbidden);
@@ -296,7 +296,7 @@ public class ChoirEndpointsTests : IClassFixture<CustomWebApplicationFactory<Pro
         };
 
         // Act
-        var response = await _client.PostAsJsonAsync("/api/choirs/invitations/accept", acceptDto);
+        var response = await _client.PostAsJsonAsync("/api/invitations/accept", acceptDto);
 
         // Assert - The endpoint returns 400 BadRequest when invitation service fails with invalid token
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
@@ -313,7 +313,7 @@ public class ChoirEndpointsTests : IClassFixture<CustomWebApplicationFactory<Pro
         };
 
         // Act
-        var response = await _client.PostAsJsonAsync("/api/choirs/invitations/reject", rejectDto);
+        var response = await _client.PostAsJsonAsync("/api/invitations/reject", rejectDto);
 
         // Assert - The endpoint returns 400 BadRequest when invitation service fails with invalid token
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);

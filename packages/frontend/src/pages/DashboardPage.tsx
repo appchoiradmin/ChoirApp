@@ -1,9 +1,35 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useUser } from '../hooks/useUser';
+import { getInvitations, acceptInvitation, rejectInvitation } from '../services/invitationService';
+import { Invitation } from '../types/invitation';
+import InvitationsList from '../components/InvitationsList';
 
 const DashboardPage: React.FC = () => {
   const { user, loading } = useUser();
+  const [invitations, setInvitations] = useState<Invitation[]>([]);
+
+  const { token } = useUser();
+  useEffect(() => {
+    if (user && token) {
+      getInvitations(token).then(setInvitations);
+    }
+  }, [user, token]);
+
+  const handleAccept = async (invitationToken: string) => {
+    if (token) {
+      await acceptInvitation(invitationToken, token);
+      setInvitations(invitations.filter(i => i.invitationToken !== invitationToken));
+      // Ideally, we should also update the user's choirs list
+    }
+  };
+
+  const handleReject = async (invitationToken: string) => {
+    if (token) {
+      await rejectInvitation(invitationToken, token);
+      setInvitations(invitations.filter(i => i.invitationToken !== invitationToken));
+    }
+  };
 
   if (loading) {
     return (
@@ -91,8 +117,7 @@ const DashboardPage: React.FC = () => {
 
           <div className="column">
             <h2 className="title is-4">Pending Invitations</h2>
-            {/* TODO: Replace with actual invitation data */}
-            <p>You have no pending invitations.</p>
+            <InvitationsList invitations={invitations} onAccept={handleAccept} onReject={handleReject} />
           </div>
         </div>
       </div>

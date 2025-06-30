@@ -6,7 +6,9 @@ using ChoirApp.Infrastructure.Persistence;
 using FluentResults;
 using Microsoft.EntityFrameworkCore;
 using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace ChoirApp.Infrastructure.Services
@@ -120,6 +122,50 @@ namespace ChoirApp.Infrastructure.Services
 
             await _context.SaveChangesAsync();
             return Result.Ok();
+        }
+
+        public async Task<List<InvitationDto>> GetInvitationsAsync(Guid userId)
+        {
+            var user = await _context.Users.FindAsync(userId);
+            if (user == null)
+            {
+                return new List<InvitationDto>();
+            }
+
+            var invitations = await _context.ChoirInvitations
+                .Where(i => i.Email == user.Email && i.Status == InvitationStatus.Pending)
+                .Include(i => i.Choir)
+                .Select(i => new InvitationDto
+                {
+                    InvitationToken = i.InvitationToken,
+                    ChoirId = i.ChoirId,
+                    ChoirName = i.Choir.ChoirName,
+                    Email = i.Email,
+                    Status = i.Status.ToString(),
+                    SentAt = i.DateSent
+                })
+                .ToListAsync();
+
+            return invitations;
+        }
+
+        public async Task<List<InvitationDto>> GetInvitationsByChoirAsync(Guid choirId)
+        {
+            var invitations = await _context.ChoirInvitations
+                .Where(i => i.ChoirId == choirId)
+                .Include(i => i.Choir)
+                .Select(i => new InvitationDto
+                {
+                    InvitationToken = i.InvitationToken,
+                    ChoirId = i.ChoirId,
+                    ChoirName = i.Choir.ChoirName,
+                    Email = i.Email,
+                    Status = i.Status.ToString(),
+                    SentAt = i.DateSent
+                })
+                .ToListAsync();
+
+            return invitations;
         }
     }
 }

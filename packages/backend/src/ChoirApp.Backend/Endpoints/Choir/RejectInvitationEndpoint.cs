@@ -19,7 +19,9 @@ namespace ChoirApp.Backend.Endpoints.Choir
 
         public override void Configure()
         {
-            Post("/choirs/invitations/reject");
+            Verbs("POST", "OPTIONS");
+            Routes("/invitations/reject");
+            AuthSchemes("Bearer");
             Roles("General", "ChoirAdmin", "SuperAdmin");
         }
 
