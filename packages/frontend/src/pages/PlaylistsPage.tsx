@@ -2,14 +2,13 @@ import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { useUser } from '../hooks/useUser';
 import { getPlaylistsByChoirId, createPlaylist, getPlaylistTemplatesByChoirId } from '../services/playlistService';
-import { Playlist, PlaylistTemplate } from '../types/playlist';
+import { Playlist } from '../types/playlist';
 import PlaylistDetail from '../components/PlaylistDetail';
 
 const PlaylistsPage: React.FC = () => {
   const { choirId } = useParams<{ choirId: string }>();
   const { token } = useUser();
   const [playlists, setPlaylists] = useState<Playlist[]>([]);
-  const [templates, setTemplates] = useState<PlaylistTemplate[]>([]);
   const [selectedPlaylist, setSelectedPlaylist] = useState<Playlist | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -33,7 +32,6 @@ const PlaylistsPage: React.FC = () => {
           ]);
 
           setPlaylists(fetchedPlaylists);
-          setTemplates(fetchedTemplates);
 
           const nextSunday = getNextSunday();
           const existingPlaylist = fetchedPlaylists.find(
@@ -73,6 +71,14 @@ const PlaylistsPage: React.FC = () => {
     return <div>Error: {error}</div>;
   }
 
+  const handlePlaylistDeleted = (playlistId: string) => {
+    const updatedPlaylists = playlists.filter(p => p.id !== playlistId);
+    setPlaylists(updatedPlaylists);
+    if (selectedPlaylist?.id === playlistId) {
+      setSelectedPlaylist(updatedPlaylists.length > 0 ? updatedPlaylists[0] : null);
+    }
+  };
+
   return (
     <div className="container">
       <h1 className="title">Playlists</h1>
@@ -96,7 +102,7 @@ const PlaylistsPage: React.FC = () => {
         </div>
         <div className="column">
           {selectedPlaylist ? (
-            <PlaylistDetail playlist={selectedPlaylist} />
+            <PlaylistDetail playlist={selectedPlaylist} onPlaylistDeleted={handlePlaylistDeleted} />
           ) : (
             <p>No playlist selected. Create a template to get started.</p>
           )}

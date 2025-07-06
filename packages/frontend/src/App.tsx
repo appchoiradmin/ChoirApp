@@ -33,12 +33,12 @@ function App() {
       <Route path="/master-songs" element={<MasterSongsListPage />} />
       <Route path="/master-songs/create" element={<CreateMasterSongPage />} />
       <Route path="/master-songs/:id" element={<MasterSongDetailPage />} />
-      <Route path="/choirs/:choirId" element={<ChoirDashboardPage />}>
+      <Route path="/choir/:choirId" element={<ChoirDashboardPage />}>
         <Route path="songs" element={<MasterSongList />} />
         <Route path="playlists" element={<PlaylistsPage />} />
         <Route path="admin" element={<ChoirAdminPage />} />
       </Route>
-      <Route path="/choirs/:choirId/songs/:songId/edit" element={<ChoirSongEditorPage />} />
+      <Route path="/choir/:choirId/songs/:songId/edit" element={<ChoirSongEditorPage />} />
       <Route path="/playlists" element={<PlaylistsPage />} />
       <Route path="/playlists/new" element={<CreatePlaylistPage />} />
       <Route path="/playlists/:playlistId" element={<PlaylistDetailPage />} />
