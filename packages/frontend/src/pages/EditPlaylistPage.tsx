@@ -170,7 +170,10 @@ const EditPlaylistPage: React.FC = () => {
       {selectedTemplate && (
         <div>
           <h2 className="title is-4 mt-5">Sections</h2>
-          {sections.map((section) => (
+          {sections
+            .slice() // Create a shallow copy to avoid mutating the original array
+            .sort((a, b) => a.order - b.order) // Sort sections by order
+            .map((section) => (
             <div key={section.id} className="box">
               <h3 className="title is-5">{section.title}</h3>
               <ul>
