@@ -12,15 +12,15 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace ChoirApp.Infrastructure.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250621212150_AddChoirInvitations")]
-    partial class AddChoirInvitations
+    [Migration("20250705145203_AddDateToPlaylist")]
+    partial class AddDateToPlaylist
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "8.0.4")
+                .HasAnnotation("ProductVersion", "9.0.0-preview.7.24405.3")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
@@ -162,8 +162,9 @@ namespace ChoirApp.Infrastructure.Migrations
 
             modelBuilder.Entity("ChoirApp.Domain.Entities.Playlist", b =>
                 {
-                    b.Property<string>("PlaylistId")
-                        .HasColumnType("text")
+                    b.Property<Guid>("PlaylistId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
                         .HasColumnName("playlist_id");
 
                     b.Property<Guid>("ChoirId")
@@ -174,21 +175,13 @@ namespace ChoirApp.Infrastructure.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("creation_date");
 
-                    b.Property<string>("Description")
-                        .HasColumnType("text")
-                        .HasColumnName("description");
+                    b.Property<DateTime>("Date")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("date");
 
                     b.Property<bool>("IsPublic")
                         .HasColumnType("boolean")
                         .HasColumnName("is_public");
-
-                    b.Property<DateTimeOffset>("LastModifiedDate")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("last_modified_date");
-
-                    b.Property<Guid?>("TemplateId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("template_id");
 
                     b.Property<string>("Title")
                         .IsRequired()
@@ -202,8 +195,6 @@ namespace ChoirApp.Infrastructure.Migrations
                     b.HasIndex("PlaylistId")
                         .IsUnique();
 
-                    b.HasIndex("TemplateId");
-
                     b.ToTable("Playlists");
                 });
 
@@ -214,13 +205,12 @@ namespace ChoirApp.Infrastructure.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("section_id");
 
-                    b.Property<int>("OrderIndex")
+                    b.Property<int>("Order")
                         .HasColumnType("integer")
-                        .HasColumnName("order_index");
+                        .HasColumnName("order");
 
-                    b.Property<string>("PlaylistId")
-                        .IsRequired()
-                        .HasColumnType("text")
+                    b.Property<Guid>("PlaylistId")
+                        .HasColumnType("uuid")
                         .HasColumnName("playlist_id");
 
                     b.Property<string>("Title")
@@ -230,7 +220,7 @@ namespace ChoirApp.Infrastructure.Migrations
 
                     b.HasKey("SectionId");
 
-                    b.HasIndex("PlaylistId", "OrderIndex")
+                    b.HasIndex("PlaylistId", "Order")
                         .IsUnique();
 
                     b.ToTable("PlaylistSections");
@@ -243,25 +233,29 @@ namespace ChoirApp.Infrastructure.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("playlist_song_id");
 
-                    b.Property<bool>("IsMasterSong")
-                        .HasColumnType("boolean")
-                        .HasColumnName("is_master_song");
+                    b.Property<Guid?>("ChoirSongVersionId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("choir_song_id");
 
-                    b.Property<int>("OrderIndex")
+                    b.Property<Guid?>("MasterSongId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("master_song_id");
+
+                    b.Property<int>("Order")
                         .HasColumnType("integer")
-                        .HasColumnName("order_index");
+                        .HasColumnName("order");
 
-                    b.Property<Guid>("SectionId")
+                    b.Property<Guid>("PlaylistSectionId")
                         .HasColumnType("uuid")
-                        .HasColumnName("section_id");
-
-                    b.Property<Guid>("SongId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("song_id");
+                        .HasColumnName("playlist_section_id");
 
                     b.HasKey("PlaylistSongId");
 
-                    b.HasIndex("SectionId", "OrderIndex")
+                    b.HasIndex("ChoirSongVersionId");
+
+                    b.HasIndex("MasterSongId");
+
+                    b.HasIndex("PlaylistSectionId", "Order")
                         .IsUnique();
 
                     b.ToTable("PlaylistSongs");
@@ -269,13 +263,18 @@ namespace ChoirApp.Infrastructure.Migrations
 
             modelBuilder.Entity("ChoirApp.Domain.Entities.PlaylistTag", b =>
                 {
-                    b.Property<string>("PlaylistId")
-                        .HasColumnType("text")
+                    b.Property<Guid>("PlaylistId")
+                        .HasColumnType("uuid")
                         .HasColumnName("playlist_id");
 
                     b.Property<Guid>("TagId")
                         .HasColumnType("uuid")
                         .HasColumnName("tag_id");
+
+                    b.Property<Guid>("PlaylistTagId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("playlist_tag_id");
 
                     b.HasKey("PlaylistId", "TagId");
 
@@ -294,10 +293,6 @@ namespace ChoirApp.Infrastructure.Migrations
                     b.Property<Guid>("ChoirId")
                         .HasColumnType("uuid")
                         .HasColumnName("choir_id");
-
-                    b.Property<DateTimeOffset>("CreationDate")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("creation_date");
 
                     b.Property<string>("Description")
                         .HasColumnType("text")
@@ -323,9 +318,9 @@ namespace ChoirApp.Infrastructure.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("template_section_id");
 
-                    b.Property<int>("OrderIndex")
+                    b.Property<int>("Order")
                         .HasColumnType("integer")
-                        .HasColumnName("order_index");
+                        .HasColumnName("order");
 
                     b.Property<Guid>("TemplateId")
                         .HasColumnType("uuid")
@@ -338,7 +333,7 @@ namespace ChoirApp.Infrastructure.Migrations
 
                     b.HasKey("TemplateSectionId");
 
-                    b.HasIndex("TemplateId", "OrderIndex")
+                    b.HasIndex("TemplateId", "Order")
                         .IsUnique();
 
                     b.ToTable("PlaylistTemplateSections");
@@ -351,17 +346,17 @@ namespace ChoirApp.Infrastructure.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("template_song_id");
 
-                    b.Property<bool>("IsMasterSong")
-                        .HasColumnType("boolean")
-                        .HasColumnName("is_master_song");
-
-                    b.Property<int>("OrderIndex")
-                        .HasColumnType("integer")
-                        .HasColumnName("order_index");
-
-                    b.Property<Guid>("SongId")
+                    b.Property<Guid?>("ChoirSongVersionId")
                         .HasColumnType("uuid")
-                        .HasColumnName("song_id");
+                        .HasColumnName("choir_song_id");
+
+                    b.Property<Guid?>("MasterSongId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("master_song_id");
+
+                    b.Property<int>("Order")
+                        .HasColumnType("integer")
+                        .HasColumnName("order");
 
                     b.Property<Guid>("TemplateSectionId")
                         .HasColumnType("uuid")
@@ -369,7 +364,11 @@ namespace ChoirApp.Infrastructure.Migrations
 
                     b.HasKey("TemplateSongId");
 
-                    b.HasIndex("TemplateSectionId", "OrderIndex")
+                    b.HasIndex("ChoirSongVersionId");
+
+                    b.HasIndex("MasterSongId");
+
+                    b.HasIndex("TemplateSectionId", "Order")
                         .IsUnique();
 
                     b.ToTable("PlaylistTemplateSongs");
@@ -419,6 +418,10 @@ namespace ChoirApp.Infrastructure.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("user_id");
 
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
                     b.Property<string>("Email")
                         .IsRequired()
                         .HasColumnType("text")
@@ -428,6 +431,10 @@ namespace ChoirApp.Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("text")
                         .HasColumnName("google_id");
+
+                    b.Property<bool>("HasCompletedOnboarding")
+                        .HasColumnType("boolean")
+                        .HasColumnName("has_completed_onboarding");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -458,6 +465,10 @@ namespace ChoirApp.Infrastructure.Migrations
                     b.Property<Guid>("ChoirId")
                         .HasColumnType("uuid")
                         .HasColumnName("choir_id");
+
+                    b.Property<bool>("IsAdmin")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_admin");
 
                     b.HasKey("UserId", "ChoirId");
 
@@ -523,19 +534,13 @@ namespace ChoirApp.Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("ChoirApp.Domain.Entities.PlaylistTemplate", "PlaylistTemplate")
-                        .WithMany("Playlists")
-                        .HasForeignKey("TemplateId");
-
                     b.Navigation("Choir");
-
-                    b.Navigation("PlaylistTemplate");
                 });
 
             modelBuilder.Entity("ChoirApp.Domain.Entities.PlaylistSection", b =>
                 {
                     b.HasOne("ChoirApp.Domain.Entities.Playlist", "Playlist")
-                        .WithMany("PlaylistSections")
+                        .WithMany("Sections")
                         .HasForeignKey("PlaylistId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -545,11 +550,23 @@ namespace ChoirApp.Infrastructure.Migrations
 
             modelBuilder.Entity("ChoirApp.Domain.Entities.PlaylistSong", b =>
                 {
+                    b.HasOne("ChoirApp.Domain.Entities.ChoirSongVersion", "ChoirSongVersion")
+                        .WithMany()
+                        .HasForeignKey("ChoirSongVersionId");
+
+                    b.HasOne("ChoirApp.Domain.Entities.MasterSong", "MasterSong")
+                        .WithMany()
+                        .HasForeignKey("MasterSongId");
+
                     b.HasOne("ChoirApp.Domain.Entities.PlaylistSection", "PlaylistSection")
                         .WithMany("PlaylistSongs")
-                        .HasForeignKey("SectionId")
+                        .HasForeignKey("PlaylistSectionId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("ChoirSongVersion");
+
+                    b.Navigation("MasterSong");
 
                     b.Navigation("PlaylistSection");
                 });
@@ -586,24 +603,36 @@ namespace ChoirApp.Infrastructure.Migrations
 
             modelBuilder.Entity("ChoirApp.Domain.Entities.PlaylistTemplateSection", b =>
                 {
-                    b.HasOne("ChoirApp.Domain.Entities.PlaylistTemplate", "PlaylistTemplate")
-                        .WithMany("PlaylistTemplateSections")
+                    b.HasOne("ChoirApp.Domain.Entities.PlaylistTemplate", "Template")
+                        .WithMany("Sections")
                         .HasForeignKey("TemplateId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("PlaylistTemplate");
+                    b.Navigation("Template");
                 });
 
             modelBuilder.Entity("ChoirApp.Domain.Entities.PlaylistTemplateSong", b =>
                 {
-                    b.HasOne("ChoirApp.Domain.Entities.PlaylistTemplateSection", "PlaylistTemplateSection")
+                    b.HasOne("ChoirApp.Domain.Entities.ChoirSongVersion", "ChoirSongVersion")
+                        .WithMany()
+                        .HasForeignKey("ChoirSongVersionId");
+
+                    b.HasOne("ChoirApp.Domain.Entities.MasterSong", "MasterSong")
+                        .WithMany()
+                        .HasForeignKey("MasterSongId");
+
+                    b.HasOne("ChoirApp.Domain.Entities.PlaylistTemplateSection", "TemplateSection")
                         .WithMany("PlaylistTemplateSongs")
                         .HasForeignKey("TemplateSectionId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("PlaylistTemplateSection");
+                    b.Navigation("ChoirSongVersion");
+
+                    b.Navigation("MasterSong");
+
+                    b.Navigation("TemplateSection");
                 });
 
             modelBuilder.Entity("ChoirApp.Domain.Entities.SongTag", b =>
@@ -664,9 +693,9 @@ namespace ChoirApp.Infrastructure.Migrations
 
             modelBuilder.Entity("ChoirApp.Domain.Entities.Playlist", b =>
                 {
-                    b.Navigation("PlaylistSections");
-
                     b.Navigation("PlaylistTags");
+
+                    b.Navigation("Sections");
                 });
 
             modelBuilder.Entity("ChoirApp.Domain.Entities.PlaylistSection", b =>
@@ -676,9 +705,7 @@ namespace ChoirApp.Infrastructure.Migrations
 
             modelBuilder.Entity("ChoirApp.Domain.Entities.PlaylistTemplate", b =>
                 {
-                    b.Navigation("PlaylistTemplateSections");
-
-                    b.Navigation("Playlists");
+                    b.Navigation("Sections");
                 });
 
             modelBuilder.Entity("ChoirApp.Domain.Entities.PlaylistTemplateSection", b =>

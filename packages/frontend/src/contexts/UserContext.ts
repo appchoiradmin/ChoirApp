@@ -6,6 +6,7 @@ export interface UserContextType {
   token: string | null;
   loading: boolean;
   refetchUser: () => Promise<void>;
+  setChoirId: (choirId: string) => void;
 }
 
 export const UserContext = createContext<UserContextType | undefined>(undefined);

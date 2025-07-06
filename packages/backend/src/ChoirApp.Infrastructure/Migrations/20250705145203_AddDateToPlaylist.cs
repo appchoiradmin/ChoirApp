@@ -6,36 +6,25 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace ChoirApp.Infrastructure.Migrations
 {
     /// <inheritdoc />
-    public partial class AddOnboardingFields : Migration
+    public partial class AddDateToPlaylist : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.AddColumn<DateTime>(
-                name: "created_at",
-                table: "Users",
+                name: "date",
+                table: "Playlists",
                 type: "timestamp with time zone",
                 nullable: false,
                 defaultValue: new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified));
-
-            migrationBuilder.AddColumn<bool>(
-                name: "has_completed_onboarding",
-                table: "Users",
-                type: "boolean",
-                nullable: false,
-                defaultValue: false);
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropColumn(
-                name: "created_at",
-                table: "Users");
-
-            migrationBuilder.DropColumn(
-                name: "has_completed_onboarding",
-                table: "Users");
+                name: "date",
+                table: "Playlists");
         }
     }
 }

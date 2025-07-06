@@ -105,11 +105,11 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
             .IsUnique();
 
         modelBuilder.Entity<PlaylistSection>()
-            .HasIndex(ps => new { ps.PlaylistId, ps.OrderIndex })
+            .HasIndex(ps => new { ps.PlaylistId, ps.Order })
             .IsUnique();
         
         modelBuilder.Entity<PlaylistSong>()
-            .HasIndex(ps => new { ps.SectionId, ps.OrderIndex })
+            .HasIndex(ps => new { ps.PlaylistSectionId, ps.Order })
             .IsUnique();
 
         modelBuilder.Entity<PlaylistTemplate>()
@@ -117,11 +117,11 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
             .IsUnique();
         
         modelBuilder.Entity<PlaylistTemplateSection>()
-            .HasIndex(pts => new { pts.TemplateId, pts.OrderIndex })
+            .HasIndex(pts => new { pts.TemplateId, pts.Order })
             .IsUnique();
 
         modelBuilder.Entity<PlaylistTemplateSong>()
-            .HasIndex(pts => new { pts.TemplateSectionId, pts.OrderIndex })
+            .HasIndex(pts => new { pts.TemplateSectionId, pts.Order })
             .IsUnique();
 
         modelBuilder.Entity<Tag>()

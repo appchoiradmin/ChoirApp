@@ -17,7 +17,7 @@ import SentInvitationsList from '../components/admin/SentInvitationsList';
 
 const ChoirAdminPage: React.FC = () => {
   const { choirId } = useParams<{ choirId: string }>();
-  const { token } = useUser();
+  const { token, setChoirId } = useUser();
   const [choir, setChoir] = useState<ChoirDetails | null>(null);
   const [invitations, setInvitations] = useState<Invitation[]>([]);
   const [loading, setLoading] = useState(true);
@@ -40,8 +40,11 @@ const ChoirAdminPage: React.FC = () => {
   }, [choirId, token]);
 
   useEffect(() => {
+    if (choirId) {
+      setChoirId(choirId);
+    }
     fetchChoirDetails();
-  }, [fetchChoirDetails]);
+  }, [choirId, fetchChoirDetails, setChoirId]);
 
   const handleInviteMember = async (email: string) => {
     if (choirId && token) {
@@ -130,6 +133,10 @@ const ChoirAdminPage: React.FC = () => {
             <Link to={`/choir/${choirId}/playlists`} className="button is-info">
               <span className="icon"><i className="fas fa-list"></i></span>
               <span>Playlists</span>
+            </Link>
+            <Link to={`/choir/${choirId}/playlist-templates`} className="button is-info">
+              <span className="icon"><i className="fas fa-list-alt"></i></span>
+              <span>Playlist Templates</span>
             </Link>
             <Link to="/dashboard" className="button">
               Go Back to Dashboard

@@ -1,0 +1,22 @@
+.bottom-navigation {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: space-around;
+  background-color: #f8f8f8;
+  border-top: 1px solid #e7e7e7;
+  padding: 10px 0;
+}
+
+.bottom-navigation a {
+  color: #333;
+  text-decoration: none;
+  padding: 5px 15px;
+  border-radius: 5px;
+}
+
+.bottom-navigation a.active {
+  background-color: #ddd;
+}

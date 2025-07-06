@@ -25,6 +25,7 @@ public static class DependencyInjection
         services.AddScoped<IMasterSongService, MasterSongService>();
         services.AddScoped<IChoirSongService, ChoirSongService>();
         services.AddScoped<IChoirService, ChoirService>();
+        services.AddScoped<IPlaylistService, PlaylistService>();
         services.AddScoped<IInvitationService, InvitationService>();
         services.AddScoped<IChoirUniquenessChecker, ChoirUniquenessChecker>();
         services.AddScoped<IInvitationPolicy, InvitationPolicy>();

@@ -33,12 +33,21 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({
     }
   }, []);
 
+  const setChoirId = useCallback((choirId: string) => {
+    setUser(prevUser => {
+      if (prevUser && prevUser.choirId !== choirId) {
+        return { ...prevUser, choirId };
+      }
+      return prevUser;
+    });
+  }, []);
+
   useEffect(() => {
     fetchUser();
   }, [fetchUser]);
 
   return (
-    <UserContext.Provider value={{ user, token, loading, refetchUser: fetchUser }}>
+    <UserContext.Provider value={{ user, token, loading, refetchUser: fetchUser, setChoirId }}>
       {children}
     </UserContext.Provider>
   );
