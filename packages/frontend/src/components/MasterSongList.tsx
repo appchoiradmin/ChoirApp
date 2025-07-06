@@ -52,19 +52,15 @@ const MasterSongList: React.FC = () => {
             <tr>
               <th>Title</th>
               <th>Artist</th>
-              <th>Actions</th>
             </tr>
           </thead>
           <tbody>
             {songs.map((song) => (
               <tr key={song.songId}>
-                <td>{song.title}</td>
-                <td>{song.artist}</td>
                 <td>
-                  <Link to={`/master-songs/${song.songId}`} className="button is-small is-info">
-                    Details
-                  </Link>
+                  <Link to={`/master-songs/${song.songId}`}>{song.title}</Link>
                 </td>
+                <td>{song.artist}</td>
               </tr>
             ))}
           </tbody>
