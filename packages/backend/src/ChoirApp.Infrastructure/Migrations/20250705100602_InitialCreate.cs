@@ -45,7 +45,9 @@ namespace ChoirApp.Infrastructure.Migrations
                     google_id = table.Column<string>(type: "text", nullable: false),
                     name = table.Column<string>(type: "text", nullable: false),
                     email = table.Column<string>(type: "text", nullable: false),
-                    role = table.Column<int>(type: "integer", nullable: false)
+                    role = table.Column<int>(type: "integer", nullable: false),
+                    has_completed_onboarding = table.Column<bool>(type: "boolean", nullable: false),
+                    created_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -97,6 +99,28 @@ namespace ChoirApp.Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "ChoirInvitations",
+                columns: table => new
+                {
+                    invitation_id = table.Column<Guid>(type: "uuid", nullable: false),
+                    choir_id = table.Column<Guid>(type: "uuid", nullable: false),
+                    email = table.Column<string>(type: "text", nullable: false),
+                    invitation_token = table.Column<string>(type: "text", nullable: false),
+                    status = table.Column<int>(type: "integer", nullable: false),
+                    date_sent = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ChoirInvitations", x => x.invitation_id);
+                    table.ForeignKey(
+                        name: "FK_ChoirInvitations_Choirs_choir_id",
+                        column: x => x.choir_id,
+                        principalTable: "Choirs",
+                        principalColumn: "choir_id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "ChoirSongVersions",
                 columns: table => new
                 {
@@ -131,14 +155,34 @@ namespace ChoirApp.Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Playlists",
+                columns: table => new
+                {
+                    playlist_id = table.Column<Guid>(type: "uuid", nullable: false),
+                    title = table.Column<string>(type: "text", nullable: false),
+                    is_public = table.Column<bool>(type: "boolean", nullable: false),
+                    creation_date = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
+                    choir_id = table.Column<Guid>(type: "uuid", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Playlists", x => x.playlist_id);
+                    table.ForeignKey(
+                        name: "FK_Playlists_Choirs_choir_id",
+                        column: x => x.choir_id,
+                        principalTable: "Choirs",
+                        principalColumn: "choir_id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "PlaylistTemplates",
                 columns: table => new
                 {
                     template_id = table.Column<Guid>(type: "uuid", nullable: false),
-                    choir_id = table.Column<Guid>(type: "uuid", nullable: false),
                     title = table.Column<string>(type: "text", nullable: false),
                     description = table.Column<string>(type: "text", nullable: true),
-                    creation_date = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false)
+                    choir_id = table.Column<Guid>(type: "uuid", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -156,7 +200,8 @@ namespace ChoirApp.Infrastructure.Migrations
                 columns: table => new
                 {
                     user_id = table.Column<Guid>(type: "uuid", nullable: false),
-                    choir_id = table.Column<Guid>(type: "uuid", nullable: false)
+                    choir_id = table.Column<Guid>(type: "uuid", nullable: false),
+                    is_admin = table.Column<bool>(type: "boolean", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -176,62 +221,13 @@ namespace ChoirApp.Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Playlists",
-                columns: table => new
-                {
-                    playlist_id = table.Column<string>(type: "text", nullable: false),
-                    choir_id = table.Column<Guid>(type: "uuid", nullable: false),
-                    title = table.Column<string>(type: "text", nullable: false),
-                    description = table.Column<string>(type: "text", nullable: true),
-                    creation_date = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
-                    last_modified_date = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
-                    is_public = table.Column<bool>(type: "boolean", nullable: false),
-                    template_id = table.Column<Guid>(type: "uuid", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Playlists", x => x.playlist_id);
-                    table.ForeignKey(
-                        name: "FK_Playlists_Choirs_choir_id",
-                        column: x => x.choir_id,
-                        principalTable: "Choirs",
-                        principalColumn: "choir_id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_Playlists_PlaylistTemplates_template_id",
-                        column: x => x.template_id,
-                        principalTable: "PlaylistTemplates",
-                        principalColumn: "template_id");
-                });
-
-            migrationBuilder.CreateTable(
-                name: "PlaylistTemplateSections",
-                columns: table => new
-                {
-                    template_section_id = table.Column<Guid>(type: "uuid", nullable: false),
-                    template_id = table.Column<Guid>(type: "uuid", nullable: false),
-                    title = table.Column<string>(type: "text", nullable: false),
-                    order_index = table.Column<int>(type: "integer", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_PlaylistTemplateSections", x => x.template_section_id);
-                    table.ForeignKey(
-                        name: "FK_PlaylistTemplateSections_PlaylistTemplates_template_id",
-                        column: x => x.template_id,
-                        principalTable: "PlaylistTemplates",
-                        principalColumn: "template_id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "PlaylistSections",
                 columns: table => new
                 {
                     section_id = table.Column<Guid>(type: "uuid", nullable: false),
-                    playlist_id = table.Column<string>(type: "text", nullable: false),
                     title = table.Column<string>(type: "text", nullable: false),
-                    order_index = table.Column<int>(type: "integer", nullable: false)
+                    order = table.Column<int>(type: "integer", nullable: false),
+                    playlist_id = table.Column<Guid>(type: "uuid", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -248,8 +244,9 @@ namespace ChoirApp.Infrastructure.Migrations
                 name: "PlaylistTags",
                 columns: table => new
                 {
-                    playlist_id = table.Column<string>(type: "text", nullable: false),
-                    tag_id = table.Column<Guid>(type: "uuid", nullable: false)
+                    playlist_id = table.Column<Guid>(type: "uuid", nullable: false),
+                    tag_id = table.Column<Guid>(type: "uuid", nullable: false),
+                    playlist_tag_id = table.Column<Guid>(type: "uuid", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -269,23 +266,22 @@ namespace ChoirApp.Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "PlaylistTemplateSongs",
+                name: "PlaylistTemplateSections",
                 columns: table => new
                 {
-                    template_song_id = table.Column<Guid>(type: "uuid", nullable: false),
                     template_section_id = table.Column<Guid>(type: "uuid", nullable: false),
-                    song_id = table.Column<Guid>(type: "uuid", nullable: false),
-                    is_master_song = table.Column<bool>(type: "boolean", nullable: false),
-                    order_index = table.Column<int>(type: "integer", nullable: false)
+                    title = table.Column<string>(type: "text", nullable: false),
+                    order = table.Column<int>(type: "integer", nullable: false),
+                    template_id = table.Column<Guid>(type: "uuid", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_PlaylistTemplateSongs", x => x.template_song_id);
+                    table.PrimaryKey("PK_PlaylistTemplateSections", x => x.template_section_id);
                     table.ForeignKey(
-                        name: "FK_PlaylistTemplateSongs_PlaylistTemplateSections_template_sec~",
-                        column: x => x.template_section_id,
-                        principalTable: "PlaylistTemplateSections",
-                        principalColumn: "template_section_id",
+                        name: "FK_PlaylistTemplateSections_PlaylistTemplates_template_id",
+                        column: x => x.template_id,
+                        principalTable: "PlaylistTemplates",
+                        principalColumn: "template_id",
                         onDelete: ReferentialAction.Cascade);
                 });
 
@@ -294,21 +290,73 @@ namespace ChoirApp.Infrastructure.Migrations
                 columns: table => new
                 {
                     playlist_song_id = table.Column<Guid>(type: "uuid", nullable: false),
-                    section_id = table.Column<Guid>(type: "uuid", nullable: false),
-                    song_id = table.Column<Guid>(type: "uuid", nullable: false),
-                    is_master_song = table.Column<bool>(type: "boolean", nullable: false),
-                    order_index = table.Column<int>(type: "integer", nullable: false)
+                    order = table.Column<int>(type: "integer", nullable: false),
+                    playlist_section_id = table.Column<Guid>(type: "uuid", nullable: false),
+                    master_song_id = table.Column<Guid>(type: "uuid", nullable: true),
+                    choir_song_id = table.Column<Guid>(type: "uuid", nullable: true)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_PlaylistSongs", x => x.playlist_song_id);
                     table.ForeignKey(
-                        name: "FK_PlaylistSongs_PlaylistSections_section_id",
-                        column: x => x.section_id,
+                        name: "FK_PlaylistSongs_ChoirSongVersions_choir_song_id",
+                        column: x => x.choir_song_id,
+                        principalTable: "ChoirSongVersions",
+                        principalColumn: "choir_song_id");
+                    table.ForeignKey(
+                        name: "FK_PlaylistSongs_MasterSongs_master_song_id",
+                        column: x => x.master_song_id,
+                        principalTable: "MasterSongs",
+                        principalColumn: "song_id");
+                    table.ForeignKey(
+                        name: "FK_PlaylistSongs_PlaylistSections_playlist_section_id",
+                        column: x => x.playlist_section_id,
                         principalTable: "PlaylistSections",
                         principalColumn: "section_id",
                         onDelete: ReferentialAction.Cascade);
                 });
+
+            migrationBuilder.CreateTable(
+                name: "PlaylistTemplateSongs",
+                columns: table => new
+                {
+                    template_song_id = table.Column<Guid>(type: "uuid", nullable: false),
+                    order = table.Column<int>(type: "integer", nullable: false),
+                    template_section_id = table.Column<Guid>(type: "uuid", nullable: false),
+                    master_song_id = table.Column<Guid>(type: "uuid", nullable: true),
+                    choir_song_id = table.Column<Guid>(type: "uuid", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_PlaylistTemplateSongs", x => x.template_song_id);
+                    table.ForeignKey(
+                        name: "FK_PlaylistTemplateSongs_ChoirSongVersions_choir_song_id",
+                        column: x => x.choir_song_id,
+                        principalTable: "ChoirSongVersions",
+                        principalColumn: "choir_song_id");
+                    table.ForeignKey(
+                        name: "FK_PlaylistTemplateSongs_MasterSongs_master_song_id",
+                        column: x => x.master_song_id,
+                        principalTable: "MasterSongs",
+                        principalColumn: "song_id");
+                    table.ForeignKey(
+                        name: "FK_PlaylistTemplateSongs_PlaylistTemplateSections_template_sec~",
+                        column: x => x.template_section_id,
+                        principalTable: "PlaylistTemplateSections",
+                        principalColumn: "template_section_id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ChoirInvitations_choir_id",
+                table: "ChoirInvitations",
+                column: "choir_id");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ChoirInvitations_invitation_token",
+                table: "ChoirInvitations",
+                column: "invitation_token",
+                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_Choirs_admin_user_id",
@@ -349,20 +397,25 @@ namespace ChoirApp.Infrastructure.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_Playlists_template_id",
-                table: "Playlists",
-                column: "template_id");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_PlaylistSections_playlist_id_order_index",
+                name: "IX_PlaylistSections_playlist_id_order",
                 table: "PlaylistSections",
-                columns: new[] { "playlist_id", "order_index" },
+                columns: new[] { "playlist_id", "order" },
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_PlaylistSongs_section_id_order_index",
+                name: "IX_PlaylistSongs_choir_song_id",
                 table: "PlaylistSongs",
-                columns: new[] { "section_id", "order_index" },
+                column: "choir_song_id");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_PlaylistSongs_master_song_id",
+                table: "PlaylistSongs",
+                column: "master_song_id");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_PlaylistSongs_playlist_section_id_order",
+                table: "PlaylistSongs",
+                columns: new[] { "playlist_section_id", "order" },
                 unique: true);
 
             migrationBuilder.CreateIndex(
@@ -377,15 +430,25 @@ namespace ChoirApp.Infrastructure.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_PlaylistTemplateSections_template_id_order_index",
+                name: "IX_PlaylistTemplateSections_template_id_order",
                 table: "PlaylistTemplateSections",
-                columns: new[] { "template_id", "order_index" },
+                columns: new[] { "template_id", "order" },
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_PlaylistTemplateSongs_template_section_id_order_index",
+                name: "IX_PlaylistTemplateSongs_choir_song_id",
                 table: "PlaylistTemplateSongs",
-                columns: new[] { "template_section_id", "order_index" },
+                column: "choir_song_id");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_PlaylistTemplateSongs_master_song_id",
+                table: "PlaylistTemplateSongs",
+                column: "master_song_id");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_PlaylistTemplateSongs_template_section_id_order",
+                table: "PlaylistTemplateSongs",
+                columns: new[] { "template_section_id", "order" },
                 unique: true);
 
             migrationBuilder.CreateIndex(
@@ -421,7 +484,7 @@ namespace ChoirApp.Infrastructure.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "ChoirSongVersions");
+                name: "ChoirInvitations");
 
             migrationBuilder.DropTable(
                 name: "PlaylistSongs");
@@ -442,16 +505,19 @@ namespace ChoirApp.Infrastructure.Migrations
                 name: "PlaylistSections");
 
             migrationBuilder.DropTable(
-                name: "PlaylistTemplateSections");
+                name: "ChoirSongVersions");
 
             migrationBuilder.DropTable(
-                name: "MasterSongs");
+                name: "PlaylistTemplateSections");
 
             migrationBuilder.DropTable(
                 name: "Tags");
 
             migrationBuilder.DropTable(
                 name: "Playlists");
+
+            migrationBuilder.DropTable(
+                name: "MasterSongs");
 
             migrationBuilder.DropTable(
                 name: "PlaylistTemplates");

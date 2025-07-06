@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useParams } from 'react-router-dom';
 import { useUser } from '../hooks/useUser';
 import { getChoirSongsByChoirId } from '../services/choirSongService';
 import type { ChoirSongVersionDto } from '../types/choir';
 
 const ChoirSongsListPage: React.FC = () => {
-  const { user, loading: userContextLoading } = useUser();
+  const { user, loading: userContextLoading, token } = useUser();
+  const { choirId } = useParams<{ choirId: string }>();
   const [songs, setSongs] = useState<ChoirSongVersionDto[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -17,10 +18,10 @@ const ChoirSongsListPage: React.FC = () => {
         return;
       }
 
-      if (user && user.choirId) {
+      if (user && choirId && token) {
         try {
           setLoading(true);
-          const choirSongs = await getChoirSongsByChoirId(user.choirId);
+          const choirSongs = await getChoirSongsByChoirId(choirId, token);
           setSongs(choirSongs);
           setError(null);
         } catch (err) {
@@ -29,7 +30,7 @@ const ChoirSongsListPage: React.FC = () => {
         } finally {
           setLoading(false);
         }
-      } else if (user && !user.choirId) {
+      } else if (user && !choirId) {
         setLoading(false);
         setError('You must be part of a choir to see its songs.');
       } else {
@@ -40,7 +41,7 @@ const ChoirSongsListPage: React.FC = () => {
     };
 
     fetchSongs();
-  }, [user]);
+  }, [user, choirId, userContextLoading, token]);
 
   if (loading) {
     return <p>Loading choir songs...</p>;
@@ -71,13 +72,13 @@ const ChoirSongsListPage: React.FC = () => {
                   <tr key={song.choirSongId}>
                     <td>{song.masterSong?.title || 'N/A'}</td>
                     <td>{song.masterSong?.artist || 'N/A'}</td>
-                    <td>{new Date(song.lastEditedDate).toLocaleDateString()}</td>
-                    <td>
-                      <Link to={`/choirs/${user?.choirId}/songs/${song.choirSongId}/edit`} className="button is-small is-info">
-                        View/Edit
-                      </Link>
-                    </td>
-                  </tr>
+                  <td>{new Date(song.lastEditedDate).toLocaleDateString()}</td>
+                  <td>
+                    <Link to={`/choirs/${choirId}/songs/${song.choirSongId}/edit`} className="button is-small is-info">
+                      View/Edit
+                    </Link>
+                  </td>
+                </tr>
                 ))}
               </tbody>
             </table>
