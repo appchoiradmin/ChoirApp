@@ -43,7 +43,13 @@ namespace ChoirApp.Backend.Endpoints.Playlist
                 Title = p.Title,
                 IsPublic = p.IsPublic,
                 ChoirId = p.ChoirId,
-                Date = p.Date
+                Date = p.Date,
+                Sections = p.Sections.Select(s => new PlaylistSectionDto
+                {
+                    Id = s.SectionId,
+                    Title = s.Title,
+                    Order = s.Order
+                }).ToList()
             });
 
             await SendAsync(response, cancellation: ct);

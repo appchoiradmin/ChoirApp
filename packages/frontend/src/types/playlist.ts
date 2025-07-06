@@ -23,6 +23,11 @@ export interface PlaylistSong {
   choirSongVersionId?: string;
 }
 
+export interface AddSongToPlaylistDto {
+  songId: string;
+  sectionId: string;
+}
+
 export interface PlaylistTemplate {
   id: string;
   title: string;

@@ -95,6 +95,7 @@ namespace ChoirApp.Infrastructure.Services
         public async Task<Result<IEnumerable<Playlist>>> GetPlaylistsByChoirIdAsync(Guid choirId)
         {
             var playlists = await _context.Playlists
+                .Include(p => p.Sections)
                 .Where(p => p.ChoirId == choirId)
                 .ToListAsync();
 
@@ -241,6 +242,37 @@ namespace ChoirApp.Infrastructure.Services
                 return Result.Fail("User is not a member of this choir.");
 
             _context.PlaylistTemplates.Remove(template);
+            await _context.SaveChangesAsync();
+            return Result.Ok();
+        }
+
+        public async Task<Result> AddSongToPlaylistAsync(string playlistId, AddSongToPlaylistDto dto)
+        {
+            if (!Guid.TryParse(playlistId, out var playlistGuid))
+                return Result.Fail("Invalid playlist id");
+
+            var playlist = await _context.Playlists.Include(p => p.Sections).FirstOrDefaultAsync(p => p.PlaylistId == playlistGuid);
+            if (playlist == null)
+                return Result.Fail("Playlist not found.");
+
+            if (!Guid.TryParse(dto.SectionId, out var sectionGuid))
+                return Result.Fail("Invalid section id");
+
+            var section = playlist.Sections.FirstOrDefault(s => s.SectionId == sectionGuid);
+            if (section == null)
+                return Result.Fail("Section not found in the playlist.");
+
+            if (!Guid.TryParse(dto.SongId, out var songGuid))
+                return Result.Fail("Invalid song id");
+
+            var song = await _context.MasterSongs.FindAsync(songGuid);
+            if (song == null)
+                return Result.Fail("Song not found");
+
+            var songResult = section.AddSong(songGuid, null);
+            if (songResult.IsFailed)
+                return Result.Fail(songResult.Errors);
+
             await _context.SaveChangesAsync();
             return Result.Ok();
         }

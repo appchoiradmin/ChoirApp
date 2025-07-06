@@ -8,7 +8,7 @@ import AuthErrorPage from './pages/AuthErrorPage.tsx';
 import MasterSongsListPage from './pages/MasterSongsListPage.tsx';
 import CreateMasterSongPage from './pages/CreateMasterSongPage.tsx';
 import MasterSongDetailPage from './pages/MasterSongDetailPage.tsx';
-import MasterSongList from './components/MasterSongList.tsx';
+import MasterSongListWrapper from './components/MasterSongListWrapper.tsx';
 import ChoirSongEditorPage from './pages/ChoirSongEditorPage.tsx';
 import ChoirAdminPage from './pages/ChoirAdminPage.tsx';
 import PlaylistsPage from './pages/PlaylistsPage.tsx';
@@ -34,7 +34,7 @@ function App() {
       <Route path="/master-songs/create" element={<CreateMasterSongPage />} />
       <Route path="/master-songs/:id" element={<MasterSongDetailPage />} />
       <Route path="/choir/:choirId" element={<ChoirDashboardPage />}>
-        <Route path="songs" element={<MasterSongList />} />
+        <Route path="songs" element={<MasterSongListWrapper />} />
         <Route path="playlists" element={<PlaylistsPage />} />
         <Route path="admin" element={<ChoirAdminPage />} />
         <Route path="playlists/:playlistId/edit" element={<EditPlaylistPage />} />

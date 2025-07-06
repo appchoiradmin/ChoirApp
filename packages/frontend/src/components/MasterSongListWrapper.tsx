@@ -9,7 +9,7 @@ const MasterSongListWrapper: React.FC = () => {
     return <div>Choir ID not found</div>;
   }
 
-  return <MasterSongList />;
+  return <MasterSongList choirId={choirId} />;
 };
 
 export default MasterSongListWrapper;

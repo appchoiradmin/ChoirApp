@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useUser } from '../hooks/useUser';
+import { usePlaylist } from '../hooks/usePlaylist';
 import { getPlaylistsByChoirId, createPlaylist, getPlaylistTemplatesByChoirId } from '../services/playlistService';
 import { Playlist } from '../types/playlist';
 import PlaylistDetail from '../components/PlaylistDetail';
@@ -9,8 +10,8 @@ const PlaylistsPage: React.FC = () => {
   const { choirId } = useParams<{ choirId: string }>();
   const { token } = useUser();
   const navigate = useNavigate();
+  const { selectedPlaylist, setSelectedPlaylist } = usePlaylist();
   const [playlists, setPlaylists] = useState<Playlist[]>([]);
-  const [selectedPlaylist, setSelectedPlaylist] = useState<Playlist | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
