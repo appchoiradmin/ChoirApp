@@ -269,10 +269,17 @@ namespace ChoirApp.Infrastructure.Services
             if (song == null)
                 return Result.Fail("Song not found");
 
-            var songResult = section.AddSong(songGuid, null);
+            Guid? choirSongVersionGuid = null;
+            if (Guid.TryParse(dto.ChoirSongVersionId, out var parsedGuid))
+            {
+                choirSongVersionGuid = parsedGuid;
+            }
+
+            var songResult = section.AddSong(songGuid, choirSongVersionGuid);
             if (songResult.IsFailed)
                 return Result.Fail(songResult.Errors);
 
+            _context.PlaylistSongs.Add(songResult.Value);
             await _context.SaveChangesAsync();
             return Result.Ok();
         }

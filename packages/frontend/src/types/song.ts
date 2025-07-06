@@ -9,6 +9,7 @@ export interface MasterSongDto {
   artist: string | null;
   lyricsChordPro: string;
   tags: TagDto[];
+  choirSongVersionId?: string;
 }
 
 export interface CreateMasterSongDto {

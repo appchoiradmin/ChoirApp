@@ -4,5 +4,6 @@ namespace ChoirApp.Application.Dtos
     {
         public string SongId { get; set; }
         public string SectionId { get; set; }
+        public string? ChoirSongVersionId { get; set; }
     }
 }

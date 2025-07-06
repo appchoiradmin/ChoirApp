@@ -26,6 +26,7 @@ export interface PlaylistSong {
 export interface AddSongToPlaylistDto {
   songId: string;
   sectionId: string;
+  choirSongVersionId?: string;
 }
 
 export interface PlaylistTemplate {

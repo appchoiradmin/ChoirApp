@@ -17,7 +17,7 @@ namespace ChoirApp.Backend.Endpoints.Playlist
 
         public override void Configure()
         {
-            Post("/api/playlists/{PlaylistId}/songs");
+            Post("/playlists/{PlaylistId}/songs");
             AuthSchemes("Bearer");
             Roles("ChoirAdmin", "SuperAdmin");
         }

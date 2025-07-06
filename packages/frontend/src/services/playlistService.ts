@@ -84,7 +84,7 @@ export const addSongToPlaylist = async (
       'Content-Type': 'application/json',
       Authorization: `Bearer ${token}`,
     },
-    body: JSON.stringify(data),
+    body: JSON.stringify({ dto: data }),
   });
 
   if (!response.ok) {
