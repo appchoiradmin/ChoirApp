@@ -1,4 +1,4 @@
-import { Playlist, PlaylistTemplate } from '../types/playlist';
+import { Playlist, PlaylistTemplate, AddSongToPlaylistDto } from '../types/playlist';
 
 export type CreatePlaylistTemplatePayload = {
   title: string;
@@ -71,6 +71,25 @@ export const getPlaylistById = async (
   }
 
   return response.json();
+};
+
+export const addSongToPlaylist = async (
+  playlistId: string,
+  data: AddSongToPlaylistDto,
+  token: string
+): Promise<void> => {
+  const response = await fetch(`${API_URL}/api/playlists/${playlistId}/songs`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(data),
+  });
+
+  if (!response.ok) {
+    throw new Error('Failed to add song to playlist');
+  }
 };
 
 export const updatePlaylist = async (
