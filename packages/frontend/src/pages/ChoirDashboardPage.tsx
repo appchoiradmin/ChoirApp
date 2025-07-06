@@ -9,12 +9,12 @@ const ChoirDashboardPage = () => {
   const isAdmin = user?.choirs.some(c => c.id === choirId && c.role === 'Admin');
 
   const tabs = [
-    { name: 'Master Songs', path: `/choirs/${choirId}/songs` },
-    { name: 'Playlists', path: `/choirs/${choirId}/playlists` },
+    { name: 'Master Songs', path: `/choir/${choirId}/songs` },
+    { name: 'Playlists', path: `/choir/${choirId}/playlists` },
   ];
 
   if (isAdmin) {
-    tabs.push({ name: 'Admin', path: `/choirs/${choirId}/admin` });
+    tabs.push({ name: 'Admin', path: `/choir/${choirId}/admin` });
   }
 
   return (

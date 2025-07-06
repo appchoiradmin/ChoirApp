@@ -41,11 +41,19 @@ namespace ChoirApp.Infrastructure.Services
 
                 if (template != null)
                 {
-                    foreach (var sectionTemplate in template.Sections)
+                    foreach (var sectionTemplate in template.Sections.OrderBy(s => s.Order))
                     {
                         var sectionResult = playlist.AddSection(sectionTemplate.Title);
                         if (sectionResult.IsFailed)
                             return Result.Fail(sectionResult.Errors);
+
+                        var newSection = playlist.Sections.Last();
+                        foreach (var songTemplate in sectionTemplate.PlaylistTemplateSongs.OrderBy(s => s.Order))
+                        {
+                            var songResult = newSection.AddSong(songTemplate.MasterSongId, songTemplate.ChoirSongVersionId);
+                            if (songResult.IsFailed)
+                                return Result.Fail(songResult.Errors);
+                        }
                     }
                 }
             }

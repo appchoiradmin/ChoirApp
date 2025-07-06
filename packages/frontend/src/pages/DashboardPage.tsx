@@ -91,8 +91,7 @@ const DashboardPage: React.FC = () => {
               <div className="list">
                 {adminOfChoirs.map(choir => (
                   <div key={choir.id} className="list-item">
-                    <Link to={`/choirs/${choir.id}/songs`}>{choir.name}</Link>
-                    <Link to={`/choir/${choir.id}/admin`} className="button is-link is-small ml-4">Admin</Link>
+                    <Link to={`/choir/${choir.id}/songs`}>{choir.name}</Link>
                   </div>
                 ))}
               </div>
@@ -107,7 +106,7 @@ const DashboardPage: React.FC = () => {
               <div className="list">
                 {memberOfChoirs.map(choir => (
                   <div key={choir.id} className="list-item">
-                    <Link to={`/choirs/${choir.id}/songs`}>{choir.name}</Link>
+                    <Link to={`/choir/${choir.id}/songs`}>{choir.name}</Link>
                   </div>
                 ))}
               </div>

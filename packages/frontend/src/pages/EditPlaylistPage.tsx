@@ -7,7 +7,7 @@ import { PlaylistTemplate, PlaylistSection, PlaylistSong } from '../types/playli
 import { ChoirSongVersionDto } from '../types/choir';
 
 const EditPlaylistPage: React.FC = () => {
-  const { user, token } = useUser();
+  const { token } = useUser();
   const { playlistId } = useParams<{ playlistId: string }>();
   const navigate = useNavigate();
   const [title, setTitle] = useState('');
@@ -20,13 +20,13 @@ const EditPlaylistPage: React.FC = () => {
 
   useEffect(() => {
     const fetchInitialData = async () => {
-      if (user?.choirId && token && playlistId) {
+      if (token && playlistId) {
         try {
           console.log("Fetching initial data...");
-          const [playlist, fetchedTemplates, fetchedSongs] = await Promise.all([
-            getPlaylist(playlistId, token),
-            getPlaylistTemplatesByChoirId(user.choirId, token),
-            getChoirSongsByChoirId(user.choirId, token)
+          const playlist = await getPlaylist(playlistId, token);
+          const [fetchedTemplates, fetchedSongs] = await Promise.all([
+            getPlaylistTemplatesByChoirId(playlist.choirId, token),
+            getChoirSongsByChoirId(playlist.choirId, token)
           ]);
           
           console.log("Playlist data:", playlist);
@@ -58,7 +58,7 @@ const EditPlaylistPage: React.FC = () => {
     };
 
     fetchInitialData();
-  }, [playlistId, user, token]);
+  }, [playlistId, token]);
 
   const handleAddSongToSection = (sectionId: string, choirSongVersionId: string) => {
     const song = choirSongs.find(s => s.choirSongId === choirSongVersionId);
@@ -93,7 +93,7 @@ const EditPlaylistPage: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (user?.choirId && token && playlistId) {
+    if (token && playlistId) {
       try {
         await updatePlaylist(playlistId, { title, isPublic, sections, playlistTemplateId: selectedTemplate?.id }, token);
         navigate(`/playlists/${playlistId}`);

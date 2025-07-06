@@ -130,10 +130,6 @@ const ChoirAdminPage: React.FC = () => {
               <span className="icon"><i className="fas fa-music"></i></span>
               <span>Master Song List</span>
             </Link>
-            <Link to={`/choir/${choirId}/playlists`} className="button is-info">
-              <span className="icon"><i className="fas fa-list"></i></span>
-              <span>Playlists</span>
-            </Link>
             <Link to={`/choir/${choirId}/playlist-templates`} className="button is-info">
               <span className="icon"><i className="fas fa-list-alt"></i></span>
               <span>Playlist Templates</span>
