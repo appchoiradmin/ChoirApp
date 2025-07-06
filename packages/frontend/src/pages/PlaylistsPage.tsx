@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { useUser } from '../hooks/useUser';
 import { getPlaylistsByChoirId, createPlaylist, getPlaylistTemplatesByChoirId } from '../services/playlistService';
 import { Playlist } from '../types/playlist';
@@ -8,6 +8,7 @@ import PlaylistDetail from '../components/PlaylistDetail';
 const PlaylistsPage: React.FC = () => {
   const { choirId } = useParams<{ choirId: string }>();
   const { token } = useUser();
+  const navigate = useNavigate();
   const [playlists, setPlaylists] = useState<Playlist[]>([]);
   const [selectedPlaylist, setSelectedPlaylist] = useState<Playlist | null>(null);
   const [loading, setLoading] = useState(true);
@@ -16,8 +17,10 @@ const PlaylistsPage: React.FC = () => {
   const getNextSunday = () => {
     const date = new Date();
     const today = date.getDay();
-    const daysUntilSunday = 7 - today;
-    date.setDate(date.getDate() + daysUntilSunday);
+    if (today !== 0) {
+      const daysUntilSunday = 7 - today;
+      date.setDate(date.getDate() + daysUntilSunday);
+    }
     date.setHours(0, 0, 0, 0);
     return date;
   };
@@ -39,7 +42,7 @@ const PlaylistsPage: React.FC = () => {
           );
 
           if (existingPlaylist) {
-            setSelectedPlaylist(existingPlaylist);
+            navigate(`/choir/${choirId}/playlists/${existingPlaylist.id}/edit`);
           } else if (fetchedTemplates.length > 0) {
             const newPlaylistDto = {
               choirId,
@@ -48,8 +51,7 @@ const PlaylistsPage: React.FC = () => {
               playlistTemplateId: fetchedTemplates[0].id,
             };
             const newPlaylist = await createPlaylist(newPlaylistDto, token);
-            setPlaylists([...fetchedPlaylists, newPlaylist]);
-            setSelectedPlaylist(newPlaylist);
+            navigate(`/choir/${choirId}/playlists/${newPlaylist.id}/edit`);
           } else if (fetchedPlaylists.length > 0) {
             setSelectedPlaylist(fetchedPlaylists[0]);
           }
@@ -61,7 +63,7 @@ const PlaylistsPage: React.FC = () => {
       };
       fetchPlaylistsAndTemplates();
     }
-  }, [choirId, token]);
+  }, [choirId, token, navigate]);
 
   if (loading) {
     return <div>Loading...</div>;

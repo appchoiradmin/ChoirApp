@@ -37,6 +37,7 @@ function App() {
         <Route path="songs" element={<MasterSongList />} />
         <Route path="playlists" element={<PlaylistsPage />} />
         <Route path="admin" element={<ChoirAdminPage />} />
+        <Route path="playlists/:playlistId/edit" element={<EditPlaylistPage />} />
       </Route>
       <Route path="/choir/:choirId/songs/:songId/edit" element={<ChoirSongEditorPage />} />
       <Route path="/playlists" element={<PlaylistsPage />} />
