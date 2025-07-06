@@ -43,10 +43,22 @@ const MasterSongList: React.FC<MasterSongListProps> = ({ choirId }) => {
     }
   }, [searchTerm, token, choirId, selectedPlaylist, setSelectedPlaylist]);
 
-  const handleAddSongToPlaylist = async (songId: string, playlistId: string, sectionId: string) => {
+  const handleAddSongToPlaylist = async (
+    song: MasterSongDto,
+    playlistId: string,
+    sectionId: string
+  ) => {
     if (!token) return;
     try {
-      await addSongToPlaylist(playlistId, { songId, sectionId }, token);
+      await addSongToPlaylist(
+        playlistId,
+        {
+          songId: song.songId,
+          sectionId,
+          choirSongVersionId: song.choirSongVersionId,
+        },
+        token
+      );
       // Optionally, show a success message
     } catch (error) {
       // Optionally, show an error message
@@ -113,7 +125,7 @@ const MasterSongList: React.FC<MasterSongListProps> = ({ choirId }) => {
                                 className="dropdown-item"
                                 key={section.id}
                                 onClick={() => {
-                                  handleAddSongToPlaylist(song.songId, selectedPlaylist.id, section.id);
+                                  handleAddSongToPlaylist(song, selectedPlaylist.id, section.id);
                                   setActiveDropdown(null);
                                 }}
                               >
