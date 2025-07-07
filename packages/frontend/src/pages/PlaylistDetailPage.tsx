@@ -2,12 +2,15 @@ import React, { useEffect, useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useUser } from '../hooks/useUser';
 import { getPlaylistById, deletePlaylist } from '../services/playlistService';
+import { getChoirSongsByChoirId } from '../services/choirSongService';
 import { Playlist } from '../types/playlist';
+import { ChoirSongVersionDto } from '../types/choir';
 
 const PlaylistDetailPage: React.FC = () => {
   const { playlistId } = useParams<{ playlistId: string }>();
   const { token } = useUser();
   const [playlist, setPlaylist] = useState<Playlist | null>(null);
+  const [choirSongs, setChoirSongs] = useState<ChoirSongVersionDto[]>([]);
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -18,6 +21,10 @@ const PlaylistDetailPage: React.FC = () => {
         try {
           const fetchedPlaylist = await getPlaylistById(playlistId, token);
           setPlaylist(fetchedPlaylist);
+          if (fetchedPlaylist) {
+            const fetchedSongs = await getChoirSongsByChoirId(fetchedPlaylist.choirId, token);
+            setChoirSongs(fetchedSongs);
+          }
         } catch (err: any) {
           setError(err.message || 'Failed to fetch playlist');
         } finally {
@@ -69,11 +76,16 @@ const PlaylistDetailPage: React.FC = () => {
       {playlist.sections.map((section) => (
         <div key={section.id} className="mb-4">
           <h2 className="subtitle">{section.title}</h2>
-          {section.songs.map((song) => (
-            <div key={song.id} className="box">
-              <p>Song ID: {song.masterSongId || song.choirSongVersionId}</p>
-            </div>
-          ))}
+          {section.songs.map((song) => {
+            const songData = choirSongs.find(cs => cs.choirSongId === song.choirSongVersionId);
+            return (
+              <div key={song.id} className="box">
+                <Link to={`/master-songs/${song.masterSongId}`}>
+                  {songData?.masterSong?.title}
+                </Link>
+              </div>
+            );
+          })}
         </div>
       ))}
     </div>

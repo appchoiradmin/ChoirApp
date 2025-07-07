@@ -283,5 +283,33 @@ namespace ChoirApp.Infrastructure.Services
             await _context.SaveChangesAsync();
             return Result.Ok();
         }
+
+        public async Task<Result> RemoveSongFromPlaylistAsync(string playlistId, string songId)
+        {
+            if (!Guid.TryParse(playlistId, out var playlistGuid) || !Guid.TryParse(songId, out var songGuid))
+            {
+                return Result.Fail("Invalid GUID format.");
+            }
+
+            var playlist = await _context.Playlists
+                .Include(p => p.Sections)
+                .ThenInclude(s => s.PlaylistSongs)
+                .FirstOrDefaultAsync(p => p.PlaylistId == playlistGuid);
+
+            if (playlist == null)
+                return Result.Fail("Playlist not found.");
+
+            var songToRemove = playlist.Sections
+                .SelectMany(s => s.PlaylistSongs)
+                .FirstOrDefault(s => s.MasterSongId == songGuid);
+
+            if (songToRemove == null)
+                return Result.Fail("Song not found in playlist.");
+
+            _context.PlaylistSongs.Remove(songToRemove);
+            await _context.SaveChangesAsync();
+
+            return Result.Ok();
+        }
     }
 }
