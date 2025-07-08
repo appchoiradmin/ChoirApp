@@ -349,7 +349,7 @@ namespace ChoirApp.Infrastructure.Services
 
             var songToRemove = playlist.Sections
                 .SelectMany(s => s.PlaylistSongs)
-                .FirstOrDefault(s => s.MasterSongId == songGuid);
+                .FirstOrDefault(s => s.PlaylistSongId == songGuid);
 
             if (songToRemove == null)
                 return Result.Fail("Song not found in playlist.");

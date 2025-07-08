@@ -5,7 +5,7 @@ import { PlaylistSong } from '../types/playlist';
 import { ChoirSongVersionDto } from '../types/choir';
 import { MasterSongDto } from '../types/song';
 import { useUser } from '../hooks/useUser';
-import { updatePlaylist, moveSongInPlaylist } from '../services/playlistService';
+import { removeSongFromPlaylist, moveSongInPlaylist } from '../services/playlistService';
 
 const PlaylistsPage: React.FC = () => {
   const { sections, isInitializing, error, isPlaylistReady, playlistId, setSections } = usePlaylistContext();
@@ -59,7 +59,10 @@ const PlaylistsPage: React.FC = () => {
     if (!playlistId || !user?.token) return;
 
     try {
-      // Update local state immediately
+      // Update backend first
+      await removeSongFromPlaylist(playlistId, songId, user.token);
+
+      // Update local state after successful backend call
       const updatedSections = sections.map(section => {
         if (section.id === sectionId) {
           return {
@@ -71,21 +74,6 @@ const PlaylistsPage: React.FC = () => {
       });
 
       setSections(updatedSections);
-
-      // Update backend
-      await updatePlaylist(playlistId, {
-        title: 'Current Playlist', // You might want to get the actual title
-        isPublic: false,
-        sections: updatedSections.map(s => ({
-          title: s.title,
-          order: s.order,
-          songs: s.songs.map(song => ({
-            masterSongId: song.masterSongId,
-            choirSongVersionId: song.choirSongVersionId,
-            order: song.order
-          }))
-        }))
-      }, user.token);
     } catch (error) {
       console.error('Failed to remove song:', error);
       // You might want to show an error message to the user

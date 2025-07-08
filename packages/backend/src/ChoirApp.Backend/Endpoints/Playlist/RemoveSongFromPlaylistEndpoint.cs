@@ -4,7 +4,7 @@ using System.Security.Claims;
 
 namespace ChoirApp.Backend.Endpoints.Playlist
 {
-    public class RemoveSongFromPlaylistEndpoint : Endpoint<RemoveSongFromPlaylistRequest>
+    public class RemoveSongFromPlaylistEndpoint : EndpointWithoutRequest
     {
         private readonly IPlaylistService _playlistService;
 
@@ -15,12 +15,12 @@ namespace ChoirApp.Backend.Endpoints.Playlist
 
         public override void Configure()
         {
-            Delete("/playlists/{PlaylistId}/songs/{SongId}");
+            Delete("/playlists/{playlistId}/songs/{songId}");
             AuthSchemes("Bearer");
             Roles("ChoirAdmin", "SuperAdmin", "ChoirMember");
         }
 
-        public override async Task HandleAsync(RemoveSongFromPlaylistRequest req, CancellationToken ct)
+        public override async Task HandleAsync(CancellationToken ct)
         {
             var userIdClaim = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
             if (!Guid.TryParse(userIdClaim, out var userId))
@@ -29,7 +29,17 @@ namespace ChoirApp.Backend.Endpoints.Playlist
                 return;
             }
 
-            var result = await _playlistService.RemoveSongFromPlaylistAsync(req.PlaylistId, req.SongId);
+            // Extract route parameters
+            var playlistId = Route<string>("playlistId");
+            var songId = Route<string>("songId");
+
+            if (string.IsNullOrEmpty(playlistId) || string.IsNullOrEmpty(songId))
+            {
+                ThrowError("Invalid playlist or song ID.");
+                return;
+            }
+
+            var result = await _playlistService.RemoveSongFromPlaylistAsync(playlistId, songId);
 
             if (result.IsFailed)
             {
@@ -40,11 +50,5 @@ namespace ChoirApp.Backend.Endpoints.Playlist
 
             await SendOkAsync(ct);
         }
-    }
-
-    public class RemoveSongFromPlaylistRequest
-    {
-        public string PlaylistId { get; set; } = default!;
-        public string SongId { get; set; } = default!;
     }
 }
