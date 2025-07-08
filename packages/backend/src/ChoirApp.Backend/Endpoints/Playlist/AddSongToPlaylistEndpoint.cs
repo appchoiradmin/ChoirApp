@@ -24,7 +24,7 @@ namespace ChoirApp.Backend.Endpoints.Playlist
 
         public override async Task HandleAsync(AddSongToPlaylistRequest req, CancellationToken ct)
         {
-            var result = await _playlistService.AddSongToPlaylistAsync(req.PlaylistId, req.Dto);
+            var result = await _playlistService.AddSongToPlaylistAsync(req.PlaylistId, req);
 
             if (result.IsFailed)
             {
@@ -37,9 +37,8 @@ namespace ChoirApp.Backend.Endpoints.Playlist
         }
     }
 
-    public class AddSongToPlaylistRequest
+    public class AddSongToPlaylistRequest : AddSongToPlaylistDto
     {
-        public string PlaylistId { get; set; }
-        public AddSongToPlaylistDto Dto { get; set; }
+        public string PlaylistId { get; set; } = string.Empty;
     }
 }

@@ -44,11 +44,45 @@ namespace ChoirApp.Backend.Endpoints.Playlist
                 IsPublic = p.IsPublic,
                 ChoirId = p.ChoirId,
                 Date = p.Date,
-                Sections = p.Sections.Select(s => new PlaylistSectionDto
+                Sections = p.Sections
+                    .OrderBy(s => s.Order)
+                    .Select(s => new PlaylistSectionDto
                 {
                     Id = s.SectionId,
                     Title = s.Title,
-                    Order = s.Order
+                    Order = s.Order,
+                    Songs = s.PlaylistSongs
+                        .OrderBy(ps => ps.Order)
+                        .Select(ps => new PlaylistSongDto
+                    {
+                        Id = ps.PlaylistSongId,
+                        Order = ps.Order,
+                        MasterSongId = ps.MasterSongId,
+                        ChoirSongVersionId = ps.ChoirSongVersionId,
+                        MasterSong = ps.MasterSong == null ? null : new MasterSongDto
+                        {
+                            SongId = ps.MasterSong.SongId,
+                            Title = ps.MasterSong.Title,
+                            Artist = ps.MasterSong.Artist,
+                            LyricsChordPro = ps.MasterSong.LyricsChordPro,
+                            Tags = ps.MasterSong.SongTags
+                                .Where(st => st.Tag != null)
+                                .Select(st => new TagDto
+                                {
+                                    TagId = st.Tag!.TagId,
+                                    TagName = st.Tag!.TagName
+                                }).ToList()
+                        },
+                        ChoirSongVersion = ps.ChoirSongVersion == null ? null : new ChoirSongVersionDto
+                        {
+                            ChoirSongId = ps.ChoirSongVersion.ChoirSongId,
+                            MasterSongId = ps.ChoirSongVersion.MasterSongId,
+                            ChoirId = ps.ChoirSongVersion.ChoirId,
+                            EditedLyricsChordPro = ps.ChoirSongVersion.EditedLyricsChordPro,
+                            LastEditedDate = ps.ChoirSongVersion.LastEditedDate,
+                            EditorUserId = ps.ChoirSongVersion.EditorUserId
+                        }
+                    }).ToList()
                 }).ToList()
             });
 

@@ -22,6 +22,19 @@ export interface PlaylistSong {
   order: number;
   masterSongId?: string;
   choirSongVersionId?: string;
+  // Include actual song details to avoid extra API calls
+  masterSong?: {
+    songId: string;
+    title: string;
+    artist: string | null;
+    lyricsChordPro: string;
+  };
+  choirSongVersion?: {
+    choirSongId: string;
+    title: string;
+    artist: string | null;
+    lyricsChordPro: string;
+  };
 }
 
 export interface AddSongToPlaylistDto {

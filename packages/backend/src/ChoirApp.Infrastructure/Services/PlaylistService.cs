@@ -96,6 +96,11 @@ namespace ChoirApp.Infrastructure.Services
         {
             var playlists = await _context.Playlists
                 .Include(p => p.Sections)
+                .ThenInclude(s => s.PlaylistSongs)
+                .ThenInclude(ps => ps.MasterSong)
+                .Include(p => p.Sections)
+                .ThenInclude(s => s.PlaylistSongs)
+                .ThenInclude(ps => ps.ChoirSongVersion)
                 .Where(p => p.ChoirId == choirId)
                 .ToListAsync();
 
@@ -291,7 +296,10 @@ namespace ChoirApp.Infrastructure.Services
             if (!Guid.TryParse(playlistId, out var playlistGuid))
                 return Result.Fail("Invalid playlist id");
 
-            var playlist = await _context.Playlists.Include(p => p.Sections).FirstOrDefaultAsync(p => p.PlaylistId == playlistGuid);
+            var playlist = await _context.Playlists
+                .Include(p => p.Sections)
+                .ThenInclude(s => s.PlaylistSongs)
+                .FirstOrDefaultAsync(p => p.PlaylistId == playlistGuid);
             if (playlist == null)
                 return Result.Fail("Playlist not found.");
 
@@ -349,6 +357,47 @@ namespace ChoirApp.Infrastructure.Services
             _context.PlaylistSongs.Remove(songToRemove);
             await _context.SaveChangesAsync();
 
+            return Result.Ok();
+        }
+
+        public async Task<Result> MoveSongInPlaylistAsync(string playlistId, string songId, string fromSectionId, string toSectionId, Guid userId)
+        {
+            if (!Guid.TryParse(playlistId, out var playlistGuid) || 
+                !Guid.TryParse(songId, out var songGuid) ||
+                !Guid.TryParse(fromSectionId, out var fromSectionGuid) ||
+                !Guid.TryParse(toSectionId, out var toSectionGuid))
+            {
+                return Result.Fail("Invalid GUID format.");
+            }
+
+            var playlist = await _context.Playlists
+                .Include(p => p.Sections)
+                .ThenInclude(s => s.PlaylistSongs)
+                .FirstOrDefaultAsync(p => p.PlaylistId == playlistGuid);
+
+            if (playlist == null)
+                return Result.Fail("Playlist not found.");
+
+            // Verify user permissions
+            var userChoir = await _context.UserChoirs.FirstOrDefaultAsync(uc => uc.UserId == userId && uc.ChoirId == playlist.ChoirId);
+            if (userChoir == null)
+                return Result.Fail("User is not a member of this choir.");
+
+            var fromSection = playlist.Sections.FirstOrDefault(s => s.SectionId == fromSectionGuid);
+            var toSection = playlist.Sections.FirstOrDefault(s => s.SectionId == toSectionGuid);
+
+            if (fromSection == null || toSection == null)
+                return Result.Fail("Section not found.");
+
+            var songToMove = fromSection.PlaylistSongs.FirstOrDefault(s => s.PlaylistSongId == songGuid);
+            if (songToMove == null)
+                return Result.Fail("Song not found in source section.");
+
+            // Update the song's section and order in place instead of creating a new one
+            var newOrder = toSection.PlaylistSongs.Count;
+            songToMove.UpdateSection(toSection.SectionId, newOrder);
+
+            await _context.SaveChangesAsync();
             return Result.Ok();
         }
     }

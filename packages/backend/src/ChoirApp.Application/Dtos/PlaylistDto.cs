@@ -29,5 +29,8 @@ namespace ChoirApp.Application.Dtos
         public int Order { get; set; }
         public Guid? MasterSongId { get; set; }
         public Guid? ChoirSongVersionId { get; set; }
+        // Include actual song details to avoid extra API calls
+        public MasterSongDto? MasterSong { get; set; }
+        public ChoirSongVersionDto? ChoirSongVersion { get; set; }
     }
 }

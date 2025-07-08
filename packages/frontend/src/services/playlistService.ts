@@ -84,7 +84,7 @@ export const addSongToPlaylist = async (
       'Content-Type': 'application/json',
       Authorization: `Bearer ${token}`,
     },
-    body: JSON.stringify({ dto: data }),
+    body: JSON.stringify(data),
   });
 
   if (!response.ok) {
@@ -253,5 +253,30 @@ export const removeSongFromPlaylist = async (
 
   if (!response.ok) {
     throw new Error('Failed to remove song from playlist');
+  }
+};
+
+export interface MoveSongInPlaylistDto {
+  fromSectionId: string;
+  toSectionId: string;
+}
+
+export const moveSongInPlaylist = async (
+  playlistId: string,
+  songId: string,
+  data: MoveSongInPlaylistDto,
+  token: string
+): Promise<void> => {
+  const response = await fetch(`${API_URL}/api/playlists/${playlistId}/songs/${songId}/move`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(data),
+  });
+
+  if (!response.ok) {
+    throw new Error('Failed to move song in playlist');
   }
 };

@@ -60,5 +60,11 @@ namespace ChoirApp.Domain.Entities
 
             return Result.Ok(new PlaylistSong(playlistSectionId, order, masterSongId, choirSongVersionId));
         }
+
+        public void UpdateSection(Guid newPlaylistSectionId, int newOrder)
+        {
+            PlaylistSectionId = newPlaylistSectionId;
+            Order = newOrder;
+        }
     }
 }

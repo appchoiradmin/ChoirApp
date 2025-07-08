@@ -22,5 +22,6 @@ namespace ChoirApp.Application.Contracts
         Task<Result> DeletePlaylistTemplateAsync(Guid templateId, Guid userId);
         Task<Result> AddSongToPlaylistAsync(string playlistId, AddSongToPlaylistDto dto);
         Task<Result> RemoveSongFromPlaylistAsync(string playlistId, string songId);
+        Task<Result> MoveSongInPlaylistAsync(string playlistId, string songId, string fromSectionId, string toSectionId, Guid userId);
     }
 }

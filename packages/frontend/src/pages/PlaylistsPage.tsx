@@ -1,8 +1,123 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { usePlaylistContext } from '../context/PlaylistContext';
+import MovableSongItem from '../components/MovableSongItem';
+import { PlaylistSong } from '../types/playlist';
+import { ChoirSongVersionDto } from '../types/choir';
+import { MasterSongDto } from '../types/song';
+import { useUser } from '../hooks/useUser';
+import { updatePlaylist, moveSongInPlaylist } from '../services/playlistService';
 
 const PlaylistsPage: React.FC = () => {
-  const { sections } = usePlaylistContext();
+  const { sections, isInitializing, error, isPlaylistReady, playlistId, setSections } = usePlaylistContext();
+  const { user } = useUser();
+  const [choirSongs] = useState<ChoirSongVersionDto[]>([]);
+  const [masterSongs] = useState<MasterSongDto[]>([]);
+
+  // For now, we'll use empty arrays for choirSongs and masterSongs
+  // In a real implementation, you might want to fetch these if needed
+  useEffect(() => {
+    // You can add logic here to fetch choirSongs and masterSongs if needed
+    // For now, we'll keep them empty since the song data is already in the playlist songs
+  }, []);
+
+  const handleMoveSong = async (song: PlaylistSong, fromSectionId: string, toSectionId: string) => {
+    if (!playlistId || !user?.token) return;
+
+    try {
+      // Update local state immediately
+      const updatedSections = sections.map(section => {
+        if (section.id === fromSectionId) {
+          return {
+            ...section,
+            songs: section.songs.filter(s => s.id !== song.id)
+          };
+        }
+        if (section.id === toSectionId) {
+          return {
+            ...section,
+            songs: [...section.songs, { ...song, order: section.songs.length }]
+          };
+        }
+        return section;
+      });
+
+      setSections(updatedSections);
+
+      // Use the dedicated move endpoint instead of updating the entire playlist
+      await moveSongInPlaylist(playlistId, song.id, {
+        fromSectionId,
+        toSectionId
+      }, user.token);
+    } catch (error) {
+      console.error('Failed to move song:', error);
+      // Revert local state on error
+      setSections(sections);
+    }
+  };
+
+  const handleRemoveSong = async (sectionId: string, songId: string) => {
+    if (!playlistId || !user?.token) return;
+
+    try {
+      // Update local state immediately
+      const updatedSections = sections.map(section => {
+        if (section.id === sectionId) {
+          return {
+            ...section,
+            songs: section.songs.filter(s => s.id !== songId)
+          };
+        }
+        return section;
+      });
+
+      setSections(updatedSections);
+
+      // Update backend
+      await updatePlaylist(playlistId, {
+        title: 'Current Playlist', // You might want to get the actual title
+        isPublic: false,
+        sections: updatedSections.map(s => ({
+          title: s.title,
+          order: s.order,
+          songs: s.songs.map(song => ({
+            masterSongId: song.masterSongId,
+            choirSongVersionId: song.choirSongVersionId,
+            order: song.order
+          }))
+        }))
+      }, user.token);
+    } catch (error) {
+      console.error('Failed to remove song:', error);
+      // You might want to show an error message to the user
+    }
+  };
+
+  if (isInitializing) {
+    return (
+      <div className="container">
+        <h1 className="title">Playlists</h1>
+        <div>Loading playlist...</div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="container">
+        <h1 className="title">Playlists</h1>
+        <div className="notification is-danger">{error}</div>
+      </div>
+    );
+  }
+
+  if (!isPlaylistReady) {
+    return (
+      <div className="container">
+        <h1 className="title">Playlists</h1>
+        <div>Preparing playlist...</div>
+      </div>
+    );
+  }
 
   return (
     <div className="container">
@@ -20,12 +135,18 @@ const PlaylistsPage: React.FC = () => {
               </header>
               {section.songs && section.songs.length > 0 ? (
                 <div className="card-content">
-                  <ul>
+                  <ul style={{ listStyle: 'none', padding: 0 }}>
                     {section.songs.map((song, songIdx) => (
-                      <li key={song.id || songIdx}>
-                        {/* Show more song info here if available in PlaylistSong */}
-                        Song #{songIdx + 1}
-                      </li>
+                      <MovableSongItem
+                        key={song.id || songIdx}
+                        song={song}
+                        section={section}
+                        sections={sections}
+                        choirSongs={choirSongs}
+                        masterSongs={masterSongs}
+                        onMoveSong={handleMoveSong}
+                        onRemoveSong={handleRemoveSong}
+                      />
                     ))}
                   </ul>
                 </div>
