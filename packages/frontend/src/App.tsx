@@ -11,7 +11,7 @@ import MasterSongDetailPage from './pages/MasterSongDetailPage.tsx';
 import MasterSongListWrapper from './components/MasterSongListWrapper.tsx';
 import ChoirSongEditorPage from './pages/ChoirSongEditorPage.tsx';
 import ChoirAdminPage from './pages/ChoirAdminPage.tsx';
-import PlaylistsPage from './pages/PlaylistsPage.tsx';
+import ChoirPlaylistsTab from './pages/ChoirPlaylistsTab';
 import PlaylistDetailPage from './pages/PlaylistDetailPage.tsx';
 import CreatePlaylistPage from './pages/CreatePlaylistPage.tsx';
 import EditPlaylistPage from './pages/EditPlaylistPage.tsx';
@@ -35,12 +35,12 @@ function App() {
       <Route path="/master-songs/:id" element={<MasterSongDetailPage />} />
       <Route path="/choir/:choirId" element={<ChoirDashboardPage />}>
         <Route path="songs" element={<MasterSongListWrapper />} />
-        <Route path="playlists" element={<PlaylistsPage />} />
+        <Route path="playlists" element={<ChoirPlaylistsTab />} />
         <Route path="admin" element={<ChoirAdminPage />} />
         <Route path="playlists/:playlistId/edit" element={<EditPlaylistPage />} />
       </Route>
       <Route path="/choir/:choirId/songs/:songId/edit" element={<ChoirSongEditorPage />} />
-      <Route path="/playlists" element={<PlaylistsPage />} />
+      <Route path="/playlists" element={<ChoirPlaylistsTab />} />
       <Route path="/playlists/new" element={<CreatePlaylistPage />} />
       <Route path="/playlists/:playlistId" element={<PlaylistDetailPage />} />
       <Route path="/playlists/:playlistId/edit" element={<EditPlaylistPage />} />

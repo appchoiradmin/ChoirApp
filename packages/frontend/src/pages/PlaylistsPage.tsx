@@ -4,7 +4,6 @@ import { usePlaylistContext } from '../context/PlaylistContext';
 const PlaylistsPage: React.FC = () => {
   const { sections } = usePlaylistContext();
 
-
   return (
     <div className="container">
       <h1 className="title">Playlists</h1>
