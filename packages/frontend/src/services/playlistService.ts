@@ -92,9 +92,28 @@ export const addSongToPlaylist = async (
   }
 };
 
+export interface UpdatePlaylistSongDto {
+  masterSongId?: string;
+  choirSongVersionId?: string;
+  order: number;
+}
+
+export interface UpdatePlaylistSectionDto {
+  title: string;
+  order: number;
+  songs: UpdatePlaylistSongDto[];
+}
+
+export interface UpdatePlaylistDto {
+  title: string;
+  isPublic: boolean;
+  sections: UpdatePlaylistSectionDto[];
+  playlistTemplateId?: string;
+}
+
 export const updatePlaylist = async (
   playlistId: string,
-  playlist: Partial<Playlist>,
+  playlist: UpdatePlaylistDto,
   token: string
 ): Promise<void> => {
   const response = await fetch(`${API_URL}/api/playlists/${playlistId}`, {

@@ -104,7 +104,11 @@ namespace ChoirApp.Infrastructure.Services
 
         public async Task<Result> UpdatePlaylistAsync(Guid playlistId, UpdatePlaylistDto playlistDto, Guid userId)
         {
-            var playlist = await _context.Playlists.FindAsync(playlistId);
+            // Load playlist with sections and songs
+            var playlist = await _context.Playlists
+                .Include(p => p.Sections)
+                    .ThenInclude(s => s.PlaylistSongs)
+                .FirstOrDefaultAsync(p => p.PlaylistId == playlistId);
             if (playlist == null)
                 return Result.Fail("Playlist not found.");
 
@@ -115,6 +119,41 @@ namespace ChoirApp.Infrastructure.Services
             playlist.UpdateTitle(playlistDto.Title);
             if (playlistDto.IsPublic.HasValue)
                 playlist.SetVisibility(playlistDto.IsPublic.Value);
+
+            // Atomic update of sections and songs
+            if (playlistDto.Sections != null)
+            {
+                // Remove all existing songs and sections
+                foreach (var section in playlist.Sections.ToList())
+                {
+                    _context.PlaylistSongs.RemoveRange(section.PlaylistSongs);
+                }
+                _context.PlaylistSections.RemoveRange(playlist.Sections);
+                await _context.SaveChangesAsync();
+
+                // Recreate sections and songs from DTO
+                int sectionOrder = 0;
+                foreach (var sectionDto in playlistDto.Sections)
+                {
+                    var sectionResult = ChoirApp.Domain.Entities.PlaylistSection.Create(sectionDto.Title, playlist.PlaylistId, sectionOrder);
+                    if (sectionResult.IsFailed)
+                        return Result.Fail(sectionResult.Errors);
+                    var section = sectionResult.Value;
+                    _context.PlaylistSections.Add(section);
+
+                    int songOrder = 0;
+                    foreach (var songDto in sectionDto.Songs)
+                    {
+                        var songResult = ChoirApp.Domain.Entities.PlaylistSong.Create(section.SectionId, songOrder, songDto.MasterSongId, songDto.ChoirSongVersionId);
+                        if (songResult.IsFailed)
+                            return Result.Fail(songResult.Errors);
+                        var song = songResult.Value;
+                        _context.PlaylistSongs.Add(song);
+                        songOrder++;
+                    }
+                    sectionOrder++;
+                }
+            }
 
             await _context.SaveChangesAsync();
             return Result.Ok();
@@ -190,6 +229,7 @@ namespace ChoirApp.Infrastructure.Services
         public async Task<Result<IEnumerable<PlaylistTemplate>>> GetPlaylistTemplatesByChoirIdAsync(Guid choirId)
         {
             var templates = await _context.PlaylistTemplates
+                .Include(t => t.Sections)
                 .Where(t => t.ChoirId == choirId)
                 .ToListAsync();
 

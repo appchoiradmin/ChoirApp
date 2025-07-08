@@ -3,10 +3,11 @@ export interface Playlist {
   title?: string;
   isPublic: boolean;
   choirId: string;
-  date: Date;
+  date: string | Date;
   sections: PlaylistSection[];
   tags: string[];
   playlistTemplateId?: string;
+  template?: PlaylistTemplate | null; // Optional, for context logic
 }
 
 export interface PlaylistSection {

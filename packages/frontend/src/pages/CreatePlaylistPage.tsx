@@ -3,8 +3,11 @@ import { useNavigate } from 'react-router-dom';
 import { useUser } from '../hooks/useUser';
 import { createPlaylist, getPlaylistTemplatesByChoirId, getPlaylistTemplateById } from '../services/playlistService';
 import { getChoirSongsByChoirId } from '../services/choirSongService';
+import { getAllMasterSongs } from '../services/masterSongService';
 import { PlaylistTemplate, PlaylistSection, PlaylistSong } from '../types/playlist';
 import { ChoirSongVersionDto } from '../types/choir';
+import { MasterSongDto } from '../types/song';
+import MovableSongItem from '../components/MovableSongItem';
 
 const CreatePlaylistPage: React.FC = () => {
   const { user, token } = useUser();
@@ -16,17 +19,20 @@ const CreatePlaylistPage: React.FC = () => {
   const [selectedTemplate, setSelectedTemplate] = useState<PlaylistTemplate | null>(null);
   const [sections, setSections] = useState<PlaylistSection[]>([]);
   const [choirSongs, setChoirSongs] = useState<ChoirSongVersionDto[]>([]);
+  const [masterSongs, setMasterSongs] = useState<MasterSongDto[]>([]);
 
   useEffect(() => {
     const fetchInitialData = async () => {
       if (user?.choirId && token) {
         try {
-          const [fetchedTemplates, fetchedSongs] = await Promise.all([
+          const [fetchedTemplates, fetchedSongs, fetchedMasterSongs] = await Promise.all([
             getPlaylistTemplatesByChoirId(user.choirId, token),
-            getChoirSongsByChoirId(user.choirId, token)
+            getChoirSongsByChoirId(user.choirId, token),
+            getAllMasterSongs(token)
           ]);
           setTemplates(fetchedTemplates);
           setChoirSongs(fetchedSongs);
+          setMasterSongs(fetchedMasterSongs);
         } catch (error) {
           console.error(error);
         }
@@ -51,6 +57,33 @@ const CreatePlaylistPage: React.FC = () => {
     }
   };
 
+  const handleMoveSong = (song: PlaylistSong, fromSectionId: string, toSectionId: string) => {
+    setSections(prevSections => {
+      const fromSection = prevSections.find(s => s.id === fromSectionId);
+      const toSection = prevSections.find(s => s.id === toSectionId);
+      if (!fromSection || !toSection) return prevSections;
+      const songToMove = fromSection.songs.find(s => s === song);
+      if (!songToMove) return prevSections;
+      // Remove from old section
+      const newFromSongs = fromSection.songs.filter(s => s !== song);
+      // Add to new section at end
+      const newToSongs = [...toSection.songs, { ...songToMove, order: toSection.songs.length }];
+      return prevSections.map(s => {
+        if (s.id === fromSectionId) return { ...s, songs: newFromSongs };
+        if (s.id === toSectionId) return { ...s, songs: newToSongs };
+        return s;
+      });
+    });
+  };
+
+  const handleRemoveSongFromSection = (sectionId: string, masterSongId: string) => {
+    setSections(prevSections => prevSections.map(s =>
+      s.id === sectionId
+        ? { ...s, songs: s.songs.filter(song => song.masterSongId !== masterSongId) }
+        : s
+    ));
+  };
+
   const handleAddSongToSection = (sectionId: string, choirSongVersionId: string) => {
     const song = choirSongs.find(s => s.choirSongId === choirSongVersionId);
     if (!song) return;
@@ -72,6 +105,12 @@ const CreatePlaylistPage: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    // Only persist if there is at least one song in any section
+    const hasSongs = sections.some(section => section.songs.length > 0);
+    if (!hasSongs) {
+      alert('Add at least one song before saving the playlist.');
+      return;
+    }
     if (user?.choirId && token) {
       try {
         await createPlaylist({ title, isPublic, choirId: user.choirId, date: new Date(date), sections, playlistTemplateId: selectedTemplate?.id }, token);
@@ -81,6 +120,7 @@ const CreatePlaylistPage: React.FC = () => {
       }
     }
   };
+
 
   return (
     <div className="container">
@@ -152,14 +192,18 @@ const CreatePlaylistPage: React.FC = () => {
             <div key={section.id} className="box">
               <h3 className="title is-5">{section.title}</h3>
               <ul>
-                {section.songs.map((song, songIndex) => {
-                  const songData = choirSongs.find(cs => cs.choirSongId === song.choirSongVersionId);
-                  return (
-                    <li key={songIndex}>
-                      {songData?.masterSong?.title}
-                    </li>
-                  );
-                })}
+                {section.songs.map((song) => (
+                  <MovableSongItem
+                    key={song.choirSongVersionId || song.masterSongId}
+                    song={song}
+                    section={section}
+                    sections={sections}
+                    choirSongs={choirSongs}
+                    masterSongs={masterSongs}
+                    onMoveSong={handleMoveSong}
+                    onRemoveSong={() => handleRemoveSongFromSection(section.id, song.masterSongId!)}
+                  />
+                ))}
               </ul>
               <div className="field has-addons mt-3">
                 <div className="control">

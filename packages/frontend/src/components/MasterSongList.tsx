@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { searchMasterSongs } from '../services/masterSongService';
-import { getPlaylistsByChoirId, addSongToPlaylist } from '../services/playlistService';
+import { addSongToPlaylist } from '../services/playlistService';
 import { MasterSongDto } from '../types/song';
-import { Playlist, PlaylistSection } from '../types/playlist';
+import { PlaylistSection } from '../types/playlist';
 import { useUser } from '../hooks/useUser';
 import { usePlaylist } from '../hooks/usePlaylist';
 
@@ -13,13 +13,13 @@ interface MasterSongListProps {
 
 const MasterSongList: React.FC<MasterSongListProps> = ({ choirId }) => {
   const [songs, setSongs] = useState<MasterSongDto[]>([]);
-  const [playlists, setPlaylists] = useState<Playlist[]>([]);
+
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
   const { token } = useUser();
-  const { selectedPlaylist, setSelectedPlaylist } = usePlaylist();
+  const { sections, selectedTemplate } = usePlaylist();
 
   useEffect(() => {
     if (token) {
@@ -28,11 +28,9 @@ const MasterSongList: React.FC<MasterSongListProps> = ({ choirId }) => {
           setLoading(true);
           const fetchedSongs = await searchMasterSongs({ title: searchTerm }, token);
           setSongs(fetchedSongs);
-          const fetchedPlaylists = await getPlaylistsByChoirId(choirId, token);
-          setPlaylists(fetchedPlaylists);
-          if (!selectedPlaylist && fetchedPlaylists.length > 0) {
-            setSelectedPlaylist(fetchedPlaylists[0]);
-          }
+
+
+          // No longer using selectedPlaylist
         } catch (err: any) {
           setError(err.message || 'Failed to fetch songs or playlists');
         } finally {
@@ -41,17 +39,13 @@ const MasterSongList: React.FC<MasterSongListProps> = ({ choirId }) => {
       };
       fetchSongsAndPlaylists();
     }
-  }, [searchTerm, token, choirId, selectedPlaylist, setSelectedPlaylist]);
+  }, [searchTerm, token, choirId]);
 
-  const handleAddSongToPlaylist = async (
-    song: MasterSongDto,
-    playlistId: string,
-    sectionId: string
-  ) => {
+  const handleAddSongToPlaylist = async (song: MasterSongDto, sectionId: string) => {
     if (!token) return;
     try {
       await addSongToPlaylist(
-        playlistId,
+        sections[0].id,
         {
           songId: song.songId,
           sectionId,
@@ -116,8 +110,8 @@ const MasterSongList: React.FC<MasterSongListProps> = ({ choirId }) => {
                     </div>
                     <div className="dropdown-menu" id={`dropdown-menu-${song.songId}`} role="menu">
                       <div className="dropdown-content">
-                        {selectedPlaylist ? (
-                          selectedPlaylist.sections
+                        {sections && sections.length > 0 ? (
+                          sections
                             .sort((a, b) => a.order - b.order)
                             .map((section: PlaylistSection) => (
                               <a
@@ -125,11 +119,12 @@ const MasterSongList: React.FC<MasterSongListProps> = ({ choirId }) => {
                                 className="dropdown-item"
                                 key={section.id}
                                 onClick={() => {
-                                  handleAddSongToPlaylist(song, selectedPlaylist.id, section.id);
+                                  handleAddSongToPlaylist(song, section.id);
+                                  // handleAddSongToPlaylist(song, playlistId, section.id);
                                   setActiveDropdown(null);
                                 }}
                               >
-                                {selectedPlaylist.title} - {section.title}
+                                {(selectedTemplate ? selectedTemplate.title : 'Playlist') + ' - ' + section.title}
                               </a>
                             ))
                         ) : (

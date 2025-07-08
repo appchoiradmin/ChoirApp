@@ -1,10 +1,15 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { getAllMasterSongs, searchMasterSongs } from '../services/masterSongService';
+import { useDisplayedPlaylistSections } from '../hooks/useDisplayedPlaylistSections';
 import type { MasterSongDto } from '../types/song';
+import { PlaylistSection } from '../types/playlist';
 import { useUser } from '../hooks/useUser';
+import { usePlaylistContext } from '../context/PlaylistContext';
 
 const MasterSongsListPage: React.FC = () => {
+  const { sections, selectedTemplate } = usePlaylistContext();
+  const displayedSections = useDisplayedPlaylistSections(sections, selectedTemplate);
   const { token } = useUser();
   const navigate = useNavigate();
   const [songs, setSongs] = useState<MasterSongDto[]>([]);
@@ -13,6 +18,7 @@ const MasterSongsListPage: React.FC = () => {
   const [searchTitle, setSearchTitle] = useState('');
   const [searchArtist, setSearchArtist] = useState('');
   const [searchTag, setSearchTag] = useState('');
+
 
   useEffect(() => {
     const fetchSongs = async () => {
@@ -118,6 +124,20 @@ const MasterSongsListPage: React.FC = () => {
           <button className="button is-light" onClick={() => navigate(-1)}>Go Back</button>
           <Link to="/master-songs/create" className="button is-primary">Create New Song</Link>
         </div>
+        {/* Show playlist/template sections as a guide for adding songs */}
+        {displayedSections.length > 0 && (
+          <div className="box mt-4">
+            <p className="has-text-weight-semibold mb-2">Add songs to these sections:</p>
+            {displayedSections
+              .slice()
+              .sort((a: PlaylistSection, b: PlaylistSection) => a.order - b.order)
+              .map((section: PlaylistSection) => (
+                <div key={section.id} className="mb-3">
+                  <span className="tag is-light is-medium mr-2">{section.title}</span>
+                </div>
+              ))}
+          </div>
+        )}
         <div className="list">
           {songs.map(song => (
             <Link key={song.songId} to={`/master-songs/${song.songId}`} className="list-item">

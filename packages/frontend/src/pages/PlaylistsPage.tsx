@@ -1,116 +1,44 @@
-import React, { useEffect, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { useUser } from '../hooks/useUser';
-import { usePlaylist } from '../hooks/usePlaylist';
-import { getPlaylistsByChoirId, createPlaylist, getPlaylistTemplatesByChoirId } from '../services/playlistService';
-import { Playlist } from '../types/playlist';
-import PlaylistDetail from '../components/PlaylistDetail';
+import React from 'react';
+import { usePlaylistContext } from '../context/PlaylistContext';
 
 const PlaylistsPage: React.FC = () => {
-  const { choirId } = useParams<{ choirId: string }>();
-  const { token } = useUser();
-  const navigate = useNavigate();
-  const { selectedPlaylist, setSelectedPlaylist } = usePlaylist();
-  const [playlists, setPlaylists] = useState<Playlist[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const { sections } = usePlaylistContext();
 
-  const getNextSunday = () => {
-    const date = new Date();
-    const today = date.getDay();
-    if (today !== 0) {
-      const daysUntilSunday = 7 - today;
-      date.setDate(date.getDate() + daysUntilSunday);
-    }
-    date.setHours(0, 0, 0, 0);
-    return date;
-  };
-
-  useEffect(() => {
-    if (choirId && token) {
-      const fetchPlaylistsAndTemplates = async () => {
-        try {
-          const [fetchedPlaylists, fetchedTemplates] = await Promise.all([
-            getPlaylistsByChoirId(choirId, token),
-            getPlaylistTemplatesByChoirId(choirId, token),
-          ]);
-
-          setPlaylists(fetchedPlaylists);
-
-          const nextSunday = getNextSunday();
-          const existingPlaylist = fetchedPlaylists.find(
-            (p) => new Date(p.date).getTime() === nextSunday.getTime()
-          );
-
-          if (existingPlaylist) {
-            navigate(`/choir/${choirId}/playlists/${existingPlaylist.id}/edit`);
-          } else if (fetchedTemplates.length > 0) {
-            const newPlaylistDto = {
-              choirId,
-              date: nextSunday,
-              isPublic: false,
-              playlistTemplateId: fetchedTemplates[0].id,
-            };
-            const newPlaylist = await createPlaylist(newPlaylistDto, token);
-            navigate(`/choir/${choirId}/playlists/${newPlaylist.id}/edit`);
-          } else if (fetchedPlaylists.length > 0) {
-            setSelectedPlaylist(fetchedPlaylists[0]);
-          }
-        } catch (err: any) {
-          setError(err.message || 'Failed to fetch data');
-        } finally {
-          setLoading(false);
-        }
-      };
-      fetchPlaylistsAndTemplates();
-    }
-  }, [choirId, token, navigate]);
-
-  if (loading) {
-    return <div>Loading...</div>;
-  }
-
-  if (error) {
-    return <div>Error: {error}</div>;
-  }
-
-  const handlePlaylistDeleted = (playlistId: string) => {
-    const updatedPlaylists = playlists.filter(p => p.id !== playlistId);
-    setPlaylists(updatedPlaylists);
-    if (selectedPlaylist?.id === playlistId) {
-      setSelectedPlaylist(updatedPlaylists.length > 0 ? updatedPlaylists[0] : null);
-    }
-  };
 
   return (
     <div className="container">
       <h1 className="title">Playlists</h1>
-      <div className="columns">
-        <div className="column is-one-quarter">
-          <aside className="menu">
-            <p className="menu-label">Playlists</p>
-            <ul className="menu-list">
-              {playlists.map((playlist) => (
-                <li key={playlist.id}>
-                  <a
-                    className={selectedPlaylist?.id === playlist.id ? 'is-active' : ''}
-                    onClick={() => setSelectedPlaylist(playlist)}
-                  >
-                    {new Date(playlist.date).toLocaleDateString()}
-                  </a>
-                </li>
-              ))}
-            </ul>
-          </aside>
+      {sections.length === 0 ? (
+        <div>No playlist sections available.</div>
+      ) : (
+        <div className="playlist-sections">
+          {sections.map((section, idx) => (
+            <div key={section.id || idx} className="card mb-4">
+              <header className="card-header">
+                <p className="card-header-title">
+                  {section.title || 'Untitled Section'}
+                </p>
+              </header>
+              {section.songs && section.songs.length > 0 ? (
+                <div className="card-content">
+                  <ul>
+                    {section.songs.map((song, songIdx) => (
+                      <li key={song.id || songIdx}>
+                        {/* Show more song info here if available in PlaylistSong */}
+                        Song #{songIdx + 1}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ) : (
+                <div className="card-content">
+                  <em>No songs in this section.</em>
+                </div>
+              )}
+            </div>
+          ))}
         </div>
-        <div className="column">
-          {selectedPlaylist ? (
-            <PlaylistDetail playlist={selectedPlaylist} onPlaylistDeleted={handlePlaylistDeleted} />
-          ) : (
-            <p>No playlist selected. Create a template to get started.</p>
-          )}
-        </div>
-      </div>
+      )}
     </div>
   );
 };

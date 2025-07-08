@@ -1,10 +1,4 @@
 import { useContext } from 'react';
-import { PlaylistContext } from '../contexts/PlaylistContext';
+import { usePlaylistContext } from '../context/PlaylistContext';
 
-export const usePlaylist = () => {
-  const context = useContext(PlaylistContext);
-  if (context === undefined) {
-    throw new Error('usePlaylist must be used within a PlaylistProvider');
-  }
-  return context;
-};
+export const usePlaylist = usePlaylistContext;

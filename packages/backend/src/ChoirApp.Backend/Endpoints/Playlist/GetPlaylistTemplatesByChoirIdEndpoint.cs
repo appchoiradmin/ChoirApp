@@ -42,7 +42,24 @@ namespace ChoirApp.Backend.Endpoints.Playlist
                 Id = t.TemplateId,
                 Title = t.Title,
                 Description = t.Description,
-                ChoirId = t.ChoirId
+                ChoirId = t.ChoirId,
+                Sections = t.Sections
+                    .OrderBy(s => s.Order)
+                    .Select(s => new PlaylistTemplateSectionDto
+                    {
+                        Id = s.TemplateSectionId,
+                        Title = s.Title,
+                        Order = s.Order,
+                        Songs = s.PlaylistTemplateSongs != null
+                            ? s.PlaylistTemplateSongs.OrderBy(ps => ps.Order).Select(ps => new PlaylistSongDto
+                                {
+                                    Id = ps.TemplateSongId,
+                                    Order = ps.Order,
+                                    MasterSongId = ps.MasterSongId,
+                                    ChoirSongVersionId = ps.ChoirSongVersionId
+                                }).ToList()
+                            : new List<PlaylistSongDto>()
+                    }).ToList()
             });
 
             await SendAsync(response, cancellation: ct);
