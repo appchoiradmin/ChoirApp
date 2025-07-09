@@ -1,0 +1,123 @@
+@use '../styles/variables' as *;
+@use 'sass:color' as color;
+
+.pageContainer {
+  max-width: 700px;
+  margin: 0 auto;
+  background: $surface;
+  border-radius: 1rem;
+  box-shadow: 0 2px 12px rgba(34,34,59,0.06);
+  padding: 2.5rem 1.5rem;
+}
+
+.title {
+  font-family: $family-primary;
+  font-size: $size-2;
+  color: $primary;
+  font-weight: 700;
+  margin-bottom: 1.2rem;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.3rem;
+  margin-bottom: 2rem;
+}
+
+.formGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.label {
+  font-family: $family-primary;
+  font-size: $size-5;
+  color: $text-light;
+  font-weight: 500;
+}
+
+.input, .select select, input[type="date"] {
+  font-family: $family-primary;
+  font-size: $size-5;
+  border: 1px solid $border;
+  border-radius: 0.5rem;
+  padding: 0.6rem 1rem;
+  background: $background;
+  color: $text;
+  outline: none;
+  transition: border-color 0.15s;
+  &:focus {
+    border-color: $primary;
+  }
+}
+
+.checkbox {
+  font-family: $family-primary;
+  font-size: $size-5;
+  color: $text;
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+}
+
+.button {
+  font-family: $family-primary;
+  font-weight: 600;
+  border-radius: 0.5rem;
+  padding: 0.6rem 1.5rem;
+  font-size: $size-5;
+  border: none;
+  background: $primary;
+  color: #fff;
+  cursor: pointer;
+  transition: background 0.15s;
+  &:hover, &:focus {
+    background: color.adjust($primary, $lightness: -8%);
+  }
+}
+
+.sectionBox {
+  background: $background;
+  border-radius: 0.7rem;
+  box-shadow: 0 1px 6px rgba(34,34,59,0.06);
+  margin-bottom: 1.3rem;
+  padding: 1.2rem 1rem;
+}
+
+.sectionTitle {
+  font-family: $family-primary;
+  font-size: $size-4;
+  color: $secondary;
+  font-weight: 600;
+  margin-bottom: 0.7rem;
+}
+
+.songList {
+  list-style: none;
+  padding: 0;
+  margin-bottom: 0.7rem;
+}
+
+.addSongRow {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  margin-top: 0.7rem;
+}
+
+@media (max-width: 600px) {
+  .pageContainer {
+    padding: 1.2rem 0.4rem;
+  }
+  .title {
+    font-size: $size-3;
+  }
+  .sectionBox {
+    padding: 0.7rem 0.4rem;
+  }
+  .sectionTitle {
+    font-size: $size-5;
+  }
+}

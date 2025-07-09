@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import Button from './Button';
+import styles from './MasterSongList.module.scss';
 import { searchMasterSongs } from '../services/masterSongService';
 import { addSongToPlaylist } from '../services/playlistService';
 import { MasterSongDto } from '../types/song';
@@ -21,6 +23,14 @@ const MasterSongList: React.FC<MasterSongListProps> = ({ choirId }) => {
   const { token } = useUser();
   const { sections, selectedTemplate, playlistId, isPlaylistReady, createPlaylistIfNeeded } = usePlaylist();
   const [isCreatingPlaylist, setIsCreatingPlaylist] = useState(false);
+
+  // DEBUG LOGS
+  // eslint-disable-next-line no-console
+  console.log('sections from context:', sections);
+  // eslint-disable-next-line no-console
+  console.log('selectedTemplate:', selectedTemplate);
+  // eslint-disable-next-line no-console
+  console.log('playlistId:', playlistId);
 
   useEffect(() => {
     if (token) {
@@ -136,12 +146,12 @@ const MasterSongList: React.FC<MasterSongListProps> = ({ choirId }) => {
 
 
   return (
-    <div className="container">
-      <h1 className="title">Master Songs</h1>
-      <div className="field">
-        <div className="control">
+    <div className={styles.container}>
+      <h1 className={styles.title}>Master Songs</h1>
+      <div className={styles.field}>
+        <div className={styles.control}>
           <input
-            className="input"
+            className={styles.input}
             type="text"
             placeholder="Filter by title or artist"
             value={searchTerm}
@@ -150,72 +160,75 @@ const MasterSongList: React.FC<MasterSongListProps> = ({ choirId }) => {
         </div>
       </div>
       {isCreatingPlaylist ? (
-        <p className="has-text-info mt-3">Creating playlist... Please wait.</p>
+        <p className={styles['has-text-info']} style={{ marginTop: '1rem' }}>Creating playlist... Please wait.</p>
       ) : loading ? (
         <p>Loading...</p>
       ) : error ? (
-        <p className="has-text-danger">{error}</p>
+        <p className={styles['has-text-danger']}>{error}</p>
       ) : (
-        <table className="table is-fullwidth is-striped is-hoverable">
-          <thead>
-            <tr>
-              <th>Title</th>
-              <th>Artist</th>
-              <th>Add to Playlist</th>
-            </tr>
-          </thead>
-          <tbody>
-            {songs.map((song) => (
-              <tr key={song.songId}>
-                <td>
-                  <Link to={`/master-songs/${song.songId}`}>{song.title}</Link>
-                </td>
-                <td>{song.artist}</td>
-                <td>
-                  <div className={`dropdown ${activeDropdown === song.songId ? 'is-active' : ''}`}>
-                    <div className="dropdown-trigger">
-                      <button
-                        className="button"
+        <div className={styles['song-table']}>
+          <table className={`table is-fullwidth is-striped is-hoverable ${styles.table}`}>
+            <thead>
+              <tr>
+                <th>Title</th>
+                <th>Artist</th>
+                <th>Add to Playlist</th>
+              </tr>
+            </thead>
+            <tbody>
+              {songs.map((song) => (
+                <tr key={song.songId}>
+                  <td>
+                    <Link to={`/master-songs/${song.songId}`}>{song.title}</Link>
+                  </td>
+                  <td>{song.artist}</td>
+                  <td>
+                    <div className={styles['song-dropdown']}>
+                      <Button
+                        className="is-small"
+                        onClick={() => setActiveDropdown(activeDropdown === song.songId ? null : song.songId)}
                         aria-haspopup="true"
                         aria-controls={`dropdown-menu-${song.songId}`}
-                        onClick={() => setActiveDropdown(activeDropdown === song.songId ? null : song.songId)}
                       >
                         <span>Add to...</span>
                         <span className="icon is-small">
                           <i className="fas fa-angle-down" aria-hidden="true"></i>
                         </span>
-                      </button>
+                      </Button>
+                      {activeDropdown === song.songId && (
+                        <div className={styles['song-dropdown-menu']} id={`dropdown-menu-${song.songId}`} role="menu">
+                          <div className={styles['song-dropdown-content']}>
+                            {sections && sections.length > 0 ? (
+                              sections
+                                .sort((a, b) => a.order - b.order)
+                                .map((section: PlaylistSection) => (
+                                  <div
+                                    key={section.id}
+                                    className={styles['song-dropdown-item']}
+                                    tabIndex={0}
+                                    role="option"
+                                    aria-disabled={isCreatingPlaylist}
+                                    onClick={() => !isCreatingPlaylist && handleAddSongToPlaylist(song, section.id)}
+                                    onKeyPress={e => {
+                                      if (!isCreatingPlaylist && e.key === 'Enter') handleAddSongToPlaylist(song, section.id);
+                                    }}
+                                  >
+                                    {(selectedTemplate ? selectedTemplate.title : 'Playlist') + ' - ' + section.title}
+                                  </div>
+                                ))
+                            ) : (
+                              <div className={styles['song-dropdown-item']}>No playlist sections</div>
+                            )}
+                          </div>
+                        </div>
+                      )}
                     </div>
-                    <div className="dropdown-menu" id={`dropdown-menu-${song.songId}`} role="menu">
-                      <div className="dropdown-content">
-                        {sections && sections.length > 0 ? (
-                          sections
-                            .sort((a, b) => a.order - b.order)
-                            .map((section: PlaylistSection) => (
-                              <button
-                                key={section.id}
-                                className="dropdown-item"
-                                type="button"
-                                onClick={(e) => {
-                                  e.preventDefault();
-                                  handleAddSongToPlaylist(song, section.id);
-                                  setActiveDropdown(null);
-                                }}
-                              >
-                                {(selectedTemplate ? selectedTemplate.title : 'Playlist') + ' - ' + section.title}
-                              </button>
-                            ))
-                        ) : (
-                          <div className="dropdown-item">No playlist sections</div>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       )}
     </div>
   );

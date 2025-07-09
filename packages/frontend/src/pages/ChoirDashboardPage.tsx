@@ -4,6 +4,7 @@ import BottomNavigation from '../components/BottomNavigation';
 import DatePicker from '../components/DatePicker';
 import { useUser } from '../hooks/useUser';
 import { getNextSunday } from '../utils/getNextSunday';
+import styles from './ChoirDashboardPage.module.scss';
 
 // Create a shared date context
 export const SharedDateContext = React.createContext<{
@@ -29,20 +30,17 @@ const ChoirDashboardPage = () => {
 
   return (
     <SharedDateContext.Provider value={{ selectedDate, setSelectedDate }}>
-      <div>
+      <div className={styles['choir-dashboard-root']}>
         {/* Shared Date Picker */}
-        <div className="container mt-4">
-          <div className="mb-4" style={{ maxWidth: 280 }}>
-            <label className="label" htmlFor="playlist-date-picker">Select Date</label>
-            <DatePicker
-              selected={selectedDate}
-              onChange={date => setSelectedDate(date)}
-              className="input"
-            />
-            <p className="help">(This date applies to both Master Songs and Playlists tabs.)</p>
-          </div>
+        <div className={styles['date-picker-container']}>
+          <label className={styles.label} htmlFor="playlist-date-picker">Select Date</label>
+          <DatePicker
+            selected={selectedDate}
+            onChange={date => setSelectedDate(date)}
+            className={styles.input}
+          />
+          <p className={styles.help}>(This date applies to both Master Songs and Playlists tabs.)</p>
         </div>
-        
         <Outlet />
         <BottomNavigation tabs={tabs} />
       </div>

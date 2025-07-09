@@ -1,0 +1,86 @@
+@use '../styles/variables' as *;
+@use 'sass:color' as color;
+
+.section {
+  padding: 2rem 0.5rem;
+}
+
+.container {
+  max-width: 700px;
+  margin: 0 auto;
+  background: $surface;
+  border-radius: 1rem;
+  box-shadow: 0 2px 12px rgba(34,34,59,0.06);
+  padding: 2.5rem 1.5rem;
+}
+
+.title {
+  font-family: $family-primary;
+  font-size: $size-1;
+  color: $primary;
+  font-weight: 700;
+  margin-bottom: 1.2rem;
+}
+
+.sectionHeader {
+  font-family: $family-primary;
+  font-size: $size-3;
+  color: $primary;
+  font-weight: 600;
+  margin-bottom: 1.2rem;
+  margin-top: 2rem;
+}
+
+.subSectionHeader {
+  font-family: $family-primary;
+  font-size: $size-4;
+  color: $secondary;
+  font-weight: 500;
+  margin-bottom: 0.7rem;
+  margin-top: 1.2rem;
+}
+
+.choirList {
+  list-style: none;
+  padding: 0;
+  margin-bottom: 1.2rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.7rem;
+}
+
+.choirListItem {
+  margin: 0;
+  padding: 0;
+  display: flex;
+  align-items: center;
+}
+
+
+p, .subtitle {
+  font-family: $family-secondary;
+  color: $text;
+  font-size: $size-4;
+}
+
+.button, .button.is-primary {
+  font-family: $family-primary;
+  font-weight: 600;
+  border-radius: 0.5rem;
+  background: $primary;
+  color: #fff;
+  border: none;
+  transition: background 0.15s;
+  &:hover, &:focus {
+    background: color.adjust($primary, $lightness: -8%);
+  }
+}
+
+@media (max-width: 600px) {
+  .container {
+    padding: 1.5rem 0.5rem;
+  }
+  .title {
+    font-size: 1.5rem;
+  }
+}

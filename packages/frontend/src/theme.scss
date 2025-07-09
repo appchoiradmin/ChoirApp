@@ -1,0 +1,65 @@
+// ChoirApp Design System Theme
+// ===========================
+
+// Import design tokens
+@use './_variables.scss' as *;
+
+// Bulma variable overrides (from _variables.scss)
+// $primary, $link, $info, $success, $warning, $danger, $family-primary already set
+
+// Import Bulma (only place where @import is used)
+@import "bulma/bulma";
+
+// Custom global styles
+body {
+  font-family: $font-family-base;
+  font-size: $font-size-base;
+  color: $color-neutral-900;
+  background: $color-neutral-100;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: $font-family-heading;
+  font-weight: $font-weight-bold;
+  color: $color-primary;
+  margin-bottom: 0.5em;
+}
+
+.button {
+  font-family: $font-family-base;
+  font-weight: $font-weight-bold;
+  border-radius: 0.5em;
+  transition: background 0.2s, color 0.2s;
+}
+
+.text-accent {
+  color: $color-accent !important;
+}
+
+
+// 5. Custom global styles
+body {
+  font-family: $font-family-base;
+  font-size: $font-size-base;
+  color: $color-neutral-900;
+  background: $color-neutral-100;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: $font-family-heading;
+  font-weight: $font-weight-bold;
+  color: $color-primary;
+  margin-bottom: 0.5em;
+}
+
+.button {
+  font-family: $font-family-base;
+  font-weight: $font-weight-bold;
+  border-radius: 0.5em;
+  transition: background 0.2s, color 0.2s;
+}
+
+// Example utility
+.text-accent {
+  color: $color-accent !important;
+}

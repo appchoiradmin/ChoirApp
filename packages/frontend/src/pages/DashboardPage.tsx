@@ -4,6 +4,7 @@ import { useUser } from '../hooks/useUser';
 import { getInvitations, acceptInvitation, rejectInvitation } from '../services/invitationService';
 import { Invitation } from '../types/invitation';
 import InvitationsList from '../components/InvitationsList';
+import styles from './DashboardPage.module.scss';
 
 const DashboardPage: React.FC = () => {
   const { user, loading } = useUser();
@@ -33,8 +34,8 @@ const DashboardPage: React.FC = () => {
 
   if (loading) {
     return (
-      <section className="section">
-        <div className="container">
+      <section className={styles.section}>
+        <div className={styles.container}>
           <p>Loading dashboard...</p>
         </div>
       </section>
@@ -43,11 +44,11 @@ const DashboardPage: React.FC = () => {
 
   if (!user) {
     return (
-      <section className="section">
-        <div className="container">
-          <h1 className="title">Welcome!</h1>
+      <section className={styles.section}>
+        <div className={styles.container}>
+          <h1 className={styles.title}>Welcome!</h1>
           <p>Please log in to see your dashboard.</p>
-          <Link to="/" className="button is-primary">Go to Homepage</Link>
+          <Link to="/" className={styles.button}>Go to Homepage</Link>
         </div>
       </section>
     );
@@ -60,65 +61,46 @@ const DashboardPage: React.FC = () => {
   // TODO: Fetch pending invitations
 
   return (
-    <section className="section">
-      <div className="container">
-        <div className="level">
-          <div className="level-left">
+    <section className={styles.section}>
+      <div className={styles.container}>
+        <h1 className={styles.title}>Dashboard</h1>
+        <p>Welcome, {name} ({email})!</p>
+
+        <div style={{ marginBottom: '2rem' }}>
+          <h2 className={styles.sectionHeader}>Your Choirs</h2>
+          {adminOfChoirs.length > 0 && (
             <div>
-              <h1 className="title">Choir Dashboard</h1>
-              <p className="subtitle">
-                Welcome, <strong>{name}</strong>! ({email})
-              </p>
+              <h3 className={styles.subSectionHeader}>As Admin</h3>
+              <ul className={styles.choirList}>
+                {adminOfChoirs.map(c => (
+                  <li key={c.id} className={styles.choirListItem}>
+                    <Link to={`/choir/${c.id}/songs`} className={styles.button}>
+                      {c.name}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
             </div>
-          </div>
-          <div className="level-right">
-            <Link to="/master-songs" className="button is-link">
-              <span className="icon"><i className="fas fa-music"></i></span>
-              <span>Master Song List</span>
-            </Link>
-            <Link to="/create-choir" className="button is-primary">
-              <span className="icon"><i className="fas fa-plus"></i></span>
-              <span>Create New Choir</span>
-            </Link>
-          </div>
+          )}
+          {memberOfChoirs.length > 0 && (
+            <div>
+              <h3 className={styles.subSectionHeader}>As Member</h3>
+              <ul className={styles.choirList}>
+                {memberOfChoirs.map(c => (
+                  <li key={c.id} className={styles.choirListItem}>
+                    <Link to={`/choir/${c.id}/songs`} className={styles.button}>
+                      {c.name}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
         </div>
-        <hr />
 
-        <div className="columns">
-          <div className="column">
-            <h2 className="title is-4">My Choirs (Admin)</h2>
-            {adminOfChoirs.length > 0 ? (
-              <div className="list">
-                {adminOfChoirs.map(choir => (
-                  <div key={choir.id} className="list-item">
-                    <Link to={`/choir/${choir.id}/songs`}>{choir.name}</Link>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <p>You haven't created any choirs yet.</p>
-            )}
-          </div>
-
-          <div className="column">
-            <h2 className="title is-4">Choirs I'm a Member Of</h2>
-            {memberOfChoirs.length > 0 ? (
-              <div className="list">
-                {memberOfChoirs.map(choir => (
-                  <div key={choir.id} className="list-item">
-                    <Link to={`/choir/${choir.id}/songs`}>{choir.name}</Link>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <p>You are not a member of any choirs.</p>
-            )}
-          </div>
-
-          <div className="column">
-            <h2 className="title is-4">Pending Invitations</h2>
-            <InvitationsList invitations={invitations} onAccept={handleAccept} onReject={handleReject} />
-          </div>
+        <div style={{ marginBottom: '1.5rem' }}>
+          <h2 className={styles.sectionHeader}>Pending Invitations</h2>
+          <InvitationsList invitations={invitations} onAccept={handleAccept} onReject={handleReject} />
         </div>
       </div>
     </section>

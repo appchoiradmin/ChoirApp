@@ -5,6 +5,7 @@ import { createChoirSongVersion, getChoirSongById } from '../services/choirSongS
 import type { MasterSongDto } from '../types/song';
 import { useUser } from '../hooks/useUser';
 import ChordProViewer from '../components/ChordProViewer';
+import styles from './MasterSongDetailPage.module.scss';
 
 const MasterSongDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -115,68 +116,49 @@ const MasterSongDetailPage: React.FC = () => {
   const canManageVersions = user && user.choirs && user.choirs.length > 0;
 
   return (
-    <section className="section">
-      <div className="container">
-        <div className="level">
-          <div className="level-left">
-            <div>
-              <h1 className="title">{song.title}</h1>
-              <p className="subtitle is-6">Artist: {song.artist}</p>
-            </div>
-          </div>
-          <div className="level-right">
-            <button className="button" onClick={() => navigate(-1)}>
-              Go Back
+    <section className={styles['song-detail-section']}>
+      <div className={styles['song-detail-container']}>
+        <div className={styles['song-actions']}>
+          <button className={styles.button} onClick={() => navigate(-1)}>
+            Go Back
+          </button>
+          {canManageVersions && user.choirs.length > 1 && (
+            <label className={styles.label} style={{ marginLeft: 12 }}>
+              For Choir:
+              <select
+                className={styles['song-select-choir']}
+                value={selectedChoirId || ''}
+                onChange={(e) => setSelectedChoirId(e.target.value)}
+              >
+                {user.choirs.map((choir) => (
+                  <option key={choir.id} value={choir.id}>
+                    {choir.name}
+                  </option>
+                ))}
+              </select>
+            </label>
+          )}
+          {canManageVersions && (
+            <button
+              className={styles.button + ' button is-primary'}
+              onClick={handleEditOrCreate}
+              disabled={isProcessing || isCheckingVersion || !selectedChoirId}
+              style={{ minWidth: 180 }}
+            >
+              {isProcessing || isCheckingVersion ? 'Loading...' : (choirSongExists ? 'Edit Choir Version' : 'Create Choir Version')}
             </button>
-          </div>
-          <div className="level-right">
-            {canManageVersions && user.choirs.length > 1 && (
-              <div className="field is-horizontal">
-                <div className="field-label is-normal">
-                  <label className="label">For Choir:</label>
-                </div>
-                <div className="field-body">
-                  <div className="field">
-                    <div className="control">
-                      <div className="select">
-                        <select
-                          value={selectedChoirId || ''}
-                          onChange={(e) => setSelectedChoirId(e.target.value)}
-                        >
-                          {user.choirs.map((choir) => (
-                            <option key={choir.id} value={choir.id}>
-                              {choir.name}
-                            </option>
-                          ))}
-                        </select>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
-            {canManageVersions && (
-              <div className="field ml-4">
-                <div className="control">
-                  <button
-                    className={`button is-primary ${isProcessing || isCheckingVersion ? 'is-loading' : ''}`}
-                    onClick={handleEditOrCreate}
-                    disabled={isProcessing || isCheckingVersion || !selectedChoirId}
-                  >
-                    {choirSongExists ? 'Edit Choir Version' : 'Create Choir Version'}
-                  </button>
-                </div>
-              </div>
-            )}
-          </div>
+          )}
         </div>
 
-        <div className="tags">
+        <h1 className={styles['song-title']}>{song.title}</h1>
+        <p className={styles['song-artist']}>Artist: {song.artist}</p>
+
+        <div className={styles['song-tags']}>
           {song.tags.map(tag => (
-            <span key={tag.tagId} className="tag is-primary">{tag.tagName}</span>
+            <span key={tag.tagId} className={styles['song-tag']}>{tag.tagName}</span>
           ))}
         </div>
-        <div className="content">
+        <div className={styles['song-content']}>
           <ChordProViewer source={song.lyricsChordPro} />
         </div>
       </div>
