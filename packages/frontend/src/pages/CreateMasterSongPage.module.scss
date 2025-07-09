@@ -1,0 +1,78 @@
+@use '../styles/variables' as *;
+
+.create-song-section {
+  padding: 2rem 0.5rem;
+  background: $background;
+  min-height: 100vh;
+}
+
+.create-song-container {
+  max-width: 700px;
+  margin: 0 auto;
+  background: $surface;
+  border-radius: 1rem;
+  box-shadow: 0 2px 12px rgba(34,34,59,0.08);
+  padding: 2.5rem 1.5rem;
+}
+
+.create-song-title {
+  font-family: $family-primary;
+  font-size: $size-2;
+  color: $primary;
+  font-weight: 700;
+  margin-bottom: 1.2rem;
+}
+
+.form-label {
+  font-family: $family-primary;
+  color: $primary;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+.form-input, .form-textarea {
+  font-family: $family-secondary;
+  border-radius: 0.5rem;
+  border: 1px solid $border;
+  padding: 0.5rem 0.75rem;
+  font-size: 1rem;
+  margin-bottom: 0.5rem;
+  width: 100%;
+}
+
+.form-textarea {
+  min-height: 200px;
+  resize: vertical;
+}
+
+.form-group {
+  margin-bottom: 1.25rem;
+}
+
+.form-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+
+.error-message {
+  background: $danger;
+  color: #fff;
+  border-radius: 0.5rem;
+  padding: 0.75rem 1rem;
+  margin-bottom: 1rem;
+  font-size: 1rem;
+}
+
+@media (max-width: 600px) {
+  .create-song-container {
+    padding: 1.5rem 0.5rem;
+  }
+  .create-song-title {
+    font-size: 1.4rem;
+  }
+  .form-textarea {
+    min-height: 120px;
+  }
+}

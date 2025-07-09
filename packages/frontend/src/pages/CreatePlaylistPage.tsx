@@ -8,6 +8,7 @@ import { PlaylistTemplate, PlaylistSection, PlaylistSong } from '../types/playli
 import { ChoirSongVersionDto } from '../types/choir';
 import { MasterSongDto } from '../types/song';
 import MovableSongItem from '../components/MovableSongItem';
+import styles from './CreatePlaylistPage.module.scss';
 
 const CreatePlaylistPage: React.FC = () => {
   const { user, token } = useUser();
@@ -123,51 +124,45 @@ const CreatePlaylistPage: React.FC = () => {
 
 
   return (
-    <div className="container">
-      <h1 className="title">New Playlist</h1>
-      <form onSubmit={handleSubmit}>
-        <div className="field">
-          <label className="label">Title</label>
-          <div className="control">
-            <input
-              className="input"
-              type="text"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-            />
+    <div className={styles.pageContainer}>
+      <h1 className={styles.title}>New Playlist</h1>
+      <form className={styles.form} onSubmit={handleSubmit}>
+        <div className={styles.formGroup}>
+          <label className={styles.label}>Title</label>
+          <input
+            className={styles.input}
+            type="text"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+          />
+        </div>
+        <div className={styles.formGroup}>
+          <label className={styles.label}>Date</label>
+          <input
+            className={styles.input}
+            type="date"
+            value={date}
+            onChange={(e) => setDate(e.target.value)}
+          />
+        </div>
+        <div className={styles.formGroup}>
+          <label className={styles.label}>Template</label>
+          <div className={styles.select}>
+            <select
+              value={selectedTemplate?.id || ''}
+              onChange={(e) => handleTemplateChange(e.target.value)}
+            >
+              <option value="">No Template</option>
+              {templates.map((template) => (
+                <option key={template.id} value={template.id}>
+                  {template.title}
+                </option>
+              ))}
+            </select>
           </div>
         </div>
-        <div className="field">
-          <label className="label">Date</label>
-          <div className="control">
-            <input
-              className="input"
-              type="date"
-              value={date}
-              onChange={(e) => setDate(e.target.value)}
-            />
-          </div>
-        </div>
-        <div className="field">
-          <label className="label">Template</label>
-          <div className="control">
-            <div className="select">
-              <select
-                value={selectedTemplate?.id || ''}
-                onChange={(e) => handleTemplateChange(e.target.value)}
-              >
-                <option value="">No Template</option>
-                {templates.map((template) => (
-                  <option key={template.id} value={template.id}>
-                    {template.title}
-                  </option>
-                ))}
-              </select>
-            </div>
-          </div>
-        </div>
-        <div className="field">
-          <label className="checkbox">
+        <div className={styles.formGroup}>
+          <label className={styles.checkbox}>
             <input
               type="checkbox"
               checked={isPublic}
@@ -176,22 +171,20 @@ const CreatePlaylistPage: React.FC = () => {
             Public
           </label>
         </div>
-        <div className="field">
-          <div className="control">
-            <button className="button is-primary" type="submit">
-              Create
-            </button>
-          </div>
+        <div className={styles.formGroup}>
+          <button className={styles.button} type="submit">
+            Create
+          </button>
         </div>
       </form>
 
       {selectedTemplate && (
         <div>
-          <h2 className="title is-4 mt-5">Sections</h2>
+          <h2 className={styles.sectionTitle}>Sections</h2>
           {sections.map((section) => (
-            <div key={section.id} className="box">
-              <h3 className="title is-5">{section.title}</h3>
-              <ul>
+            <div key={section.id} className={styles.sectionBox}>
+              <h3 className={styles.sectionTitle}>{section.title}</h3>
+              <ul className={styles.songList}>
                 {section.songs.map((song) => (
                   <MovableSongItem
                     key={song.choirSongVersionId || song.masterSongId}
@@ -205,16 +198,14 @@ const CreatePlaylistPage: React.FC = () => {
                   />
                 ))}
               </ul>
-              <div className="field has-addons mt-3">
-                <div className="control">
-                  <div className="select">
-                    <select onChange={(e) => handleAddSongToSection(section.id, e.target.value)}>
-                      <option>Select a song</option>
-                      {choirSongs.map(song => (
-                        <option key={song.choirSongId} value={song.choirSongId}>{song.masterSong?.title}</option>
-                      ))}
-                    </select>
-                  </div>
+              <div className={styles.addSongRow}>
+                <div className={styles.select}>
+                  <select onChange={(e) => handleAddSongToSection(section.id, e.target.value)}>
+                    <option>Select a song</option>
+                    {choirSongs.map(song => (
+                      <option key={song.choirSongId} value={song.choirSongId}>{song.masterSong?.title}</option>
+                    ))}
+                  </select>
                 </div>
               </div>
             </div>

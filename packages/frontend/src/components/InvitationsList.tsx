@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Invitation } from '../types/invitation';
+import styles from './InvitationsList.module.scss';
 
 interface InvitationsListProps {
   invitations: Invitation[];
@@ -30,13 +31,13 @@ const InvitationsList: React.FC<InvitationsListProps> = ({ invitations, onAccept
   return (
     <div className="invitations-list">
       {Object.entries(groupedInvitations).map(([choirName, choirInvitations]) => (
-        <div key={choirName} className="list-item">
-          <div onClick={() => toggleExpand(choirName)} style={{ cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div key={choirName} className={styles.listItem}>
+          <div onClick={() => toggleExpand(choirName)} className={styles.choirHeader}>
             <p>
-              You have been invited to join <strong className="has-text-link">{choirName}</strong>.
+              You have been invited to join <strong className={styles.choirName}>{choirName}</strong>.
             </p>
             {choirInvitations.length > 1 && (
-              <span className="icon">
+              <span className={styles.icon}>
                 <i className={`fas fa-angle-${expandedChoir === choirName ? 'up' : 'down'}`}></i>
               </span>
             )}
@@ -44,13 +45,13 @@ const InvitationsList: React.FC<InvitationsListProps> = ({ invitations, onAccept
             {expandedChoir === choirName && (
             <div className="list">
               {choirInvitations.map(invitation => (
-                <div key={invitation.invitationToken} className="list-item">
+                <div key={invitation.invitationToken} className={styles.listItem}>
                   <span>{new Date(invitation.sentAt).toLocaleString()}</span>
                   <div className="buttons">
-                    <button className="button is-success" onClick={() => onAccept(invitation.invitationToken)}>
+                    <button className={styles.button + ' ' + styles.acceptButton} onClick={() => onAccept(invitation.invitationToken)}>
                       Accept
                     </button>
-                    <button className="button is-danger" onClick={() => onReject(invitation.invitationToken)}>
+                    <button className={styles.button + ' ' + styles.rejectButton} onClick={() => onReject(invitation.invitationToken)}>
                       Reject
                     </button>
                   </div>

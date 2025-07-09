@@ -1,0 +1,42 @@
+// Design System Variables (NO Bulma import)
+// =========================================
+
+// Color Palette
+$color-primary: #3B82F6;     // Blue-500
+$color-secondary: #6366F1;   // Indigo-500
+$color-accent: #F59E42;      // Orange-400
+$color-success: #22C55E;     // Green-500
+$color-danger: #EF4444;      // Red-500
+$color-warning: #FACC15;     // Yellow-400
+$color-info: #38BDF8;        // Sky-400
+
+// Neutral shades
+$color-neutral-100: #F3F4F6;
+$color-neutral-200: #E5E7EB;
+$color-neutral-300: #D1D5DB;
+$color-neutral-400: #9CA3AF;
+$color-neutral-500: #6B7280;
+$color-neutral-600: #4B5563;
+$color-neutral-700: #374151;
+$color-neutral-800: #1F2937;
+$color-neutral-900: #111827;
+
+// Typography
+$font-family-base: 'Inter', 'Segoe UI', Arial, sans-serif;
+$font-family-heading: 'Inter', 'Segoe UI', Arial, sans-serif;
+$font-size-base: 1rem;      // 16px
+$font-size-sm: 0.875rem;    // 14px
+$font-size-lg: 1.25rem;     // 20px
+$font-size-xl: 1.5rem;      // 24px
+$font-size-2xl: 2rem;       // 32px
+$font-weight-normal: 400;
+$font-weight-bold: 700;
+
+// Bulma variable aliases for theme.scss only
+$primary: $color-primary;
+$link: $color-accent;
+$info: $color-info;
+$success: $color-success;
+$warning: $color-warning;
+$danger: $color-danger;
+$family-primary: $font-family-base;

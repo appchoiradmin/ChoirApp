@@ -1,0 +1,152 @@
+@use '../styles/variables' as *;
+
+.container {
+  padding: 1.5rem 0.5rem;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.title {
+  font-family: $family-primary;
+  font-size: $size-1;
+  font-weight: 700;
+  margin-bottom: 1.25rem;
+  color: $primary;
+}
+
+.song-table {
+  background: $surface;
+  border-radius: 1rem;
+  box-shadow: 0 2px 12px rgba(34,34,59,0.05);
+  overflow-x: auto;
+  margin-bottom: 1.5rem;
+}
+
+.song-table,
+.table,
+.song-dropdown {
+  overflow: visible !important;
+}
+
+.table {
+  border-radius: 1rem;
+  overflow: hidden;
+  margin-bottom: 0;
+  position: relative;
+}
+
+.table th, .table td {
+  font-family: $family-secondary;
+  font-size: $size-4;
+  padding: 0.75em 1em;
+}
+
+.song-dropdown {
+  position: relative;
+  overflow: visible !important;
+}
+
+.song-dropdown-menu {
+  position: absolute;
+  left: 0;
+  top: 110%;
+  min-width: 200px;
+  background: #fff;
+  border: 1px solid #e0e0e0;
+  border-radius: 0.75rem;
+  box-shadow: 0 4px 16px rgba(34,34,59,0.10);
+  z-index: 9999;
+  margin-top: 4px;
+  display: flex;
+  flex-direction: column;
+  padding: 0.25rem 0;
+}
+
+.song-dropdown-content {
+  padding: 0;
+}
+
+.song-dropdown-item {
+  font-size: 1rem;
+  color: #222;
+  background: none;
+  border: none;
+  margin: 0;
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  transition: background 0.12s, color 0.12s;
+  display: block;
+}
+
+.song-dropdown-item + .song-dropdown-item {
+  margin-top: 2px;
+}
+
+.song-dropdown-item:hover,
+.song-dropdown-item:focus {
+  background: #f2f6ff;
+  color: #1976d2;
+}
+
+
+.field {
+  margin-bottom: 1.25rem;
+}
+
+.input {
+  border-radius: 0.5rem;
+  font-size: $size-4;
+  padding: 0.75em 1em;
+}
+
+.has-text-info {
+  color: $primary;
+}
+
+.has-text-danger {
+  color: $danger;
+}
+
+.song-dropdown-item {
+  all: unset;
+  display: block;
+  width: 100%;
+  background: #fff;
+  color: $text;
+  font-family: $family-secondary;
+  font-size: $size-4;
+  border-radius: 0.5rem;
+  padding: 0.75em 1em;
+  margin-bottom: 0.25em;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+  box-sizing: border-box;
+  &:hover,
+  &:focus {
+    background: $primary-light;
+    color: $primary;
+    outline: none;
+  }
+  &[aria-disabled="true"] {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+}
+
+@media (max-width: 600px) {
+  .container {
+    padding: 1rem 0.25rem;
+  }
+  .table th, .table td {
+    font-size: $size-5;
+    padding: 0.5em 0.5em;
+  }
+  .title {
+    font-size: 1.5rem;
+  }
+  .song-dropdown-item {
+    font-size: $size-5;
+    padding: 0.5em 0.75em;
+  }
+}

@@ -1,0 +1,39 @@
+// In this file we will define all the variables that will be used in the application.
+
+// Colors (ChoirApp Design System)
+$primary: #3E63DD; // Royal Blue
+$secondary: #F4B942; // Warm Gold
+$accent: #E34F4F; // Coral Red
+$background: #F8FAFC; // Light Gray
+$surface: #FFFFFF; // White
+$text: #22223B; // Deep Navy
+$text-muted: #6B7280; // Gray
+$text-light: #fff; // White for text on dark backgrounds
+
+// Borders
+$border: #E5E7EB; // Subtle Gray for borders
+
+// Light variants
+$primary-light: #e9f0fd; // Light blue for primary backgrounds
+
+// Bulma compatibility
+$success: #28a745;
+$danger: #E34F4F;
+$warning: #ffc107;
+$info: #3E63DD;
+$light: #F8FAFC;
+$dark: #22223B;
+
+// Typography (ChoirApp Design System)
+$family-primary: 'Montserrat', 'Segoe UI', Arial, sans-serif;
+$family-secondary: 'Inter', 'Segoe UI', Arial, sans-serif;
+$family-sans-serif: $family-primary;
+
+// Font sizes (mobile-first)
+$size-1: 2rem; // h1
+$size-2: 1.5rem; // h2
+$size-3: 1.25rem; // h3
+$size-4: 1rem; // body
+$size-5: 0.875rem; // small
+$size-6: 0.75rem; // x-small
+$size-7: 0.625rem; // xx-small

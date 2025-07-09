@@ -1,0 +1,85 @@
+@use '../styles/variables' as *;
+@use 'sass:color' as color;
+
+.invitationsList {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+}
+
+.listItem {
+  background: $surface;
+  border-radius: 0.75rem;
+  box-shadow: 0 1px 6px rgba(34,34,59,0.06);
+  margin-bottom: 1rem;
+  padding: 1.2rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.choirHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+}
+
+.choirName {
+  color: $primary;
+  font-weight: 700;
+  font-size: $size-4;
+}
+
+.icon {
+  color: $primary;
+  font-size: 1.2em;
+  margin-left: 0.5rem;
+}
+
+.buttons {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.button {
+  font-family: $family-primary;
+  font-weight: 600;
+  border-radius: 0.5rem;
+  padding: 0.4rem 1.1rem;
+  font-size: $size-5;
+  border: none;
+  cursor: pointer;
+  transition: background 0.15s;
+  background: $primary-light;
+  color: $primary;
+  &:hover, &:focus {
+    background: color.adjust($primary-light, $lightness: -8%);
+  }
+}
+
+.acceptButton {
+  background: $success;
+  color: #fff;
+  &:hover, &:focus {
+    background: color.adjust($success, $lightness: -8%);
+  }
+}
+
+.rejectButton {
+  background: $danger;
+  color: #fff;
+  &:hover, &:focus {
+    background: color.adjust($danger, $lightness: -8%);
+  }
+}
+
+@media (max-width: 600px) {
+  .listItem {
+    padding: 1rem 0.5rem;
+  }
+  .choirName {
+    font-size: $size-5;
+  }
+}
