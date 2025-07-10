@@ -173,481 +173,495 @@
   }
 }
 
-// Playlist Sections Guide
-.playlist-sections-guide {
-  background: rgba($primary, 0.05);
-  border: 2px solid rgba($primary, 0.2);
-  border-radius: $border-radius-lg;
-  padding: $spacing-md;
-  margin-bottom: $spacing-md;
+// Enhanced Playlist Building Guide
+.playlist-building-guide {
+  margin-bottom: $spacing-lg;
 
-  .guide-title {
-    font-size: 1rem;
-    font-weight: 600;
-    color: $primary;
-    margin: 0 0 $spacing-sm;
-  }
-
-  .section-tags {
-    display: flex;
-    flex-wrap: wrap;
-    gap: $spacing-xs;
-
-    .section-tag {
-      background: $primary;
-      color: $surface;
-      padding: 4px 12px;
-      border-radius: $border-radius-md;
-      font-size: 0.875rem;
-      font-weight: 500;
-
-      @media screen and (max-width: $mobile) {
-        font-size: 0.75rem;
-        padding: 3px 8px;
-      }
-    }
-  }
-}
-
-// Search and Filters
-.search-filters {
-  display: flex;
-  gap: $spacing-md;
-  align-items: flex-end;
-  margin-bottom: $spacing-md;
-
-  @media screen and (max-width: $tablet) {
-    flex-direction: column;
-    gap: $spacing-sm;
-    align-items: stretch;
-  }
-
-  .search-bar {
-    position: relative;
-    flex: 1;
-    min-width: 0;
-    display: flex;
-    gap: $spacing-sm;
-
-    @media screen and (max-width: $tablet) {
-      flex-direction: column;
-    }
-
-    .search-icon {
-      position: absolute;
-      left: 12px;
-      top: 50%;
-      transform: translateY(-50%);
-      width: 20px;
-      height: 20px;
-      color: $text-light;
-      pointer-events: none;
-      z-index: 2;
-
-      @media screen and (max-width: $tablet) {
-        top: 22px;
-      }
-    }
-
-    .search-input {
-      flex: 1;
-      padding: 12px 12px 12px 44px;
-      border: 2px solid $border-light;
-      border-radius: $border-radius-md;
-      background: $surface;
-      font-size: 1rem;
-      color: $text-dark;
-      transition: all $transition-normal;
-      min-height: 44px; // Touch-friendly
-
-      &::placeholder {
-        color: $text-light;
-      }
-
-      &:focus {
-        outline: none;
-        border-color: $primary;
-        box-shadow: 0 0 0 3px rgba($primary, 0.1);
-      }
-
-      @media screen and (max-width: $mobile) {
-        font-size: 16px; // Prevent zoom on iOS
-      }
-    }
-
-    .search-button {
-      min-height: 44px;
-      padding: 0 $spacing-md;
-    }
-  }
-
-  .filter-controls {
-    display: flex;
-    gap: $spacing-sm;
-    align-items: center;
-
-    @media screen and (max-width: $tablet) {
-      width: 100%;
-      justify-content: space-between;
-      flex-wrap: wrap;
-    }
-
-    .filter-select {
-      padding: 8px 12px;
-      border: 2px solid $border-light;
-      border-radius: $border-radius-md;
-      background: $surface;
-      font-size: 0.875rem;
-      color: $text-dark;
-      cursor: pointer;
-      transition: all $transition-normal;
-      min-height: 40px;
-
-      &:focus {
-        outline: none;
-        border-color: $primary;
-        box-shadow: 0 0 0 3px rgba($primary, 0.1);
-      }
-
-      @media screen and (max-width: $mobile) {
-        font-size: 14px;
-        min-width: 120px;
-      }
-    }
-  }
-}
-
-// Bulk Actions
-.bulk-actions {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: $spacing-md;
-  background: rgba($primary, 0.05);
-  border: 2px solid rgba($primary, 0.2);
-  border-radius: $border-radius-lg;
-  margin-bottom: $spacing-md;
-
-  @media screen and (max-width: $tablet) {
-    flex-direction: column;
-    gap: $spacing-sm;
-    align-items: stretch;
-  }
-
-  .bulk-info {
-    display: flex;
-    align-items: center;
-    gap: $spacing-sm;
-
-    .bulk-icon {
-      width: 20px;
-      height: 20px;
-      color: $primary;
-    }
-
-    .bulk-count {
-      font-weight: 600;
-      color: $primary;
-    }
-  }
-
-  .bulk-buttons {
-    display: flex;
-    gap: $spacing-sm;
-
-    @media screen and (max-width: $tablet) {
-      justify-content: flex-end;
-    }
-  }
-}
-
-// Songs Content
-.songs-content {
-  margin-top: $spacing-lg;
-
-  .songs-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-    gap: $spacing-md;
-
-    @media screen and (max-width: $tablet) {
-      grid-template-columns: 1fr;
-      gap: $spacing-sm;
-    }
-  }
-}
-
-// Song Card
-.song-card {
-  cursor: pointer;
-  transition: all $transition-normal;
-  border-radius: $border-radius-lg;
-  overflow: hidden;
-
-  &:hover {
-    transform: translateY(-2px);
-    box-shadow: $shadow-lg;
-  }
-
-  &.selected {
-    .card-content {
-      border-color: $primary;
-      background-color: rgba($primary, 0.05);
-      box-shadow: 0 0 0 3px rgba($primary, 0.1);
-    }
-  }
-
-  .card-content {
-    border: 2px solid $border-light;
+  .guide-card {
+    background: linear-gradient(135deg, rgba($primary, 0.08) 0%, rgba($secondary, 0.06) 100%);
+    border: 2px solid rgba($primary, 0.2);
     border-radius: $border-radius-lg;
-    background: $surface;
-    padding: $spacing-lg;
-    transition: all $transition-normal;
-
-    @media screen and (max-width: $mobile) {
-      padding: $spacing-md;
-    }
+    overflow: hidden;
   }
 
-  .card-header {
+  .guide-header {
     display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
     gap: $spacing-md;
     margin-bottom: $spacing-md;
 
     @media screen and (max-width: $mobile) {
+      flex-direction: column;
       gap: $spacing-sm;
-      margin-bottom: $spacing-sm;
     }
+  }
 
-    .card-checkbox {
-      display: flex;
-      align-items: flex-start;
-      cursor: pointer;
+  .guide-status {
+    display: flex;
+    align-items: flex-start;
+    gap: $spacing-sm;
+    flex: 1;
+
+    .status-icon {
+      width: 24px;
+      height: 24px;
+      color: $primary;
+      flex-shrink: 0;
       margin-top: 2px;
-
-      input[type="checkbox"] {
-        display: none;
-      }
-
-      .checkmark {
-        width: 20px;
-        height: 20px;
-        border: 2px solid $border-dark;
-        border-radius: $border-radius-sm;
-        position: relative;
-        transition: all $transition-normal;
-        flex-shrink: 0;
-
-        &::after {
-          content: '';
-          position: absolute;
-          left: 6px;
-          top: 2px;
-          width: 6px;
-          height: 10px;
-          border: solid $surface;
-          border-width: 0 2px 2px 0;
-          transform: rotate(45deg);
-          opacity: 0;
-          transition: opacity $transition-normal;
-        }
-      }
-
-      input[type="checkbox"]:checked + .checkmark {
-        background-color: $primary;
-        border-color: $primary;
-
-        &::after {
-          opacity: 1;
-        }
-      }
-
-      &:hover .checkmark {
-        border-color: $primary;
-      }
     }
 
-    .song-info {
+    .status-info {
       flex: 1;
       min-width: 0;
 
-      .song-title {
-        font-size: 1.25rem;
+      .guide-title {
+        font-size: 1.125rem;
         font-weight: 600;
         color: $text-dark;
         margin: 0 0 $spacing-xs;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-
-        @media screen and (max-width: $mobile) {
-          font-size: 1.125rem;
-        }
       }
 
-      .song-artist {
-        color: $text-light;
+      .guide-subtitle {
         font-size: 0.875rem;
+        color: $text-light;
         margin: 0;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-      }
-    }
-
-    .card-actions {
-      display: flex;
-      flex-direction: column;
-      gap: $spacing-xs;
-      align-items: flex-end;
-
-      @media screen and (max-width: $mobile) {
-        flex-direction: row;
-        align-items: center;
-      }
-
-      .view-button {
-        .button-icon {
-          width: 18px;
-          height: 18px;
-        }
-      }
-
-      .add-to-container {
-        position: relative;
-
-        .add-to-btn {
-          display: flex;
-          align-items: center;
-          gap: $spacing-xs;
-          min-height: 36px;
-
-          .button-icon {
-            width: 16px;
-            height: 16px;
-          }
-        }
-
-        .add-to-dropdown {
-          position: absolute;
-          top: calc(100% + 4px);
-          right: 0;
-          min-width: 200px;
-          background: $surface;
-          border: 2px solid $border-light;
-          border-radius: $border-radius-md;
-          box-shadow: $shadow-lg;
-          z-index: 10;
-          overflow: hidden;
-
-          @media screen and (max-width: $mobile) {
-            right: auto;
-            left: 0;
-            min-width: 250px;
-          }
-
-          .dropdown-item {
-            display: block;
-            width: 100%;
-            padding: 12px 16px;
-            background: none;
-            border: none;
-            text-align: left;
-            color: $text-dark;
-            font-size: 0.875rem;
-            cursor: pointer;
-            transition: all $transition-normal;
-            border-bottom: 1px solid $border-light;
-
-            &:last-child {
-              border-bottom: none;
-            }
-
-            &:hover {
-              background-color: rgba($primary, 0.1);
-              color: $primary;
-            }
-
-            &.disabled {
-              color: $text-light;
-              cursor: not-allowed;
-              font-style: italic;
-
-              &:hover {
-                background: none;
-                color: $text-light;
-              }
-            }
-          }
-        }
+        line-height: 1.4;
       }
     }
   }
 
-  .card-meta {
-    .song-tags {
+  .playlist-stats {
+    display: flex;
+    gap: $spacing-md;
+
+    @media screen and (max-width: $mobile) {
+      width: 100%;
+      justify-content: flex-start;
+    }
+
+    .playlist-stat {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      gap: $spacing-xs;
+
+      .stat-number {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: $primary;
+        line-height: 1;
+      }
+
+      .stat-label {
+        font-size: 0.75rem;
+        color: $text-light;
+        font-weight: 500;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+    }
+  }
+
+  .available-sections {
+    .sections-title {
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: $text-dark;
+      margin: 0 0 $spacing-sm;
+    }
+
+    .section-tags {
       display: flex;
       flex-wrap: wrap;
       gap: $spacing-xs;
 
-      .tag {
+      .section-tag {
         display: flex;
         align-items: center;
-        gap: 4px;
-        background-color: rgba($secondary, 0.1);
-        color: $secondary;
-        padding: 4px 8px;
-        border-radius: $border-radius-sm;
-        font-size: 0.75rem;
-        font-weight: 500;
+        gap: $spacing-xs;
+        background: $surface;
+        border: 1px solid $border;
+        border-radius: $border-radius-md;
+        padding: 8px 12px;
+        font-size: 0.875rem;
+        transition: all 0.2s ease;
 
-        .tag-icon {
-          width: 12px;
-          height: 12px;
+        &:hover {
+          border-color: $primary;
+          box-shadow: $shadow-sm;
         }
 
-        &.more {
-          background-color: rgba($text-light, 0.1);
-          color: $text-light;
+        .section-name {
+          font-weight: 500;
+          color: $text-dark;
+        }
+
+        .section-count {
+          background: rgba($primary, 0.1);
+          color: $primary;
+          font-weight: 600;
+          font-size: 0.75rem;
+          padding: 2px 6px;
+          border-radius: $border-radius-sm;
+          min-width: 20px;
+          text-align: center;
+        }
+
+        @media screen and (max-width: $mobile) {
+          font-size: 0.75rem;
+          padding: 6px 10px;
+
+          .section-count {
+            font-size: 0.7rem;
+            padding: 1px 4px;
+          }
         }
       }
     }
   }
 }
 
-// Empty State
-.empty-state {
+// Enhanced Playlist Building Status Bar - Mobile First
+.playlist-status-bar {
+  margin-bottom: 1.5rem;
+
+  .status-card {
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    overflow: hidden;
+
+    .status-content {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      padding: 1rem;
+
+      @media (min-width: 768px) {
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+      }
+    }
+
+    .status-left {
+      .status-indicator {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+
+        .status-icon {
+          width: 1.5rem;
+          height: 1.5rem;
+          color: var(--primary-color);
+          flex-shrink: 0;
+        }
+
+        .status-info {
+          display: flex;
+          flex-direction: column;
+          gap: 0.25rem;
+
+          .status-date {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: var(--text-primary);
+          }
+
+          .status-label {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+          }
+        }
+      }
+    }
+
+    .status-center {
+      .status-progress {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+
+        .progress-item {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 0.5rem;
+
+          .progress-step {
+            width: 2rem;
+            height: 2rem;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+
+            &.completed {
+              background-color: var(--success-color);
+              color: white;
+            }
+
+            &.pending {
+              background-color: var(--border-color);
+              color: var(--text-secondary);
+            }
+
+            .step-icon {
+              width: 1rem;
+              height: 1rem;
+            }
+          }
+
+          .progress-count {
+            width: 2rem;
+            height: 2rem;
+            border-radius: 50%;
+            background-color: var(--primary-color);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 0.9rem;
+          }
+
+          .progress-label {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            text-align: center;
+          }
+        }
+
+        .progress-divider {
+          width: 2rem;
+          height: 2px;
+          background-color: var(--border-color);
+          border-radius: 1px;
+
+          @media (max-width: 767px) {
+            width: 1rem;
+          }
+        }
+      }
+    }
+
+    .status-right {
+      .view-playlist-btn {
+        white-space: nowrap;
+
+        .button-icon {
+          width: 1rem;
+          height: 1rem;
+        }
+      }
+    }
+
+    .status-hint {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.75rem 1rem;
+      background-color: var(--info-bg);
+      border-top: 1px solid var(--border-color);
+
+      .hint-icon {
+        width: 1rem;
+        height: 1rem;
+        color: var(--info-color);
+        flex-shrink: 0;
+      }
+
+      .hint-text {
+        font-size: 0.85rem;
+        color: var(--info-color);
+        line-height: 1.4;
+      }
+    }
+  }
+}
+
+// Enhanced Add to Section Dropdown - Mobile First
+.add-to-dropdown {
+  &.enhanced {
+    .dropdown-header {
+      padding: 1rem;
+      border-bottom: 1px solid var(--border-color);
+
+      .dropdown-title-section {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+        margin-bottom: 0.75rem;
+
+        .dropdown-title {
+          font-size: 1rem;
+          font-weight: 600;
+          color: var(--text-primary);
+        }
+
+        .dropdown-status {
+          .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.375rem;
+            padding: 0.25rem 0.5rem;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 500;
+
+            &.new {
+              background-color: var(--primary-light);
+              color: var(--primary-color);
+            }
+
+            &.existing {
+              background-color: var(--success-light);
+              color: var(--success-color);
+            }
+
+            .status-icon {
+              width: 0.75rem;
+              height: 0.75rem;
+            }
+          }
+        }
+      }
+
+      .dropdown-summary {
+        .summary-text {
+          font-size: 0.8rem;
+          color: var(--text-secondary);
+        }
+      }
+    }
+
+    .dropdown-content {
+      max-height: 16rem;
+      overflow-y: auto;
+
+      .dropdown-item {
+        &:not(.disabled) {
+          .dropdown-content-row {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem 1rem;
+
+            .section-indicator {
+              position: relative;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+
+              .dropdown-icon {
+                width: 1.25rem;
+                height: 1.25rem;
+                color: var(--primary-color);
+              }
+
+              .section-number {
+                position: absolute;
+                top: -0.25rem;
+                right: -0.25rem;
+                background-color: var(--secondary-color);
+                color: white;
+                font-size: 0.6rem;
+                font-weight: 600;
+                width: 1rem;
+                height: 1rem;
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+              }
+            }
+
+            .dropdown-text {
+              flex: 1;
+              display: flex;
+              flex-direction: column;
+              gap: 0.25rem;
+
+              .dropdown-name {
+                font-size: 0.9rem;
+                font-weight: 500;
+                color: var(--text-primary);
+              }
+
+              .dropdown-detail {
+                font-size: 0.75rem;
+                color: var(--text-secondary);
+              }
+            }
+
+            .dropdown-actions {
+              display: flex;
+              align-items: center;
+
+              .dropdown-action {
+                width: 1rem;
+                height: 1rem;
+                color: var(--primary-color);
+                transition: transform 0.1s ease;
+              }
+            }
+          }
+
+          &:hover {
+            .dropdown-actions .dropdown-action {
+              transform: scale(1.1);
+            }
+          }
+        }
+
+        &.disabled {
+          .dropdown-content-row {
+            padding: 1rem;
+
+            .dropdown-icon {
+              color: var(--text-secondary);
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+// Error State
+.master-songs-error {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
+  min-height: 50vh;
   text-align: center;
-  padding: $spacing-xl;
   gap: $spacing-md;
 
-  .empty-icon {
+  .error-icon {
     width: 64px;
     height: 64px;
-    color: $text-light;
-    opacity: 0.5;
+    color: $danger;
+    opacity: 0.6;
   }
 
-  .empty-title {
+  .error-title {
     font-size: 1.5rem;
     font-weight: 600;
     color: $text-dark;
     margin: 0;
   }
 
-  .empty-message {
+  .error-message {
     color: $text-light;
     font-size: 1rem;
     margin: 0;
     max-width: 400px;
-    line-height: 1.5;
   }
 
-  .empty-actions {
+  .error-actions {
     display: flex;
     gap: $spacing-sm;
     flex-wrap: wrap;
@@ -655,67 +669,1775 @@
   }
 }
 
-// Mobile Responsive Enhancements
-@media screen and (max-width: $mobile) {
-  .master-songs-container {
-    padding: $spacing-sm;
+// Header Section
+.songs-header {
+  margin-bottom: $spacing-lg;
+
+  .header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: $spacing-md;
+    gap: $spacing-md;
+
+    @media screen and (max-width: $tablet) {
+      flex-direction: column;
+      align-items: stretch;
+    }
   }
 
-  .songs-header {
-    .header-content {
+  .header-left {
+    flex: 1;
+
+    .page-title {
+      display: flex;
+      align-items: center;
+      gap: $spacing-sm;
+      font-size: 2rem;
+      font-weight: 700;
+      color: $text-dark;
+      margin: 0 0 $spacing-xs;
+
+      @media screen and (max-width: $tablet) {
+        font-size: 1.75rem;
+      }
+
+      .title-icon {
+        width: 32px;
+        height: 32px;
+        color: $primary;
+      }
+    }
+
+    .page-subtitle {
+      color: $text-light;
+      font-size: 1rem;
+      margin: 0;
+    }
+  }
+
+  .header-actions {
+    display: flex;
+    gap: $spacing-sm;
+    align-items: center;
+
+    @media screen and (max-width: $tablet) {
+      justify-content: flex-end;
+    }
+  }
+
+  // Stats Cards - Mobile Optimized
+  .header-stats {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: $spacing-md;
+    margin-top: $spacing-md;
+
+    @media screen and (max-width: $tablet) {
+      grid-template-columns: repeat(2, 1fr);
       gap: $spacing-sm;
     }
 
-    .page-title {
-      font-size: 1.5rem !important;
+    @media screen and (max-width: $mobile) {
+      grid-template-columns: repeat(2, 1fr);
+      gap: $spacing-xs;
+    }
+
+    .stat-card {
+      background: $surface;
+      border: 2px solid $border-light;
+      border-radius: $border-radius-lg;
+      padding: $spacing-md;
+      text-align: center;
+      transition: all $transition-normal;
+
+      &:hover {
+        border-color: $border-dark;
+        box-shadow: $shadow-sm;
+      }
+
+      .stat-number {
+        display: block;
+        font-size: 1.75rem;
+        font-weight: 700;
+        color: $primary;
+        margin-bottom: $spacing-xs;
+
+        @media screen and (max-width: $mobile) {
+          font-size: 1.5rem;
+        }
+      }
+
+      .stat-label {
+        font-size: 0.875rem;
+        color: $text-light;
+        font-weight: 500;
+      }
+    }
+  }
+}
+
+// Enhanced Playlist Building Guide
+.playlist-building-guide {
+  margin-bottom: $spacing-lg;
+
+  .guide-card {
+    background: linear-gradient(135deg, rgba($primary, 0.08) 0%, rgba($secondary, 0.06) 100%);
+    border: 2px solid rgba($primary, 0.2);
+    border-radius: $border-radius-lg;
+    overflow: hidden;
+  }
+
+  .guide-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: $spacing-md;
+    margin-bottom: $spacing-md;
+
+    @media screen and (max-width: $mobile) {
+      flex-direction: column;
+      gap: $spacing-sm;
     }
   }
 
-  .search-filters {
-    .search-bar .search-input {
-      font-size: 16px; // Prevent zoom on iOS
-    }
-  }
+  .guide-status {
+    display: flex;
+    align-items: flex-start;
+    gap: $spacing-sm;
+    flex: 1;
 
-  .song-card {
-    .card-header {
-      .song-info .song-title {
+    .status-icon {
+      width: 24px;
+      height: 24px;
+      color: $primary;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+
+    .status-info {
+      flex: 1;
+      min-width: 0;
+
+      .guide-title {
         font-size: 1.125rem;
+        font-weight: 600;
+        color: $text-dark;
+        margin: 0 0 $spacing-xs;
       }
-    }
 
-    .card-meta {
-      .song-tags .tag {
-        font-size: 0.6875rem;
-        padding: 2px 6px;
+      .guide-subtitle {
+        font-size: 0.875rem;
+        color: $text-light;
+        margin: 0;
+        line-height: 1.4;
       }
     }
   }
 
-  .bulk-actions {
-    padding: $spacing-sm;
+  .playlist-stats {
+    display: flex;
+    gap: $spacing-md;
+
+    @media screen and (max-width: $mobile) {
+      width: 100%;
+      justify-content: flex-start;
+    }
+
+    .playlist-stat {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      gap: $spacing-xs;
+
+      .stat-number {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: $primary;
+        line-height: 1;
+      }
+
+      .stat-label {
+        font-size: 0.75rem;
+        color: $text-light;
+        font-weight: 500;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+    }
+  }
+
+  .available-sections {
+    .sections-title {
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: $text-dark;
+      margin: 0 0 $spacing-sm;
+    }
+
+    .section-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: $spacing-xs;
+
+      .section-tag {
+        display: flex;
+        align-items: center;
+        gap: $spacing-xs;
+        background: $surface;
+        border: 1px solid $border;
+        border-radius: $border-radius-md;
+        padding: 8px 12px;
+        font-size: 0.875rem;
+        transition: all 0.2s ease;
+
+        &:hover {
+          border-color: $primary;
+          box-shadow: $shadow-sm;
+        }
+
+        .section-name {
+          font-weight: 500;
+          color: $text-dark;
+        }
+
+        .section-count {
+          background: rgba($primary, 0.1);
+          color: $primary;
+          font-weight: 600;
+          font-size: 0.75rem;
+          padding: 2px 6px;
+          border-radius: $border-radius-sm;
+          min-width: 20px;
+          text-align: center;
+        }
+
+        @media screen and (max-width: $mobile) {
+          font-size: 0.75rem;
+          padding: 6px 10px;
+
+          .section-count {
+            font-size: 0.7rem;
+            padding: 1px 4px;
+          }
+        }
+      }
+    }
   }
 }
 
-// Touch Improvements
-@media (hover: none) and (pointer: coarse) {
-  .song-card {
-    &:active {
-      transform: scale(0.98);
-    }
-  }
+// Enhanced Playlist Building Status Bar - Mobile First
+.playlist-status-bar {
+  margin-bottom: 1.5rem;
 
-  .filter-controls .filter-select,
-  .card-actions .view-button,
-  .add-to-btn {
-    min-height: 44px;
-    min-width: 44px;
+  .status-card {
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    overflow: hidden;
+
+    .status-content {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      padding: 1rem;
+
+      @media (min-width: 768px) {
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+      }
+    }
+
+    .status-left {
+      .status-indicator {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+
+        .status-icon {
+          width: 1.5rem;
+          height: 1.5rem;
+          color: var(--primary-color);
+          flex-shrink: 0;
+        }
+
+        .status-info {
+          display: flex;
+          flex-direction: column;
+          gap: 0.25rem;
+
+          .status-date {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: var(--text-primary);
+          }
+
+          .status-label {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+          }
+        }
+      }
+    }
+
+    .status-center {
+      .status-progress {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+
+        .progress-item {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 0.5rem;
+
+          .progress-step {
+            width: 2rem;
+            height: 2rem;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+
+            &.completed {
+              background-color: var(--success-color);
+              color: white;
+            }
+
+            &.pending {
+              background-color: var(--border-color);
+              color: var(--text-secondary);
+            }
+
+            .step-icon {
+              width: 1rem;
+              height: 1rem;
+            }
+          }
+
+          .progress-count {
+            width: 2rem;
+            height: 2rem;
+            border-radius: 50%;
+            background-color: var(--primary-color);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 0.9rem;
+          }
+
+          .progress-label {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            text-align: center;
+          }
+        }
+
+        .progress-divider {
+          width: 2rem;
+          height: 2px;
+          background-color: var(--border-color);
+          border-radius: 1px;
+
+          @media (max-width: 767px) {
+            width: 1rem;
+          }
+        }
+      }
+    }
+
+    .status-right {
+      .view-playlist-btn {
+        white-space: nowrap;
+
+        .button-icon {
+          width: 1rem;
+          height: 1rem;
+        }
+      }
+    }
+
+    .status-hint {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.75rem 1rem;
+      background-color: var(--info-bg);
+      border-top: 1px solid var(--border-color);
+
+      .hint-icon {
+        width: 1rem;
+        height: 1rem;
+        color: var(--info-color);
+        flex-shrink: 0;
+      }
+
+      .hint-text {
+        font-size: 0.85rem;
+        color: var(--info-color);
+        line-height: 1.4;
+      }
+    }
   }
 }
 
-// High DPI / Retina Display Optimizations
-@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
-  .checkmark::after {
-    border-width: 0 1.5px 1.5px 0;
+// Enhanced Add to Section Dropdown - Mobile First
+.add-to-dropdown {
+  &.enhanced {
+    .dropdown-header {
+      padding: 1rem;
+      border-bottom: 1px solid var(--border-color);
+
+      .dropdown-title-section {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+        margin-bottom: 0.75rem;
+
+        .dropdown-title {
+          font-size: 1rem;
+          font-weight: 600;
+          color: var(--text-primary);
+        }
+
+        .dropdown-status {
+          .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.375rem;
+            padding: 0.25rem 0.5rem;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 500;
+
+            &.new {
+              background-color: var(--primary-light);
+              color: var(--primary-color);
+            }
+
+            &.existing {
+              background-color: var(--success-light);
+              color: var(--success-color);
+            }
+
+            .status-icon {
+              width: 0.75rem;
+              height: 0.75rem;
+            }
+          }
+        }
+      }
+
+      .dropdown-summary {
+        .summary-text {
+          font-size: 0.8rem;
+          color: var(--text-secondary);
+        }
+      }
+    }
+
+    .dropdown-content {
+      max-height: 16rem;
+      overflow-y: auto;
+
+      .dropdown-item {
+        &:not(.disabled) {
+          .dropdown-content-row {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem 1rem;
+
+            .section-indicator {
+              position: relative;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+
+              .dropdown-icon {
+                width: 1.25rem;
+                height: 1.25rem;
+                color: var(--primary-color);
+              }
+
+              .section-number {
+                position: absolute;
+                top: -0.25rem;
+                right: -0.25rem;
+                background-color: var(--secondary-color);
+                color: white;
+                font-size: 0.6rem;
+                font-weight: 600;
+                width: 1rem;
+                height: 1rem;
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+              }
+            }
+
+            .dropdown-text {
+              flex: 1;
+              display: flex;
+              flex-direction: column;
+              gap: 0.25rem;
+
+              .dropdown-name {
+                font-size: 0.9rem;
+                font-weight: 500;
+                color: var(--text-primary);
+              }
+
+              .dropdown-detail {
+                font-size: 0.75rem;
+                color: var(--text-secondary);
+              }
+            }
+
+            .dropdown-actions {
+              display: flex;
+              align-items: center;
+
+              .dropdown-action {
+                width: 1rem;
+                height: 1rem;
+                color: var(--primary-color);
+                transition: transform 0.1s ease;
+              }
+            }
+          }
+
+          &:hover {
+            .dropdown-actions .dropdown-action {
+              transform: scale(1.1);
+            }
+          }
+        }
+
+        &.disabled {
+          .dropdown-content-row {
+            padding: 1rem;
+
+            .dropdown-icon {
+              color: var(--text-secondary);
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+// Error State
+.master-songs-error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 50vh;
+  text-align: center;
+  gap: $spacing-md;
+
+  .error-icon {
+    width: 64px;
+    height: 64px;
+    color: $danger;
+    opacity: 0.6;
+  }
+
+  .error-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: $text-dark;
+    margin: 0;
+  }
+
+  .error-message {
+    color: $text-light;
+    font-size: 1rem;
+    margin: 0;
+    max-width: 400px;
+  }
+
+  .error-actions {
+    display: flex;
+    gap: $spacing-sm;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+}
+
+// Header Section
+.songs-header {
+  margin-bottom: $spacing-lg;
+
+  .header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: $spacing-md;
+    gap: $spacing-md;
+
+    @media screen and (max-width: $tablet) {
+      flex-direction: column;
+      align-items: stretch;
+    }
+  }
+
+  .header-left {
+    flex: 1;
+
+    .page-title {
+      display: flex;
+      align-items: center;
+      gap: $spacing-sm;
+      font-size: 2rem;
+      font-weight: 700;
+      color: $text-dark;
+      margin: 0 0 $spacing-xs;
+
+      @media screen and (max-width: $tablet) {
+        font-size: 1.75rem;
+      }
+
+      .title-icon {
+        width: 32px;
+        height: 32px;
+        color: $primary;
+      }
+    }
+
+    .page-subtitle {
+      color: $text-light;
+      font-size: 1rem;
+      margin: 0;
+    }
+  }
+
+  .header-actions {
+    display: flex;
+    gap: $spacing-sm;
+    align-items: center;
+
+    @media screen and (max-width: $tablet) {
+      justify-content: flex-end;
+    }
+  }
+
+  // Stats Cards - Mobile Optimized
+  .header-stats {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: $spacing-md;
+    margin-top: $spacing-md;
+
+    @media screen and (max-width: $tablet) {
+      grid-template-columns: repeat(2, 1fr);
+      gap: $spacing-sm;
+    }
+
+    @media screen and (max-width: $mobile) {
+      grid-template-columns: repeat(2, 1fr);
+      gap: $spacing-xs;
+    }
+
+    .stat-card {
+      background: $surface;
+      border: 2px solid $border-light;
+      border-radius: $border-radius-lg;
+      padding: $spacing-md;
+      text-align: center;
+      transition: all $transition-normal;
+
+      &:hover {
+        border-color: $border-dark;
+        box-shadow: $shadow-sm;
+      }
+
+      .stat-number {
+        display: block;
+        font-size: 1.75rem;
+        font-weight: 700;
+        color: $primary;
+        margin-bottom: $spacing-xs;
+
+        @media screen and (max-width: $mobile) {
+          font-size: 1.5rem;
+        }
+      }
+
+      .stat-label {
+        font-size: 0.875rem;
+        color: $text-light;
+        font-weight: 500;
+      }
+    }
+  }
+}
+
+// Enhanced Playlist Building Guide
+.playlist-building-guide {
+  margin-bottom: $spacing-lg;
+
+  .guide-card {
+    background: linear-gradient(135deg, rgba($primary, 0.08) 0%, rgba($secondary, 0.06) 100%);
+    border: 2px solid rgba($primary, 0.2);
+    border-radius: $border-radius-lg;
+    overflow: hidden;
+  }
+
+  .guide-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: $spacing-md;
+    margin-bottom: $spacing-md;
+
+    @media screen and (max-width: $mobile) {
+      flex-direction: column;
+      gap: $spacing-sm;
+    }
+  }
+
+  .guide-status {
+    display: flex;
+    align-items: flex-start;
+    gap: $spacing-sm;
+    flex: 1;
+
+    .status-icon {
+      width: 24px;
+      height: 24px;
+      color: $primary;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+
+    .status-info {
+      flex: 1;
+      min-width: 0;
+
+      .guide-title {
+        font-size: 1.125rem;
+        font-weight: 600;
+        color: $text-dark;
+        margin: 0 0 $spacing-xs;
+      }
+
+      .guide-subtitle {
+        font-size: 0.875rem;
+        color: $text-light;
+        margin: 0;
+        line-height: 1.4;
+      }
+    }
+  }
+
+  .playlist-stats {
+    display: flex;
+    gap: $spacing-md;
+
+    @media screen and (max-width: $mobile) {
+      width: 100%;
+      justify-content: flex-start;
+    }
+
+    .playlist-stat {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      gap: $spacing-xs;
+
+      .stat-number {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: $primary;
+        line-height: 1;
+      }
+
+      .stat-label {
+        font-size: 0.75rem;
+        color: $text-light;
+        font-weight: 500;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+    }
+  }
+
+  .available-sections {
+    .sections-title {
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: $text-dark;
+      margin: 0 0 $spacing-sm;
+    }
+
+    .section-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: $spacing-xs;
+
+      .section-tag {
+        display: flex;
+        align-items: center;
+        gap: $spacing-xs;
+        background: $surface;
+        border: 1px solid $border;
+        border-radius: $border-radius-md;
+        padding: 8px 12px;
+        font-size: 0.875rem;
+        transition: all 0.2s ease;
+
+        &:hover {
+          border-color: $primary;
+          box-shadow: $shadow-sm;
+        }
+
+        .section-name {
+          font-weight: 500;
+          color: $text-dark;
+        }
+
+        .section-count {
+          background: rgba($primary, 0.1);
+          color: $primary;
+          font-weight: 600;
+          font-size: 0.75rem;
+          padding: 2px 6px;
+          border-radius: $border-radius-sm;
+          min-width: 20px;
+          text-align: center;
+        }
+
+        @media screen and (max-width: $mobile) {
+          font-size: 0.75rem;
+          padding: 6px 10px;
+
+          .section-count {
+            font-size: 0.7rem;
+            padding: 1px 4px;
+          }
+        }
+      }
+    }
+  }
+}
+
+// Enhanced Playlist Building Status Bar - Mobile First
+.playlist-status-bar {
+  margin-bottom: 1.5rem;
+
+  .status-card {
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    overflow: hidden;
+
+    .status-content {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      padding: 1rem;
+
+      @media (min-width: 768px) {
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+      }
+    }
+
+    .status-left {
+      .status-indicator {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+
+        .status-icon {
+          width: 1.5rem;
+          height: 1.5rem;
+          color: var(--primary-color);
+          flex-shrink: 0;
+        }
+
+        .status-info {
+          display: flex;
+          flex-direction: column;
+          gap: 0.25rem;
+
+          .status-date {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: var(--text-primary);
+          }
+
+          .status-label {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+          }
+        }
+      }
+    }
+
+    .status-center {
+      .status-progress {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+
+        .progress-item {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 0.5rem;
+
+          .progress-step {
+            width: 2rem;
+            height: 2rem;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+
+            &.completed {
+              background-color: var(--success-color);
+              color: white;
+            }
+
+            &.pending {
+              background-color: var(--border-color);
+              color: var(--text-secondary);
+            }
+
+            .step-icon {
+              width: 1rem;
+              height: 1rem;
+            }
+          }
+
+          .progress-count {
+            width: 2rem;
+            height: 2rem;
+            border-radius: 50%;
+            background-color: var(--primary-color);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 0.9rem;
+          }
+
+          .progress-label {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            text-align: center;
+          }
+        }
+
+        .progress-divider {
+          width: 2rem;
+          height: 2px;
+          background-color: var(--border-color);
+          border-radius: 1px;
+
+          @media (max-width: 767px) {
+            width: 1rem;
+          }
+        }
+      }
+    }
+
+    .status-right {
+      .view-playlist-btn {
+        white-space: nowrap;
+
+        .button-icon {
+          width: 1rem;
+          height: 1rem;
+        }
+      }
+    }
+
+    .status-hint {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.75rem 1rem;
+      background-color: var(--info-bg);
+      border-top: 1px solid var(--border-color);
+
+      .hint-icon {
+        width: 1rem;
+        height: 1rem;
+        color: var(--info-color);
+        flex-shrink: 0;
+      }
+
+      .hint-text {
+        font-size: 0.85rem;
+        color: var(--info-color);
+        line-height: 1.4;
+      }
+    }
+  }
+}
+
+// Enhanced Add to Section Dropdown - Mobile First
+.add-to-dropdown {
+  &.enhanced {
+    .dropdown-header {
+      padding: 1rem;
+      border-bottom: 1px solid var(--border-color);
+
+      .dropdown-title-section {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+        margin-bottom: 0.75rem;
+
+        .dropdown-title {
+          font-size: 1rem;
+          font-weight: 600;
+          color: var(--text-primary);
+        }
+
+        .dropdown-status {
+          .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.375rem;
+            padding: 0.25rem 0.5rem;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 500;
+
+            &.new {
+              background-color: var(--primary-light);
+              color: var(--primary-color);
+            }
+
+            &.existing {
+              background-color: var(--success-light);
+              color: var(--success-color);
+            }
+
+            .status-icon {
+              width: 0.75rem;
+              height: 0.75rem;
+            }
+          }
+        }
+      }
+
+      .dropdown-summary {
+        .summary-text {
+          font-size: 0.8rem;
+          color: var(--text-secondary);
+        }
+      }
+    }
+
+    .dropdown-content {
+      max-height: 16rem;
+      overflow-y: auto;
+
+      .dropdown-item {
+        &:not(.disabled) {
+          .dropdown-content-row {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem 1rem;
+
+            .section-indicator {
+              position: relative;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+
+              .dropdown-icon {
+                width: 1.25rem;
+                height: 1.25rem;
+                color: var(--primary-color);
+              }
+
+              .section-number {
+                position: absolute;
+                top: -0.25rem;
+                right: -0.25rem;
+                background-color: var(--secondary-color);
+                color: white;
+                font-size: 0.6rem;
+                font-weight: 600;
+                width: 1rem;
+                height: 1rem;
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+              }
+            }
+
+            .dropdown-text {
+              flex: 1;
+              display: flex;
+              flex-direction: column;
+              gap: 0.25rem;
+
+              .dropdown-name {
+                font-size: 0.9rem;
+                font-weight: 500;
+                color: var(--text-primary);
+              }
+
+              .dropdown-detail {
+                font-size: 0.75rem;
+                color: var(--text-secondary);
+              }
+            }
+
+            .dropdown-actions {
+              display: flex;
+              align-items: center;
+
+              .dropdown-action {
+                width: 1rem;
+                height: 1rem;
+                color: var(--primary-color);
+                transition: transform 0.1s ease;
+              }
+            }
+          }
+
+          &:hover {
+            .dropdown-actions .dropdown-action {
+              transform: scale(1.1);
+            }
+          }
+        }
+
+        &.disabled {
+          .dropdown-content-row {
+            padding: 1rem;
+
+            .dropdown-icon {
+              color: var(--text-secondary);
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+// Error State
+.master-songs-error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 50vh;
+  text-align: center;
+  gap: $spacing-md;
+
+  .error-icon {
+    width: 64px;
+    height: 64px;
+    color: $danger;
+    opacity: 0.6;
+  }
+
+  .error-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: $text-dark;
+    margin: 0;
+  }
+
+  .error-message {
+    color: $text-light;
+    font-size: 1rem;
+    margin: 0;
+    max-width: 400px;
+  }
+
+  .error-actions {
+    display: flex;
+    gap: $spacing-sm;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+}
+
+// Header Section
+.songs-header {
+  margin-bottom: $spacing-lg;
+
+  .header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: $spacing-md;
+    gap: $spacing-md;
+
+    @media screen and (max-width: $tablet) {
+      flex-direction: column;
+      align-items: stretch;
+    }
+  }
+
+  .header-left {
+    flex: 1;
+
+    .page-title {
+      display: flex;
+      align-items: center;
+      gap: $spacing-sm;
+      font-size: 2rem;
+      font-weight: 700;
+      color: $text-dark;
+      margin: 0 0 $spacing-xs;
+
+      @media screen and (max-width: $tablet) {
+        font-size: 1.75rem;
+      }
+
+      .title-icon {
+        width: 32px;
+        height: 32px;
+        color: $primary;
+      }
+    }
+
+    .page-subtitle {
+      color: $text-light;
+      font-size: 1rem;
+      margin: 0;
+    }
+  }
+
+  .header-actions {
+    display: flex;
+    gap: $spacing-sm;
+    align-items: center;
+
+    @media screen and (max-width: $tablet) {
+      justify-content: flex-end;
+    }
+  }
+
+  // Stats Cards - Mobile Optimized
+  .header-stats {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: $spacing-md;
+    margin-top: $spacing-md;
+
+    @media screen and (max-width: $tablet) {
+      grid-template-columns: repeat(2, 1fr);
+      gap: $spacing-sm;
+    }
+
+    @media screen and (max-width: $mobile) {
+      grid-template-columns: repeat(2, 1fr);
+      gap: $spacing-xs;
+    }
+
+    .stat-card {
+      background: $surface;
+      border: 2px solid $border-light;
+      border-radius: $border-radius-lg;
+      padding: $spacing-md;
+      text-align: center;
+      transition: all $transition-normal;
+
+      &:hover {
+        border-color: $border-dark;
+        box-shadow: $shadow-sm;
+      }
+
+      .stat-number {
+        display: block;
+        font-size: 1.75rem;
+        font-weight: 700;
+        color: $primary;
+        margin-bottom: $spacing-xs;
+
+        @media screen and (max-width: $mobile) {
+          font-size: 1.5rem;
+        }
+      }
+
+      .stat-label {
+        font-size: 0.875rem;
+        color: $text-light;
+        font-weight: 500;
+      }
+    }
+  }
+}
+
+// Enhanced Playlist Building Guide
+.playlist-building-guide {
+  margin-bottom: $spacing-lg;
+
+  .guide-card {
+    background: linear-gradient(135deg, rgba($primary, 0.08) 0%, rgba($secondary, 0.06) 100%);
+    border: 2px solid rgba($primary, 0.2);
+    border-radius: $border-radius-lg;
+    overflow: hidden;
+  }
+
+  .guide-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: $spacing-md;
+    margin-bottom: $spacing-md;
+
+    @media screen and (max-width: $mobile) {
+      flex-direction: column;
+      gap: $spacing-sm;
+    }
+  }
+
+  .guide-status {
+    display: flex;
+    align-items: flex-start;
+    gap: $spacing-sm;
+    flex: 1;
+
+    .status-icon {
+      width: 24px;
+      height: 24px;
+      color: $primary;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+
+    .status-info {
+      flex: 1;
+      min-width: 0;
+
+      .guide-title {
+        font-size: 1.125rem;
+        font-weight: 600;
+        color: $text-dark;
+        margin: 0 0 $spacing-xs;
+      }
+
+      .guide-subtitle {
+        font-size: 0.875rem;
+        color: $text-light;
+        margin: 0;
+        line-height: 1.4;
+      }
+    }
+  }
+
+  .playlist-stats {
+    display: flex;
+    gap: $spacing-md;
+
+    @media screen and (max-width: $mobile) {
+      width: 100%;
+      justify-content: flex-start;
+    }
+
+    .playlist-stat {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      gap: $spacing-xs;
+
+      .stat-number {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: $primary;
+        line-height: 1;
+      }
+
+      .stat-label {
+        font-size: 0.75rem;
+        color: $text-light;
+        font-weight: 500;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+    }
+  }
+
+  .available-sections {
+    .sections-title {
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: $text-dark;
+      margin: 0 0 $spacing-sm;
+    }
+
+    .section-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: $spacing-xs;
+
+      .section-tag {
+        display: flex;
+        align-items: center;
+        gap: $spacing-xs;
+        background: $surface;
+        border: 1px solid $border;
+        border-radius: $border-radius-md;
+        padding: 8px 12px;
+        font-size: 0.875rem;
+        transition: all 0.2s ease;
+
+        &:hover {
+          border-color: $primary;
+          box-shadow: $shadow-sm;
+        }
+
+        .section-name {
+          font-weight: 500;
+          color: $text-dark;
+        }
+
+        .section-count {
+          background: rgba($primary, 0.1);
+          color: $primary;
+          font-weight: 600;
+          font-size: 0.75rem;
+          padding: 2px 6px;
+          border-radius: $border-radius-sm;
+          min-width: 20px;
+          text-align: center;
+        }
+
+        @media screen and (max-width: $mobile) {
+          font-size: 0.75rem;
+          padding: 6px 10px;
+
+          .section-count {
+            font-size: 0.7rem;
+            padding: 1px 4px;
+          }
+        }
+      }
+    }
+  }
+}
+
+// Enhanced Playlist Building Status Bar - Mobile First
+.playlist-status-bar {
+  margin-bottom: 1.5rem;
+
+  .status-card {
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    overflow: hidden;
+
+    .status-content {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      padding: 1rem;
+
+      @media (min-width: 768px) {
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+      }
+    }
+
+    .status-left {
+      .status-indicator {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+
+        .status-icon {
+          width: 1.5rem;
+          height: 1.5rem;
+          color: var(--primary-color);
+          flex-shrink: 0;
+        }
+
+        .status-info {
+          display: flex;
+          flex-direction: column;
+          gap: 0.25rem;
+
+          .status-date {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: var(--text-primary);
+          }
+
+          .status-label {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+          }
+        }
+      }
+    }
+
+    .status-center {
+      .status-progress {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+
+        .progress-item {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 0.5rem;
+
+          .progress-step {
+            width: 2rem;
+            height: 2rem;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+
+            &.completed {
+              background-color: var(--success-color);
+              color: white;
+            }
+
+            &.pending {
+              background-color: var(--border-color);
+              color: var(--text-secondary);
+            }
+
+            .step-icon {
+              width: 1rem;
+              height: 1rem;
+            }
+          }
+
+          .progress-count {
+            width: 2rem;
+            height: 2rem;
+            border-radius: 50%;
+            background-color: var(--primary-color);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 0.9rem;
+          }
+
+          .progress-label {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            text-align: center;
+          }
+        }
+
+        .progress-divider {
+          width: 2rem;
+          height: 2px;
+          background-color: var(--border-color);
+          border-radius: 1px;
+
+          @media (max-width: 767px) {
+            width: 1rem;
+          }
+        }
+      }
+    }
+
+    .status-right {
+      .view-playlist-btn {
+        white-space: nowrap;
+
+        .button-icon {
+          width: 1rem;
+          height: 1rem;
+        }
+      }
+    }
+
+    .status-hint {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.75rem 1rem;
+      background-color: var(--info-bg);
+      border-top: 1px solid var(--border-color);
+
+      .hint-icon {
+        width: 1rem;
+        height: 1rem;
+        color: var(--info-color);
+        flex-shrink: 0;
+      }
+
+      .hint-text {
+        font-size: 0.85rem;
+        color: var(--info-color);
+        line-height: 1.4;
+      }
+    }
+  }
+}
+
+// Enhanced Add to Section Dropdown - Mobile First
+.add-to-dropdown {
+  &.enhanced {
+    .dropdown-header {
+      padding: 1rem;
+      border-bottom: 1px solid var(--border-color);
+
+      .dropdown-title-section {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+        margin-bottom: 0.75rem;
+
+        .dropdown-title {
+          font-size: 1rem;
+          font-weight: 600;
+          color: var(--text-primary);
+        }
+
+        .dropdown-status {
+          .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.375rem;
+            padding: 0.25rem 0.5rem;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 500;
+
+            &.new {
+              background-color: var(--primary-light);
+              color: var(--primary-color);
+            }
+
+            &.existing {
+              background-color: var(--success-light);
+              color: var(--success-color);
+            }
+
+            .status-icon {
+              width: 0.75rem;
+              height: 0.75rem;
+            }
+          }
+        }
+      }
+
+      .dropdown-summary {
+        .summary-text {
+          font-size: 0.8rem;
+          color: var(--text-secondary);
+        }
+      }
+    }
+
+    .dropdown-content {
+      max-height: 16rem;
+      overflow-y: auto;
+
+      .dropdown-item {
+        &:not(.disabled) {
+          .dropdown-content-row {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem 1rem;
+
+            .section-indicator {
+              position: relative;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+
+              .dropdown-icon {
+                width: 1.25rem;
+                height: 1.25rem;
+                color: var(--primary-color);
+              }
+
+              .section-number {
+                position: absolute;
+                top: -0.25rem;
+                right: -0.25rem;
+                background-color: var(--secondary-color);
+                color: white;
+                font-size: 0.6rem;
+                font-weight: 600;
+                width: 1rem;
+                height: 1rem;
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+              }
+            }
+
+            .dropdown-text {
+              flex: 1;
+              display: flex;
+              flex-direction: column;
+              gap: 0.25rem;
+
+              .dropdown-name {
+                font-size: 0.9rem;
+                font-weight: 500;
+                color: var(--text-primary);
+              }
+
+              .dropdown-detail {
+                font-size: 0.75rem;
+                color: var(--text-secondary);
+              }
+            }
+
+            .dropdown-actions {
+              display: flex;
+              align-items: center;
+
+              .dropdown-action {
+                width: 1rem;
+                height: 1rem;
+                color: var(--primary-color);
+                transition: transform 0.1s ease;
+              }
+            }
+          }
+
+          &:hover {
+            .dropdown-actions .dropdown-action {
+              transform: scale(1.1);
+            }
+          }
+        }
+
+        &.disabled {
+          .dropdown-content-row {
+            padding: 1rem;
+
+            .dropdown-icon {
+              color: var(--text-secondary);
+            }
+          }
+        }
+      }
+    }
   }
 }
