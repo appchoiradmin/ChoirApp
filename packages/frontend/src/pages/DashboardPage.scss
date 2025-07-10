@@ -1,0 +1,522 @@
+// DashboardPage Styles - Modern Design System Implementation
+@import '../_variables.scss';
+
+// Main Container
+.dashboard-container {
+  min-height: calc(100vh - 4rem);
+  background: linear-gradient(135deg, $color-neutral-50 0%, $color-neutral-100 100%);
+  padding: $spacing-lg $spacing-md;
+  
+  @media (max-width: 768px) {
+    padding: $spacing-md $spacing-sm;
+  }
+}
+
+// Header Section
+.dashboard-header {
+  margin-bottom: $spacing-2xl;
+  
+  .header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: $spacing-lg;
+    
+    @media (max-width: 768px) {
+      flex-direction: column;
+      gap: $spacing-md;
+    }
+  }
+  
+  .user-welcome {
+    flex: 1;
+  }
+  
+  .dashboard-title {
+    font-size: $font-size-3xl;
+    font-weight: $font-weight-bold;
+    color: $color-neutral-900;
+    margin-bottom: $spacing-xs;
+    
+    @media (max-width: 768px) {
+      font-size: $font-size-2xl;
+    }
+  }
+  
+  .dashboard-subtitle {
+    font-size: $font-size-lg;
+    color: $color-neutral-600;
+    margin: 0;
+  }
+  
+  .header-actions {
+    .create-action {
+      display: flex;
+      align-items: center;
+      gap: $spacing-sm;
+      
+      .button-icon {
+        width: 1.25rem;
+        height: 1.25rem;
+      }
+    }
+  }
+}
+
+// Stats Grid
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: $spacing-lg;
+  margin-bottom: $spacing-2xl;
+  
+  @media (max-width: 640px) {
+    grid-template-columns: repeat(2, 1fr);
+    gap: $spacing-md;
+  }
+}
+
+.stat-card {
+  border: none;
+  background: white;
+  border-radius: $radius-xl;
+  box-shadow: $shadow-sm;
+  transition: all $transition-fast;
+  
+  &:hover {
+    box-shadow: $shadow-md;
+    transform: translateY(-1px);
+  }
+  
+  .stat-content {
+    display: flex;
+    align-items: center;
+    gap: $spacing-md;
+    padding: $spacing-lg;
+  }
+  
+  .stat-icon-wrapper {
+    width: 3rem;
+    height: 3rem;
+    border-radius: $radius-lg;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    
+    &.primary {
+      background: rgba($color-primary, 0.1);
+      color: $color-primary;
+    }
+    
+    &.secondary {
+      background: rgba($color-secondary, 0.1);
+      color: $color-secondary;
+    }
+    
+    &.accent {
+      background: rgba($color-accent, 0.1);
+      color: $color-accent;
+    }
+    
+    &.success {
+      background: rgba($color-success, 0.1);
+      color: $color-success;
+    }
+  }
+  
+  .stat-icon {
+    width: 1.5rem;
+    height: 1.5rem;
+  }
+  
+  .stat-details {
+    flex: 1;
+  }
+  
+  .stat-number {
+    font-size: $font-size-2xl;
+    font-weight: $font-weight-bold;
+    color: $color-neutral-900;
+    margin: 0 0 $spacing-xs 0;
+  }
+  
+  .stat-label {
+    font-size: $font-size-sm;
+    color: $color-neutral-600;
+    margin: 0;
+    font-weight: $font-weight-medium;
+  }
+}
+
+// Progress Card
+.progress-card {
+  background: white;
+  border-radius: $radius-xl;
+  box-shadow: $shadow-sm;
+  padding: $spacing-xl;
+  margin-bottom: $spacing-2xl;
+  
+  .progress-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: $spacing-lg;
+    
+    @media (max-width: 640px) {
+      flex-direction: column;
+      gap: $spacing-sm;
+      align-items: flex-start;
+    }
+  }
+  
+  .progress-percentage {
+    font-size: $font-size-sm;
+    font-weight: $font-weight-semibold;
+    color: $color-primary;
+    background: rgba($color-primary, 0.1);
+    padding: $spacing-xs $spacing-sm;
+    border-radius: $radius-full;
+  }
+  
+  .progress-bar {
+    width: 100%;
+    height: 0.5rem;
+    background: $color-neutral-200;
+    border-radius: $radius-full;
+    overflow: hidden;
+    margin-bottom: $spacing-lg;
+    
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, $color-primary, $color-secondary);
+      border-radius: $radius-full;
+      transition: width $transition-slow;
+    }
+  }
+  
+  .progress-steps {
+    display: flex;
+    flex-direction: column;
+    gap: $spacing-md;
+    
+    .progress-step {
+      display: flex;
+      align-items: center;
+      gap: $spacing-sm;
+      
+      .step-icon {
+        width: 1.25rem;
+        height: 1.25rem;
+        flex-shrink: 0;
+        
+        &.completed {
+          color: $color-success;
+        }
+        
+        &.pending {
+          color: $color-neutral-400;
+        }
+      }
+      
+      .step-label {
+        font-size: $font-size-sm;
+        color: $color-neutral-700;
+      }
+    }
+  }
+}
+
+// Section Titles
+.section-title {
+  font-size: $font-size-xl;
+  font-weight: $font-weight-semibold;
+  color: $color-neutral-900;
+  margin: 0 0 $spacing-lg 0;
+}
+
+// Quick Actions
+.quick-actions-card {
+  background: white;
+  border-radius: $radius-xl;
+  box-shadow: $shadow-sm;
+  padding: $spacing-xl;
+  margin-bottom: $spacing-2xl;
+  
+  .quick-actions-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: $spacing-md;
+    
+    @media (max-width: 640px) {
+      grid-template-columns: 1fr;
+    }
+  }
+  
+  .quick-action-button {
+    display: flex;
+    align-items: center;
+    gap: $spacing-md;
+    padding: $spacing-lg;
+    border-radius: $radius-lg;
+    text-align: left;
+    justify-content: flex-start;
+    min-height: 4rem;
+    transition: all $transition-fast;
+    
+    &:hover:not(:disabled) {
+      background: $color-neutral-50;
+      transform: translateY(-1px);
+      box-shadow: $shadow-md;
+    }
+    
+    &:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+    
+    .action-icon {
+      width: 1.5rem;
+      height: 1.5rem;
+      flex-shrink: 0;
+      color: $color-primary;
+    }
+    
+    .action-content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: $spacing-xs;
+    }
+    
+    .action-title {
+      font-size: $font-size-base;
+      font-weight: $font-weight-medium;
+      color: $color-neutral-900;
+    }
+    
+    .action-subtitle {
+      font-size: $font-size-sm;
+      color: $color-neutral-600;
+    }
+  }
+}
+
+// Choirs Section
+.choirs-section {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-xl;
+}
+
+.choirs-card {
+  background: white;
+  border-radius: $radius-xl;
+  box-shadow: $shadow-sm;
+  padding: $spacing-xl;
+  
+  .choirs-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: $spacing-md;
+    
+    @media (max-width: 640px) {
+      grid-template-columns: 1fr;
+    }
+  }
+  
+  .choir-card-link {
+    display: block;
+    text-decoration: none;
+    color: inherit;
+    
+    .choir-card {
+      border: 1px solid $color-neutral-200;
+      border-radius: $radius-lg;
+      transition: all $transition-fast;
+      
+      &:hover {
+        border-color: $color-primary;
+        box-shadow: $shadow-md;
+        transform: translateY(-1px);
+      }
+      
+      .choir-content {
+        display: flex;
+        align-items: center;
+        gap: $spacing-md;
+        padding: $spacing-lg;
+      }
+      
+      .choir-icon-wrapper {
+        width: 2.5rem;
+        height: 2.5rem;
+        border-radius: $radius-lg;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        
+        &.admin {
+          background: rgba($color-primary, 0.1);
+          color: $color-primary;
+        }
+        
+        &.member {
+          background: rgba($color-secondary, 0.1);
+          color: $color-secondary;
+        }
+        
+        .choir-icon {
+          width: 1.25rem;
+          height: 1.25rem;
+        }
+      }
+      
+      .choir-details {
+        flex: 1;
+      }
+      
+      .choir-name {
+        font-size: $font-size-lg;
+        font-weight: $font-weight-semibold;
+        color: $color-neutral-900;
+        margin: 0 0 $spacing-xs 0;
+      }
+      
+      .choir-role {
+        font-size: $font-size-sm;
+        color: $color-neutral-600;
+        margin: 0;
+        font-weight: $font-weight-medium;
+      }
+      
+      .choir-arrow {
+        .arrow-icon {
+          width: 1.25rem;
+          height: 1.25rem;
+          color: $color-neutral-400;
+          transition: color $transition-fast;
+        }
+      }
+      
+      &:hover .choir-arrow .arrow-icon {
+        color: $color-primary;
+      }
+    }
+  }
+}
+
+// Empty State
+.empty-state-card {
+  background: white;
+  border-radius: $radius-xl;
+  box-shadow: $shadow-sm;
+  padding: $spacing-3xl;
+  text-align: center;
+  
+  .empty-state-content {
+    max-width: 24rem;
+    margin: 0 auto;
+  }
+  
+  .empty-state-icon {
+    width: 4rem;
+    height: 4rem;
+    color: $color-neutral-400;
+    margin: 0 auto $spacing-lg auto;
+  }
+  
+  .empty-state-title {
+    font-size: $font-size-xl;
+    font-weight: $font-weight-semibold;
+    color: $color-neutral-900;
+    margin: 0 0 $spacing-md 0;
+  }
+  
+  .empty-state-subtitle {
+    font-size: $font-size-base;
+    color: $color-neutral-600;
+    margin: 0 0 $spacing-xl 0;
+    line-height: 1.6;
+  }
+  
+  .empty-state-action {
+    display: inline-flex;
+    align-items: center;
+    gap: $spacing-sm;
+    
+    .button-icon {
+      width: 1.25rem;
+      height: 1.25rem;
+    }
+  }
+}
+
+// Invitations
+.invitations-card {
+  background: white;
+  border-radius: $radius-xl;
+  box-shadow: $shadow-sm;
+  padding: $spacing-xl;
+  
+  .invitation-count {
+    font-size: $font-size-sm;
+    font-weight: $font-weight-semibold;
+    color: $color-accent;
+    background: rgba($color-accent, 0.1);
+    padding: $spacing-xs $spacing-sm;
+    border-radius: $radius-full;
+    margin-left: $spacing-sm;
+  }
+}
+
+// Loading States
+.loading-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh;
+  gap: $spacing-lg;
+  
+  .loading-text {
+    font-size: $font-size-lg;
+    color: $color-neutral-600;
+    margin: 0;
+  }
+}
+
+// Welcome Card (not logged in)
+.welcome-card {
+  background: white;
+  border-radius: $radius-xl;
+  box-shadow: $shadow-lg;
+  padding: $spacing-3xl;
+  text-align: center;
+  max-width: 32rem;
+  margin: $spacing-3xl auto;
+  
+  .welcome-content {
+    .welcome-icon {
+      width: 4rem;
+      height: 4rem;
+      color: $color-primary;
+      margin: 0 auto $spacing-lg auto;
+    }
+    
+    .welcome-title {
+      font-size: $font-size-2xl;
+      font-weight: $font-weight-bold;
+      color: $color-neutral-900;
+      margin: 0 0 $spacing-md 0;
+    }
+    
+    .welcome-subtitle {
+      font-size: $font-size-base;
+      color: $color-neutral-600;
+      margin: 0 0 $spacing-xl 0;
+      line-height: 1.6;
+    }
+  }
+}
