@@ -1,0 +1,33 @@
+.layout-container {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  position: relative;
+}
+
+.layout-header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: white;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.layout-main {
+  flex: 1;
+  overflow-x: hidden;
+}
+
+.layout-footer {
+  position: sticky;
+  bottom: 0;
+  z-index: 100;
+  background: white;
+  border-top: 1px solid #e5e7eb;
+}
+
+@media (max-width: 768px) {
+  .layout-footer {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+}

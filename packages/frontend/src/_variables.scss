@@ -1,16 +1,17 @@
-// Design System Variables (NO Bulma import)
-// =========================================
+// ChoirApp Design System Variables
+// ================================
 
-// Color Palette
-$color-primary: #3B82F6;     // Blue-500
-$color-secondary: #6366F1;   // Indigo-500
-$color-accent: #F59E42;      // Orange-400
-$color-success: #22C55E;     // Green-500
-$color-danger: #EF4444;      // Red-500
-$color-warning: #FACC15;     // Yellow-400
-$color-info: #38BDF8;        // Sky-400
+// Enhanced Color Palette - Phase 1 Update
+$color-primary: #2563EB;     // Deep blue - trustworthiness and professionalism
+$color-secondary: #7C3AED;   // Warm purple - creativity and music
+$color-accent: #F59E42;      // Musical gold - warm accent for highlights
+$color-success: #10B981;     // Emerald green - success states
+$color-danger: #EF4444;      // Rose red - error states  
+$color-warning: #F59E0B;     // Amber - warning states
+$color-info: #38BDF8;        // Sky blue - informational
 
-// Neutral shades
+// Neutral Color Scale - Enhanced for better contrast
+$color-neutral-50: #F9FAFB;
 $color-neutral-100: #F3F4F6;
 $color-neutral-200: #E5E7EB;
 $color-neutral-300: #D1D5DB;
@@ -20,23 +21,81 @@ $color-neutral-600: #4B5563;
 $color-neutral-700: #374151;
 $color-neutral-800: #1F2937;
 $color-neutral-900: #111827;
+$color-neutral-950: #030712;
 
-// Typography
-$font-family-base: 'Inter', 'Segoe UI', Arial, sans-serif;
-$font-family-heading: 'Inter', 'Segoe UI', Arial, sans-serif;
-$font-size-base: 1rem;      // 16px
+// Musical Theme Colors
+$color-musical-light: #FEF3C7;   // Light gold background
+$color-musical-medium: #F59E0B;  // Medium gold
+$color-musical-dark: #D97706;    // Dark gold
+
+// Enhanced Typography Scale
+$font-family-base: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+$font-family-heading: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+$font-family-musical: '"Plus Jakarta Sans"', 'Inter', sans-serif; // For musical/creative elements
+
+// Typography Scale - Better hierarchy
+$font-size-xs: 0.75rem;     // 12px
 $font-size-sm: 0.875rem;    // 14px
-$font-size-lg: 1.25rem;     // 20px
-$font-size-xl: 1.5rem;      // 24px
-$font-size-2xl: 2rem;       // 32px
-$font-weight-normal: 400;
-$font-weight-bold: 700;
+$font-size-base: 1rem;      // 16px
+$font-size-lg: 1.125rem;    // 18px
+$font-size-xl: 1.25rem;     // 20px
+$font-size-2xl: 1.5rem;     // 24px
+$font-size-3xl: 1.875rem;   // 30px
+$font-size-4xl: 2.25rem;    // 36px
+$font-size-5xl: 3rem;       // 48px
 
-// Bulma variable aliases for theme.scss only
+// Font Weights
+$font-weight-light: 300;
+$font-weight-normal: 400;
+$font-weight-medium: 500;
+$font-weight-semibold: 600;
+$font-weight-bold: 700;
+$font-weight-extrabold: 800;
+
+// Spacing Scale - Consistent spacing system
+$spacing-xs: 0.25rem;   // 4px
+$spacing-sm: 0.5rem;    // 8px
+$spacing-md: 1rem;      // 16px
+$spacing-lg: 1.5rem;    // 24px
+$spacing-xl: 2rem;      // 32px
+$spacing-2xl: 3rem;     // 48px
+$spacing-3xl: 4rem;     // 64px
+
+// Border Radius
+$radius-sm: 0.375rem;   // 6px
+$radius-md: 0.5rem;     // 8px
+$radius-lg: 0.75rem;    // 12px
+$radius-xl: 1rem;       // 16px
+$radius-2xl: 1.5rem;    // 24px
+$radius-full: 9999px;
+
+// Shadows
+$shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+$shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+$shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+$shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+
+// Transitions
+$transition-fast: 150ms ease-in-out;
+$transition-normal: 300ms ease-in-out;
+$transition-slow: 500ms ease-in-out;
+
+// Bulma variable aliases for theme.scss integration
 $primary: $color-primary;
+$secondary: $color-secondary;
 $link: $color-accent;
 $info: $color-info;
 $success: $color-success;
 $warning: $color-warning;
 $danger: $color-danger;
 $family-primary: $font-family-base;
+$family-secondary: $font-family-heading;
+
+// Component-specific variables
+$navbar-height: 4rem;
+$sidebar-width: 16rem;
+$container-max-width: 80rem;
+
+// Animation timing
+$animation-duration: $transition-normal;
+$hover-transition: $transition-fast;
