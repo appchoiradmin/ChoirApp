@@ -1,8 +1,11 @@
-// ChoirApp Design System Theme
-// ===========================
+// ChoirApp Enhanced Design System Theme
+// ====================================
 
-// Import design tokens
+// Import design tokens FIRST
 @use './_variables.scss' as *;
+
+// Import Google Fonts
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
 
 // Bulma variable overrides (from _variables.scss)
 // $primary, $link, $info, $success, $warning, $danger, $family-primary already set
@@ -10,56 +13,375 @@
 // Import Bulma (only place where @import is used)
 @import "bulma/bulma";
 
-// Custom global styles
+// Enhanced Global Styles
+// ======================
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
 body {
   font-family: $font-family-base;
   font-size: $font-size-base;
+  font-weight: $font-weight-normal;
+  line-height: 1.6;
   color: $color-neutral-900;
-  background: $color-neutral-100;
+  background: $color-neutral-50;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
+
+// Enhanced Typography Hierarchy
+// =============================
 
 h1, h2, h3, h4, h5, h6 {
   font-family: $font-family-heading;
   font-weight: $font-weight-bold;
-  color: $color-primary;
-  margin-bottom: 0.5em;
+  line-height: 1.2;
+  color: $color-neutral-900;
+  margin-bottom: $spacing-md;
 }
+
+h1 {
+  font-size: $font-size-4xl;
+  font-weight: $font-weight-extrabold;
+}
+
+h2 {
+  font-size: $font-size-3xl;
+  font-weight: $font-weight-bold;
+}
+
+h3 {
+  font-size: $font-size-2xl;
+  font-weight: $font-weight-semibold;
+}
+
+h4 {
+  font-size: $font-size-xl;
+  font-weight: $font-weight-semibold;
+}
+
+h5 {
+  font-size: $font-size-lg;
+  font-weight: $font-weight-medium;
+}
+
+h6 {
+  font-size: $font-size-base;
+  font-weight: $font-weight-medium;
+}
+
+// Enhanced Button Styles
+// ======================
 
 .button {
   font-family: $font-family-base;
-  font-weight: $font-weight-bold;
-  border-radius: 0.5em;
-  transition: background 0.2s, color 0.2s;
+  font-weight: $font-weight-medium;
+  border-radius: $radius-lg;
+  border: none;
+  transition: all $transition-fast;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: $spacing-sm;
+  
+  &:hover {
+    transform: translateY(-1px);
+    box-shadow: $shadow-md;
+  }
+  
+  &:active {
+    transform: translateY(0);
+  }
+  
+  &.is-primary {
+    background: linear-gradient(135deg, $color-primary 0%, lighten($color-primary, 10%) 100%);
+    color: white;
+    
+    &:hover {
+      background: linear-gradient(135deg, darken($color-primary, 5%) 0%, $color-primary 100%);
+    }
+  }
+  
+  &.is-secondary {
+    background: linear-gradient(135deg, $color-secondary 0%, lighten($color-secondary, 10%) 100%);
+    color: white;
+    
+    &:hover {
+      background: linear-gradient(135deg, darken($color-secondary, 5%) 0%, $color-secondary 100%);
+    }
+  }
+  
+  &.is-accent {
+    background: linear-gradient(135deg, $color-accent 0%, lighten($color-accent, 10%) 100%);
+    color: white;
+    
+    &:hover {
+      background: linear-gradient(135deg, darken($color-accent, 5%) 0%, $color-accent 100%);
+    }
+  }
+  
+  &.is-outlined {
+    background: transparent;
+    border: 2px solid $color-primary;
+    color: $color-primary;
+    
+    &:hover {
+      background: $color-primary;
+      color: white;
+    }
+  }
+  
+  &.is-xl {
+    font-size: $font-size-lg;
+    padding: $spacing-lg $spacing-2xl;
+    min-height: 3.5rem;
+  }
 }
+
+// Enhanced Card Styles
+// ===================
+
+.card {
+  border-radius: $radius-xl;
+  box-shadow: $shadow-sm;
+  border: 1px solid $color-neutral-200;
+  background: white;
+  transition: all $transition-normal;
+  
+  &:hover {
+    box-shadow: $shadow-lg;
+    transform: translateY(-2px);
+  }
+  
+  .card-header {
+    border-radius: $radius-xl $radius-xl 0 0;
+    background: $color-neutral-50;
+    border-bottom: 1px solid $color-neutral-200;
+  }
+  
+  .card-content {
+    padding: $spacing-lg;
+  }
+}
+
+// Musical Theme Elements
+// =====================
+
+.musical-accent {
+  color: $color-musical-dark;
+  font-family: $font-family-musical;
+}
+
+.hero-musical {
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(135deg, $color-primary 0%, $color-secondary 100%);
+  color: white;
+  
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, 
+      $color-primary 0%, 
+      mix($color-primary, $color-secondary, 70%) 50%,
+      $color-secondary 100%
+    );
+    opacity: 0.95;
+  }
+  
+  .title {
+    color: white;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+  
+  .subtitle {
+    color: rgba(255, 255, 255, 0.9);
+  }
+  
+  .hero-body {
+    position: relative;
+    z-index: 1;
+  }
+}
+
+// Wave animation and homepage enhancements
+// =======================================
+
+.wave {
+  width: 100%;
+  height: 100px;
+  display: block;
+  margin-top: -1px;
+}
+
+// Feature cards hover effects
+.section .card:hover {
+  transform: translateY(-4px);
+  box-shadow: $shadow-xl;
+}
+
+// Mobile-first viewport optimization
+.hero.is-fullheight {
+  min-height: 100vh;
+  
+  @media (max-width: 768px) {
+    min-height: 90vh; // Account for mobile browser UI
+  }
+}
+
+// Improved mobile spacing
+@media (max-width: 768px) {
+  .section {
+    padding: 2rem 1rem;
+  }
+  
+  .container {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+  
+  // Stack buttons vertically on mobile
+  .buttons.is-centered {
+    flex-direction: column;
+    align-items: center;
+    
+    .button + .button {
+      margin-left: 0;
+      margin-top: 0.75rem;
+    }
+  }
+  
+  // Better mobile cards
+  .card {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    border-radius: 12px;
+  }
+}
+
+// Tablet and up improvements
+@media (min-width: 769px) {
+  .buttons.is-centered {
+    flex-direction: row;
+    justify-content: center;
+    
+    .button + .button {
+      margin-top: 0;
+      margin-left: 1rem;
+    }
+  }
+}
+
+// Utility Classes
+// ==============
 
 .text-accent {
   color: $color-accent !important;
 }
 
-
-// 5. Custom global styles
-body {
-  font-family: $font-family-base;
-  font-size: $font-size-base;
-  color: $color-neutral-900;
-  background: $color-neutral-100;
+.text-primary {
+  color: $color-primary !important;
 }
 
-h1, h2, h3, h4, h5, h6 {
-  font-family: $font-family-heading;
-  font-weight: $font-weight-bold;
-  color: $color-primary;
-  margin-bottom: 0.5em;
+.text-secondary {
+  color: $color-secondary !important;
 }
 
-.button {
-  font-family: $font-family-base;
-  font-weight: $font-weight-bold;
-  border-radius: 0.5em;
-  transition: background 0.2s, color 0.2s;
+.gradient-primary {
+  background: linear-gradient(135deg, $color-primary 0%, $color-secondary 100%);
 }
 
-// Example utility
-.text-accent {
-  color: $color-accent !important;
+.gradient-accent {
+  background: linear-gradient(135deg, $color-accent 0%, $color-musical-dark 100%);
+}
+
+// Responsive Utilities
+// ===================
+
+@media (max-width: 768px) {
+  h1 {
+    font-size: $font-size-3xl;
+  }
+  
+  h2 {
+    font-size: $font-size-2xl;
+  }
+  
+  .hero-musical {
+    .title {
+      font-size: $font-size-3xl !important;
+    }
+    
+    .subtitle {
+      font-size: $font-size-lg !important;
+    }
+  }
+  
+  .buttons {
+    flex-direction: column;
+    
+    .button {
+      width: 100%;
+      margin: $spacing-sm 0 !important;
+    }
+  }
+  
+  .card {
+    margin: $spacing-sm;
+  }
+}
+
+// Mobile-first responsive utilities
+@media screen and (max-width: 768px) {
+  .is-fullwidth-mobile {
+    width: 100% !important;
+  }
+  
+  .mr-0-mobile {
+    margin-right: 0 !important;
+  }
+  
+  .px-3 {
+    padding-left: 1rem !important;
+    padding-right: 1rem !important;
+  }
+}
+
+@media screen and (min-width: 769px) {
+  .mr-4-tablet {
+    margin-right: 1.5rem !important;
+  }
+  
+  .px-0-tablet {
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+  }
+}
+
+// Touch-friendly improvements for mobile
+@media (max-width: 768px) {
+  .button {
+    min-height: 44px; // iOS touch target minimum
+    padding: 0.75rem 1.5rem;
+  }
+  
+  .card {
+    margin-bottom: 1rem;
+  }
+  
+  // Better touch targets for form elements
+  input, textarea, select {
+    min-height: 44px;
+    font-size: 16px; // Prevents zoom on iOS
+  }
 }
