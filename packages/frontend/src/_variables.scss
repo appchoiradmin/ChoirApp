@@ -52,6 +52,15 @@ $font-weight-semibold: 600;
 $font-weight-bold: 700;
 $font-weight-extrabold: 800;
 
+// Bulma-style size variables for compatibility
+$size-1: 3rem;      // 48px - $font-size-5xl
+$size-2: 2.25rem;   // 36px - $font-size-4xl  
+$size-3: 1.875rem;  // 30px - $font-size-3xl
+$size-4: 1.5rem;    // 24px - $font-size-2xl
+$size-5: 1.25rem;   // 20px - $font-size-xl
+$size-6: 1.125rem;  // 18px - $font-size-lg
+$size-7: 1rem;      // 16px - $font-size-base
+
 // Spacing Scale - Consistent spacing system
 $spacing-xs: 0.25rem;   // 4px
 $spacing-sm: 0.5rem;    // 8px
@@ -60,6 +69,7 @@ $spacing-lg: 1.5rem;    // 24px
 $spacing-xl: 2rem;      // 32px
 $spacing-2xl: 3rem;     // 48px
 $spacing-3xl: 4rem;     // 64px
+$spacing-xxl: 5rem;     // 80px - Extra extra large spacing
 
 // Border Radius
 $radius-sm: 0.375rem;   // 6px
@@ -98,11 +108,16 @@ $container-max-width: 80rem;
 
 // Text Colors
 $text-dark: $color-neutral-900;
+$text: $color-neutral-900;        // Main text color
 $text-light: $color-neutral-600;
 $text-muted: $color-neutral-500;
 
+// Error color alias
+$error: $color-danger;
+
 // Border Colors
 $border-light: $color-neutral-200;
+$border: $color-neutral-300;          // Main border color
 $border-dark: $color-neutral-400;
 
 // Surface Colors
