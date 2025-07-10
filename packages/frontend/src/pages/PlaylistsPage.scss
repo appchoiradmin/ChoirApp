@@ -1,0 +1,467 @@
+@use '../_variables.scss' as *;
+
+.playlists-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: $spacing-sm;
+
+  @media screen and (min-width: $tablet) {
+    padding: $spacing-md;
+  }
+
+  @media screen and (min-width: $desktop) {
+    padding: $spacing-lg;
+  }
+}
+
+// Loading State
+.playlist-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh;
+  gap: $spacing-md;
+
+  .loading-text {
+    font-size: $size-5;
+    color: $text-light;
+    font-weight: 500;
+  }
+}
+
+// Error State
+.playlist-error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh;
+  text-align: center;
+  gap: $spacing-md;
+  padding: $spacing-md;
+
+  .error-icon {
+    width: 4rem;
+    height: 4rem;
+    color: $error;
+    opacity: 0.6;
+  }
+
+  .error-title {
+    font-size: $size-3;
+    font-weight: 700;
+    color: $text;
+    margin: 0;
+  }
+
+  .error-message {
+    font-size: $size-5;
+    color: $text-light;
+    margin: 0;
+    max-width: 400px;
+  }
+
+  .error-actions {
+    display: flex;
+    gap: $spacing-sm;
+    margin-top: $spacing-sm;
+  }
+}
+
+// Header Section - Mobile First
+.playlist-header {
+  margin-bottom: $spacing-lg;
+
+  .header-content {
+    display: flex;
+    flex-direction: column;
+    gap: $spacing-md;
+    margin-bottom: $spacing-lg;
+
+    @media screen and (min-width: $tablet) {
+      flex-direction: row;
+      justify-content: space-between;
+      align-items: flex-start;
+    }
+  }
+
+  .header-left {
+    flex: 1;
+
+    .playlist-title {
+      display: flex;
+      align-items: center;
+      gap: $spacing-sm;
+      font-size: $size-2;
+      font-weight: 700;
+      color: $text;
+      margin: 0 0 $spacing-sm;
+      line-height: 1.2;
+
+      @media screen and (min-width: $tablet) {
+        font-size: $size-1;
+      }
+
+      .title-icon {
+        width: 1.5rem;
+        height: 1.5rem;
+        color: $primary;
+      }
+    }
+
+    .playlist-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: $spacing-sm;
+      align-items: center;
+
+      @media screen and (min-width: $tablet) {
+        gap: $spacing-md;
+      }
+
+      .meta-item {
+        display: flex;
+        align-items: center;
+        gap: $spacing-xs;
+        font-size: $size-6;
+        color: $text-light;
+        font-weight: 500;
+
+        .meta-icon {
+          width: 1rem;
+          height: 1rem;
+          color: $primary;
+        }
+
+        &.public-badge {
+          background: rgba($success, 0.1);
+          color: $success;
+          padding: $spacing-xs $spacing-sm;
+          border-radius: $border-radius-sm;
+          font-weight: 600;
+        }
+      }
+    }
+  }
+
+  .header-actions {
+    display: flex;
+    flex-direction: column;
+    gap: $spacing-sm;
+
+    @media screen and (min-width: $tablet) {
+      flex-direction: row;
+      align-items: center;
+    }
+
+    .action-buttons {
+      display: flex;
+      gap: $spacing-sm;
+
+      @media screen and (max-width: $mobile) {
+        flex-direction: column;
+      }
+
+      .play-button {
+        @media screen and (max-width: $mobile) {
+          order: 1;
+        }
+      }
+
+      .add-songs-button {
+        @media screen and (max-width: $mobile) {
+          order: 2;
+        }
+      }
+    }
+
+    .dropdown-container {
+      position: relative;
+
+      .dropdown-trigger {
+        min-width: 44px;
+        min-height: 44px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        svg {
+          width: 1.25rem;
+          height: 1.25rem;
+        }
+      }
+
+      .dropdown-menu {
+        position: absolute;
+        top: 100%;
+        right: 0;
+        z-index: 50;
+        min-width: 200px;
+        background: $surface;
+        border: 1px solid $border;
+        border-radius: $border-radius-md;
+        box-shadow: $shadow-lg;
+        padding: $spacing-xs;
+        margin-top: $spacing-xs;
+
+        @media screen and (max-width: $tablet) {
+          left: 0;
+          right: auto;
+          min-width: 250px;
+        }
+
+        .dropdown-item {
+          display: flex;
+          align-items: center;
+          gap: $spacing-sm;
+          width: 100%;
+          padding: $spacing-sm;
+          border: none;
+          background: none;
+          color: $text;
+          font-size: $size-6;
+          border-radius: $border-radius-sm;
+          cursor: pointer;
+          transition: background-color 0.15s ease;
+          min-height: 44px;
+
+          &:hover {
+            background: rgba($primary, 0.08);
+          }
+
+          .dropdown-icon {
+            width: 1rem;
+            height: 1rem;
+            color: $text-light;
+          }
+        }
+      }
+    }
+  }
+
+  // Stats Cards - Mobile First Grid
+  .header-stats {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: $spacing-sm;
+
+    @media screen and (min-width: $tablet) {
+      grid-template-columns: repeat(4, 1fr);
+      gap: $spacing-md;
+    }
+
+    .stat-card {
+      background: $surface;
+      border: 2px solid $border-light;
+      border-radius: $border-radius-lg;
+      padding: $spacing-md;
+      text-align: center;
+      transition: all $transition-normal;
+
+      &:hover {
+        border-color: $border-dark;
+        box-shadow: $shadow-sm;
+      }
+
+      .stat-number {
+        display: block;
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: $primary;
+        margin-bottom: $spacing-xs;
+
+        @media screen and (min-width: $tablet) {
+          font-size: 1.75rem;
+        }
+      }
+
+      .stat-label {
+        font-size: 0.875rem;
+        color: $text-light;
+        font-weight: 500;
+      }
+    }
+  }
+}
+
+// Content Section
+.playlist-content {
+  .empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: $spacing-xxl 0;
+    gap: $spacing-md;
+
+    .empty-icon {
+      width: 5rem;
+      height: 5rem;
+      color: $text-light;
+      opacity: 0.6;
+    }
+
+    .empty-title {
+      font-size: $size-3;
+      font-weight: 700;
+      color: $text;
+      margin: 0;
+    }
+
+    .empty-message {
+      font-size: $size-5;
+      color: $text-light;
+      margin: 0;
+      max-width: 400px;
+      line-height: 1.5;
+    }
+
+    .empty-actions {
+      display: flex;
+      flex-direction: column;
+      gap: $spacing-sm;
+      margin-top: $spacing-sm;
+
+      @media screen and (min-width: $tablet) {
+        flex-direction: row;
+      }
+    }
+
+    .empty-cta {
+      margin-top: $spacing-sm;
+    }
+  }
+
+  .playlist-sections {
+    display: flex;
+    flex-direction: column;
+    gap: $spacing-lg;
+  }
+}
+
+// Section Cards - Mobile First Design
+.section-card {
+  // Card styling is handled by the Card component
+  // We provide overrides here for section-specific needs
+
+  .section-header {
+    background: rgba($primary, 0.02);
+    border-bottom: 1px solid $border;
+    padding: $spacing-md;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    @media screen and (max-width: $mobile) {
+      padding: $spacing-sm;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: $spacing-xs;
+    }
+
+    .section-title {
+      font-size: $size-4;
+      font-weight: 600;
+      color: $text;
+      margin: 0;
+      line-height: 1.3;
+    }
+
+    .section-meta {
+      display: flex;
+      align-items: center;
+      gap: $spacing-sm;
+
+      .song-count {
+        font-size: $size-6;
+        color: $text-light;
+        font-weight: 500;
+        padding: $spacing-xs $spacing-sm;
+        background: rgba($primary, 0.1);
+        border-radius: $border-radius-sm;
+      }
+    }
+  }
+
+  .section-songs {
+    padding: 0;
+    // MovableSongItem styling will be handled by that component
+    // We provide container styles here
+  }
+
+  .section-empty {
+    padding: $spacing-xl;
+    text-align: center;
+    border-top: 1px dashed $border;
+
+    .empty-text {
+      font-size: $size-6;
+      color: $text-light;
+      margin: 0 0 $spacing-md;
+      font-style: italic;
+    }
+  }
+}
+
+// Mobile-First Responsive Adjustments
+@media screen and (max-width: $mobile) {
+  .playlists-container {
+    padding: $spacing-xs;
+  }
+
+  .playlist-header {
+    margin-bottom: $spacing-md;
+    
+    .header-left .playlist-title {
+      font-size: $size-3;
+    }
+  }
+
+  .section-card {
+    border-radius: $border-radius-md;
+    
+    .section-header {
+      padding: $spacing-sm;
+    }
+  }
+}
+
+// Touch-friendly enhancements
+@media (hover: none) and (pointer: coarse) {
+  .section-card {
+    &:hover {
+      box-shadow: $shadow-sm;
+      border-color: $border;
+    }
+  }
+
+  .dropdown-container .dropdown-item {
+    min-height: 48px;
+    padding: $spacing-md;
+  }
+}
+
+// Loading and transition animations
+.playlist-sections {
+  animation: fadeInUp 0.4s ease-out;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+// Focus management for accessibility
+.dropdown-trigger:focus,
+.dropdown-item:focus {
+  outline: 2px solid $primary;
+  outline-offset: 2px;
+}
