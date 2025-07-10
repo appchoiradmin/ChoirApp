@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getAllMasterSongs, searchMasterSongs } from '../services/masterSongService';
+import { getPlaylistTemplatesByChoirId } from '../services/playlistService';
 import { useDisplayedPlaylistSections } from '../hooks/useDisplayedPlaylistSections';
 import type { MasterSongDto } from '../types/song';
-import { PlaylistSection } from '../types/playlist';
+import { PlaylistSection, PlaylistTemplate } from '../types/playlist';
 import { useUser } from '../hooks/useUser';
 import { usePlaylistContext } from '../context/PlaylistContext';
 import { addSongToPlaylist } from '../services/playlistService';
@@ -23,7 +24,9 @@ import {
   ListBulletIcon,
   CalendarDaysIcon,
   ClockIcon,
-  CheckIcon
+  CheckIcon,
+  ChevronDownIcon,
+  ChevronUpIcon
 } from '@heroicons/react/24/outline';
 import './MasterSongsListPage.scss';
 
@@ -39,7 +42,7 @@ const MasterSongsListPage: React.FC = () => {
   const [dropdownOpen, setDropdownOpen] = useState<string | null>(null);
   const dropdownRefs = useRef<Record<string, HTMLDivElement | null>>({});
   const navigate = useNavigate();
-  const { sections, selectedTemplate, playlistId, refreshPlaylist } = usePlaylistContext();
+  const { sections, selectedTemplate, playlistId, refreshPlaylist, setSelectedTemplate } = usePlaylistContext();
   const displayedSections = useDisplayedPlaylistSections(sections, selectedTemplate);
   const { token, user } = useUser();
   
@@ -47,6 +50,8 @@ const MasterSongsListPage: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedSongs, setSelectedSongs] = useState<Set<string>>(new Set());
+  const [availableTemplates, setAvailableTemplates] = useState<PlaylistTemplate[]>([]);
+  const [templateDropdownOpen, setTemplateDropdownOpen] = useState<boolean>(false);
   const [filters, setFilters] = useState<FilterState>({
     search: '',
     sortBy: 'title',
@@ -73,9 +78,9 @@ const MasterSongsListPage: React.FC = () => {
     };
   }, [dropdownOpen]);
 
-  // Fetch songs data
+  // Fetch songs data and templates
   useEffect(() => {
-    const fetchSongs = async () => {
+    const fetchData = async () => {
       if (!token) {
         setError('Authentication token not found.');
         setLoading(false);
@@ -83,20 +88,24 @@ const MasterSongsListPage: React.FC = () => {
       }
       try {
         setLoading(true);
-        const data = await getAllMasterSongs(token);
-        setSongs(data || []);
+        const [songsData, templatesData] = await Promise.all([
+          getAllMasterSongs(token),
+          user?.choirId ? getPlaylistTemplatesByChoirId(user.choirId, token) : Promise.resolve([])
+        ]);
+        setSongs(songsData || []);
+        setAvailableTemplates(templatesData || []);
         setError(null);
       } catch (err) {
-        console.error('Error fetching master songs:', err);
-        setError('Failed to load master songs');
-        toast.error('Failed to load master songs');
+        console.error('Error fetching data:', err);
+        setError('Failed to load data');
+        toast.error('Failed to load data');
       } finally {
         setLoading(false);
       }
     };
 
-    fetchSongs();
-  }, [token]);
+    fetchData();
+  }, [token, user?.choirId]);
 
   // Filter and sort songs
   const filteredAndSortedSongs = useMemo(() => {
@@ -184,6 +193,13 @@ const MasterSongsListPage: React.FC = () => {
 
   const clearSelection = () => {
     setSelectedSongs(new Set());
+  };
+
+  // Handle template selection
+  const handleTemplateSelect = (template: PlaylistTemplate) => {
+    setSelectedTemplate(template);
+    setTemplateDropdownOpen(false);
+    toast.success(`Switched to template: ${template.title}`);
   };
 
   // Handle adding song to playlist section
@@ -476,17 +492,80 @@ const MasterSongsListPage: React.FC = () => {
               <span className="stat-number">{filteredAndSortedSongs.length}</span>
               <span className="stat-label">Total Songs</span>
             </div>
-            <div className="stat-card">
-              <span className="stat-number">{availableTags.length}</span>
-              <span className="stat-label">Tags</span>
+            <div className="stat-card tags-card">
+              <div className="tag-filters">
+                {availableTags.slice(0, 3).map(tag => (
+                  <Button
+                    key={tag}
+                    variant="ghost"
+                    size="sm"
+                    className="tag-filter-btn"
+                    onClick={() => setFilters(prev => ({ ...prev, search: tag }))}
+                  >
+                    {tag}
+                  </Button>
+                ))}
+                {availableTags.length > 3 && (
+                  <span className="more-tags">+{availableTags.length - 3} more</span>
+                )}
+              </div>
+              <span className="stat-label">Popular Tags</span>
             </div>
             <div className="stat-card">
               <span className="stat-number">{selectedSongs.size}</span>
               <span className="stat-label">Selected</span>
             </div>
-            <div className="stat-card">
-              <span className="stat-number">{displayedSections.length}</span>
-              <span className="stat-label">Sections</span>
+            <div className="stat-card template-selector">
+              <div className="template-dropdown">
+                <button
+                  className="template-dropdown-trigger"
+                  onClick={() => setTemplateDropdownOpen(!templateDropdownOpen)}
+                  type="button"
+                >
+                  <div className="template-info">
+                    <span className="template-name">
+                      {selectedTemplate ? selectedTemplate.title : 'Select Template'}
+                    </span>
+                    <span className="template-details">
+                      {selectedTemplate ? `${selectedTemplate.sections.length} sections` : `${availableTemplates.length} available`}
+                    </span>
+                  </div>
+                  {templateDropdownOpen ? <ChevronUpIcon className="dropdown-icon" /> : <ChevronDownIcon className="dropdown-icon" />}
+                </button>
+                
+                {templateDropdownOpen && (
+                  <div className="template-dropdown-menu">
+                    {availableTemplates.length === 0 ? (
+                      <div className="dropdown-item disabled">
+                        <span>No templates available</span>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => navigate(`/choir/${user?.choirId}/playlist-templates/new`)}
+                        >
+                          Create One
+                        </Button>
+                      </div>
+                    ) : (
+                      availableTemplates.map(template => (
+                        <button
+                          key={template.id}
+                          className={`dropdown-item ${selectedTemplate?.id === template.id ? 'selected' : ''}`}
+                          onClick={() => handleTemplateSelect(template)}
+                          type="button"
+                        >
+                          <div className="template-option">
+                            <span className="option-name">{template.title}</span>
+                            <span className="option-details">{template.sections.length} sections</span>
+                          </div>
+                          {selectedTemplate?.id === template.id && <CheckIcon className="selected-icon" />}
+                        </button>
+                      ))
+                    )}
+                  </div>
+                )}
+              </div>
+              <span className="stat-label">Template</span>
             </div>
           </div>
         </div>

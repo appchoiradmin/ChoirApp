@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useUser } from '../hooks/useUser';
 import { getPlaylistById as getPlaylist, getPlaylistsByChoirId, updatePlaylist, getPlaylistTemplatesByChoirId, removeSongFromPlaylist, UpdatePlaylistDto } from '../services/playlistService';
@@ -18,11 +18,7 @@ import {
   CalendarDaysIcon,
   MusicalNoteIcon,
   PlusIcon,
-  ShareIcon,
-  ArrowDownTrayIcon,
-  DocumentDuplicateIcon,
   Cog6ToothIcon,
-  EllipsisVerticalIcon,
   InformationCircleIcon,
   ClockIcon,
   UserGroupIcon,
@@ -54,25 +50,6 @@ const EditPlaylistPage: React.FC = () => {
   
   // UI State
   const [playlistSelectorOpen, setPlaylistSelectorOpen] = useState(false);
-  const [dropdownOpen, setDropdownOpen] = useState<string | null>(null);
-  const dropdownRef = useRef<HTMLDivElement>(null);
-
-  // Close dropdown when clicking outside
-  useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-        setDropdownOpen(null);
-      }
-    }
-    if (dropdownOpen) {
-      document.addEventListener('mousedown', handleClickOutside);
-    } else {
-      document.removeEventListener('mousedown', handleClickOutside);
-    }
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, [dropdownOpen]);
 
   // Fetch all playlists for the choir and select the target playlist
   useEffect(() => {
@@ -309,22 +286,6 @@ const EditPlaylistPage: React.FC = () => {
     navigate('/master-songs');
   };
 
-  const handleSharePlaylist = () => {
-    toast.success('Playlist sharing feature coming soon!');
-  };
-
-  const handleExportPlaylist = () => {
-    toast.success('Playlist export feature coming soon!');
-  };
-
-  const handleDuplicatePlaylist = () => {
-    toast.success('Playlist duplication feature coming soon!');
-  };
-
-  const toggleDropdown = (type: string) => {
-    setDropdownOpen(dropdownOpen === type ? null : type);
-  };
-
   const getTotalSongs = () => {
     return sections.reduce((total, section) => total + section.songs.length, 0);
   };
@@ -440,46 +401,8 @@ const EditPlaylistPage: React.FC = () => {
                   onClick={handleAddSongs}
                   className="add-songs-button"
                 >
-                  Add Songs
+                  Add Songs from Master Songs
                 </Button>
-              </div>
-              <div className="dropdown-container" ref={dropdownRef}>
-                <Button
-                  variant="ghost"
-                  onClick={() => toggleDropdown('playlist')}
-                  className="dropdown-trigger"
-                  title="More options"
-                >
-                  <EllipsisVerticalIcon />
-                </Button>
-                {dropdownOpen === 'playlist' && (
-                  <div className="dropdown-menu" role="menu">
-                    <button 
-                      className="dropdown-item" 
-                      onClick={handleSharePlaylist}
-                      role="menuitem"
-                    >
-                      <ShareIcon className="dropdown-icon" />
-                      Share Playlist
-                    </button>
-                    <button 
-                      className="dropdown-item" 
-                      onClick={handleDuplicatePlaylist}
-                      role="menuitem"
-                    >
-                      <DocumentDuplicateIcon className="dropdown-icon" />
-                      Duplicate
-                    </button>
-                    <button 
-                      className="dropdown-item" 
-                      onClick={handleExportPlaylist}
-                      role="menuitem"
-                    >
-                      <ArrowDownTrayIcon className="dropdown-icon" />
-                      Export
-                    </button>
-                  </div>
-                )}
               </div>
             </div>
           </div>
