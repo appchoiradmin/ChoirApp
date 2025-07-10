@@ -20,7 +20,10 @@ import {
   InformationCircleIcon,
   XMarkIcon,
   EyeIcon,
-  ListBulletIcon
+  ListBulletIcon,
+  CalendarDaysIcon,
+  ClockIcon,
+  CheckIcon
 } from '@heroicons/react/24/outline';
 import './MasterSongsListPage.scss';
 
@@ -279,30 +282,80 @@ const MasterSongsListPage: React.FC = () => {
                   
                   {dropdownOpen === song.songId && (
                     <div
-                      className="add-to-dropdown"
+                      className="add-to-dropdown enhanced"
                       role="listbox"
                       ref={el => { dropdownRefs.current[song.songId] = el; }}
                       onClick={e => e.stopPropagation()}
                     >
-                      {displayedSections.length === 0 ? (
-                        <div className="dropdown-item disabled">
-                          <em>No playlist sections</em>
+                      <div className="dropdown-header">
+                        <div className="dropdown-title-section">
+                          <span className="dropdown-title">Add to Section</span>
+                          <div className="dropdown-status">
+                            {!playlistId ? (
+                              <span className="status-badge new">
+                                <PlusIcon className="status-icon" />
+                                Will create playlist
+                              </span>
+                            ) : (
+                              <span className="status-badge existing">
+                                <CheckIcon className="status-icon" />
+                                Adding to saved playlist
+                              </span>
+                            )}
+                          </div>
                         </div>
-                      ) : (
-                        displayedSections
-                          .slice()
-                          .sort((a, b) => a.order - b.order)
-                          .map(section => (
-                            <button
-                              key={section.id}
-                              className="dropdown-item"
-                              onClick={() => handleAddToSection(song, section)}
-                              type="button"
-                            >
-                              {section.title}
-                            </button>
-                          ))
-                      )}
+                        
+                        {displayedSections.length > 0 && (
+                          <div className="dropdown-summary">
+                            <span className="summary-text">
+                              {displayedSections.length} section{displayedSections.length !== 1 ? 's' : ''} available
+                            </span>
+                          </div>
+                        )}
+                      </div>
+                      
+                      <div className="dropdown-content">
+                        {displayedSections.length === 0 ? (
+                          <div className="dropdown-item disabled">
+                            <div className="dropdown-content-row">
+                              <MusicalNoteIcon className="dropdown-icon" />
+                              <div className="dropdown-text">
+                                <span className="dropdown-name">No sections available</span>
+                                <span className="dropdown-detail">Create a template first</span>
+                              </div>
+                            </div>
+                          </div>
+                        ) : (
+                          displayedSections
+                            .slice()
+                            .sort((a, b) => a.order - b.order)
+                            .map(section => (
+                              <button
+                                key={section.id}
+                                className="dropdown-item"
+                                onClick={() => handleAddToSection(song, section)}
+                                type="button"
+                              >
+                                <div className="dropdown-content-row">
+                                  <div className="section-indicator">
+                                    <MusicalNoteIcon className="dropdown-icon" />
+                                    <span className="section-number">{section.order + 1}</span>
+                                  </div>
+                                  <div className="dropdown-text">
+                                    <span className="dropdown-name">{section.title}</span>
+                                    <span className="dropdown-detail">
+                                      {section.songs.length} song{section.songs.length !== 1 ? 's' : ''}
+                                      {section.songs.length === 0 && ' · Empty section'}
+                                    </span>
+                                  </div>
+                                  <div className="dropdown-actions">
+                                    <PlusIcon className="dropdown-action" />
+                                  </div>
+                                </div>
+                              </button>
+                            ))
+                        )}
+                      </div>
                     </div>
                   )}
                 </div>
@@ -422,20 +475,132 @@ const MasterSongsListPage: React.FC = () => {
           </div>
         </div>
 
-        {/* Show playlist sections guide */}
-        {displayedSections.length > 0 && (
-          <div className="playlist-sections-guide">
-            <h3 className="guide-title">Add songs to these playlist sections:</h3>
-            <div className="section-tags">
-              {displayedSections
-                .slice()
-                .sort((a, b) => a.order - b.order)
-                .map((section) => (
-                  <span key={section.id} className="section-tag">
-                    {section.title}
-                  </span>
-                ))}
+        {/* Enhanced Playlist Building Status Bar */}
+        <div className="playlist-status-bar">
+          <Card className="status-card">
+            <div className="status-content">
+              <div className="status-left">
+                <div className="status-indicator">
+                  <CalendarDaysIcon className="status-icon" />
+                  <div className="status-info">
+                    <span className="status-date">
+                      {new Date().toLocaleDateString('en-US', { 
+                        weekday: 'long', 
+                        year: 'numeric', 
+                        month: 'long', 
+                        day: 'numeric' 
+                      })}
+                    </span>
+                    <span className="status-label">
+                      {playlistId ? 'Editing Saved Playlist' : 'Building New Playlist'}
+                    </span>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="status-center">
+                <div className="status-progress">
+                  <div className="progress-item">
+                    <div className={`progress-step ${playlistId || displayedSections.some(s => s.songs.length > 0) ? 'completed' : 'pending'}`}>
+                      {playlistId || displayedSections.some(s => s.songs.length > 0) ? (
+                        <CheckIcon className="step-icon" />
+                      ) : (
+                        <ClockIcon className="step-icon" />
+                      )}
+                    </div>
+                    <span className="progress-label">
+                      {playlistId ? 'Saved' : 'In Memory'}
+                    </span>
+                  </div>
+                  
+                  <div className="progress-divider"></div>
+                  
+                  <div className="progress-item">
+                    <div className="progress-count">
+                      <span className="count-number">
+                        {displayedSections.reduce((total, section) => total + section.songs.length, 0)}
+                      </span>
+                    </div>
+                    <span className="progress-label">Songs Added</span>
+                  </div>
+                  
+                  <div className="progress-divider"></div>
+                  
+                  <div className="progress-item">
+                    <div className="progress-count">
+                      <span className="count-number">{displayedSections.length}</span>
+                    </div>
+                    <span className="progress-label">Sections</span>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="status-right">
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  onClick={() => navigate(`/choir/${user?.choirId}/playlists`)}
+                  className="view-playlist-btn"
+                >
+                  <ListBulletIcon className="button-icon" />
+                  View Playlists
+                </Button>
+              </div>
             </div>
+            
+            {!playlistId && (
+              <div className="status-hint">
+                <InformationCircleIcon className="hint-icon" />
+                <span className="hint-text">
+                  Your playlist will be automatically saved when you add the first song
+                </span>
+              </div>
+            )}
+          </Card>
+        </div>
+
+        {/* Enhanced Playlist Building Guide */}
+        {displayedSections.length > 0 && (
+          <div className="playlist-building-guide">
+            <Card className="guide-card">
+              <div className="guide-header">
+                <div className="guide-status">
+                  <InformationCircleIcon className="status-icon" />
+                  <div className="status-info">
+                    <h3 className="guide-title">
+                      {playlistId ? 'Adding to Saved Playlist' : 'Building New Playlist'}
+                    </h3>
+                    <p className="guide-subtitle">
+                      {playlistId 
+                        ? 'This playlist is saved and ready for editing' 
+                        : 'Playlist will be created when you add the first song'
+                      }
+                    </p>
+                  </div>
+                </div>
+                <div className="playlist-stats">
+                  <span className="playlist-stat">
+                    <span className="stat-number">{displayedSections.reduce((total, section) => total + section.songs.length, 0)}</span>
+                    <span className="stat-label">Songs</span>
+                  </span>
+                </div>
+              </div>
+              
+              <div className="available-sections">
+                <h4 className="sections-title">Available Sections:</h4>
+                <div className="section-tags">
+                  {displayedSections
+                    .slice()
+                    .sort((a, b) => a.order - b.order)
+                    .map((section) => (
+                      <span key={section.id} className="section-tag">
+                        <span className="section-name">{section.title}</span>
+                        <span className="section-count">{section.songs.length}</span>
+                      </span>
+                    ))}
+                </div>
+              </div>
+            </Card>
           </div>
         )}
 
