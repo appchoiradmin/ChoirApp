@@ -10,6 +10,18 @@ $color-danger: #EF4444;      // Rose red - error states
 $color-warning: #F59E0B;     // Amber - warning states
 $color-info: #38BDF8;        // Sky blue - informational
 
+// Primary Color Shades
+$primary-50: #EEF2FF;       // Very light blue
+$primary-100: #E0E7FF;      // Light blue
+$primary-200: #C7D2FE;      // Lighter blue
+$primary-300: #A5B4FC;      // Light blue
+$primary-400: #818CF8;      // Medium light blue
+$primary-500: $color-primary; // Base primary color
+$primary-600: #2563EB;      // Base primary (same as above)
+$primary-700: #1D4ED8;      // Darker blue
+$primary-800: #1E40AF;      // Dark blue
+$primary-900: #1E3A8A;      // Very dark blue
+
 // Neutral Color Scale - Enhanced for better contrast
 $color-neutral-50: #F9FAFB;
 $color-neutral-100: #F3F4F6;
@@ -118,13 +130,28 @@ $error: $color-danger;
 // Border Colors
 $border-light: $color-neutral-200;
 $border: $color-neutral-300;          // Main border color
+$border-color: $color-neutral-300;    // Alias for main border color
 $border-dark: $color-neutral-400;
 
 // Surface Colors
 $surface: $color-neutral-50;
 $surface-elevated: #FFFFFF;
+$white: #FFFFFF;
+
+// Grey color aliases for legacy compatibility
+$grey-50: $color-neutral-50;
+$grey-100: $color-neutral-100;
+$grey-200: $color-neutral-200;
+$grey-300: $color-neutral-300;
+$grey-400: $color-neutral-400;
+$grey-500: $color-neutral-500;
+$grey-600: $color-neutral-600;
+$grey-700: $color-neutral-700;
+$grey-800: $color-neutral-800;
+$grey-900: $color-neutral-900;
 
 // Border Radius aliases for consistency
+$border-radius: $radius-md;          // Default border radius
 $border-radius-sm: $radius-sm;
 $border-radius-md: $radius-md;
 $border-radius-lg: $radius-lg;
