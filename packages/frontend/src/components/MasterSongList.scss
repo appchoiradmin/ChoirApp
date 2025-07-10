@@ -1,0 +1,713 @@
+@use '../_variables.scss' as *;
+
+.master-songs-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: $spacing-md;
+
+  @media screen and (max-width: $tablet) {
+    padding: $spacing-sm;
+  }
+}
+
+// Loading State
+.master-songs-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 50vh;
+  gap: $spacing-md;
+
+  .loading-text {
+    color: $text-light;
+    font-size: 1rem;
+    margin: 0;
+  }
+}
+
+// Error State
+.master-songs-error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 50vh;
+  text-align: center;
+  gap: $spacing-md;
+
+  .error-icon {
+    width: 64px;
+    height: 64px;
+    color: $danger;
+    opacity: 0.6;
+  }
+
+  .error-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: $text-dark;
+    margin: 0;
+  }
+
+  .error-message {
+    color: $text-light;
+    font-size: 1rem;
+    margin: 0;
+    max-width: 400px;
+  }
+}
+
+// Header Section
+.songs-header {
+  margin-bottom: $spacing-lg;
+
+  .header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: $spacing-md;
+    gap: $spacing-md;
+
+    @media screen and (max-width: $tablet) {
+      flex-direction: column;
+      align-items: stretch;
+    }
+  }
+
+  .header-left {
+    flex: 1;
+
+    .page-title {
+      font-size: 2rem;
+      font-weight: 700;
+      color: $text-dark;
+      margin: 0 0 $spacing-xs;
+      display: flex;
+      align-items: center;
+      gap: $spacing-sm;
+
+      @media screen and (max-width: $tablet) {
+        font-size: 1.75rem;
+      }
+
+      .title-icon {
+        width: 2rem;
+        height: 2rem;
+        color: $primary;
+      }
+    }
+
+    .page-subtitle {
+      color: $text-light;
+      font-size: 1rem;
+      margin: 0;
+    }
+  }
+
+  .header-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: $spacing-md;
+    margin-top: $spacing-md;
+
+    @media screen and (max-width: $tablet) {
+      grid-template-columns: repeat(2, 1fr);
+      gap: $spacing-sm;
+    }
+
+    .stat-card {
+      background: $surface-elevated;
+      border: 1px solid $border-light;
+      border-radius: $radius-lg;
+      padding: $spacing-md;
+      text-align: center;
+      box-shadow: $shadow-sm;
+      transition: $transition-fast;
+
+      &:hover {
+        box-shadow: $shadow-md;
+        border-color: $primary-200;
+      }
+
+      .stat-number {
+        display: block;
+        font-size: 2rem;
+        font-weight: 700;
+        color: $primary;
+        line-height: 1;
+
+        @media screen and (max-width: $tablet) {
+          font-size: 1.75rem;
+        }
+      }
+
+      .stat-label {
+        display: block;
+        font-size: 0.875rem;
+        color: $text-light;
+        margin-top: $spacing-xs;
+        text-transform: uppercase;
+        letter-spacing: 0.025em;
+        font-weight: 500;
+      }
+    }
+  }
+}
+
+// Playlist Status Bar
+.playlist-status-bar {
+  margin-bottom: $spacing-lg;
+
+  .status-card {
+    &.creating {
+      border: 1px solid $primary-200;
+      background: $primary-50;
+    }
+
+    .status-content {
+      display: flex;
+      align-items: center;
+      gap: $spacing-md;
+      padding: $spacing-md;
+
+      .status-text {
+        color: $primary-700;
+        font-weight: 500;
+      }
+    }
+  }
+}
+
+// Search and Filters
+.search-filters {
+  background: $surface-elevated;
+  border: 1px solid $border-light;
+  border-radius: $radius-lg;
+  padding: $spacing-lg;
+  margin-bottom: $spacing-lg;
+  box-shadow: $shadow-sm;
+
+  .search-row {
+    display: flex;
+    gap: $spacing-md;
+    margin-bottom: $spacing-md;
+
+    @media screen and (max-width: $tablet) {
+      flex-direction: column;
+      gap: $spacing-sm;
+    }
+
+    .search-bar {
+      flex: 1;
+      position: relative;
+      display: flex;
+      align-items: center;
+
+      .search-icon {
+        position: absolute;
+        left: $spacing-md;
+        width: 1.25rem;
+        height: 1.25rem;
+        color: $text-light;
+        pointer-events: none;
+        z-index: 1;
+      }
+
+      .search-input {
+        width: 100%;
+        height: 44px;
+        padding: $spacing-sm $spacing-md $spacing-sm 3rem;
+        border: 1px solid $border;
+        border-radius: $radius-md;
+        font-size: 1rem;
+        background: $surface;
+        transition: $transition-fast;
+
+        &:focus {
+          outline: none;
+          border-color: $primary;
+          box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        &::placeholder {
+          color: $text-muted;
+        }
+      }
+
+      .clear-search-btn {
+        position: absolute;
+        right: $spacing-xs;
+        padding: $spacing-xs;
+        border-radius: $radius-sm;
+      }
+    }
+
+    .filter-toggle-btn {
+      white-space: nowrap;
+      position: relative;
+
+      .filter-count {
+        position: absolute;
+        top: -6px;
+        right: -6px;
+        background: $primary;
+        color: white;
+        font-size: 0.75rem;
+        font-weight: 600;
+        padding: 2px 6px;
+        border-radius: 10px;
+        min-width: 18px;
+        height: 18px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+    }
+  }
+
+  .advanced-filters {
+    border-top: 1px solid $border-light;
+    padding-top: $spacing-md;
+    margin-top: $spacing-md;
+
+    .filter-section {
+      margin-bottom: $spacing-lg;
+
+      &:last-child {
+        margin-bottom: 0;
+      }
+
+      .filter-label {
+        display: block;
+        font-weight: 600;
+        color: $text-dark;
+        margin-bottom: $spacing-sm;
+        font-size: 0.875rem;
+      }
+
+      .tag-filters {
+        display: flex;
+        flex-wrap: wrap;
+        gap: $spacing-sm;
+
+        .tag-filter {
+          display: flex;
+          align-items: center;
+          gap: $spacing-xs;
+          padding: $spacing-xs $spacing-sm;
+          border: 1px solid $border;
+          border-radius: $radius-md;
+          background: $surface;
+          font-size: 0.875rem;
+          cursor: pointer;
+          transition: $transition-fast;
+
+          &:hover {
+            border-color: $primary-300;
+            background: $primary-50;
+          }
+
+          &.active {
+            border-color: $primary;
+            background: $primary-100;
+            color: $primary-700;
+          }
+
+          .tag-icon,
+          .check-icon {
+            width: 1rem;
+            height: 1rem;
+          }
+
+          .check-icon {
+            color: $primary;
+          }
+        }
+      }
+
+      .sort-controls {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: $spacing-md;
+
+        @media screen and (max-width: $tablet) {
+          grid-template-columns: 1fr;
+        }
+
+        .filter-select {
+          height: 44px;
+          padding: $spacing-sm $spacing-md;
+          border: 1px solid $border;
+          border-radius: $radius-md;
+          font-size: 1rem;
+          background: $surface;
+          transition: $transition-fast;
+
+          &:focus {
+            outline: none;
+            border-color: $primary;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+          }
+        }
+      }
+    }
+  }
+
+  .selection-controls {
+    display: flex;
+    gap: $spacing-sm;
+    flex-wrap: wrap;
+
+    @media screen and (max-width: $tablet) {
+      flex-direction: column;
+    }
+  }
+}
+
+// Songs Content
+.songs-content {
+  .songs-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    gap: $spacing-lg;
+
+    @media screen and (max-width: $tablet) {
+      grid-template-columns: 1fr;
+      gap: $spacing-md;
+    }
+
+    .song-card {
+      cursor: pointer;
+      transition: $transition-fast;
+      border-radius: $radius-lg;
+      overflow: hidden;
+
+      &:hover {
+        transform: translateY(-2px);
+        box-shadow: $shadow-lg;
+      }
+
+      &.selected {
+        .card-content {
+          border-color: $primary;
+          background: $primary-50;
+        }
+      }
+
+      .card-content {
+        padding: $spacing-lg;
+        border: 1px solid $border-light;
+        border-radius: $radius-lg;
+        transition: $transition-fast;
+
+        .card-header {
+          display: flex;
+          align-items: flex-start;
+          gap: $spacing-md;
+          margin-bottom: $spacing-md;
+
+          .card-checkbox {
+            position: relative;
+            flex-shrink: 0;
+
+            input[type="checkbox"] {
+              width: 20px;
+              height: 20px;
+              margin: 0;
+              opacity: 0;
+              cursor: pointer;
+            }
+
+            .checkmark {
+              position: absolute;
+              top: 0;
+              left: 0;
+              width: 20px;
+              height: 20px;
+              border: 2px solid $border;
+              border-radius: $radius-sm;
+              background: $surface;
+              transition: $transition-fast;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+
+              .check-icon {
+                width: 12px;
+                height: 12px;
+                color: white;
+                opacity: 0;
+                transition: $transition-fast;
+              }
+            }
+
+            input[type="checkbox"]:checked + .checkmark {
+              background: $primary;
+              border-color: $primary;
+
+              .check-icon {
+                opacity: 1;
+              }
+            }
+
+            input[type="checkbox"]:focus + .checkmark {
+              box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+            }
+          }
+
+          .song-info {
+            flex: 1;
+            min-width: 0;
+
+            .song-title {
+              font-size: 1.125rem;
+              font-weight: 600;
+              color: $text-dark;
+              margin: 0 0 $spacing-xs;
+              line-height: 1.4;
+              word-break: break-word;
+            }
+
+            .song-artist {
+              font-size: 0.875rem;
+              color: $text-light;
+              margin: 0;
+              line-height: 1.4;
+            }
+          }
+
+          .card-actions {
+            display: flex;
+            gap: $spacing-xs;
+            flex-shrink: 0;
+
+            .action-button {
+              padding: $spacing-xs;
+              border-radius: $radius-sm;
+
+              .button-icon {
+                width: 1.25rem;
+                height: 1.25rem;
+              }
+            }
+
+            .add-to-container {
+              position: relative;
+
+              .add-to-btn {
+                white-space: nowrap;
+
+                .button-icon {
+                  width: 1rem;
+                  height: 1rem;
+                }
+              }
+
+              .add-to-dropdown {
+                position: absolute;
+                top: 100%;
+                right: 0;
+                z-index: 50;
+                min-width: 300px;
+                background: $surface-elevated;
+                border: 1px solid $border;
+                border-radius: $radius-lg;
+                box-shadow: $shadow-xl;
+                margin-top: $spacing-xs;
+
+                &.enhanced {
+                  .dropdown-header {
+                    padding: $spacing-md;
+                    border-bottom: 1px solid $border-light;
+                    background: $surface;
+
+                    .dropdown-title-section {
+                      display: flex;
+                      justify-content: space-between;
+                      align-items: center;
+                      margin-bottom: $spacing-sm;
+
+                      .dropdown-title {
+                        font-weight: 600;
+                        color: $text-dark;
+                      }
+
+                      .status-badge {
+                        display: flex;
+                        align-items: center;
+                        gap: $spacing-xs;
+                        padding: $spacing-xs $spacing-sm;
+                        border-radius: $radius-sm;
+                        font-size: 0.75rem;
+                        font-weight: 500;
+
+                        &.new {
+                          background: $primary-100;
+                          color: $primary-700;
+                        }
+
+                        &.existing {
+                          background: $success;
+                          color: white;
+                        }
+
+                        .status-icon {
+                          width: 0.875rem;
+                          height: 0.875rem;
+                        }
+                      }
+                    }
+
+                    .dropdown-summary {
+                      .summary-text {
+                        font-size: 0.875rem;
+                        color: $text-light;
+                      }
+                    }
+                  }
+
+                  .dropdown-content {
+                    max-height: 200px;
+                    overflow-y: auto;
+
+                    .dropdown-item {
+                      width: 100%;
+                      padding: $spacing-md;
+                      border: none;
+                      background: none;
+                      text-align: left;
+                      cursor: pointer;
+                      transition: $transition-fast;
+
+                      &:hover:not(.disabled) {
+                        background: $surface;
+                      }
+
+                      &.disabled {
+                        opacity: 0.6;
+                        cursor: not-allowed;
+                      }
+
+                      .dropdown-content-row {
+                        display: flex;
+                        align-items: center;
+                        gap: $spacing-md;
+
+                        .section-indicator {
+                          display: flex;
+                          align-items: center;
+                          gap: $spacing-xs;
+                          flex-shrink: 0;
+
+                          .dropdown-icon {
+                            width: 1.25rem;
+                            height: 1.25rem;
+                            color: $primary;
+                          }
+
+                          .section-number {
+                            font-size: 0.75rem;
+                            font-weight: 600;
+                            color: $text-light;
+                          }
+                        }
+
+                        .dropdown-text {
+                          flex: 1;
+                          min-width: 0;
+
+                          .dropdown-name {
+                            display: block;
+                            font-weight: 500;
+                            color: $text-dark;
+                            margin-bottom: 2px;
+                          }
+
+                          .dropdown-detail {
+                            font-size: 0.75rem;
+                            color: $text-light;
+                          }
+                        }
+
+                        .dropdown-actions {
+                          flex-shrink: 0;
+
+                          .dropdown-action {
+                            width: 1rem;
+                            height: 1rem;
+                            color: $text-light;
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+
+        .card-meta {
+          .song-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: $spacing-xs;
+
+            .tag {
+              display: flex;
+              align-items: center;
+              gap: $spacing-xs;
+              padding: $spacing-xs $spacing-sm;
+              background: $color-neutral-100;
+              border-radius: $radius-sm;
+              font-size: 0.75rem;
+              color: $text-light;
+
+              .tag-icon {
+                width: 0.875rem;
+                height: 0.875rem;
+              }
+
+              &.more-tags {
+                background: $primary-100;
+                color: $primary-700;
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  .empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 400px;
+    text-align: center;
+    gap: $spacing-md;
+
+    .empty-icon {
+      width: 80px;
+      height: 80px;
+      color: $text-muted;
+      opacity: 0.5;
+    }
+
+    .empty-title {
+      font-size: 1.5rem;
+      font-weight: 600;
+      color: $text-dark;
+      margin: 0;
+    }
+
+    .empty-message {
+      color: $text-light;
+      font-size: 1rem;
+      margin: 0;
+      max-width: 400px;
+    }
+  }
+}
