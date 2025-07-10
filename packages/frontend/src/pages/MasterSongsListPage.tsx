@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { getAllMasterSongs, searchMasterSongs } from '../services/masterSongService';
 import { useDisplayedPlaylistSections } from '../hooks/useDisplayedPlaylistSections';
@@ -6,8 +6,24 @@ import type { MasterSongDto } from '../types/song';
 import { PlaylistSection } from '../types/playlist';
 import { useUser } from '../hooks/useUser';
 import { usePlaylistContext } from '../context/PlaylistContext';
-import styles from './MasterSongsListPage.module.scss';
 import { addSongToPlaylist } from '../services/playlistService';
+import { Button, Card, LoadingSpinner } from '../components/ui';
+import Layout from '../components/ui/Layout';
+import toast from 'react-hot-toast';
+import {
+  MagnifyingGlassIcon,
+  PlusIcon,
+  DocumentTextIcon,
+  MusicalNoteIcon,
+  TagIcon,
+  PlayIcon,
+  XMarkIcon,
+  CheckCircleIcon,
+  InformationCircleIcon,
+  FunnelIcon,
+  UserGroupIcon
+} from '@heroicons/react/24/outline';
+import './MasterSongsListPage.scss';
 
 const MasterSongsListPage: React.FC = () => {
   const [dropdownOpen, setDropdownOpen] = useState<string | null>(null);

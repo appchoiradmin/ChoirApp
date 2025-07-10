@@ -16,11 +16,9 @@ import {
   EyeIcon,
   XMarkIcon,
   UserIcon,
-  TagIcon,
   CheckCircleIcon,
   InformationCircleIcon
 } from '@heroicons/react/24/outline';
-import { CheckIcon as CheckIconSolid } from '@heroicons/react/24/solid';
 import type { ChoirSongVersionDto } from '../types/choir';
 import './ChoirSongsListPage.scss';
 
@@ -176,12 +174,21 @@ const ChoirSongsListPage: React.FC = () => {
     
     return (
       <div 
-        className={`song-card ${isSelected ? 'is-selected' : ''}`}
+        className={`song-card ${isSelected ? 'selected' : ''}`}
         onClick={() => handleSelectSong(song.choirSongId)}
       >
         <Card>
           <div className="card-content">
-            <div className="song-header">
+            <div className="card-header">
+              <div className="card-checkbox">
+                <input 
+                  type="checkbox" 
+                  checked={isSelected}
+                  onChange={() => handleSelectSong(song.choirSongId)}
+                />
+                <div className="checkmark"></div>
+              </div>
+              
               <div className="song-info">
                 <h3 className="song-title">
                   {song.masterSong?.title || 'Untitled Song'}
@@ -189,70 +196,61 @@ const ChoirSongsListPage: React.FC = () => {
                 {song.masterSong?.artist && (
                   <p className="song-artist">{song.masterSong.artist}</p>
                 )}
-                <div className="song-meta">
-                  <div className="meta-item">
-                    <ClockIcon className="icon" />
-                    <span>{formatDate(song.lastEditedDate)}</span>
-                  </div>
-                  {song.editorUserId && (
-                    <div className="meta-item">
-                      <UserIcon className="icon" />
-                      <span>Edited</span>
-                    </div>
-                  )}
-                  {song.masterSong?.tags && song.masterSong.tags.length > 0 && (
-                    <div className="meta-item">
-                      <TagIcon className="icon" />
-                      <span>{song.masterSong.tags.length} tags</span>
-                    </div>
-                  )}
-                </div>
               </div>
               
-              <div className="song-actions">
+              <div className="card-actions">
                 <Button
                   variant="ghost"
                   size="sm"
+                  className="edit-button"
                   onClick={(e) => {
                     e.stopPropagation();
                     navigate(`/choirs/${choirId}/songs/${song.choirSongId}`);
                   }}
                   title="View song"
                 >
-                  <EyeIcon className="icon" />
+                  <EyeIcon className="button-icon" />
                 </Button>
                 <Button
                   variant="ghost"
                   size="sm"
+                  className="edit-button"
                   onClick={(e) => {
                     e.stopPropagation();
                     navigate(`/choirs/${choirId}/songs/${song.choirSongId}/edit`);
                   }}
                   title="Edit song"
                 >
-                  <PencilIcon className="icon" />
+                  <PencilIcon className="button-icon" />
                 </Button>
               </div>
             </div>
             
-            {song.masterSong?.tags && song.masterSong.tags.length > 0 && (
-              <div className="song-tags">
-                {song.masterSong.tags.slice(0, 3).map((tag) => (
-                  <span key={tag.tagId} className="tag">
-                    {tag.tagName}
-                  </span>
-                ))}
-                {song.masterSong.tags.length > 3 && (
-                  <span className="tag">+{song.masterSong.tags.length - 3} more</span>
-                )}
+            <div className="card-meta">
+              <div className="meta-item">
+                <ClockIcon className="meta-icon" />
+                <span>{formatDate(song.lastEditedDate)}</span>
               </div>
-            )}
-            
-            {isSelected && (
-              <div className="selection-indicator">
-                <CheckIconSolid className="check-icon" />
-              </div>
-            )}
+              {song.editorUserId && (
+                <div className="meta-item">
+                  <UserIcon className="meta-icon" />
+                  <span>Edited by user</span>
+                </div>
+              )}
+              
+              {song.masterSong?.tags && song.masterSong.tags.length > 0 && (
+                <div className="song-tags">
+                  {song.masterSong.tags.slice(0, 3).map((tag) => (
+                    <span key={tag.tagId} className="tag">
+                      {tag.tagName}
+                    </span>
+                  ))}
+                  {song.masterSong.tags.length > 3 && (
+                    <span className="tag">+{song.masterSong.tags.length - 3} more</span>
+                  )}
+                </div>
+              )}
+            </div>
           </div>
         </Card>
       </div>
@@ -263,9 +261,10 @@ const ChoirSongsListPage: React.FC = () => {
   if (loading) {
     return (
       <Layout>
-        <div className="choir-songs-page">
-          <div className="loading-overlay">
+        <div className="choir-songs-container">
+          <div className="choir-songs-loading">
             <LoadingSpinner />
+            <p className="loading-text">Loading choir songs...</p>
           </div>
         </div>
       </Layout>
@@ -276,12 +275,12 @@ const ChoirSongsListPage: React.FC = () => {
   if (error) {
     return (
       <Layout>
-        <div className="choir-songs-page">
-          <div className="empty-state">
-            <InformationCircleIcon className="empty-icon" />
-            <h2 className="empty-title">Error Loading Songs</h2>
-            <p className="empty-message">{error}</p>
-            <div className="empty-action">
+        <div className="choir-songs-container">
+          <div className="choir-songs-error">
+            <InformationCircleIcon className="error-icon" />
+            <h2 className="error-title">Error Loading Songs</h2>
+            <p className="error-message">{error}</p>
+            <div className="error-actions">
               <Button
                 variant="primary"
                 onClick={() => window.location.reload()}
@@ -297,23 +296,29 @@ const ChoirSongsListPage: React.FC = () => {
 
   return (
     <Layout>
-      <div className="choir-songs-page">
-        {/* Mobile-First Header */}
-        <div className="page-header">
-          <div className="header-main">
-            <h1 className="page-title">
-              <MusicalNoteIcon className="title-icon" />
-              Choir Songs
-            </h1>
-            <Button
-              variant="primary"
-              size="sm"
-              className="add-song-btn"
-              onClick={() => navigate(`/choirs/${choirId}/songs/add`)}
-            >
-              <PlusIcon className="icon" />
-              <span className="btn-text">Add Song</span>
-            </Button>
+      <div className="choir-songs-container">
+        {/* Header Section */}
+        <div className="songs-header">
+          <div className="header-content">
+            <div className="header-left">
+              <h1 className="page-title">
+                <MusicalNoteIcon className="title-icon" />
+                Choir Songs
+              </h1>
+              <p className="page-subtitle">
+                Manage and organize your choir's song collection
+              </p>
+            </div>
+            <div className="header-actions">
+              <Button
+                variant="primary"
+                size="sm"
+                onClick={() => navigate(`/choirs/${choirId}/songs/add`)}
+              >
+                <PlusIcon className="icon" />
+                Add Song
+              </Button>
+            </div>
           </div>
           
           {/* Stats Cards - Mobile Optimized */}
@@ -341,45 +346,39 @@ const ChoirSongsListPage: React.FC = () => {
           </div>
         </div>
 
-        {/* Mobile-First Search & Filters */}
+        {/* Search and Filters */}
         <div className="search-filters">
-          <div className="search-row">
-            <div className="search-input">
-              <MagnifyingGlassIcon className="search-icon" />
-              <input
-                type="text"
-                className="input"
-                placeholder="Search songs, artists, or lyrics..."
-                value={filters.search}
-                onChange={(e) => setFilters(prev => ({ ...prev, search: e.target.value }))}
-              />
-            </div>
+          <div className="search-bar">
+            <MagnifyingGlassIcon className="search-icon" />
+            <input
+              type="text"
+              className="search-input"
+              placeholder="Search songs, artists, or lyrics..."
+              value={filters.search}
+              onChange={(e) => setFilters(prev => ({ ...prev, search: e.target.value }))}
+            />
           </div>
           
-          <div className="filter-row">
-            <div className="select">
-              <select
-                value={filters.sortBy}
-                onChange={(e) => setFilters(prev => ({ ...prev, sortBy: e.target.value as SortOption }))}
-              >
-                <option value="title">Sort by Title</option>
-                <option value="artist">Sort by Artist</option>
-                <option value="lastEdited">Sort by Last Edited</option>
-              </select>
-            </div>
+          <div className="filter-controls">
+            <select
+              className="filter-select"
+              value={filters.sortBy}
+              onChange={(e) => setFilters(prev => ({ ...prev, sortBy: e.target.value as SortOption }))}
+            >
+              <option value="title">Sort by Title</option>
+              <option value="artist">Sort by Artist</option>
+              <option value="lastEdited">Sort by Last Edited</option>
+            </select>
             
-            <div className="select">
-              <select
-                value={filters.sortOrder}
-                onChange={(e) => setFilters(prev => ({ ...prev, sortOrder: e.target.value as 'asc' | 'desc' }))}
-              >
-                <option value="asc">A-Z / Oldest</option>
-                <option value="desc">Z-A / Newest</option>
-              </select>
-            </div>
-          </div>
-          
-          <div className="action-buttons">
+            <select
+              className="filter-select"
+              value={filters.sortOrder}
+              onChange={(e) => setFilters(prev => ({ ...prev, sortOrder: e.target.value as 'asc' | 'desc' }))}
+            >
+              <option value="asc">A-Z / Oldest</option>
+              <option value="desc">Z-A / Newest</option>
+            </select>
+            
             <Button
               variant={selectedSongs.size > 0 ? "primary" : "secondary"}
               size="sm"
@@ -387,7 +386,7 @@ const ChoirSongsListPage: React.FC = () => {
               disabled={selectedSongs.size === 0}
             >
               <XMarkIcon className="icon" />
-              Clear Selection
+              Clear ({selectedSongs.size})
             </Button>
             
             <Button
@@ -401,45 +400,18 @@ const ChoirSongsListPage: React.FC = () => {
           </div>
         </div>
 
-        {/* Songs Grid */}
-        {filteredAndSortedSongs.length === 0 ? (
-          <div className="empty-state">
-            <MusicalNoteIcon className="empty-icon" />
-            <h2 className="empty-title">
-              {filters.search ? 'No songs found' : 'No songs yet'}
-            </h2>
-            <p className="empty-message">
-              {filters.search 
-                ? `No songs match "${filters.search}". Try adjusting your search.`
-                : 'Get started by adding your first song to this choir.'
-              }
-            </p>
-            <div className="empty-action">
-              <Button
-                variant="primary"
-                onClick={() => navigate(`/choirs/${choirId}/songs/add`)}
-              >
-                <PlusIcon className="icon" />
-                Add First Song
-              </Button>
-            </div>
-          </div>
-        ) : (
-          <div className="songs-grid">
-            {filteredAndSortedSongs.map((song) => (
-              <SongCard key={song.choirSongId} song={song} />
-            ))}
-          </div>
-        )}
-
-        {/* Bulk Actions Bar - Mobile Optimized */}
-        {selectedSongs.size > 0 && (
-          <div className="bulk-actions">
-            <div className="actions-content">
-              <div className="selection-info">
-                {selectedSongs.size} song{selectedSongs.size !== 1 ? 's' : ''} selected
+        {/* Songs Content */}
+        <div className="songs-content">
+          {/* Bulk Actions Bar - Mobile Optimized */}
+          {selectedSongs.size > 0 && (
+            <div className="bulk-actions">
+              <div className="bulk-info">
+                <CheckCircleIcon className="bulk-icon" />
+                <span className="bulk-count">
+                  {selectedSongs.size} song{selectedSongs.size !== 1 ? 's' : ''} selected
+                </span>
               </div>
-              <div className="action-buttons">
+              <div className="bulk-buttons">
                 <Button
                   variant="secondary"
                   size="sm"
@@ -465,8 +437,39 @@ const ChoirSongsListPage: React.FC = () => {
                 </Button>
               </div>
             </div>
-          </div>
-        )}
+          )}
+
+          {/* Songs Grid */}
+          {filteredAndSortedSongs.length === 0 ? (
+            <div className="empty-state">
+              <MusicalNoteIcon className="empty-icon" />
+              <h2 className="empty-title">
+                {filters.search ? 'No songs found' : 'No songs yet'}
+              </h2>
+              <p className="empty-message">
+                {filters.search 
+                  ? `No songs match "${filters.search}". Try adjusting your search.`
+                  : 'Get started by adding your first song to this choir.'
+                }
+              </p>
+              <div className="empty-actions">
+                <Button
+                  variant="primary"
+                  onClick={() => navigate(`/choirs/${choirId}/songs/add`)}
+                >
+                  <PlusIcon className="icon" />
+                  Add First Song
+                </Button>
+              </div>
+            </div>
+          ) : (
+            <div className="songs-grid grid">
+              {filteredAndSortedSongs.map((song) => (
+                <SongCard key={song.choirSongId} song={song} />
+              ))}
+            </div>
+          )}
+        </div>
       </div>
     </Layout>
   );
