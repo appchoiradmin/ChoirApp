@@ -1,0 +1,523 @@
+@use '../_variables.scss' as *;
+
+.edit-playlist-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: $spacing-md;
+
+  @media screen and (max-width: $tablet) {
+    padding: $spacing-sm;
+  }
+}
+
+// Loading State
+.playlist-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 50vh;
+  gap: $spacing-md;
+
+  .loading-text {
+    color: $text-light;
+    font-size: 1rem;
+    margin: 0;
+  }
+}
+
+// Error State
+.playlist-error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 50vh;
+  text-align: center;
+  gap: $spacing-md;
+
+  .error-icon {
+    width: 64px;
+    height: 64px;
+    color: $danger;
+    opacity: 0.6;
+  }
+
+  .error-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: $text-dark;
+    margin: 0;
+  }
+
+  .error-message {
+    color: $text-light;
+    font-size: 1rem;
+    margin: 0;
+    max-width: 400px;
+  }
+
+  .error-actions {
+    display: flex;
+    gap: $spacing-sm;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+}
+
+// Header Section - Mobile First
+.playlist-header {
+  margin-bottom: $spacing-lg;
+
+  .header-content {
+    display: flex;
+    flex-direction: column;
+    gap: $spacing-md;
+    margin-bottom: $spacing-lg;
+
+    @media screen and (min-width: $tablet) {
+      flex-direction: row;
+      justify-content: space-between;
+      align-items: flex-start;
+    }
+  }
+
+  .header-left {
+    flex: 1;
+
+    .back-button {
+      margin-bottom: $spacing-sm;
+    }
+
+    .playlist-title {
+      display: flex;
+      align-items: center;
+      gap: $spacing-sm;
+      font-size: 1.75rem;
+      font-weight: 700;
+      color: $text-dark;
+      margin: 0 0 $spacing-sm;
+
+      @media screen and (min-width: $tablet) {
+        font-size: 2rem;
+      }
+
+      .title-icon {
+        width: 1.75rem;
+        height: 1.75rem;
+        color: $primary;
+        flex-shrink: 0;
+
+        @media screen and (min-width: $tablet) {
+          width: 2rem;
+          height: 2rem;
+        }
+      }
+    }
+
+    .playlist-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: $spacing-sm;
+      align-items: center;
+
+      .meta-item {
+        display: flex;
+        align-items: center;
+        gap: $spacing-xs;
+        color: $text-light;
+        font-size: 0.875rem;
+        font-weight: 500;
+
+        &.public-badge {
+          background: $success;
+          color: $white;
+          padding: 0.25rem 0.5rem;
+          border-radius: $border-radius-sm;
+          font-size: 0.75rem;
+          font-weight: 600;
+        }
+
+        .meta-icon {
+          width: 1rem;
+          height: 1rem;
+          flex-shrink: 0;
+        }
+      }
+    }
+  }
+
+  .header-actions {
+    display: flex;
+    gap: $spacing-sm;
+    align-items: flex-start;
+
+    @media screen and (max-width: $tablet) {
+      flex-direction: column;
+      align-items: stretch;
+    }
+
+    .action-buttons {
+      display: flex;
+      gap: $spacing-sm;
+      flex-wrap: wrap;
+    }
+
+    .dropdown-container {
+      position: relative;
+
+      .dropdown-trigger {
+        padding: $spacing-sm;
+        
+        svg {
+          width: 1.25rem;
+          height: 1.25rem;
+        }
+      }
+
+      .dropdown-menu {
+        position: absolute;
+        top: 100%;
+        right: 0;
+        background: $white;
+        border: 1px solid $border-color;
+        border-radius: $border-radius;
+        box-shadow: $shadow-md;
+        min-width: 200px;
+        z-index: 1000;
+        padding: $spacing-xs;
+
+        @media screen and (max-width: $tablet) {
+          right: auto;
+          left: 0;
+        }
+
+        .dropdown-item {
+          display: flex;
+          align-items: center;
+          gap: $spacing-sm;
+          width: 100%;
+          padding: $spacing-sm;
+          background: none;
+          border: none;
+          color: $text-dark;
+          font-size: 0.875rem;
+          font-weight: 500;
+          cursor: pointer;
+          border-radius: $border-radius-sm;
+          transition: all 0.2s ease;
+
+          &:hover {
+            background: $grey-100;
+            color: $primary;
+          }
+
+          .dropdown-icon {
+            width: 1rem;
+            height: 1rem;
+            flex-shrink: 0;
+          }
+        }
+      }
+    }
+  }
+
+  // Stats Cards - Mobile First
+  .header-stats {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: $spacing-sm;
+
+    @media screen and (min-width: $tablet) {
+      grid-template-columns: repeat(4, 1fr);
+    }
+
+    .stat-card {
+      background: $white;
+      border: 1px solid $border-color;
+      border-radius: $border-radius;
+      padding: $spacing-md;
+      text-align: center;
+      transition: all 0.2s ease;
+
+      &:hover {
+        box-shadow: $shadow-sm;
+        border-color: $primary;
+      }
+
+      .stat-number {
+        display: block;
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: $primary;
+        margin-bottom: $spacing-xs;
+      }
+
+      .stat-label {
+        font-size: 0.75rem;
+        color: $text-light;
+        font-weight: 500;
+        text-transform: uppercase;
+        letter-spacing: 0.025em;
+      }
+    }
+  }
+}
+
+// Playlist Selector Card - Mobile First
+.playlist-selector-card {
+  margin-bottom: $spacing-lg;
+
+  .selector-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: $spacing-md;
+
+    .selector-title {
+      font-size: 1.125rem;
+      font-weight: 600;
+      color: $text-dark;
+      margin: 0;
+    }
+  }
+
+  .playlist-options {
+    display: flex;
+    flex-direction: column;
+    gap: $spacing-xs;
+
+    .playlist-option {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+      padding: $spacing-md;
+      background: $white;
+      border: 1px solid $border-color;
+      border-radius: $border-radius;
+      cursor: pointer;
+      transition: all 0.2s ease;
+
+      &:hover {
+        background: $grey-50;
+        border-color: $primary;
+      }
+
+      &.selected {
+        background: $primary-50;
+        border-color: $primary;
+      }
+
+      .option-content {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: $spacing-xs;
+
+        @media screen and (min-width: $tablet) {
+          flex-direction: row;
+          align-items: center;
+          gap: $spacing-md;
+        }
+
+        .option-date {
+          font-weight: 600;
+          color: $text-dark;
+          font-size: 0.875rem;
+        }
+
+        .option-title {
+          color: $text-light;
+          font-size: 0.875rem;
+        }
+
+        .option-songs {
+          color: $text-light;
+          font-size: 0.75rem;
+          font-weight: 500;
+        }
+      }
+
+      .selected-icon {
+        width: 1.25rem;
+        height: 1.25rem;
+        color: $primary;
+        flex-shrink: 0;
+      }
+    }
+  }
+}
+
+// Content Section - Mobile First
+.playlist-content {
+  .empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 40vh;
+    text-align: center;
+    gap: $spacing-md;
+    background: $white;
+    border: 1px solid $border-color;
+    border-radius: $border-radius;
+    padding: $spacing-lg;
+
+    .empty-icon {
+      width: 4rem;
+      height: 4rem;
+      color: $text-light;
+      opacity: 0.6;
+    }
+
+    .empty-title {
+      font-size: 1.5rem;
+      font-weight: 600;
+      color: $text-dark;
+      margin: 0;
+    }
+
+    .empty-message {
+      color: $text-light;
+      font-size: 1rem;
+      margin: 0;
+      max-width: 400px;
+    }
+
+    .empty-actions {
+      display: flex;
+      gap: $spacing-sm;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+  }
+
+  .playlist-sections {
+    display: flex;
+    flex-direction: column;
+    gap: $spacing-md;
+
+    .section-card {
+      .section-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: $spacing-md;
+        padding-bottom: $spacing-sm;
+        border-bottom: 1px solid $border-color;
+
+        .section-title {
+          font-size: 1.25rem;
+          font-weight: 600;
+          color: $text-dark;
+          margin: 0;
+        }
+
+        .section-meta {
+          display: flex;
+          align-items: center;
+          gap: $spacing-sm;
+
+          .song-count {
+            color: $text-light;
+            font-size: 0.875rem;
+            font-weight: 500;
+          }
+
+          .saving-indicator {
+            display: flex;
+            align-items: center;
+            gap: $spacing-xs;
+            color: $primary;
+            font-size: 0.75rem;
+            font-weight: 500;
+          }
+        }
+      }
+
+      .section-songs {
+        display: flex;
+        flex-direction: column;
+        gap: $spacing-sm;
+      }
+
+      .section-empty {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: $spacing-sm;
+        padding: $spacing-lg;
+        background: $grey-50;
+        border: 1px dashed $border-color;
+        border-radius: $border-radius;
+        text-align: center;
+
+        .empty-text {
+          color: $text-light;
+          font-size: 0.875rem;
+          margin: 0;
+        }
+      }
+    }
+  }
+}
+
+// Responsive Design - Mobile First
+@media screen and (max-width: $mobile) {
+  .edit-playlist-container {
+    padding: $spacing-sm;
+
+    .playlist-header {
+      .header-content {
+        gap: $spacing-sm;
+      }
+
+      .header-left {
+        .playlist-title {
+          font-size: 1.5rem;
+          
+          .title-icon {
+            width: 1.5rem;
+            height: 1.5rem;
+          }
+        }
+
+        .playlist-meta {
+          .meta-item {
+            font-size: 0.75rem;
+          }
+        }
+      }
+
+      .header-stats {
+        .stat-card {
+          padding: $spacing-sm;
+
+          .stat-number {
+            font-size: 1.25rem;
+          }
+        }
+      }
+    }
+
+    .playlist-content {
+      .playlist-sections {
+        gap: $spacing-sm;
+
+        .section-card {
+          .section-header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: $spacing-xs;
+
+            .section-meta {
+              justify-content: flex-start;
+            }
+          }
+        }
+      }
+    }
+  }
+}
