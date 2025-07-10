@@ -6,6 +6,7 @@ interface CardProps {
   children: React.ReactNode;
   hover?: boolean;
   padding?: 'none' | 'sm' | 'md' | 'lg';
+  onClick?: () => void;
 }
 
 interface CardHeaderProps {
@@ -23,7 +24,7 @@ interface CardFooterProps {
   children: React.ReactNode;
 }
 
-const Card = ({ className, children, hover = true, padding = 'md' }: CardProps) => {
+const Card = ({ className, children, hover = true, padding = 'md', onClick }: CardProps) => {
   return (
     <div
       className={clsx(
@@ -31,9 +32,11 @@ const Card = ({ className, children, hover = true, padding = 'md' }: CardProps) 
         {
           'card-hover': hover,
           [`card-padding-${padding}`]: padding !== 'md',
+          'cursor-pointer': onClick,
         },
         className
       )}
+      onClick={onClick}
     >
       {children}
     </div>
