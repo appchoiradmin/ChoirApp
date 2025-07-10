@@ -1,19 +1,33 @@
-import React, { useState } from 'react';
+import React from 'react';
+import { useNavigate } from 'react-router-dom';
+import { ArrowLeftIcon } from '@heroicons/react/24/outline';
+import UserProfileDropdown from './UserProfileDropdown';
+import './Navigation.scss';
 
 interface NavigationProps {
   title?: string;
   showBackButton?: boolean;
   onBackClick?: () => void;
   actions?: React.ReactNode;
+  showUserProfile?: boolean;
 }
 
 const Navigation: React.FC<NavigationProps> = ({
   title = 'ChoirApp',
   showBackButton = false,
   onBackClick,
-  actions
+  actions,
+  showUserProfile = true
 }) => {
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const navigate = useNavigate();
+
+  const handleBackClick = () => {
+    if (onBackClick) {
+      onBackClick();
+    } else {
+      navigate(-1);
+    }
+  };
 
   return (
     <nav className="navbar is-primary" role="navigation" aria-label="main navigation">
@@ -22,35 +36,23 @@ const Navigation: React.FC<NavigationProps> = ({
           {showBackButton && (
             <button
               className="navbar-item button is-ghost has-text-white"
-              onClick={onBackClick}
+              onClick={handleBackClick}
               aria-label="Go back"
             >
-              <span className="icon">
-                <i className="fas fa-arrow-left"></i>
-              </span>
+              <ArrowLeftIcon className="icon" style={{ width: '1.25rem', height: '1.25rem' }} />
             </button>
           )}
           
           <span className="navbar-item has-text-white is-size-5 has-text-weight-bold">
             {title}
           </span>
-
-          <button
-            className={`navbar-burger burger ${isMenuOpen ? 'is-active' : ''}`}
-            aria-label="menu"
-            aria-expanded={isMenuOpen}
-            onClick={() => setIsMenuOpen(!isMenuOpen)}
-          >
-            <span aria-hidden="true"></span>
-            <span aria-hidden="true"></span>
-            <span aria-hidden="true"></span>
-          </button>
-        </div>
-
-        <div className={`navbar-menu ${isMenuOpen ? 'is-active' : ''}`}>
-          <div className="navbar-end">
-            {actions}
-          </div>
+          
+          {/* User profile on the right side of navbar-brand */}
+          {showUserProfile && (
+            <div className="navbar-item" style={{ marginLeft: 'auto' }}>
+              <UserProfileDropdown />
+            </div>
+          )}
         </div>
       </div>
     </nav>

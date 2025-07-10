@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { createChoir } from '../services/choirService';
 import { useUser } from '../hooks/useUser';
+import { Layout, Navigation } from '../components/ui';
 
 const CreateChoirPage: React.FC = () => {
   const [choirName, setChoirName] = useState('');
@@ -30,7 +31,7 @@ const CreateChoirPage: React.FC = () => {
   };
 
   const handleGoBack = () => {
-    navigate(-1);
+    navigate('/dashboard');
   };
 
   if (loading) {
@@ -43,46 +44,48 @@ const CreateChoirPage: React.FC = () => {
   }
 
   return (
-    <section className="section">
-      <div className="container">
-        <div className="is-flex is-justify-content-space-between is-align-items-center">
-          <h1 className="title">Create a New Choir</h1>
-          <button className="button" onClick={handleGoBack}>
-            Go Back
-          </button>
+    <Layout>
+      <Navigation 
+        title="Create Choir"
+        showBackButton={true}
+        onBackClick={handleGoBack}
+        showUserProfile={true}
+      />
+      <section className="section">
+        <div className="container">
+          <form onSubmit={handleSubmit}>
+            <div className="field">
+              <label className="label" htmlFor="choirName">
+                Choir Name
+              </label>
+              <div className="control">
+                <input
+                  id="choirName"
+                  className={`input ${error ? 'is-danger' : ''}`}
+                  type="text"
+                  placeholder="e.g., St. Peter's Church Choir"
+                  value={choirName}
+                  onChange={(e) => setChoirName(e.target.value)}
+                  required
+                />
+              </div>
+              {error && <p className="help is-danger">{error}</p>}
+            </div>
+            <div className="field is-grouped">
+              <div className="control">
+                <button
+                  type="submit"
+                  className={`button is-primary ${isLoading ? 'is-loading' : ''}`}
+                  disabled={isLoading}
+                >
+                  Create Choir
+                </button>
+              </div>
+            </div>
+          </form>
         </div>
-        <form onSubmit={handleSubmit}>
-          <div className="field">
-            <label className="label" htmlFor="choirName">
-              Choir Name
-            </label>
-            <div className="control">
-              <input
-                id="choirName"
-                className={`input ${error ? 'is-danger' : ''}`}
-                type="text"
-                placeholder="e.g., St. Peter's Church Choir"
-                value={choirName}
-                onChange={(e) => setChoirName(e.target.value)}
-                required
-              />
-            </div>
-            {error && <p className="help is-danger">{error}</p>}
-          </div>
-          <div className="field is-grouped">
-            <div className="control">
-              <button
-                type="submit"
-                className={`button is-primary ${isLoading ? 'is-loading' : ''}`}
-                disabled={isLoading}
-              >
-                Create Choir
-              </button>
-            </div>
-          </div>
-        </form>
-      </div>
-    </section>
+      </section>
+    </Layout>
   );
 };
 

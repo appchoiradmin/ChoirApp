@@ -1,0 +1,28 @@
+// Navigation component styles
+.navbar {
+  .navbar-brand {
+    display: flex !important;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    
+    // Ensure dropdown menus can overflow the navbar container
+    overflow: visible !important;
+  }
+  
+  .container {
+    overflow: visible !important;
+  }
+  
+  .navbar-item {
+    overflow: visible !important;
+  }
+}
+
+// Mobile-specific navbar fixes
+@media (max-width: 1023px) {
+  .navbar-brand {
+    flex: 1 !important;
+    min-height: 3.25rem !important;
+  }
+}
