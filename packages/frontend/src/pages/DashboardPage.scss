@@ -1,5 +1,5 @@
 // DashboardPage Styles - Modern Design System Implementation
-@import '../_variables.scss';
+@use '../_variables.scss' as *;
 
 // Main Container
 .dashboard-container {
