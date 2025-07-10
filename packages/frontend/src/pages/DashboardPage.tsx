@@ -4,7 +4,7 @@ import { useUser } from '../hooks/useUser';
 import { getInvitations, acceptInvitation, rejectInvitation } from '../services/invitationService';
 import { Invitation } from '../types/invitation';
 import InvitationsList from '../components/InvitationsList';
-import { Card, Button, LoadingSpinner } from '../components/ui';
+import { Card, Button, LoadingSpinner, Layout, Navigation } from '../components/ui';
 import { 
   MusicalNoteIcon, 
   UserGroupIcon, 
@@ -44,31 +44,37 @@ const DashboardPage: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="dashboard-container">
-        <div className="loading-section">
-          <LoadingSpinner size="lg" />
-          <p className="loading-text">Loading your dashboard...</p>
+      <Layout 
+        navigation={<Navigation title="Dashboard" showBackButton={false} />}
+      >
+        <div className="dashboard-container">
+          <div className="loading-section">
+            <LoadingSpinner size="lg" />
+            <p className="loading-text">Loading your dashboard...</p>
+          </div>
         </div>
-      </div>
+      </Layout>
     );
   }
 
   if (!user) {
     return (
-      <div className="dashboard-container">
-        <Card className="welcome-card">
-          <div className="welcome-content">
-            <MusicalNoteIcon className="welcome-icon" />
-            <h1 className="welcome-title">Welcome to ChoirApp!</h1>
-            <p className="welcome-subtitle">Please log in to access your dashboard and manage your choirs.</p>
-            <Link to="/">
-              <Button variant="primary" size="lg">
-                Go to Homepage
-              </Button>
-            </Link>
-          </div>
-        </Card>
-      </div>
+      <Layout>
+        <div className="dashboard-container">
+          <Card className="welcome-card">
+            <div className="welcome-content">
+              <MusicalNoteIcon className="welcome-icon" />
+              <h1 className="welcome-title">Welcome to ChoirApp!</h1>
+              <p className="welcome-subtitle">Please log in to access your dashboard and manage your choirs.</p>
+              <Link to="/">
+                <Button variant="primary" size="lg">
+                  Go to Homepage
+                </Button>
+              </Link>
+            </div>
+          </Card>
+        </div>
+      </Layout>
     );
   }
 
@@ -90,27 +96,30 @@ const DashboardPage: React.FC = () => {
   const progressPercentage = (completedSteps / progressSteps.length) * 100;
 
   return (
-    <div className="dashboard-container">
-      {/* Welcome Header */}
-      <div className="dashboard-header">
-        <div className="header-content">
-          <div className="user-welcome">
-            <h1 className="dashboard-title">Welcome back, {name}!</h1>
-            <p className="dashboard-subtitle">{email}</p>
-          </div>
-          <div className="header-actions">
-            <Link to="/create-choir">
-              <Button 
-                variant="primary" 
-                className="create-action"
-              >
-                <PlusIcon className="button-icon" />
-                Create Choir
-              </Button>
-            </Link>
+    <Layout 
+      navigation={<Navigation title="Dashboard" showBackButton={false} />}
+    >
+      <div className="dashboard-container">
+        {/* Welcome Header */}
+        <div className="dashboard-header">
+          <div className="header-content">
+            <div className="user-welcome">
+              <h1 className="dashboard-title">Welcome back, {name}!</h1>
+              <p className="dashboard-subtitle">{email}</p>
+            </div>
+            <div className="header-actions">
+              <Link to="/create-choir">
+                <Button 
+                  variant="primary" 
+                  className="create-action"
+                >
+                  <PlusIcon className="button-icon" />
+                  Create Choir
+                </Button>
+              </Link>
+            </div>
           </div>
         </div>
-      </div>
 
       {/* Stats Overview */}
       <div className="stats-grid">
@@ -346,7 +355,8 @@ const DashboardPage: React.FC = () => {
           />
         </Card>
       )}
-    </div>
+      </div>
+    </Layout>
   );
 };
 

@@ -1,0 +1,268 @@
+@use '../../_variables.scss' as *;
+
+.user-profile-dropdown {
+  position: relative;
+  display: inline-block;
+  z-index: 1000; // Ensure the container has a stacking context
+
+  .dropdown-trigger {
+    display: flex;
+    align-items: center;
+    gap: $spacing-sm;
+    padding: $spacing-sm;
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: $radius-lg;
+    color: white;
+    cursor: pointer;
+    transition: all $transition-fast;
+    min-height: 44px; // Touch-friendly
+
+    &:hover {
+      background: rgba(255, 255, 255, 0.1);
+      border-color: rgba(255, 255, 255, 0.3);
+    }
+
+    &:focus {
+      outline: none;
+      box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.3);
+    }
+
+    // Mobile optimization - make it more compact
+    @media (max-width: 768px) {
+      padding: $spacing-xs;
+      gap: $spacing-xs;
+      min-width: 44px;
+    }
+  }
+
+  .user-avatar {
+    width: 2rem;
+    height: 2rem;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+
+    .avatar-initials {
+      font-size: $font-size-sm;
+      font-weight: $font-weight-semibold;
+      color: white;
+    }
+
+    .avatar-icon {
+      width: 1.5rem;
+      height: 1.5rem;
+      color: white;
+    }
+  }
+
+  .user-info {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    min-width: 0; // Allow text to truncate
+
+    // Hide user info on mobile to save space
+    @media (max-width: 768px) {
+      display: none;
+    }
+
+    .user-name {
+      font-size: $font-size-sm;
+      font-weight: $font-weight-medium;
+      color: white;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 120px;
+    }
+
+    .user-email {
+      font-size: $font-size-xs;
+      color: rgba(255, 255, 255, 0.8);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 120px;
+    }
+  }
+
+  .chevron-icon {
+    width: 1rem;
+    height: 1rem;
+    color: rgba(255, 255, 255, 0.8);
+    transition: transform $transition-fast;
+    flex-shrink: 0;
+
+    &.rotated {
+      transform: rotate(180deg);
+    }
+  }
+
+  .dropdown-menu {
+    position: absolute;
+    top: calc(100% + 5px);
+    right: 0;
+    z-index: 9999 !important; // Higher z-index to ensure it appears above other elements
+    min-width: 280px;
+    
+    // Mobile optimization
+    @media (max-width: 768px) {
+      right: -10px;
+      min-width: 240px;
+      // Make sure it doesn't go off screen
+      transform: translateX(0);
+    }
+  }
+
+  .dropdown-content {
+    background: white;
+    border-radius: $radius-lg;
+    box-shadow: $shadow-xl;
+    border: 1px solid $color-neutral-200;
+    overflow: hidden;
+    animation: dropdownFadeIn 0.2s ease-out;
+  }
+
+  .dropdown-header {
+    padding: $spacing-lg;
+    background: linear-gradient(135deg, $primary-50, $primary-100);
+    display: flex;
+    align-items: center;
+    gap: $spacing-md;
+
+    .header-avatar {
+      width: 3rem;
+      height: 3rem;
+      border-radius: 50%;
+      background: $color-primary;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+
+      .avatar-initials.large {
+        font-size: $font-size-lg;
+        font-weight: $font-weight-bold;
+        color: white;
+      }
+
+      .avatar-icon.large {
+        width: 2rem;
+        height: 2rem;
+        color: white;
+      }
+    }
+
+    .header-info {
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+
+      .header-name {
+        font-size: $font-size-base;
+        font-weight: $font-weight-semibold;
+        color: $color-neutral-900;
+        margin-bottom: $spacing-xs;
+      }
+
+      .header-email {
+        font-size: $font-size-sm;
+        color: $color-neutral-600;
+        margin-bottom: $spacing-xs;
+        word-break: break-all;
+      }
+
+      .header-role {
+        font-size: $font-size-xs;
+        color: $color-primary;
+        font-weight: $font-weight-medium;
+        background: rgba($color-primary, 0.1);
+        padding: $spacing-xs $spacing-sm;
+        border-radius: $radius-md;
+        align-self: flex-start;
+      }
+    }
+  }
+
+  .dropdown-divider {
+    height: 1px;
+    background: $color-neutral-200;
+    margin: 0;
+  }
+
+  .dropdown-item {
+    display: flex;
+    align-items: center;
+    gap: $spacing-md;
+    width: 100%;
+    padding: $spacing-md $spacing-lg;
+    background: none;
+    border: none;
+    text-align: left;
+    cursor: pointer;
+    transition: background-color $transition-fast;
+    font-size: $font-size-sm;
+    color: $color-neutral-700;
+    min-height: 44px; // Touch-friendly
+
+    &:hover {
+      background: $color-neutral-50;
+    }
+
+    &:focus {
+      outline: none;
+      background: $color-neutral-100;
+    }
+
+    &.sign-out {
+      color: $color-danger;
+
+      &:hover {
+        background: $color-neutral-100;
+        color: $color-danger;
+      }
+
+      .item-icon {
+        color: $color-danger;
+      }
+    }
+
+    .item-icon {
+      width: 1.25rem;
+      height: 1.25rem;
+      color: $color-neutral-500;
+      flex-shrink: 0;
+    }
+
+    span {
+      font-weight: $font-weight-medium;
+    }
+
+    // Mobile optimization
+    @media (max-width: 768px) {
+      padding: $spacing-md;
+      gap: $spacing-sm;
+      
+      .item-icon {
+        width: 1.5rem;
+        height: 1.5rem;
+      }
+    }
+  }
+}
+
+// Animation for dropdown appearance
+@keyframes dropdownFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

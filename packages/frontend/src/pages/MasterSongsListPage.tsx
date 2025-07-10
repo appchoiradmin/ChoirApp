@@ -7,7 +7,7 @@ import { PlaylistSection } from '../types/playlist';
 import { useUser } from '../hooks/useUser';
 import { usePlaylistContext } from '../context/PlaylistContext';
 import { addSongToPlaylist } from '../services/playlistService';
-import { Button, Card, LoadingSpinner } from '../components/ui';
+import { Button, Card, LoadingSpinner, Navigation } from '../components/ui';
 import Layout from '../components/ui/Layout';
 import toast from 'react-hot-toast';
 import {
@@ -400,7 +400,15 @@ const MasterSongsListPage: React.FC = () => {
   // Error state
   if (error) {
     return (
-      <Layout>
+      <Layout 
+        navigation={
+          <Navigation 
+            title="Master Songs" 
+            showBackButton={true} 
+            onBackClick={() => navigate('/dashboard')}
+          />
+        }
+      >
         <div className="master-songs-container">
           <div className="master-songs-error">
             <InformationCircleIcon className="error-icon" />
@@ -421,7 +429,15 @@ const MasterSongsListPage: React.FC = () => {
   }
 
   return (
-    <Layout>
+    <Layout 
+      navigation={
+        <Navigation 
+          title="Master Songs" 
+          showBackButton={true} 
+          onBackClick={() => navigate('/dashboard')}
+        />
+      }
+    >
       <div className="master-songs-container">
         {/* Header Section */}
         <div className="songs-header">

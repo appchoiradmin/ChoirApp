@@ -4,6 +4,7 @@ import './BottomNavigation.css';
 interface Tab {
   name: string;
   path: string;
+  icon?: React.ReactNode;
 }
 
 interface BottomNavigationProps {
@@ -17,9 +18,16 @@ const BottomNavigation = ({ tabs }: BottomNavigationProps) => {
         <NavLink
           key={tab.name}
           to={tab.path}
-          className={({ isActive }) => (isActive ? 'active' : '')}
+          className={({ isActive }) => 
+            `bottom-navigation__tab ${isActive ? 'active' : ''}`
+          }
         >
-          {tab.name}
+          {tab.icon && (
+            <div className="bottom-navigation__icon">
+              {tab.icon}
+            </div>
+          )}
+          <span className="bottom-navigation__label">{tab.name}</span>
         </NavLink>
       ))}
     </div>
