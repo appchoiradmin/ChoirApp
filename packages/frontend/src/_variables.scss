@@ -96,6 +96,31 @@ $navbar-height: 4rem;
 $sidebar-width: 16rem;
 $container-max-width: 80rem;
 
+// Text Colors
+$text-dark: $color-neutral-900;
+$text-light: $color-neutral-600;
+$text-muted: $color-neutral-500;
+
+// Border Colors
+$border-light: $color-neutral-200;
+$border-dark: $color-neutral-400;
+
+// Surface Colors
+$surface: $color-neutral-50;
+$surface-elevated: #FFFFFF;
+
+// Border Radius aliases for consistency
+$border-radius-sm: $radius-sm;
+$border-radius-md: $radius-md;
+$border-radius-lg: $radius-lg;
+
+// Breakpoints
+$mobile: 480px;
+$tablet: 768px;
+$desktop: 1024px;
+$widescreen: 1216px;
+$fullhd: 1408px;
+
 // Animation timing
 $animation-duration: $transition-normal;
 $hover-transition: $transition-fast;
