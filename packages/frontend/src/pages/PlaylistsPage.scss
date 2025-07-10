@@ -4,13 +4,18 @@
   max-width: 1200px;
   margin: 0 auto;
   padding: $spacing-sm;
+  
+  // Ensure proper bottom spacing for mobile
+  padding-bottom: $spacing-xl;
 
   @media screen and (min-width: $tablet) {
     padding: $spacing-md;
+    padding-bottom: $spacing-xl;
   }
 
   @media screen and (min-width: $desktop) {
     padding: $spacing-lg;
+    padding-bottom: $spacing-xl;
   }
 }
 
@@ -341,6 +346,24 @@
   }
 }
 
+// Content Section - Ensure proper scrolling
+.playlist-content {
+  position: relative;
+  
+  .playlist-sections {
+    display: flex;
+    flex-direction: column;
+    gap: $spacing-md;
+    
+    // Add bottom padding to ensure last section is visible
+    padding-bottom: $spacing-lg;
+    
+    @media screen and (max-width: $mobile) {
+      padding-bottom: $spacing-xl;
+    }
+  }
+}
+
 // Section Cards - Mobile First Design
 .section-card {
   // Card styling is handled by the Card component
@@ -409,6 +432,7 @@
 @media screen and (max-width: $mobile) {
   .playlists-container {
     padding: $spacing-xs;
+    // No need for extra bottom padding here since Layout handles it
   }
 
   .playlist-header {
@@ -425,6 +449,11 @@
     .section-header {
       padding: $spacing-sm;
     }
+  }
+  
+  .playlist-content {
+    // Enable smooth scrolling on mobile
+    -webkit-overflow-scrolling: touch;
   }
 }
 

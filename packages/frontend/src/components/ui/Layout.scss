@@ -16,6 +16,20 @@
 .layout-main {
   flex: 1;
   overflow-x: hidden;
+  overflow-y: auto;
+  position: relative;
+  
+  // Ensure proper scrolling on mobile
+  -webkit-overflow-scrolling: touch;
+  
+  // Add bottom padding for mobile navigation
+  padding-bottom: env(safe-area-inset-bottom, 0);
+  
+  @media (max-width: 768px) {
+    // Add extra padding for mobile bottom navigation
+    // Account for fixed bottom navigation height (~64px) + safe area + extra space
+    padding-bottom: calc(env(safe-area-inset-bottom, 0) + 80px);
+  }
 }
 
 .layout-footer {
