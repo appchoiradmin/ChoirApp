@@ -1,25 +1,56 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
-import Button from './Button';
-import styles from './MasterSongList.module.scss';
+import { Button, Card, LoadingSpinner } from './ui';
 import { searchMasterSongs } from '../services/masterSongService';
 import { addSongToPlaylist } from '../services/playlistService';
 import { MasterSongDto } from '../types/song';
 import { PlaylistSection } from '../types/playlist';
 import { useUser } from '../hooks/useUser';
 import { usePlaylist } from '../hooks/usePlaylist';
+import toast from 'react-hot-toast';
+import {
+  MagnifyingGlassIcon,
+  MusicalNoteIcon,
+  TagIcon,
+  CheckCircleIcon,
+  InformationCircleIcon,
+  XMarkIcon,
+  EyeIcon,
+  ListBulletIcon,
+  PlusIcon,
+  CheckIcon,
+  FunnelIcon
+} from '@heroicons/react/24/outline';
+import './MasterSongList.scss';
 
 interface MasterSongListProps {
   choirId: string;
 }
 
+type SortOption = 'title' | 'artist' | 'tags';
+
+interface FilterState {
+  search: string;
+  sortBy: SortOption;
+  sortOrder: 'asc' | 'desc';
+  showAdvancedFilters: boolean;
+  selectedTags: string[];
+}
+
 const MasterSongList: React.FC<MasterSongListProps> = ({ choirId }) => {
   const [songs, setSongs] = useState<MasterSongDto[]>([]);
-
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedSongs, setSelectedSongs] = useState<Set<string>>(new Set());
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
+  const [filters, setFilters] = useState<FilterState>({
+    search: '',
+    sortBy: 'title',
+    sortOrder: 'asc',
+    showAdvancedFilters: false,
+    selectedTags: []
+  });
+
   const { token } = useUser();
   const { sections, selectedTemplate, playlistId, isPlaylistReady, createPlaylistIfNeeded } = usePlaylist();
   const [isCreatingPlaylist, setIsCreatingPlaylist] = useState(false);
@@ -37,11 +68,8 @@ const MasterSongList: React.FC<MasterSongListProps> = ({ choirId }) => {
       const fetchSongsAndPlaylists = async () => {
         try {
           setLoading(true);
-          const fetchedSongs = await searchMasterSongs({ title: searchTerm }, token);
+          const fetchedSongs = await searchMasterSongs({ title: filters.search }, token);
           setSongs(fetchedSongs);
-
-
-          // No longer using selectedPlaylist
         } catch (err: any) {
           setError(err.message || 'Failed to fetch songs or playlists');
         } finally {
@@ -50,7 +78,121 @@ const MasterSongList: React.FC<MasterSongListProps> = ({ choirId }) => {
       };
       fetchSongsAndPlaylists();
     }
-  }, [searchTerm, token, choirId]);
+  }, [filters.search, token, choirId]);
+
+  // Filter and sort songs with enhanced search functionality
+  const filteredAndSortedSongs = useMemo(() => {
+    let filtered = songs.filter(song => {
+      // Search filter
+      if (filters.search) {
+        const searchLower = filters.search.toLowerCase();
+        const titleMatch = song.title?.toLowerCase().includes(searchLower);
+        const artistMatch = song.artist?.toLowerCase().includes(searchLower);
+        const tagsMatch = song.tags?.some(tag => tag.tagName?.toLowerCase().includes(searchLower));
+        const lyricsMatch = song.lyricsChordPro?.toLowerCase().includes(searchLower);
+        
+        if (!(titleMatch || artistMatch || tagsMatch || lyricsMatch)) {
+          return false;
+        }
+      }
+
+      // Tag filter
+      if (filters.selectedTags.length > 0) {
+        const songTags = song.tags?.map(tag => tag.tagName) || [];
+        const hasSelectedTag = filters.selectedTags.some(tag => songTags.includes(tag));
+        if (!hasSelectedTag) {
+          return false;
+        }
+      }
+
+      return true;
+    });
+
+    // Enhanced sorting with tag support
+    filtered.sort((a, b) => {
+      let valueA: string;
+      let valueB: string;
+
+      switch (filters.sortBy) {
+        case 'title':
+          valueA = a.title || '';
+          valueB = b.title || '';
+          break;
+        case 'artist':
+          valueA = a.artist || '';
+          valueB = b.artist || '';
+          break;
+        case 'tags':
+          valueA = a.tags?.map(t => t.tagName).join(', ') || '';
+          valueB = b.tags?.map(t => t.tagName).join(', ') || '';
+          break;
+      }
+
+      const comparison = valueA.localeCompare(valueB);
+      return filters.sortOrder === 'asc' ? comparison : -comparison;
+    });
+
+    return filtered;
+  }, [songs, filters]);
+
+  // Get unique tags for filtering
+  const availableTags = useMemo(() => {
+    const tags = new Set<string>();
+    songs.forEach(song => {
+      song.tags?.forEach(tag => {
+        tags.add(tag.tagName);
+      });
+    });
+    return Array.from(tags).sort();
+  }, [songs]);
+
+  // Calculate statistics for header cards
+  const stats = useMemo(() => {
+    const totalSongs = filteredAndSortedSongs.length;
+    const totalTags = availableTags.length;
+    const selectedCount = selectedSongs.size;
+    const sectionsCount = sections.length;
+
+    return {
+      totalSongs,
+      totalTags,
+      selectedCount,
+      sectionsCount
+    };
+  }, [filteredAndSortedSongs, availableTags, selectedSongs, sections]);
+
+  // Selection handlers
+  const handleSelectSong = (songId: string) => {
+    const newSelected = new Set(selectedSongs);
+    if (newSelected.has(songId)) {
+      newSelected.delete(songId);
+    } else {
+      newSelected.add(songId);
+    }
+    setSelectedSongs(newSelected);
+  };
+
+  const handleSelectAll = () => {
+    if (selectedSongs.size === filteredAndSortedSongs.length && filteredAndSortedSongs.length > 0) {
+      setSelectedSongs(new Set());
+    } else {
+      setSelectedSongs(new Set(filteredAndSortedSongs.map(song => song.songId)));
+    }
+  };
+
+  const clearSelection = () => {
+    setSelectedSongs(new Set());
+  };
+
+  // Toggle tag filter
+  const toggleTagFilter = (tagName: string) => {
+    setFilters(prev => ({
+      ...prev,
+      selectedTags: prev.selectedTags.includes(tagName)
+        ? prev.selectedTags.filter(t => t !== tagName)
+        : [...prev.selectedTags, tagName]
+    }));
+  };
 
   const handleAddSongToPlaylist = async (song: MasterSongDto, sectionId: string) => {
     if (!token) return;
@@ -145,91 +287,389 @@ const MasterSongList: React.FC<MasterSongListProps> = ({ choirId }) => {
 
 
 
-  return (
-    <div className={styles.container}>
-      <h1 className={styles.title}>Master Songs</h1>
-      <div className={styles.field}>
-        <div className={styles.control}>
-          <input
-            className={styles.input}
-            type="text"
-            placeholder="Filter by title or artist"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
-        </div>
-      </div>
-      {isCreatingPlaylist ? (
-        <p className={styles['has-text-info']} style={{ marginTop: '1rem' }}>Creating playlist... Please wait.</p>
-      ) : loading ? (
-        <p>Loading...</p>
-      ) : error ? (
-        <p className={styles['has-text-danger']}>{error}</p>
-      ) : (
-        <div className={styles['song-table']}>
-          <table className={`table is-fullwidth is-striped is-hoverable ${styles.table}`}>
-            <thead>
-              <tr>
-                <th>Title</th>
-                <th>Artist</th>
-                <th>Add to Playlist</th>
-              </tr>
-            </thead>
-            <tbody>
-              {songs.map((song) => (
-                <tr key={song.songId}>
-                  <td>
-                    <Link to={`/master-songs/${song.songId}`}>{song.title}</Link>
-                  </td>
-                  <td>{song.artist}</td>
-                  <td>
-                    <div className={styles['song-dropdown']}>
-                      <Button
-                        className="is-small"
-                        onClick={() => setActiveDropdown(activeDropdown === song.songId ? null : song.songId)}
-                        aria-haspopup="true"
-                        aria-controls={`dropdown-menu-${song.songId}`}
-                      >
-                        <span>Add to...</span>
-                        <span className="icon is-small">
-                          <i className="fas fa-angle-down" aria-hidden="true"></i>
-                        </span>
-                      </Button>
-                      {activeDropdown === song.songId && (
-                        <div className={styles['song-dropdown-menu']} id={`dropdown-menu-${song.songId}`} role="menu">
-                          <div className={styles['song-dropdown-content']}>
-                            {sections && sections.length > 0 ? (
-                              sections
-                                .sort((a, b) => a.order - b.order)
-                                .map((section: PlaylistSection) => (
-                                  <div
-                                    key={section.id}
-                                    className={styles['song-dropdown-item']}
-                                    tabIndex={0}
-                                    role="option"
-                                    aria-disabled={isCreatingPlaylist}
-                                    onClick={() => !isCreatingPlaylist && handleAddSongToPlaylist(song, section.id)}
-                                    onKeyPress={e => {
-                                      if (!isCreatingPlaylist && e.key === 'Enter') handleAddSongToPlaylist(song, section.id);
-                                    }}
-                                  >
-                                    {(selectedTemplate ? selectedTemplate.title : 'Playlist') + ' - ' + section.title}
-                                  </div>
-                                ))
+  // Enhanced Song card component with better mobile UX
+  const SongCard: React.FC<{ song: MasterSongDto }> = ({ song }) => {
+    const isSelected = selectedSongs.has(song.songId);
+    
+    return (
+      <div 
+        className={`song-card ${isSelected ? 'selected' : ''}`}
+        onClick={() => handleSelectSong(song.songId)}
+      >
+        <Card>
+          <div className="card-content">
+            <div className="card-header">
+              <div className="card-checkbox">
+                <input 
+                  type="checkbox" 
+                  checked={isSelected}
+                  onChange={() => handleSelectSong(song.songId)}
+                  onClick={(e) => e.stopPropagation()}
+                />
+                <div className="checkmark">
+                  {isSelected && <CheckIcon className="check-icon" />}
+                </div>
+              </div>
+              
+              <div className="song-info">
+                <h3 className="song-title">
+                  {song.title || 'Untitled Song'}
+                </h3>
+                {song.artist && (
+                  <p className="song-artist">{song.artist}</p>
+                )}
+              </div>
+              
+              <div className="card-actions">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="action-button view-button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    // Navigate to song detail or handle view
+                  }}
+                  title="View song"
+                >
+                  <EyeIcon className="button-icon" />
+                </Button>
+                
+                <div className="add-to-container">
+                  <Button
+                    variant="primary"
+                    size="sm"
+                    className="add-to-btn"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setActiveDropdown(song.songId === activeDropdown ? null : song.songId);
+                    }}
+                    title="Add to playlist"
+                    disabled={isCreatingPlaylist}
+                  >
+                    <ListBulletIcon className="button-icon" />
+                    Add to
+                  </Button>
+                  
+                  {activeDropdown === song.songId && (
+                    <div
+                      className="add-to-dropdown enhanced"
+                      role="listbox"
+                      onClick={e => e.stopPropagation()}
+                    >
+                      <div className="dropdown-header">
+                        <div className="dropdown-title-section">
+                          <span className="dropdown-title">Add to Section</span>
+                          <div className="dropdown-status">
+                            {!playlistId ? (
+                              <span className="status-badge new">
+                                <PlusIcon className="status-icon" />
+                                Will create playlist
+                              </span>
                             ) : (
-                              <div className={styles['song-dropdown-item']}>No playlist sections</div>
+                              <span className="status-badge existing">
+                                <CheckIcon className="status-icon" />
+                                Adding to saved playlist
+                              </span>
                             )}
                           </div>
                         </div>
-                      )}
+                        
+                        {sections.length > 0 && (
+                          <div className="dropdown-summary">
+                            <span className="summary-text">
+                              {sections.length} section{sections.length !== 1 ? 's' : ''} available
+                            </span>
+                          </div>
+                        )}
+                      </div>
+                      
+                      <div className="dropdown-content">
+                        {sections.length === 0 ? (
+                          <div className="dropdown-item disabled">
+                            <div className="dropdown-content-row">
+                              <MusicalNoteIcon className="dropdown-icon" />
+                              <div className="dropdown-text">
+                                <span className="dropdown-name">No sections available</span>
+                                <span className="dropdown-detail">Create a template first</span>
+                              </div>
+                            </div>
+                          </div>
+                        ) : (
+                          sections
+                            .slice()
+                            .sort((a, b) => a.order - b.order)
+                            .map(section => (
+                              <button
+                                key={section.id}
+                                className="dropdown-item"
+                                onClick={() => {
+                                  handleAddSongToPlaylist(song, section.id);
+                                  setActiveDropdown(null);
+                                  toast.success(`Added "${song.title}" to ${section.title}`);
+                                }}
+                                type="button"
+                                disabled={isCreatingPlaylist}
+                              >
+                                <div className="dropdown-content-row">
+                                  <div className="section-indicator">
+                                    <MusicalNoteIcon className="dropdown-icon" />
+                                    <span className="section-number">{section.order + 1}</span>
+                                  </div>
+                                  <div className="dropdown-text">
+                                    <span className="dropdown-name">{section.title}</span>
+                                    <span className="dropdown-detail">
+                                      {section.songs.length} song{section.songs.length !== 1 ? 's' : ''}
+                                      {section.songs.length === 0 && ' · Empty section'}
+                                    </span>
+                                  </div>
+                                  <div className="dropdown-actions">
+                                    <PlusIcon className="dropdown-action" />
+                                  </div>
+                                </div>
+                              </button>
+                            ))
+                        )}
+                      </div>
                     </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+                  )}
+                </div>
+              </div>
+            </div>
+            
+            <div className="card-meta">
+              {song.tags && song.tags.length > 0 && (
+                <div className="song-tags">
+                  {song.tags.slice(0, 3).map((tag) => (
+                    <span key={tag.tagId} className="tag">
+                      <TagIcon className="tag-icon" />
+                      {tag.tagName}
+                    </span>
+                  ))}
+                  {song.tags.length > 3 && (
+                    <span className="tag more-tags">+{song.tags.length - 3} more</span>
+                  )}
+                </div>
+              )}
+            </div>
+          </div>
+        </Card>
+      </div>
+    );
+  };
+
+  return (
+    <div className="master-songs-container">
+      {/* Header Section */}
+      <div className="songs-header">
+        <div className="header-content">
+          <div className="header-left">
+            <h1 className="page-title">
+              <MusicalNoteIcon className="title-icon" />
+              Master Songs
+            </h1>
+            <p className="page-subtitle">
+              Browse and add songs to your playlist
+            </p>
+          </div>
+        </div>
+        
+        {/* Enhanced Stats Cards - Mobile Optimized */}
+        <div className="header-stats">
+          <div className="stat-card">
+            <span className="stat-number">{stats.totalSongs}</span>
+            <span className="stat-label">Total Songs</span>
+          </div>
+          <div className="stat-card">
+            <span className="stat-number">{stats.totalTags}</span>
+            <span className="stat-label">Tags</span>
+          </div>
+          <div className="stat-card">
+            <span className="stat-number">{stats.selectedCount}</span>
+            <span className="stat-label">Selected</span>
+          </div>
+          <div className="stat-card">
+            <span className="stat-number">{stats.sectionsCount}</span>
+            <span className="stat-label">Sections</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Enhanced Playlist Building Status */}
+      {isCreatingPlaylist && (
+        <div className="playlist-status-bar">
+          <Card className="status-card creating">
+            <div className="status-content">
+              <LoadingSpinner />
+              <span className="status-text">Creating playlist... Please wait.</span>
+            </div>
+          </Card>
         </div>
       )}
+
+      {/* Enhanced Search and Filters - Mobile Optimized */}
+      <div className="search-filters">
+        <div className="search-row">
+          <div className="search-bar">
+            <MagnifyingGlassIcon className="search-icon" />
+            <input
+              type="text"
+              className="search-input"
+              placeholder="Search songs, artists, or tags..."
+              value={filters.search}
+              onChange={(e) => setFilters(prev => ({ ...prev, search: e.target.value }))}
+            />
+            {filters.search && (
+              <Button
+                variant="ghost"
+                size="sm"
+                className="clear-search-btn"
+                onClick={() => setFilters(prev => ({ ...prev, search: '' }))}
+              >
+                <XMarkIcon className="icon" />
+              </Button>
+            )}
+          </div>
+          
+          <Button
+            variant="outlined"
+            size="sm"
+            className="filter-toggle-btn"
+            onClick={() => setFilters(prev => ({ ...prev, showAdvancedFilters: !prev.showAdvancedFilters }))}
+          >
+            <FunnelIcon className="icon" />
+            Filters
+            {(filters.selectedTags.length > 0) && (
+              <span className="filter-count">{filters.selectedTags.length}</span>
+            )}
+          </Button>
+        </div>
+        
+        {/* Advanced Filters */}
+        {filters.showAdvancedFilters && (
+          <div className="advanced-filters">
+            {/* Tag Filters */}
+            {availableTags.length > 0 && (
+              <div className="filter-section">
+                <label className="filter-label">Filter by Tags:</label>
+                <div className="tag-filters">
+                  {availableTags.map(tag => (
+                    <button
+                      key={tag}
+                      className={`tag-filter ${filters.selectedTags.includes(tag) ? 'active' : ''}`}
+                      onClick={() => toggleTagFilter(tag)}
+                    >
+                      <TagIcon className="tag-icon" />
+                      {tag}
+                      {filters.selectedTags.includes(tag) && (
+                        <CheckIcon className="check-icon" />
+                      )}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+            
+            {/* Sort Controls */}
+            <div className="filter-section">
+              <label className="filter-label">Sort Options:</label>
+              <div className="sort-controls">
+                <select
+                  className="filter-select"
+                  value={filters.sortBy}
+                  onChange={(e) => setFilters(prev => ({ ...prev, sortBy: e.target.value as SortOption }))}
+                >
+                  <option value="title">Sort by Title</option>
+                  <option value="artist">Sort by Artist</option>
+                  <option value="tags">Sort by Tags</option>
+                </select>
+                
+                <select
+                  className="filter-select"
+                  value={filters.sortOrder}
+                  onChange={(e) => setFilters(prev => ({ ...prev, sortOrder: e.target.value as 'asc' | 'desc' }))}
+                >
+                  <option value="asc">A-Z</option>
+                  <option value="desc">Z-A</option>
+                </select>
+              </div>
+            </div>
+          </div>
+        )}
+        
+        {/* Selection Controls */}
+        <div className="selection-controls">
+          <Button
+            variant="outlined"
+            size="sm"
+            onClick={handleSelectAll}
+            className="select-all-btn"
+          >
+            <CheckCircleIcon className="icon" />
+            {selectedSongs.size === filteredAndSortedSongs.length && filteredAndSortedSongs.length > 0 
+              ? 'Deselect All' 
+              : 'Select All'
+            }
+          </Button>
+          
+          {selectedSongs.size > 0 && (
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={clearSelection}
+              className="clear-selection-btn"
+            >
+              <XMarkIcon className="icon" />
+              Clear Selection ({selectedSongs.size})
+            </Button>
+          )}
+        </div>
+      </div>
+
+      {/* Songs Content */}
+      <div className="songs-content">
+        {/* Loading state */}
+        {loading && (
+          <div className="master-songs-loading">
+            <LoadingSpinner />
+            <p className="loading-text">Loading master songs...</p>
+          </div>
+        )}
+
+        {/* Error state */}
+        {error && (
+          <div className="master-songs-error">
+            <InformationCircleIcon className="error-icon" />
+            <h2 className="error-title">Error Loading Songs</h2>
+            <p className="error-message">{error}</p>
+          </div>
+        )}
+
+        {/* Songs Grid */}
+        {!loading && !error && (
+          <>
+            {filteredAndSortedSongs.length === 0 ? (
+              <div className="empty-state">
+                <MusicalNoteIcon className="empty-icon" />
+                <h2 className="empty-title">
+                  {filters.search ? 'No songs found' : 'No master songs yet'}
+                </h2>
+                <p className="empty-message">
+                  {filters.search 
+                    ? `No songs match "${filters.search}". Try adjusting your search.`
+                    : 'Get started by creating your first master song.'
+                  }
+                </p>
+              </div>
+            ) : (
+              <div className="songs-grid">
+                {filteredAndSortedSongs.map((song) => (
+                  <SongCard key={song.songId} song={song} />
+                ))}
+              </div>
+            )}
+          </>
+        )}
+      </div>
     </div>
   );
 };

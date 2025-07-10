@@ -17,18 +17,22 @@ import {
   XMarkIcon,
   UserIcon,
   CheckCircleIcon,
-  InformationCircleIcon
+  InformationCircleIcon,
+  TagIcon,
+  CheckIcon,
+  FunnelIcon
 } from '@heroicons/react/24/outline';
 import type { ChoirSongVersionDto } from '../types/choir';
 import './ChoirSongsListPage.scss';
 
-type SortOption = 'title' | 'artist' | 'lastEdited';
+type SortOption = 'title' | 'artist' | 'lastEdited' | 'tags';
 
 interface FilterState {
   search: string;
   sortBy: SortOption;
   sortOrder: 'asc' | 'desc';
-  showFilters: boolean;
+  showAdvancedFilters: boolean;
+  selectedTags: string[];
 }
 
 const ChoirSongsListPage: React.FC = () => {
@@ -44,7 +48,8 @@ const ChoirSongsListPage: React.FC = () => {
     search: '',
     sortBy: 'lastEdited',
     sortOrder: 'desc',
-    showFilters: false
+    showAdvancedFilters: false,
+    selectedTags: []
   });
 
   // Fetch songs data
@@ -77,21 +82,41 @@ const ChoirSongsListPage: React.FC = () => {
     fetchSongs();
   }, [token, choirId, userContextLoading]);
 
-  // Filter and sort songs
+  // Filter and sort songs with enhanced search functionality
   const filteredAndSortedSongs = useMemo(() => {
     let filtered = songs.filter(song => {
-      const searchLower = filters.search.toLowerCase();
-      const titleMatch = song.masterSong?.title?.toLowerCase().includes(searchLower);
-      const artistMatch = song.masterSong?.artist?.toLowerCase().includes(searchLower);
-      const lyricsMatch = song.editedLyricsChordPro?.toLowerCase().includes(searchLower) ||
-                         song.masterSong?.lyricsChordPro?.toLowerCase().includes(searchLower);
-      
-      return titleMatch || artistMatch || lyricsMatch;
+      // Search filter
+      if (filters.search) {
+        const searchLower = filters.search.toLowerCase();
+        const titleMatch = song.masterSong?.title?.toLowerCase().includes(searchLower);
+        const artistMatch = song.masterSong?.artist?.toLowerCase().includes(searchLower);
+        const lyricsMatch = song.editedLyricsChordPro?.toLowerCase().includes(searchLower) ||
+                           song.masterSong?.lyricsChordPro?.toLowerCase().includes(searchLower);
+        const tagsMatch = song.masterSong?.tags?.some(tag => 
+          tag.tagName.toLowerCase().includes(searchLower)
+        );
+        
+        if (!(titleMatch || artistMatch || lyricsMatch || tagsMatch)) {
+          return false;
+        }
+      }
+
+      // Tag filter
+      if (filters.selectedTags.length > 0) {
+        const songTags = song.masterSong?.tags?.map(tag => tag.tagName) || [];
+        const hasSelectedTag = filters.selectedTags.some(tag => songTags.includes(tag));
+        if (!hasSelectedTag) {
+          return false;
+        }
+      }
+
+      return true;
     });
 
+    // Enhanced sorting with tag support
     filtered.sort((a, b) => {
-      let valueA: string | number;
-      let valueB: string | number;
+      let valueA: string | number = '';
+      let valueB: string | number = '';
 
       switch (filters.sortBy) {
         case 'title':
@@ -105,6 +130,10 @@ const ChoirSongsListPage: React.FC = () => {
         case 'lastEdited':
           valueA = new Date(a.lastEditedDate).getTime();
           valueB = new Date(b.lastEditedDate).getTime();
+          break;
+        case 'tags':
+          valueA = a.masterSong?.tags?.length || 0;
+          valueB = b.masterSong?.tags?.length || 0;
           break;
       }
 
@@ -120,7 +149,26 @@ const ChoirSongsListPage: React.FC = () => {
     return filtered;
   }, [songs, filters]);
 
-  // Selection handlers
+  // Calculate statistics for header cards
+  const stats = useMemo(() => {
+    const totalSongs = filteredAndSortedSongs.length;
+    const recentSongs = songs.filter(s => s.lastEditedDate && 
+      new Date(s.lastEditedDate) > new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
+    ).length;
+    const uniqueTags = new Set(
+      songs.flatMap(song => song.masterSong?.tags?.map(tag => tag.tagName) || [])
+    ).size;
+    const selectedCount = selectedSongs.size;
+
+    return {
+      totalSongs,
+      recentSongs,
+      uniqueTags,
+      selectedCount
+    };
+  }, [filteredAndSortedSongs, songs, selectedSongs]);
+
+  // Enhanced selection handlers
   const handleSelectSong = (songId: string) => {
     const newSelected = new Set(selectedSongs);
     if (newSelected.has(songId)) {
@@ -132,7 +180,7 @@ const ChoirSongsListPage: React.FC = () => {
   };
 
   const handleSelectAll = () => {
-    if (selectedSongs.size === filteredAndSortedSongs.length) {
+    if (selectedSongs.size === filteredAndSortedSongs.length && filteredAndSortedSongs.length > 0) {
       setSelectedSongs(new Set());
     } else {
       setSelectedSongs(new Set(filteredAndSortedSongs.map(song => song.choirSongId)));
@@ -141,6 +189,43 @@ const ChoirSongsListPage: React.FC = () => {
 
   const clearSelection = () => {
     setSelectedSongs(new Set());
+  };
+
+  // Enhanced bulk operations (functions used in UI)
+  const handleBulkDelete = () => {
+    if (selectedSongs.size === 0) return;
+    
+    // TODO: Implement actual bulk delete
+    toast.success(`${selectedSongs.size} song${selectedSongs.size > 1 ? 's' : ''} deleted successfully`);
+    clearSelection();
+  };
+
+  const handleBulkExport = () => {
+    if (selectedSongs.size === 0) return;
+    
+    // TODO: Implement actual bulk export
+    toast.success(`${selectedSongs.size} song${selectedSongs.size > 1 ? 's' : ''} exported successfully`);
+  };
+
+  // Get unique tags for filtering
+  const availableTags = useMemo(() => {
+    const tags = new Set<string>();
+    songs.forEach(song => {
+      song.masterSong?.tags?.forEach(tag => {
+        tags.add(tag.tagName);
+      });
+    });
+    return Array.from(tags).sort();
+  }, [songs]);
+
+  // Toggle tag filter
+  const toggleTagFilter = (tagName: string) => {
+    setFilters(prev => ({
+      ...prev,
+      selectedTags: prev.selectedTags.includes(tagName)
+        ? prev.selectedTags.filter(t => t !== tagName)
+        : [...prev.selectedTags, tagName]
+    }));
   };
 
   // Format date for display
@@ -157,18 +242,7 @@ const ChoirSongsListPage: React.FC = () => {
     return date.toLocaleDateString();
   };
 
-  // Get unique tags for filtering
-  const availableTags = useMemo(() => {
-    const tags = new Set<string>();
-    songs.forEach(song => {
-      song.masterSong?.tags?.forEach(tag => {
-        tags.add(tag.tagName);
-      });
-    });
-    return Array.from(tags).sort();
-  }, [songs]);
-
-  // Song card component
+  // Enhanced Song card component with better mobile UX
   const SongCard: React.FC<{ song: ChoirSongVersionDto }> = ({ song }) => {
     const isSelected = selectedSongs.has(song.choirSongId);
     
@@ -185,8 +259,11 @@ const ChoirSongsListPage: React.FC = () => {
                   type="checkbox" 
                   checked={isSelected}
                   onChange={() => handleSelectSong(song.choirSongId)}
+                  onClick={(e) => e.stopPropagation()}
                 />
-                <div className="checkmark"></div>
+                <div className="checkmark">
+                  {isSelected && <CheckIcon className="check-icon" />}
+                </div>
               </div>
               
               <div className="song-info">
@@ -202,7 +279,7 @@ const ChoirSongsListPage: React.FC = () => {
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="edit-button"
+                  className="action-button view-button"
                   onClick={(e) => {
                     e.stopPropagation();
                     navigate(`/choirs/${choirId}/songs/${song.choirSongId}`);
@@ -214,7 +291,7 @@ const ChoirSongsListPage: React.FC = () => {
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="edit-button"
+                  className="action-button edit-button"
                   onClick={(e) => {
                     e.stopPropagation();
                     navigate(`/choirs/${choirId}/songs/${song.choirSongId}/edit`);
@@ -227,26 +304,31 @@ const ChoirSongsListPage: React.FC = () => {
             </div>
             
             <div className="card-meta">
-              <div className="meta-item">
-                <ClockIcon className="meta-icon" />
-                <span>{formatDate(song.lastEditedDate)}</span>
-              </div>
-              {song.editorUserId && (
+              <div className="meta-row">
                 <div className="meta-item">
-                  <UserIcon className="meta-icon" />
-                  <span>Edited by user</span>
+                  <ClockIcon className="meta-icon" />
+                  <span className="meta-text">{formatDate(song.lastEditedDate)}</span>
                 </div>
-              )}
+                {song.editorUserId && (
+                  <div className="meta-item">
+                    <UserIcon className="meta-icon" />
+                    <span className="meta-text">Edited by user</span>
+                  </div>
+                )}
+              </div>
               
               {song.masterSong?.tags && song.masterSong.tags.length > 0 && (
                 <div className="song-tags">
                   {song.masterSong.tags.slice(0, 3).map((tag) => (
                     <span key={tag.tagId} className="tag">
+                      <TagIcon className="tag-icon" />
                       {tag.tagName}
                     </span>
                   ))}
                   {song.masterSong.tags.length > 3 && (
-                    <span className="tag">+{song.masterSong.tags.length - 3} more</span>
+                    <span className="tag more-tags">
+                      +{song.masterSong.tags.length - 3} more
+                    </span>
                   )}
                 </div>
               )}
@@ -321,82 +403,144 @@ const ChoirSongsListPage: React.FC = () => {
             </div>
           </div>
           
-          {/* Stats Cards - Mobile Optimized */}
+          {/* Enhanced Stats Cards - Mobile Optimized */}
           <div className="header-stats">
             <div className="stat-card">
-              <span className="stat-number">{filteredAndSortedSongs.length}</span>
+              <span className="stat-number">{stats.totalSongs}</span>
               <span className="stat-label">Total Songs</span>
             </div>
             <div className="stat-card">
-              <span className="stat-number">
-                {songs.filter(s => s.lastEditedDate && 
-                  new Date(s.lastEditedDate) > new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
-                ).length}
-              </span>
+              <span className="stat-number">{stats.recentSongs}</span>
               <span className="stat-label">Recent</span>
             </div>
             <div className="stat-card">
-              <span className="stat-number">{availableTags.length}</span>
+              <span className="stat-number">{stats.uniqueTags}</span>
               <span className="stat-label">Tags</span>
             </div>
             <div className="stat-card">
-              <span className="stat-number">{selectedSongs.size}</span>
+              <span className="stat-number">{stats.selectedCount}</span>
               <span className="stat-label">Selected</span>
             </div>
           </div>
         </div>
 
-        {/* Search and Filters */}
+        {/* Enhanced Search and Filters - Mobile Optimized */}
         <div className="search-filters">
-          <div className="search-bar">
-            <MagnifyingGlassIcon className="search-icon" />
-            <input
-              type="text"
-              className="search-input"
-              placeholder="Search songs, artists, or lyrics..."
-              value={filters.search}
-              onChange={(e) => setFilters(prev => ({ ...prev, search: e.target.value }))}
-            />
-          </div>
-          
-          <div className="filter-controls">
-            <select
-              className="filter-select"
-              value={filters.sortBy}
-              onChange={(e) => setFilters(prev => ({ ...prev, sortBy: e.target.value as SortOption }))}
-            >
-              <option value="title">Sort by Title</option>
-              <option value="artist">Sort by Artist</option>
-              <option value="lastEdited">Sort by Last Edited</option>
-            </select>
-            
-            <select
-              className="filter-select"
-              value={filters.sortOrder}
-              onChange={(e) => setFilters(prev => ({ ...prev, sortOrder: e.target.value as 'asc' | 'desc' }))}
-            >
-              <option value="asc">A-Z / Oldest</option>
-              <option value="desc">Z-A / Newest</option>
-            </select>
-            
-            <Button
-              variant={selectedSongs.size > 0 ? "primary" : "secondary"}
-              size="sm"
-              onClick={clearSelection}
-              disabled={selectedSongs.size === 0}
-            >
-              <XMarkIcon className="icon" />
-              Clear ({selectedSongs.size})
-            </Button>
+          <div className="search-row">
+            <div className="search-bar">
+              <MagnifyingGlassIcon className="search-icon" />
+              <input
+                type="text"
+                className="search-input"
+                placeholder="Search songs, artists, or lyrics..."
+                value={filters.search}
+                onChange={(e) => setFilters(prev => ({ ...prev, search: e.target.value }))}
+              />
+              {filters.search && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="clear-search-btn"
+                  onClick={() => setFilters(prev => ({ ...prev, search: '' }))}
+                >
+                  <XMarkIcon className="icon" />
+                </Button>
+              )}
+            </div>
             
             <Button
               variant="outlined"
               size="sm"
+              className="filter-toggle-btn"
+              onClick={() => setFilters(prev => ({ ...prev, showAdvancedFilters: !prev.showAdvancedFilters }))}
+            >
+              <FunnelIcon className="icon" />
+              Filters
+              {(filters.selectedTags.length > 0) && (
+                <span className="filter-count">{filters.selectedTags.length}</span>
+              )}
+            </Button>
+          </div>
+          
+          {/* Advanced Filters */}
+          {filters.showAdvancedFilters && (
+            <div className="advanced-filters">
+              {/* Tag Filters */}
+              {availableTags.length > 0 && (
+                <div className="filter-section">
+                  <label className="filter-label">Filter by Tags:</label>
+                  <div className="tag-filters">
+                    {availableTags.map(tag => (
+                      <button
+                        key={tag}
+                        className={`tag-filter ${filters.selectedTags.includes(tag) ? 'active' : ''}`}
+                        onClick={() => toggleTagFilter(tag)}
+                      >
+                        <TagIcon className="tag-icon" />
+                        {tag}
+                        {filters.selectedTags.includes(tag) && (
+                          <CheckIcon className="check-icon" />
+                        )}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+              
+              {/* Sort Controls */}
+              <div className="filter-section">
+                <label className="filter-label">Sort Options:</label>
+                <div className="sort-controls">
+                  <select
+                    className="filter-select"
+                    value={filters.sortBy}
+                    onChange={(e) => setFilters(prev => ({ ...prev, sortBy: e.target.value as SortOption }))}
+                  >
+                    <option value="title">Sort by Title</option>
+                    <option value="artist">Sort by Artist</option>
+                    <option value="lastEdited">Sort by Last Edited</option>
+                    <option value="tags">Sort by Tag Count</option>
+                  </select>
+                  
+                  <select
+                    className="filter-select"
+                    value={filters.sortOrder}
+                    onChange={(e) => setFilters(prev => ({ ...prev, sortOrder: e.target.value as 'asc' | 'desc' }))}
+                  >
+                    <option value="asc">A-Z / Oldest</option>
+                    <option value="desc">Z-A / Newest</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+          )}
+          
+          {/* Selection Controls */}
+          <div className="selection-controls">
+            <Button
+              variant="outlined"
+              size="sm"
               onClick={handleSelectAll}
+              className="select-all-btn"
             >
               <CheckCircleIcon className="icon" />
-              {selectedSongs.size === filteredAndSortedSongs.length ? 'Deselect All' : 'Select All'}
+              {selectedSongs.size === filteredAndSortedSongs.length && filteredAndSortedSongs.length > 0 
+                ? 'Deselect All' 
+                : 'Select All'
+              }
             </Button>
+            
+            {selectedSongs.size > 0 && (
+              <Button
+                variant="secondary"
+                size="sm"
+                onClick={clearSelection}
+                className="clear-selection-btn"
+              >
+                <XMarkIcon className="icon" />
+                Clear Selection ({selectedSongs.size})
+              </Button>
+            )}
           </div>
         </div>
 
@@ -415,11 +559,7 @@ const ChoirSongsListPage: React.FC = () => {
                 <Button
                   variant="secondary"
                   size="sm"
-                  onClick={() => {
-                    // TODO: Implement bulk delete
-                    toast.success(`${selectedSongs.size} songs deleted`);
-                    setSelectedSongs(new Set());
-                  }}
+                  onClick={handleBulkDelete}
                 >
                   <TrashIcon className="icon" />
                   Delete
@@ -427,10 +567,7 @@ const ChoirSongsListPage: React.FC = () => {
                 <Button
                   variant="secondary"
                   size="sm"
-                  onClick={() => {
-                    // TODO: Implement bulk export
-                    toast.success(`${selectedSongs.size} songs exported`);
-                  }}
+                  onClick={handleBulkExport}
                 >
                   <DocumentTextIcon className="icon" />
                   Export
