@@ -15,7 +15,6 @@ import {
   CheckCircleIcon,
   InformationCircleIcon,
   XMarkIcon,
-  EyeIcon,
   ListBulletIcon,
   PlusIcon,
   CheckIcon,
@@ -312,28 +311,26 @@ const MasterSongList: React.FC<MasterSongListProps> = ({ choirId }) => {
               </div>
               
               <div className="song-info">
-                <h3 className="song-title">
+                <button 
+                  className="song-title clickable"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    // Navigate to song detail page
+                    if (typeof window !== 'undefined') {
+                      window.location.href = `/master-songs/${song.songId}`;
+                    }
+                  }}
+                  title="Click to view song details"
+                  type="button"
+                >
                   {song.title || 'Untitled Song'}
-                </h3>
+                </button>
                 {song.artist && (
                   <p className="song-artist">{song.artist}</p>
                 )}
               </div>
               
               <div className="card-actions">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="action-button view-button"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    // Navigate to song detail or handle view
-                  }}
-                  title="View song"
-                >
-                  <EyeIcon className="button-icon" />
-                </Button>
-                
                 <div className="add-to-container">
                   <Button
                     variant="primary"

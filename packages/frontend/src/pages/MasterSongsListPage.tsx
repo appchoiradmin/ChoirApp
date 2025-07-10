@@ -20,7 +20,6 @@ import {
   CheckCircleIcon,
   InformationCircleIcon,
   XMarkIcon,
-  EyeIcon,
   ListBulletIcon,
   CalendarDaysIcon,
   ClockIcon,
@@ -241,10 +240,19 @@ const MasterSongsListPage: React.FC = () => {
   const SongCard: React.FC<{ song: MasterSongDto }> = ({ song }) => {
     const isSelected = selectedSongs.has(song.songId);
     
+    const handleCardClick = (e: React.MouseEvent) => {
+      // Don't select if clicking on the song title or other interactive elements
+      const target = e.target as HTMLElement;
+      if (target.closest('.song-title.clickable, .card-checkbox, .add-to-container, .card-actions')) {
+        return;
+      }
+      handleSelectSong(song.songId);
+    };
+    
     return (
       <div 
         className={`song-card ${isSelected ? 'selected' : ''}`}
-        onClick={() => handleSelectSong(song.songId)}
+        onClick={handleCardClick}
       >
         <Card>
           <div className="card-content">
@@ -254,33 +262,29 @@ const MasterSongsListPage: React.FC = () => {
                   type="checkbox" 
                   checked={isSelected}
                   onChange={() => handleSelectSong(song.songId)}
+                  onClick={(e) => e.stopPropagation()}
                 />
                 <div className="checkmark"></div>
               </div>
               
               <div className="song-info">
-                <h3 className="song-title">
+                <button 
+                  className="song-title clickable" 
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    navigate(`/master-songs/${song.songId}`);
+                  }}
+                  title="Click to view song details"
+                  type="button"
+                >
                   {song.title || 'Untitled Song'}
-                </h3>
+                </button>
                 {song.artist && (
                   <p className="song-artist">{song.artist}</p>
                 )}
               </div>
               
               <div className="card-actions">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="view-button"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    navigate(`/master-songs/${song.songId}`);
-                  }}
-                  title="View song"
-                >
-                  <EyeIcon className="button-icon" />
-                </Button>
-                
                 <div className="add-to-container">
                   <Button
                     variant="primary"
