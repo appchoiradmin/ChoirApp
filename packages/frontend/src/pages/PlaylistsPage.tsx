@@ -13,10 +13,6 @@ import toast from 'react-hot-toast';
 import { 
   PlusIcon, 
   MusicalNoteIcon,
-  PlayIcon,
-  ShareIcon,
-  ArrowDownTrayIcon,
-  DocumentDuplicateIcon,
   Cog6ToothIcon,
   EllipsisVerticalIcon,
   InformationCircleIcon,
@@ -127,30 +123,6 @@ const PlaylistsPage: React.FC = () => {
     navigate('/master-songs');
   };
 
-  const handlePlaylist = () => {
-    // TODO: Implement playlist playback
-    toast.success('Playlist playback feature coming soon!');
-    console.log('Play playlist');
-  };
-
-  const handleSharePlaylist = () => {
-    // TODO: Implement playlist sharing
-    toast.success('Playlist sharing feature coming soon!');
-    console.log('Share playlist');
-  };
-
-  const handleExportPlaylist = () => {
-    // TODO: Implement playlist export
-    toast.success('Playlist export feature coming soon!');
-    console.log('Export playlist');
-  };
-
-  const handleDuplicatePlaylist = () => {
-    // TODO: Implement playlist duplication
-    toast.success('Playlist duplication feature coming soon!');
-    console.log('Duplicate playlist');
-  };
-
   const handleEditPlaylist = () => {
     if (playlistId) {
       navigate(`/playlists/${playlistId}/edit`);
@@ -229,7 +201,12 @@ const PlaylistsPage: React.FC = () => {
             <div className="header-left">
               <h1 className="playlist-title">
                 <MusicalNoteIcon className="title-icon" />
-                Current Playlist
+                {new Date().toLocaleDateString(undefined, { 
+                  weekday: 'long', 
+                  year: 'numeric', 
+                  month: 'long', 
+                  day: 'numeric' 
+                })}
               </h1>
               <div className="playlist-meta">
                 <span className="meta-item">
@@ -259,19 +236,11 @@ const PlaylistsPage: React.FC = () => {
               <div className="action-buttons">
                 <Button 
                   variant="primary" 
-                  leftIcon={<PlayIcon />}
-                  onClick={handlePlaylist}
-                  className="play-button"
-                >
-                  Play
-                </Button>
-                <Button 
-                  variant="outlined" 
                   leftIcon={<PlusIcon />}
                   onClick={handleAddSongs}
                   className="add-songs-button"
                 >
-                  Add Songs
+                  Add Songs from Master Songs
                 </Button>
               </div>
               <div className="dropdown-container" ref={dropdownRef}>
@@ -292,30 +261,6 @@ const PlaylistsPage: React.FC = () => {
                     >
                       <Cog6ToothIcon className="dropdown-icon" />
                       Edit Playlist
-                    </button>
-                    <button 
-                      className="dropdown-item" 
-                      onClick={handleSharePlaylist}
-                      role="menuitem"
-                    >
-                      <ShareIcon className="dropdown-icon" />
-                      Share Playlist
-                    </button>
-                    <button 
-                      className="dropdown-item" 
-                      onClick={handleDuplicatePlaylist}
-                      role="menuitem"
-                    >
-                      <DocumentDuplicateIcon className="dropdown-icon" />
-                      Duplicate
-                    </button>
-                    <button 
-                      className="dropdown-item" 
-                      onClick={handleExportPlaylist}
-                      role="menuitem"
-                    >
-                      <ArrowDownTrayIcon className="dropdown-icon" />
-                      Export
                     </button>
                   </div>
                 )}
