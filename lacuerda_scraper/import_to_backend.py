@@ -9,7 +9,7 @@ INPUT_FILE = "lacuerda_songs.json"
 
 def main():
     # Use provided Bearer token directly for automation
-    token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1laWQiOiI2NTNlOGU2NS04ODhhLTQ1NWYtYTY3ZS0xM2I0ZTM1Y2VkMDEiLCJlbWFpbCI6ImFwcGNob2lyQGdtYWlsLmNvbSIsInJvbGUiOiJDaG9pckFkbWluIiwibmJmIjoxNzUyMjU0MDkwLCJleHAiOjE3NTI4NTg4OTAsImlhdCI6MTc1MjI1NDA5MCwiaXNzIjoiQ2hvaXJBcHBEZXYiLCJhdWQiOiJDaG9pckFwcFVzZXJzIn0.iW394kS__fKLkeefjov2qQcznZG4R1H3RIt_mxBd5bY"
+    token = ""
     headers = {
         "Authorization": f"Bearer {token}",
         "Content-Type": "application/json"
