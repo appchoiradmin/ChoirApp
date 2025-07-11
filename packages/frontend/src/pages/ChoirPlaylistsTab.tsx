@@ -39,7 +39,7 @@ const ChoirPlaylistsTab: React.FC = () => {
           <label className="label" htmlFor="playlist-date-picker">Select Date</label>
           <DatePicker
             selected={selectedDate}
-            onChange={date => setSelectedDate(date)}
+            onChange={date => { if (date) setSelectedDate(date); }}
             className="input"
           />
           <p className="help">(Changing the date will show playlists for that date.)</p>

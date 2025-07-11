@@ -85,7 +85,6 @@ const ChoirDashboardPage: React.FC = () => {
               onChange={date => setSelectedDate(date || getNextSunday())}
               className={styles.input}
             />
-            <p className={styles.help}>(This date applies to both Master Songs and Playlists tabs.)</p>
           </div>
           <Outlet />
         </div>

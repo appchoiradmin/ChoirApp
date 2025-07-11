@@ -4,7 +4,7 @@
   max-width: 1200px;
   margin: 0 auto;
   padding: $spacing-sm;
-  
+
   // Ensure proper bottom spacing for mobile
   padding-bottom: $spacing-xl;
 
@@ -145,6 +145,17 @@
           padding: $spacing-xs $spacing-sm;
           border-radius: $border-radius-sm;
           font-weight: 600;
+        }
+
+        &.private-badge {
+          background: #f3f4f6;
+          color: #6b7280;
+          padding: $spacing-xs $spacing-sm;
+          border-radius: $border-radius-sm;
+          font-weight: 600;
+          display: inline-flex;
+          align-items: center;
+          gap: $spacing-xs;
         }
       }
     }
@@ -349,15 +360,15 @@
 // Content Section - Ensure proper scrolling
 .playlist-content {
   position: relative;
-  
+
   .playlist-sections {
     display: flex;
     flex-direction: column;
     gap: $spacing-md;
-    
+
     // Add bottom padding to ensure last section is visible
     padding-bottom: $spacing-lg;
-    
+
     @media screen and (max-width: $mobile) {
       padding-bottom: $spacing-xl;
     }
@@ -437,7 +448,7 @@
 
   .playlist-header {
     margin-bottom: $spacing-md;
-    
+
     .header-left .playlist-title {
       font-size: $size-3;
     }
@@ -445,12 +456,12 @@
 
   .section-card {
     border-radius: $border-radius-md;
-    
+
     .section-header {
       padding: $spacing-sm;
     }
   }
-  
+
   .playlist-content {
     // Enable smooth scrolling on mobile
     -webkit-overflow-scrolling: touch;
@@ -482,6 +493,7 @@
     opacity: 0;
     transform: translateY(20px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);

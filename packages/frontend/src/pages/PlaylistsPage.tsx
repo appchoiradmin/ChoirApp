@@ -1,4 +1,6 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useContext } from 'react';
+// Import SharedDateContext to access the shared date
+import { SharedDateContext } from './ChoirDashboardPage';
 import { useNavigate } from 'react-router-dom';
 import { usePlaylistContext } from '../context/PlaylistContext';
 import MovableSongItem from '../components/MovableSongItem';
@@ -13,8 +15,6 @@ import toast from 'react-hot-toast';
 import { 
   PlusIcon, 
   MusicalNoteIcon,
-  Cog6ToothIcon,
-  EllipsisVerticalIcon,
   InformationCircleIcon,
   ClockIcon,
   UserGroupIcon,
@@ -22,7 +22,77 @@ import {
 } from '@heroicons/react/24/outline';
 import './PlaylistsPage.scss';
 
+// Reusable header component for playlist pages
+const PlaylistHeader: React.FC<{
+  title: string;
+  date: Date;
+  totalSongs: number;
+  totalSections: number;
+  duration: string;
+  isPrivate?: boolean;
+}> = ({ title, date, totalSongs, totalSections, duration, isPrivate = true }) => (
+  <div className="playlist-header">
+    <div className="header-content">
+      <div className="header-left">
+        <h1 className="playlist-title">
+          <MusicalNoteIcon className="title-icon" />
+          {title}
+        </h1>
+        <div className="playlist-meta">
+          <span className="meta-item">
+            <CalendarIcon className="meta-icon" />
+            {date.toLocaleDateString(undefined, {
+              weekday: 'long',
+              year: 'numeric',
+              month: 'short',
+              day: 'numeric',
+            })}
+          </span>
+          <span className="meta-item">
+            <MusicalNoteIcon className="meta-icon" />
+            {totalSongs} song{totalSongs !== 1 ? 's' : ''}
+          </span>
+          <span className="meta-item">
+            <ClockIcon className="meta-icon" />
+            {duration}
+          </span>
+          {isPrivate && (
+            <span className="meta-item private-badge">
+              <UserGroupIcon className="meta-icon" />
+              Private
+            </span>
+          )}
+        </div>
+      </div>
+      <div className="header-actions">
+        {/* ...existing code for header actions... */}
+      </div>
+    </div>
+    {/* Stats Cards - Mobile Optimized */}
+    <div className="header-stats">
+      <div className="stat-card">
+        <span className="stat-number">{totalSections}</span>
+        <span className="stat-label">Sections</span>
+      </div>
+      <div className="stat-card">
+        <span className="stat-number">{totalSongs}</span>
+        <span className="stat-label">Total Songs</span>
+      </div>
+      <div className="stat-card">
+        <span className="stat-number">{duration}</span>
+        <span className="stat-label">Duration</span>
+      </div>
+      <div className="stat-card">
+        <span className="stat-number">3</span>
+        <span className="stat-label">Contributors</span>
+      </div>
+    </div>
+  </div>
+);
+
 const PlaylistsPage: React.FC = () => {
+  // Use the shared date context
+  const { selectedDate } = useContext(SharedDateContext);
   const { 
     sections, 
     isInitializing, 
@@ -123,16 +193,6 @@ const PlaylistsPage: React.FC = () => {
     navigate('/master-songs');
   };
 
-  const handleEditPlaylist = () => {
-    if (playlistId) {
-      navigate(`/playlists/${playlistId}/edit`);
-    }
-  };
-
-  const toggleDropdown = (type: string) => {
-    setDropdownOpen(dropdownOpen === type ? null : type);
-  };
-
   const getTotalSongs = () => {
     return sections.reduce((total, section) => total + section.songs.length, 0);
   };
@@ -196,98 +256,18 @@ const PlaylistsPage: React.FC = () => {
     <Layout>
       <div className="playlists-container">
         {/* Header Section */}
-        <div className="playlist-header">
-          <div className="header-content">
-            <div className="header-left">
-              <h1 className="playlist-title">
-                <MusicalNoteIcon className="title-icon" />
-                {new Date().toLocaleDateString(undefined, { 
-                  weekday: 'long', 
-                  year: 'numeric', 
-                  month: 'long', 
-                  day: 'numeric' 
-                })}
-              </h1>
-              <div className="playlist-meta">
-                <span className="meta-item">
-                  <CalendarIcon className="meta-icon" />
-                  {new Date().toLocaleDateString(undefined, { 
-                    weekday: 'long', 
-                    year: 'numeric', 
-                    month: 'short', 
-                    day: 'numeric' 
-                  })}
-                </span>
-                <span className="meta-item">
-                  <MusicalNoteIcon className="meta-icon" />
-                  {getTotalSongs()} song{getTotalSongs() !== 1 ? 's' : ''}
-                </span>
-                <span className="meta-item">
-                  <ClockIcon className="meta-icon" />
-                  {getTotalDuration()}
-                </span>
-                <span className="meta-item public-badge">
-                  <UserGroupIcon className="meta-icon" />
-                  Public
-                </span>
-              </div>
-            </div>
-            <div className="header-actions">
-              <div className="action-buttons">
-                <Button 
-                  variant="primary" 
-                  leftIcon={<PlusIcon />}
-                  onClick={handleAddSongs}
-                  className="add-songs-button"
-                >
-                  Add Songs from Master Songs
-                </Button>
-              </div>
-              <div className="dropdown-container" ref={dropdownRef}>
-                <Button
-                  variant="ghost"
-                  onClick={() => toggleDropdown('playlist')}
-                  className="dropdown-trigger"
-                  title="More options"
-                >
-                  <EllipsisVerticalIcon />
-                </Button>
-                {dropdownOpen === 'playlist' && (
-                  <div className="dropdown-menu" role="menu">
-                    <button 
-                      className="dropdown-item" 
-                      onClick={handleEditPlaylist}
-                      role="menuitem"
-                    >
-                      <Cog6ToothIcon className="dropdown-icon" />
-                      Edit Playlist
-                    </button>
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-          
-          {/* Stats Cards - Mobile Optimized */}
-          <div className="header-stats">
-            <div className="stat-card">
-              <span className="stat-number">{sections.length}</span>
-              <span className="stat-label">Sections</span>
-            </div>
-            <div className="stat-card">
-              <span className="stat-number">{getTotalSongs()}</span>
-              <span className="stat-label">Total Songs</span>
-            </div>
-            <div className="stat-card">
-              <span className="stat-number">{getTotalDuration()}</span>
-              <span className="stat-label">Duration</span>
-            </div>
-            <div className="stat-card">
-              <span className="stat-number">3</span>
-              <span className="stat-label">Contributors</span>
-            </div>
-          </div>
-        </div>
+        <PlaylistHeader
+          title={selectedDate.toLocaleDateString(undefined, {
+            weekday: 'long',
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+          })}
+          date={selectedDate}
+          totalSongs={getTotalSongs()}
+          totalSections={sections.length}
+          duration={getTotalDuration()}
+        />
 
         {/* Content Section */}
         <div className="playlist-content">

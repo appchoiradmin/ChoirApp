@@ -393,7 +393,7 @@ const EditPlaylistPage: React.FC = () => {
                 )}
               </div>
             </div>
-            <div className="header-actions">
+            {/* <div className="header-actions">
               <div className="action-buttons">
                 <Button 
                   variant="primary" 
@@ -404,7 +404,7 @@ const EditPlaylistPage: React.FC = () => {
                   Add Songs from Master Songs
                 </Button>
               </div>
-            </div>
+            </div> */}
           </div>
           
           {/* Stats Cards - Mobile Optimized */}
