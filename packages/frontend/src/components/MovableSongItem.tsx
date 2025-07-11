@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { PlaylistSong, PlaylistSection } from '../types/playlist';
 import { ChoirSongVersionDto } from '../types/choir';
 import { MasterSongDto } from '../types/song';
+import styles from './MovableSongItem.module.scss';
 
 interface MovableSongItemProps {
   song: PlaylistSong;
@@ -68,15 +69,11 @@ const MovableSongItem: React.FC<MovableSongItemProps> = ({
   };
 
   return (
-    <li
-      className="movable-song-item"
-      style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}
-    >
+    <li className={styles['movable-song-item']}>
       {title && songId ? (
         <a
           href={`/master-songs/${songId}`}
           onClick={e => handleNavigate(e, songId!)}
-          style={{ fontWeight: 500, fontSize: 16, color: '#363636', textDecoration: 'underline', flex: 1, padding: '8px 0' }}
           tabIndex={0}
           aria-label={`View details for ${title}`}
         >
@@ -84,13 +81,13 @@ const MovableSongItem: React.FC<MovableSongItemProps> = ({
         </a>
       ) : (
         <span
-          style={{ flex: 1, color: '#b5b5b5', fontStyle: 'italic', padding: '8px 0' }}
+          style={{ color: '#b5b5b5', fontStyle: 'italic', padding: '8px 0', width: '100%', textAlign: 'center' }}
           aria-label="Unknown Song"
         >
           Unknown Song
         </span>
       )}
-      <div className="song-actions" style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+      <div className={styles['song-actions']}>
         <button className="button is-small" type="button" onClick={openModal}>
           Move To
         </button>

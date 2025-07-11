@@ -1,5 +1,42 @@
 @use '../_variables.scss' as *;
 
+.virtual-playlist-banner {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  background: #eaf6ff;
+  border-left: 5px solid #2196f3;
+  border-radius: 10px;
+  padding: 1rem 1.25rem;
+  margin-bottom: 1.5rem;
+  font-size: 1.05rem;
+  font-weight: 500;
+  color: #1769aa;
+  box-shadow: 0 2px 8px rgba(33, 150, 243, 0.08);
+
+  .virtual-playlist-icon {
+    width: 2.2rem;
+    height: 2.2rem;
+    color: #2196f3;
+    flex-shrink: 0;
+    opacity: 0.85;
+  }
+
+  span {
+    flex: 1;
+    line-height: 1.4;
+  }
+
+  @media (max-width: 600px) {
+    font-size: 0.98rem;
+    padding: 0.75rem 0.7rem;
+    .virtual-playlist-icon {
+      width: 1.7rem;
+      height: 1.7rem;
+    }
+  }
+}
+
 .playlists-container {
   max-width: 1200px;
   margin: 0 auto;
@@ -423,6 +460,14 @@
     padding: 0;
     // MovableSongItem styling will be handled by that component
     // We provide container styles here
+    
+    .song-title {
+      display: block;
+      width: 100%;
+      text-align: center;
+      margin-left: auto;
+      margin-right: auto;
+    }
   }
 
   .section-empty {

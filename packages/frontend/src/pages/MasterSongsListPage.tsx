@@ -16,7 +16,6 @@ import {
   PlusIcon,
   DocumentTextIcon,
   MusicalNoteIcon,
-  TagIcon,
   CheckCircleIcon,
   InformationCircleIcon,
   XMarkIcon,
@@ -223,18 +222,7 @@ const MasterSongsListPage: React.FC = () => {
       toast.error('Failed to add song to playlist');
       setDropdownOpen(null);
     }
-  };
-
-  // Get unique tags for filtering
-  const availableTags = useMemo(() => {
-    const tags = new Set<string>();
-    songs.forEach(song => {
-      song.tags?.forEach(tag => {
-        tags.add(tag.tagName);
-      });
-    });
-    return Array.from(tags).sort();
-  }, [songs]);
+  };  
 
   // Song card component
   const SongCard: React.FC<{ song: MasterSongDto }> = ({ song }) => {

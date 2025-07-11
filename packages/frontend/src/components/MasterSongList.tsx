@@ -1,10 +1,8 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Link } from 'react-router-dom';
 import { Button, Card, LoadingSpinner } from './ui';
 import { searchMasterSongs } from '../services/masterSongService';
 import { addSongToPlaylist } from '../services/playlistService';
 import { MasterSongDto } from '../types/song';
-import { PlaylistSection } from '../types/playlist';
 import { useUser } from '../hooks/useUser';
 import { usePlaylist } from '../hooks/usePlaylist';
 import toast from 'react-hot-toast';

@@ -90,9 +90,9 @@ const PlaylistsPage: React.FC = () => {
     sections, 
     isInitializing, 
     error, 
-    isPlaylistReady, 
     playlistId, 
-    setSections
+    setSections,
+    isPersisted
   } = usePlaylistContext();
   const { user } = useUser();
   const navigate = useNavigate();
@@ -232,7 +232,8 @@ const PlaylistsPage: React.FC = () => {
     );
   }
 
-  if (!isPlaylistReady) {
+  // Show loading spinner only while initializing
+  if (isInitializing) {
     return (
       <Layout>
         <div className="playlists-container">
@@ -245,9 +246,42 @@ const PlaylistsPage: React.FC = () => {
     );
   }
 
+  // Show error if failed
+  if (error) {
+    return (
+      <Layout>
+        <div className="playlists-container">
+          <div className="playlist-error">
+            <InformationCircleIcon className="error-icon" />
+            <h2 className="error-title">Unable to Load Playlist</h2>
+            <p className="error-message">{error}</p>
+            <div className="error-actions">
+              <Button 
+                variant="primary" 
+                onClick={() => window.location.reload()}
+              >
+                Try Again
+              </Button>
+            </div>
+          </div>
+        </div>
+      </Layout>
+    );
+  }
+
+  // Show playlist UI (virtual or persisted)
   return (
     <Layout>
       <div className="playlists-container">
+        {/* If this is a virtual playlist (not persisted), show a badge/message */}
+        {!isPersisted && !isInitializing && (
+          <div className="virtual-playlist-banner">
+            <InformationCircleIcon className="virtual-playlist-icon" />
+            <span>
+              This playlist is a preview based on your default template. It will be saved only after you add the first song.
+            </span>
+          </div>
+        )}
         {/* Header Section */}
         <PlaylistHeader
           title={selectedDate.toLocaleDateString(undefined, {
@@ -323,14 +357,9 @@ const PlaylistsPage: React.FC = () => {
                     ) : (
                       <div className="section-empty">
                         <p className="empty-text">No songs in this section yet.</p>
-                        <Button 
-                          variant="ghost" 
-                          size="sm"
-                          leftIcon={<PlusIcon />}
-                          onClick={handleAddSongs}
-                        >
-                          Add Songs
-                        </Button>
+                        <p className="section-add-instructions">
+                          To add songs, go to the <b>Songs</b> tab and add them to your playlist.
+                        </p>
                       </div>
                     )}
                   </Card>
