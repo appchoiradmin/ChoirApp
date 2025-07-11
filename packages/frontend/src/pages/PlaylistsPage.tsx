@@ -78,14 +78,7 @@ const PlaylistHeader: React.FC<{
         <span className="stat-number">{totalSongs}</span>
         <span className="stat-label">Total Songs</span>
       </div>
-      <div className="stat-card">
-        <span className="stat-number">{duration}</span>
-        <span className="stat-label">Duration</span>
-      </div>
-      <div className="stat-card">
-        <span className="stat-number">3</span>
-        <span className="stat-label">Contributors</span>
-      </div>
+
     </div>
   </div>
 );

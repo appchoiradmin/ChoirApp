@@ -476,18 +476,12 @@ const MasterSongList: React.FC<MasterSongListProps> = ({ choirId }) => {
             <span className="stat-number">{stats.totalSongs}</span>
             <span className="stat-label">Total Songs</span>
           </div>
-          <div className="stat-card">
-            <span className="stat-number">{stats.totalTags}</span>
-            <span className="stat-label">Tags</span>
-          </div>
+
           <div className="stat-card">
             <span className="stat-number">{stats.selectedCount}</span>
             <span className="stat-label">Selected</span>
           </div>
-          <div className="stat-card">
-            <span className="stat-number">{stats.sectionsCount}</span>
-            <span className="stat-label">Sections</span>
-          </div>
+
         </div>
       </div>
 
@@ -528,17 +522,19 @@ const MasterSongList: React.FC<MasterSongListProps> = ({ choirId }) => {
           </div>
           
           <Button
-            variant="outlined"
-            size="sm"
-            className="filter-toggle-btn"
-            onClick={() => setFilters(prev => ({ ...prev, showAdvancedFilters: !prev.showAdvancedFilters }))}
-          >
-            <FunnelIcon className="icon" />
-            Filters
-            {(filters.selectedTags.length > 0) && (
-              <span className="filter-count">{filters.selectedTags.length}</span>
-            )}
-          </Button>
+  variant="outlined"
+  size="sm"
+  className="filter-toggle-btn"
+  onClick={() => setFilters(prev => ({ ...prev, showAdvancedFilters: !prev.showAdvancedFilters }))}
+>
+  <span style={{ display: 'flex', alignItems: 'center', gap: '0.5em', width: '100%', justifyContent: 'center' }}>
+    <FunnelIcon className="icon" />
+    <span>Filters</span>
+    {(filters.selectedTags.length > 0) && (
+      <span className="filter-count">{filters.selectedTags.length}</span>
+    )}
+  </span>
+</Button>
         </div>
         
         {/* Advanced Filters */}
@@ -596,17 +592,20 @@ const MasterSongList: React.FC<MasterSongListProps> = ({ choirId }) => {
         {/* Selection Controls */}
         <div className="selection-controls">
           <Button
-            variant="outlined"
-            size="sm"
-            onClick={handleSelectAll}
-            className="select-all-btn"
-          >
-            <CheckCircleIcon className="icon" />
-            {selectedSongs.size === filteredAndSortedSongs.length && filteredAndSortedSongs.length > 0 
-              ? 'Deselect All' 
-              : 'Select All'
-            }
-          </Button>
+  variant="outlined"
+  size="sm"
+  onClick={handleSelectAll}
+  className="select-all-btn"
+>
+  <span style={{ display: 'flex', alignItems: 'center', gap: '0.5em', width: '100%', justifyContent: 'center' }}>
+    <CheckCircleIcon className="icon" />
+    <span>
+      {selectedSongs.size === filteredAndSortedSongs.length && filteredAndSortedSongs.length > 0
+        ? 'Deselect All'
+        : 'Select All'}
+    </span>
+  </span>
+</Button>
           
           {selectedSongs.size > 0 && (
             <Button

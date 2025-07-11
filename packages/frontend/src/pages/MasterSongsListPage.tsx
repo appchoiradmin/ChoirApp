@@ -382,21 +382,7 @@ const MasterSongsListPage: React.FC = () => {
               </div>
             </div>
             
-            <div className="card-meta">
-              {song.tags && song.tags.length > 0 && (
-                <div className="song-tags">
-                  {song.tags.slice(0, 3).map((tag) => (
-                    <span key={tag.tagId} className="tag">
-                      <TagIcon className="tag-icon" />
-                      {tag.tagName}
-                    </span>
-                  ))}
-                  {song.tags.length > 3 && (
-                    <span className="tag more">+{song.tags.length - 3} more</span>
-                  )}
-                </div>
-              )}
-            </div>
+            
           </div>
         </Card>
       </div>
@@ -496,25 +482,7 @@ const MasterSongsListPage: React.FC = () => {
               <span className="stat-number">{filteredAndSortedSongs.length}</span>
               <span className="stat-label">Total Songs</span>
             </div>
-            <div className="stat-card tags-card">
-              <div className="tag-filters">
-                {availableTags.slice(0, 3).map(tag => (
-                  <Button
-                    key={tag}
-                    variant="ghost"
-                    size="sm"
-                    className="tag-filter-btn"
-                    onClick={() => setFilters(prev => ({ ...prev, search: tag }))}
-                  >
-                    {tag}
-                  </Button>
-                ))}
-                {availableTags.length > 3 && (
-                  <span className="more-tags">+{availableTags.length - 3} more</span>
-                )}
-              </div>
-              <span className="stat-label">Popular Tags</span>
-            </div>
+            
             <div className="stat-card">
               <span className="stat-number">{selectedSongs.size}</span>
               <span className="stat-label">Selected</span>
@@ -531,7 +499,7 @@ const MasterSongsListPage: React.FC = () => {
                       {selectedTemplate ? selectedTemplate.title : 'Select Template'}
                     </span>
                     <span className="template-details">
-                      {selectedTemplate ? `${selectedTemplate.sections.length} sections` : `${availableTemplates.length} available`}
+                      {selectedTemplate ? '' : `${availableTemplates.length} available`}
                     </span>
                   </div>
                   {templateDropdownOpen ? <ChevronUpIcon className="dropdown-icon" /> : <ChevronDownIcon className="dropdown-icon" />}

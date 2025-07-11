@@ -244,26 +244,53 @@
     }
 
     .filter-toggle-btn {
-      white-space: nowrap;
-      position: relative;
+  white-space: nowrap;
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: $spacing-xs;
 
-      .filter-count {
-        position: absolute;
-        top: -6px;
-        right: -6px;
-        background: $primary;
-        color: white;
-        font-size: 0.75rem;
-        font-weight: 600;
-        padding: 2px 6px;
-        border-radius: 10px;
-        min-width: 18px;
-        height: 18px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-      }
-    }
+  .icon {
+    margin-right: $spacing-xs;
+    width: 1.1em;
+    height: 1.1em;
+    vertical-align: middle;
+    flex-shrink: 0;
+  }
+
+  .filter-count {
+    position: absolute;
+    top: -6px;
+    right: -6px;
+    background: $primary;
+    color: white;
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 2px 6px;
+    border-radius: 10px;
+    min-width: 18px;
+    height: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+}
+
+// Add spacing for select all button
+.select-all-btn {
+  display: flex;
+  align-items: center;
+  gap: $spacing-xs;
+
+  .icon {
+    margin-right: $spacing-xs;
+    width: 1.1em;
+    height: 1.1em;
+    vertical-align: middle;
+    flex-shrink: 0;
+  }
+}
+
   }
 
   .advanced-filters {
@@ -361,6 +388,21 @@
 
     @media screen and (max-width: $tablet) {
       flex-direction: column;
+    }
+
+    .select-all-btn,
+    .clear-selection-btn {
+      display: flex;
+      align-items: center;
+      gap: $spacing-xs;
+
+      .icon {
+        margin-right: $spacing-xs;
+        width: 1.1em;
+        height: 1.1em;
+        vertical-align: middle;
+        flex-shrink: 0;
+      }
     }
   }
 }

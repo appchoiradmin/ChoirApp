@@ -10,11 +10,21 @@
   transition: background 0.15s, color 0.15s, box-shadow 0.15s;
   border: none;
   cursor: pointer;
-  display: inline-block;
+  display: flex;
+  align-items: center;
+  gap: 0.5em;
   line-height: 1.2;
   box-shadow: 0 1px 3px rgba(34,34,59,0.03);
   outline: none;
 }
+
+.button .icon {
+  width: 1.1em;
+  height: 1.1em;
+  vertical-align: middle;
+  flex-shrink: 0;
+}
+
 
 
 .is-primary {
