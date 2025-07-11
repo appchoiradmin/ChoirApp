@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { Button, Card, LoadingSpinner } from './ui';
 import { searchMasterSongs } from '../services/masterSongService';
 import { addSongToPlaylist } from '../services/playlistService';
@@ -40,6 +40,7 @@ const MasterSongList: React.FC<MasterSongListProps> = ({ choirId }) => {
   const [error, setError] = useState<string | null>(null);
   const [selectedSongs, setSelectedSongs] = useState<Set<string>>(new Set());
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
+  const [isDropdownOpenUp, setIsDropdownOpenUp] = useState(false);
   const [filters, setFilters] = useState<FilterState>({
     search: '',
     sortBy: 'title',
@@ -49,7 +50,7 @@ const MasterSongList: React.FC<MasterSongListProps> = ({ choirId }) => {
   });
 
   const { token } = useUser();
-  const { sections, selectedTemplate, playlistId, isPlaylistReady, createPlaylistIfNeeded } = usePlaylist();
+  const { sections, selectedTemplate, playlistId, isPlaylistReady, createPlaylistIfNeeded, refreshPlaylist } = usePlaylist();
   const [isCreatingPlaylist, setIsCreatingPlaylist] = useState(false);
 
   // DEBUG LOGS
@@ -276,6 +277,7 @@ const MasterSongList: React.FC<MasterSongListProps> = ({ choirId }) => {
         return;
       }
       // Optionally, show a success message
+      refreshPlaylist();
     } catch (error: any) {
       setIsCreatingPlaylist(false);
       setError(error?.message || 'Failed to add song to playlist');
@@ -287,6 +289,19 @@ const MasterSongList: React.FC<MasterSongListProps> = ({ choirId }) => {
   // Enhanced Song card component with better mobile UX
   const SongCard: React.FC<{ song: MasterSongDto }> = ({ song }) => {
     const isSelected = selectedSongs.has(song.songId);
+    const dropdownRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+      if (activeDropdown === song.songId && dropdownRef.current) {
+        const dropdownRect = dropdownRef.current.getBoundingClientRect();
+        const viewportHeight = window.innerHeight;
+        if (dropdownRect.bottom > viewportHeight) {
+          setIsDropdownOpenUp(true);
+        } else {
+          setIsDropdownOpenUp(false);
+        }
+      }
+    }, [activeDropdown, song.songId]);
     
     return (
       <div 
@@ -347,7 +362,8 @@ const MasterSongList: React.FC<MasterSongListProps> = ({ choirId }) => {
                   
                   {activeDropdown === song.songId && (
                     <div
-                      className="add-to-dropdown enhanced"
+                      ref={dropdownRef}
+                      className={`add-to-dropdown enhanced ${isDropdownOpenUp ? 'is-up' : ''}`}
                       role="listbox"
                       onClick={e => e.stopPropagation()}
                     >

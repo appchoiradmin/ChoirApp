@@ -599,7 +599,6 @@ details {
       box-shadow: $shadow-sm;
       border: 1px solid $color-neutral-200;
       transition: all $transition-fast;
-      overflow: hidden;
       
       &:active {
         transform: scale(0.98);

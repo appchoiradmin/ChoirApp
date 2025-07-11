@@ -423,10 +423,8 @@
       cursor: pointer;
       transition: $transition-fast;
       border-radius: $radius-lg;
-      overflow: hidden;
 
       &:hover {
-        transform: translateY(-2px);
         box-shadow: $shadow-lg;
       }
 
@@ -548,7 +546,7 @@
 
               .add-to-dropdown {
                 position: absolute;
-                top: 100%;
+                bottom: 100%;
                 right: 0;
                 z-index: 50;
                 min-width: 300px;
@@ -610,10 +608,10 @@
                   }
 
                   .dropdown-content {
-                    max-height: 200px;
-                    overflow-y: auto;
 
-                    .dropdown-item {
+                    button.dropdown-item {
+                      display: flex;
+                      align-items: center;
                       width: 100%;
                       padding: $spacing-md;
                       border: none;
