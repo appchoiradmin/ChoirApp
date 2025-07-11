@@ -16,7 +16,8 @@ import {
   ListBulletIcon,
   PlusIcon,
   CheckIcon,
-  FunnelIcon
+  FunnelIcon,
+  ArrowUpIcon
 } from '@heroicons/react/24/outline';
 import './MasterSongList.scss';
 
@@ -35,9 +36,25 @@ interface FilterState {
 }
 
 const MasterSongList: React.FC<MasterSongListProps> = ({ choirId }) => {
+  const [showBackToTop, setShowBackToTop] = useState(false);
+  // Show button after scrolling 400px
+  useEffect(() => {
+    const handleScroll = () => {
+      setShowBackToTop(window.scrollY > 400);
+    };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+  const handleBackToTop = () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
   const [songs, setSongs] = useState<MasterSongDto[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [hasMore, setHasMore] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const BATCH_SIZE = 40;
+  const listContainerRef = useRef<HTMLDivElement | null>(null);
   const [selectedSongs, setSelectedSongs] = useState<Set<string>>(new Set());
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
   const [isDropdownOpenUp, setIsDropdownOpenUp] = useState(false);
@@ -61,24 +78,63 @@ const MasterSongList: React.FC<MasterSongListProps> = ({ choirId }) => {
   // eslint-disable-next-line no-console
   console.log('playlistId:', playlistId);
 
+  // Infinite scroll: fetch initial batch and reset on search/filter change
   useEffect(() => {
     if (token) {
-      const fetchSongsAndPlaylists = async () => {
+      setSongs([]);
+      setHasMore(true);
+      setError(null);
+      setLoading(true);
+      const fetchInitialSongs = async () => {
         try {
-          setLoading(true);
-          const fetchedSongs = await searchMasterSongs({ title: filters.search }, token);
+          const fetchedSongs = await searchMasterSongs({ title: filters.search, skip: 0, take: BATCH_SIZE }, token);
           setSongs(fetchedSongs);
+          setHasMore(fetchedSongs.length === BATCH_SIZE);
         } catch (err: any) {
-          setError(err.message || 'Failed to fetch songs or playlists');
+          setError(err.message || 'Failed to fetch songs');
+          setHasMore(false);
         } finally {
           setLoading(false);
         }
       };
-      fetchSongsAndPlaylists();
+      fetchInitialSongs();
     }
   }, [filters.search, token, choirId]);
 
+  // Infinite scroll: fetch more when near bottom
+  useEffect(() => {
+    if (!hasMore || loading || loadingMore) return;
+    const handleScroll = () => {
+      const container = listContainerRef.current || document.documentElement;
+      const scrollTop = window.scrollY || container.scrollTop;
+      const windowHeight = window.innerHeight || container.clientHeight;
+      const fullHeight = document.body.scrollHeight || container.scrollHeight;
+      if (fullHeight - (scrollTop + windowHeight) < 300) {
+        loadMoreSongs();
+      }
+    };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+    // eslint-disable-next-line
+  }, [hasMore, loading, loadingMore, songs]);
+
+  const loadMoreSongs = async () => {
+    if (!token || loadingMore || !hasMore) return;
+    setLoadingMore(true);
+    try {
+      const fetchedSongs = await searchMasterSongs({ title: filters.search, skip: songs.length, take: BATCH_SIZE }, token);
+      setSongs(prev => [...prev, ...fetchedSongs]);
+      setHasMore(fetchedSongs.length === BATCH_SIZE);
+    } catch (err: any) {
+      setError(err.message || 'Failed to fetch more songs');
+      setHasMore(false);
+    } finally {
+      setLoadingMore(false);
+    }
+  };
+
   // Filter and sort songs with enhanced search functionality
+  // For infinite scroll, filter/sort only on loaded songs (backend can be enhanced later)
   const filteredAndSortedSongs = useMemo(() => {
     let filtered = songs.filter(song => {
       // Search filter
@@ -636,12 +692,27 @@ const MasterSongList: React.FC<MasterSongListProps> = ({ choirId }) => {
       </div>
 
       {/* Songs Content */}
-      <div className="songs-content">
+      <div className="songs-content" ref={listContainerRef}>
         {/* Loading state */}
         {loading && (
           <div className="master-songs-loading">
             <LoadingSpinner />
             <p className="loading-text">Loading master songs...</p>
+          </div>
+        )}
+
+        {/* Infinite scroll loading spinner */}
+        {!loading && loadingMore && (
+          <div className="master-songs-loading more">
+            <LoadingSpinner />
+            <p className="loading-text">Loading more songs...</p>
+          </div>
+        )}
+
+        {/* End of list indicator */}
+        {!loading && !loadingMore && !hasMore && songs.length > 0 && (
+          <div className="end-of-list">
+            <p className="end-message">All songs loaded.</p>
           </div>
         )}
 
@@ -680,8 +751,19 @@ const MasterSongList: React.FC<MasterSongListProps> = ({ choirId }) => {
           </>
         )}
       </div>
+      {/* Back to Top Button */}
+      {showBackToTop && (
+        <button
+          className="back-to-top-btn"
+          aria-label="Back to top"
+          onClick={handleBackToTop}
+          style={{ position: 'fixed', right: 16, bottom: 24, zIndex: 1000, border: 'none', background: '#3273dc', borderRadius: '50%', padding: 12, boxShadow: '0 2px 8px rgba(0,0,0,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'opacity 0.3s', color: 'white' }}
+        >
+          <ArrowUpIcon style={{ width: 24, height: 24 }} />
+        </button>
+      )}
     </div>
   );
-};
+}
 
 export default MasterSongList;

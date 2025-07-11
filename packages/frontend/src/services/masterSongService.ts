@@ -49,13 +49,15 @@ export const createMasterSong = async (songDto: CreateMasterSongDto, token: stri
 };
 
 export const searchMasterSongs = async (
-  params: { title?: string; artist?: string; tag?: string },
+  params: { title?: string; artist?: string; tag?: string; skip?: number; take?: number },
   token: string
 ): Promise<MasterSongDto[]> => {
   const query = new URLSearchParams();
   if (params.title) query.append('title', params.title);
   if (params.artist) query.append('artist', params.artist);
   if (params.tag) query.append('tag', params.tag);
+  if (typeof params.skip === 'number') query.append('skip', params.skip.toString());
+  if (typeof params.take === 'number') query.append('take', params.take.toString());
 
   const response = await fetch(`${API_BASE_URL}/api/master-songs/search?${query.toString()}`, {
     headers: {

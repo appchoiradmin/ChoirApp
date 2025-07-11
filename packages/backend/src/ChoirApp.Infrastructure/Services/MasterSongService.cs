@@ -175,7 +175,7 @@ public class MasterSongService : IMasterSongService
         }
     }
 
-        public async Task<Result<IEnumerable<MasterSongDto>>> SearchSongsAsync(string? title, string? artist, string? tag)
+        public async Task<Result<IEnumerable<MasterSongDto>>> SearchSongsAsync(string? title, string? artist, string? tag, int? skip = null, int? take = null)
     {
         try
         {
@@ -195,6 +195,15 @@ public class MasterSongService : IMasterSongService
             {
                 var normalizedTag = tag.ToLower().Trim();
                 query = query.Where(s => s.SongTags.Any(st => st.Tag != null && st.Tag.TagName == normalizedTag));
+            }
+
+            if (skip.HasValue)
+            {
+                query = query.Skip(skip.Value);
+            }
+            if (take.HasValue)
+            {
+                query = query.Take(take.Value);
             }
 
             var songs = await query

@@ -26,7 +26,7 @@ namespace ChoirApp.Backend.Endpoints.Songs
 
         public override async Task HandleAsync(SearchSongsRequest req, CancellationToken ct)
         {
-            var result = await _masterSongService.SearchSongsAsync(req.Title, req.Artist, req.Tag);
+            var result = await _masterSongService.SearchSongsAsync(req.Title, req.Artist, req.Tag, req.Skip, req.Take);
 
             if (result.IsFailed)
             {
