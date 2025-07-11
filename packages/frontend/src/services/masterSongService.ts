@@ -1,3 +1,24 @@
+// Get the total count of master songs (optionally filtered)
+export const getMasterSongsCount = async (
+  params: { title?: string; artist?: string; tag?: string },
+  token: string
+): Promise<number> => {
+  const query = new URLSearchParams();
+  if (params.title) query.append('title', params.title);
+  if (params.artist) query.append('artist', params.artist);
+  if (params.tag) query.append('tag', params.tag);
+
+  const response = await fetch(`${API_BASE_URL}/api/master-songs/count?${query.toString()}`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+  if (!response.ok) {
+    throw new Error('Failed to fetch master songs count');
+  }
+  const data = await response.json();
+  return data.totalCount;
+};
 import type { MasterSongDto, CreateMasterSongDto, TagDto } from '../types/song';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { Button, Card, LoadingSpinner } from './ui';
-import { searchMasterSongs } from '../services/masterSongService';
+import { searchMasterSongs, getMasterSongsCount } from '../services/masterSongService';
 import { addSongToPlaylist } from '../services/playlistService';
 import { MasterSongDto } from '../types/song';
 import { useUser } from '../hooks/useUser';
@@ -53,6 +53,7 @@ const MasterSongList: React.FC<MasterSongListProps> = ({ choirId }) => {
   const [error, setError] = useState<string | null>(null);
   const [hasMore, setHasMore] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
+  const [totalSongsCount, setTotalSongsCount] = useState<number | null>(null);
   const BATCH_SIZE = 40;
   const listContainerRef = useRef<HTMLDivElement | null>(null);
   const [selectedSongs, setSelectedSongs] = useState<Set<string>>(new Set());
@@ -85,11 +86,16 @@ const MasterSongList: React.FC<MasterSongListProps> = ({ choirId }) => {
       setHasMore(true);
       setError(null);
       setLoading(true);
+      setTotalSongsCount(null);
       const fetchInitialSongs = async () => {
         try {
-          const fetchedSongs = await searchMasterSongs({ title: filters.search, skip: 0, take: BATCH_SIZE }, token);
+          const [fetchedSongs, count] = await Promise.all([
+            searchMasterSongs({ title: filters.search, skip: 0, take: BATCH_SIZE }, token),
+            getMasterSongsCount({ title: filters.search }, token)
+          ]);
           setSongs(fetchedSongs);
           setHasMore(fetchedSongs.length === BATCH_SIZE);
+          setTotalSongsCount(count);
         } catch (err: any) {
           setError(err.message || 'Failed to fetch songs');
           setHasMore(false);
@@ -202,7 +208,7 @@ const MasterSongList: React.FC<MasterSongListProps> = ({ choirId }) => {
 
   // Calculate statistics for header cards
   const stats = useMemo(() => {
-    const totalSongs = filteredAndSortedSongs.length;
+    const totalSongs = totalSongsCount !== null ? totalSongsCount : filteredAndSortedSongs.length;
     const totalTags = availableTags.length;
     const selectedCount = selectedSongs.size;
     const sectionsCount = sections.length;
@@ -213,7 +219,7 @@ const MasterSongList: React.FC<MasterSongListProps> = ({ choirId }) => {
       selectedCount,
       sectionsCount
     };
-  }, [filteredAndSortedSongs, availableTags, selectedSongs, sections]);
+  }, [filteredAndSortedSongs, availableTags, selectedSongs, sections, totalSongsCount]);
 
   // Selection handlers
   const handleSelectSong = (songId: string) => {

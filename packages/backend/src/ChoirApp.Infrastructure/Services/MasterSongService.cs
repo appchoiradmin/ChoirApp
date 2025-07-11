@@ -1,3 +1,4 @@
+
 using ChoirApp.Application.Contracts;
 using ChoirApp.Application.Dtos;
 using ChoirApp.Domain.Entities;
@@ -14,6 +15,30 @@ public class MasterSongService : IMasterSongService
     public MasterSongService(ApplicationDbContext context)
     {
         _context = context;
+    }
+
+    // Count master songs with optional filters
+    public async Task<int> CountMasterSongsAsync(string? title, string? artist, string? tag)
+    {
+        var query = _context.MasterSongs.AsQueryable();
+
+        if (!string.IsNullOrEmpty(title))
+        {
+            query = query.Where(s => s.Title.Contains(title));
+        }
+
+        if (!string.IsNullOrEmpty(artist))
+        {
+            query = query.Where(s => s.Artist != null && s.Artist.Contains(artist));
+        }
+
+        if (!string.IsNullOrEmpty(tag))
+        {
+            var normalizedTag = tag.ToLower().Trim();
+            query = query.Where(s => s.SongTags.Any(st => st.Tag != null && st.Tag.TagName == normalizedTag));
+        }
+
+        return await query.CountAsync();
     }
 
     public async Task<Result<MasterSongDto>> CreateMasterSongAsync(CreateMasterSongDto createMasterSongDto)
