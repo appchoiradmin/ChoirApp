@@ -121,43 +121,43 @@ const ChoirAdminPage: React.FC = () => {
         <div className="level">
           <div className="level-left">
             <div>
-              <h1 className="title">{choir.name} - Admin</h1>
-              <p className="subtitle">Manage your choir members, songs, and playlists.</p>
+              <h1 className="title is-3 mb-1">{choir.name}</h1>
+<p className="subtitle is-5 has-text-weight-semibold mb-4">Admin Panel</p>
+<p className="mb-5">Manage your choir members and playlist templates.</p>
             </div>
           </div>
-          <div className="level-right">
-            <Link to="/master-songs" className="button is-link">
-              <span className="icon"><i className="fas fa-music"></i></span>
-              <span>Master Song List</span>
-            </Link>
-            <Link to={`/choir/${choirId}/playlist-templates`} className="button is-info">
-              <span className="icon"><i className="fas fa-list-alt"></i></span>
-              <span>Playlist Templates</span>
-            </Link>
-            <Link to="/dashboard" className="button">
-              Go Back to Dashboard
-            </Link>
-          </div>
+          <div className="level-right"></div>
         </div>
         <hr />
-        <div className="columns">
-          <div className="column is-three-fifths">
-            <MembersList
-              members={choir.members}
-              onRemoveMember={handleRemoveMember}
-              onUpdateMemberRole={handleUpdateMemberRole}
-            />
-            <div className="mt-5">
-              <ChoirSongsList choirId={choir.id} />
-            </div>
-          </div>
-          <div className="column is-two-fifths">
-            <InviteMember onInviteMember={handleInviteMember} />
-            <div className="mt-5">
-              <SentInvitationsList invitations={invitations || []} />
-            </div>
-          </div>
-        </div>
+        <div className="columns is-multiline">
+  <div className="column is-12-mobile is-7-tablet">
+    <section className="box mb-4">
+      <h2 className="title is-5 mb-3">Choir Members</h2>
+      <MembersList
+        members={choir.members}
+        onRemoveMember={handleRemoveMember}
+        onUpdateMemberRole={handleUpdateMemberRole}
+      />
+      <div className="mt-4">
+        <InviteMember onInviteMember={handleInviteMember} />
+      </div>
+    </section>
+    <section className="box mb-4">
+      <h2 className="title is-5 mb-3">Pending Invitations</h2>
+      <SentInvitationsList invitations={invitations || []} />
+    </section>
+  </div>
+  <div className="column is-12-mobile is-5-tablet">
+    <section className="box">
+      <h2 className="title is-5 mb-3">Playlist Templates</h2>
+      <Link to={`/choir/${choirId}/playlist-templates`} className="button is-info is-fullwidth">
+        <span className="icon"><i className="fas fa-list-alt"></i></span>
+        <span>Manage Playlist Templates</span>
+      </Link>
+      <p className="help mt-2">Create and edit reusable playlist structures for your choir's events.</p>
+    </section>
+  </div>
+</div>
       </div>
     </section>
   );
