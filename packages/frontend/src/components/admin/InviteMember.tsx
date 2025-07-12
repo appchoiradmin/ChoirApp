@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import './InviteMember.scss';
 
 interface InviteMemberProps {
   onInviteMember: (email: string) => void;
@@ -16,13 +17,13 @@ const InviteMember: React.FC<InviteMemberProps> = ({ onInviteMember }) => {
   };
 
   return (
-    <div className="card">
+    <div className="invite-member-card card">
       <header className="card-header">
         <p className="card-header-title">Invite New Member</p>
       </header>
       <div className="card-content">
-        <form onSubmit={handleSubmit}>
-          <div className="field has-addons">
+        <form onSubmit={handleSubmit} className="invite-form">
+          <div className="field is-grouped">
             <div className="control is-expanded">
               <input
                 className="input"
@@ -31,11 +32,19 @@ const InviteMember: React.FC<InviteMemberProps> = ({ onInviteMember }) => {
                 value={email}
                 onChange={e => setEmail(e.target.value)}
                 required
+                aria-label="Email address"
               />
             </div>
-            <div className="control">
-              <button className="button is-primary" type="submit">
-                Send Invitation
+            <div className="control send-button-container">
+              <button 
+                className="button is-primary" 
+                type="submit"
+                aria-label="Send invitation"
+              >
+                <span className="icon">
+                  <i className="fas fa-paper-plane"></i>
+                </span>
+                <span className="button-text">Send</span>
               </button>
             </div>
           </div>

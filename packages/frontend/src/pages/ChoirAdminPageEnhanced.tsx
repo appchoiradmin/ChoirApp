@@ -14,7 +14,7 @@ import { UserRole } from '../constants/roles';
 import MembersListEnhanced from '../components/admin/MembersListEnhanced';
 import InviteMemberEnhanced from '../components/admin/InviteMemberEnhanced';
 import ChoirSongsList from '../components/admin/ChoirSongsList';
-import SentInvitationsList from '../components/admin/SentInvitationsList';
+import InvitationsAccordion from '../components/admin/InvitationsAccordion';
 import { Button, LoadingSpinner } from '../components/ui';
 import Layout from '../components/ui/Layout';
 import toast from 'react-hot-toast';
@@ -34,6 +34,8 @@ const ChoirAdminPageEnhanced: React.FC = () => {
   const navigate = useNavigate();
   const [choir, setChoir] = useState<ChoirDetails | null>(null);
   const [invitations, setInvitations] = useState<Invitation[]>([]);
+  const pendingInvitations = invitations.filter(inv => inv.status === 'Pending');
+  const sentInvitations = invitations.filter(inv => inv.status !== 'Pending');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [inviteLoading, setInviteLoading] = useState(false);
@@ -281,15 +283,18 @@ const ChoirAdminPageEnhanced: React.FC = () => {
                 isLoading={inviteLoading}
               />
               
-              {invitations.length > 0 && (
+              {(pendingInvitations.length > 0 || sentInvitations.length > 0) && (
                 <div className="section-spacer">
                   <div className="section-header">
-                    <h3 className="section-title">Pending Invitations</h3>
+                    <h3 className="section-title">Invitations</h3>
                     <p className="section-subtitle">
-                      Invitations waiting for response
+                      Manage choir invitations
                     </p>
                   </div>
-                  <SentInvitationsList invitations={invitations} />
+                  <InvitationsAccordion 
+                    pendingInvitations={pendingInvitations} 
+                    sentInvitations={sentInvitations} 
+                  />
                 </div>
               )}
 

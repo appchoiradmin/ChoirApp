@@ -12,14 +12,15 @@ import { ChoirDetails, ChoirRole } from '../types/choir';
 import { Invitation } from '../types/invitation';
 import MembersList from '../components/admin/MembersList';
 import InviteMember from '../components/admin/InviteMember';
-import ChoirSongsList from '../components/admin/ChoirSongsList';
-import SentInvitationsList from '../components/admin/SentInvitationsList';
+import InvitationsAccordion from '../components/admin/InvitationsAccordion';
 
 const ChoirAdminPage: React.FC = () => {
   const { choirId } = useParams<{ choirId: string }>();
   const { token, setChoirId } = useUser();
   const [choir, setChoir] = useState<ChoirDetails | null>(null);
   const [invitations, setInvitations] = useState<Invitation[]>([]);
+  const pendingInvitations = invitations.filter(inv => inv.status === 'Pending');
+  const sentInvitations = invitations.filter(inv => inv.status !== 'Pending');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -143,8 +144,11 @@ const ChoirAdminPage: React.FC = () => {
       </div>
     </section>
     <section className="box mb-4">
-      <h2 className="title is-5 mb-3">Pending Invitations</h2>
-      <SentInvitationsList invitations={invitations || []} />
+      <h2 className="title is-5 mb-3">Invitations</h2>
+      <InvitationsAccordion 
+        pendingInvitations={pendingInvitations} 
+        sentInvitations={sentInvitations} 
+      />
     </section>
   </div>
   <div className="column is-12-mobile is-5-tablet">

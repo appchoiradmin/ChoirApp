@@ -1,0 +1,115 @@
+.invitations-accordion {
+  margin-bottom: 1.5rem;
+  
+  .accordion-section {
+    margin-bottom: 0.75rem;
+    border: 1px solid #dbdbdb;
+    border-radius: 4px;
+    overflow: hidden;
+    
+    &:last-child {
+      margin-bottom: 0;
+    }
+  }
+  
+  .accordion-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem 1rem;
+    background-color: #f5f5f5;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+    
+    &:hover {
+      background-color: #eeeeee;
+    }
+    
+    &.is-active {
+      background-color: #eef6fc;
+      border-bottom: 1px solid #dbdbdb;
+    }
+    
+    .accordion-title {
+      font-size: 1rem;
+      font-weight: 600;
+      margin: 0;
+      display: flex;
+      align-items: center;
+    }
+  }
+  
+  .accordion-content {
+    padding: 0;
+  }
+  
+  .invitation-email-group {
+    border-bottom: 1px solid #eeeeee;
+    
+    &:last-child {
+      border-bottom: none;
+    }
+  }
+  
+  .invitation-email-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem 1rem;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+    
+    &:hover {
+      background-color: #f9f9f9;
+    }
+  }
+  
+  .invitation-email-info {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+  
+  .invitation-email {
+    color: #3273dc;
+    word-break: break-all;
+  }
+  
+  .invitation-details {
+    padding: 0.5rem 1rem 0.75rem 1.5rem;
+    background-color: #fafafa;
+    border-top: 1px solid #eeeeee;
+  }
+  
+  .invitation-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.5rem 0;
+    font-size: 0.9rem;
+    
+    &:not(:last-child) {
+      border-bottom: 1px dashed #eeeeee;
+    }
+  }
+  
+  .invitation-date {
+    color: #666;
+  }
+  
+  // Mobile-first responsive adjustments
+  @media screen and (max-width: 768px) {
+    .invitation-email-info {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 0.25rem;
+    }
+    
+    .invitation-item {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 0.25rem;
+    }
+  }
+}

@@ -1,0 +1,91 @@
+.invite-member-card {
+  .card-header {
+    background-color: #f8f9fa;
+    
+    .card-header-title {
+      font-size: 1.1rem;
+      padding: 0.75rem 1rem;
+    }
+  }
+  
+  .invite-form {
+    .field.is-grouped {
+      align-items: center;
+      
+      // Mobile-first: Stack on very small screens
+      @media screen and (max-width: 480px) {
+        flex-direction: column;
+        
+        .control {
+          width: 100%;
+          margin-right: 0;
+        }
+        
+        .send-button-container {
+          margin-top: 0.5rem;
+          
+          .button {
+            width: 100%;
+          }
+        }
+      }
+      
+      // Tablet and above: Side-by-side with appropriate proportions
+      @media screen and (min-width: 481px) {
+        .control.is-expanded {
+          flex-grow: 4; // Give more space to the input
+        }
+        
+        .send-button-container {
+          flex-grow: 1;
+          max-width: 100px; // Limit button width
+        }
+      }
+    }
+    
+    .input {
+      height: 2.5rem;
+      font-size: 1rem;
+      
+      &::placeholder {
+        color: #aaa;
+        font-size: 0.95rem;
+      }
+    }
+    
+    .button {
+      height: 2.5rem;
+      padding: 0 1rem;
+      justify-content: center;
+      text-align: center;
+      display: flex;
+      align-items: center;
+      position: relative;
+      
+      .icon {
+        position: absolute;
+        left: 0.75rem;
+        margin-right: 0;
+      }
+      
+      .button-text {
+        width: 100%;
+        text-align: center;
+        margin: 0 auto;
+      }
+      
+      // Hide text on smaller screens to make button more compact
+      @media screen and (max-width: 768px) and (min-width: 481px) {
+        padding: 0 0.75rem;
+        
+        .button-text {
+          display: none;
+        }
+        
+        .icon {
+          margin-right: 0;
+        }
+      }
+    }
+  }
+}
