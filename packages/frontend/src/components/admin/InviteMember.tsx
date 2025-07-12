@@ -37,14 +37,11 @@ const InviteMember: React.FC<InviteMemberProps> = ({ onInviteMember }) => {
             </div>
             <div className="control send-button-container">
               <button 
-                className="button is-primary" 
+                className="button is-primary send-button" 
                 type="submit"
                 aria-label="Send invitation"
               >
-                <span className="icon">
-                  <i className="fas fa-paper-plane"></i>
-                </span>
-                <span className="button-text">Send</span>
+                Send
               </button>
             </div>
           </div>
