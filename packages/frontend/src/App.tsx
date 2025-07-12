@@ -8,6 +8,7 @@ import DashboardPage from './pages/DashboardPage.tsx';
 import AuthCallbackPage from './pages/AuthCallbackPage.tsx';
 import AuthErrorPage from './pages/AuthErrorPage.tsx';
 import MasterSongsListPage from './pages/MasterSongsListPage.tsx';
+import GeneralMasterSongsListWrapper from './components/GeneralMasterSongsListWrapper';
 import CreateMasterSongPage from './pages/CreateMasterSongPage.tsx';
 import MasterSongDetailPage from './pages/MasterSongDetailPage.tsx';
 import MasterSongListWrapper from './components/MasterSongListWrapper.tsx';
@@ -56,7 +57,7 @@ function App() {
       <Route path="/dashboard" element={<DashboardPage />} />
       <Route path="/auth/callback" element={<AuthCallbackPage />} />
       <Route path="/auth/error" element={<AuthErrorPage />} />
-      <Route path="/master-songs" element={<MasterSongsListPage />} />
+      <Route path="/master-songs" element={<GeneralMasterSongsListWrapper />} />
       <Route path="/master-songs/create" element={<CreateMasterSongPage />} />
       <Route path="/master-songs/:id" element={<MasterSongDetailPage />} />
       <Route path="/choir/:choirId" element={<ChoirDashboardPage />}>

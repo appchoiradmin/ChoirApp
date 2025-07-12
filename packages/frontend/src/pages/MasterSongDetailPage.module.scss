@@ -51,6 +51,44 @@
   gap: 1rem;
   align-items: center;
   margin-bottom: 1.5rem;
+  
+  @media (max-width: 600px) {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.75rem;
+  }
+  
+  .button {
+    border-radius: 0.5rem;
+    padding: 0.5rem 1rem;
+    font-weight: 600;
+    transition: all 0.2s ease;
+    
+    &:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+    
+    @media (max-width: 600px) {
+      width: 100%;
+      justify-content: center;
+    }
+  }
+}
+
+.label {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  font-weight: 500;
+  
+  @media (max-width: 600px) {
+    width: 100%;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.25rem;
+  }
 }
 
 .song-select-choir {
@@ -60,6 +98,17 @@
   padding: 0.4rem 0.75rem;
   font-size: 1rem;
   margin-left: 0.5rem;
+  
+  @media (max-width: 600px) {
+    margin-left: 0;
+    width: 100%;
+  }
+  
+  &:focus {
+    border-color: $primary;
+    outline: none;
+    box-shadow: 0 0 0 2px rgba($primary, 0.2);
+  }
 }
 
 .song-content {

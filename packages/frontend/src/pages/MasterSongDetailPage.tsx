@@ -113,22 +113,25 @@ const MasterSongDetailPage: React.FC = () => {
     return <div>Song not found.</div>;
   }
 
-  const canManageVersions = user && user.choirs && user.choirs.length > 0;
+  // Check if user is a general user (no choir ID) or has choirs
+  const isGeneralUser = !user?.choirId;
+  const canManageVersions = user && user.choirs && user.choirs.length > 0 && !isGeneralUser;
 
   return (
     <section className={styles['song-detail-section']}>
       <div className={styles['song-detail-container']}>
         <div className={styles['song-actions']}>
-          <button className={styles.button} onClick={() => navigate(-1)}>
+          <button className={`${styles.button} button is-secondary`} onClick={() => navigate(-1)}>
             Go Back
           </button>
           {canManageVersions && user.choirs.length > 1 && (
-            <label className={styles.label} style={{ marginLeft: 12 }}>
-              For Choir:
+            <label className={styles.label}>
+              <span>For Choir:</span>
               <select
                 className={styles['song-select-choir']}
                 value={selectedChoirId || ''}
                 onChange={(e) => setSelectedChoirId(e.target.value)}
+                aria-label="Select choir"
               >
                 {user.choirs.map((choir) => (
                   <option key={choir.id} value={choir.id}>
