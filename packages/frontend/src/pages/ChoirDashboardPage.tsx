@@ -10,9 +10,9 @@ import { ChoirDetails } from '../types/choir';
 import { 
   MusicalNoteIcon, 
   QueueListIcon, 
-  Cog6ToothIcon,
-  BuildingLibraryIcon 
+  Cog6ToothIcon 
 } from '@heroicons/react/24/outline';
+
 import styles from './ChoirDashboardPage.module.scss';
 
 // Create a shared date context
@@ -57,11 +57,10 @@ const ChoirDashboardPage: React.FC = () => {
   const tabs = [
     { name: 'Songs', path: `/choir/${choirId}/songs`, icon: <MusicalNoteIcon /> },
     { name: 'Playlists', path: `/choir/${choirId}/playlists`, icon: <QueueListIcon /> },
-    { name: 'Dashboard', path: '/dashboard', icon: <BuildingLibraryIcon /> }, // Add way back to main dashboard
   ];
 
   if (isAdmin) {
-    tabs.splice(2, 0, { name: 'Admin', path: `/choir/${choirId}/admin`, icon: <Cog6ToothIcon /> }); // Insert Admin before Dashboard
+    tabs.splice(2, 0, { name: 'Admin', path: `/choir/${choirId}/admin`, icon: <Cog6ToothIcon /> }); // Insert Admin as the last tab
   }
 
   return (
