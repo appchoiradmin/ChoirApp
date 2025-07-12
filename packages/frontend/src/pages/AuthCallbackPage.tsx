@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
+import { useUser } from '../hooks/useUser';
 import { motion } from 'framer-motion';
 import { MusicalNoteIcon, CheckIcon, ExclamationTriangleIcon } from '@heroicons/react/24/outline';
 import { Layout } from '../components/ui';
@@ -7,64 +8,45 @@ import { Layout } from '../components/ui';
 const AuthCallbackPage: React.FC = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
+  const { setToken, user, loading } = useUser();
   const [status, setStatus] = useState<'loading' | 'success' | 'error'>('loading');
   const [message, setMessage] = useState('Authenticating...');
 
   useEffect(() => {
-    console.log("AuthCallbackPage loaded. Checking for token...");
     const token = searchParams.get('token');
     const error = searchParams.get('error');
-    const isNewUser = searchParams.get('isNewUser') === 'true';
-    
-    // Check for errors first
+
     if (error) {
-      console.error('Authentication error:', error);
       setStatus('error');
       setMessage(error);
-      setTimeout(() => {
-        navigate(`/auth/error?message=${encodeURIComponent(error)}`);
-      }, 2000);
+      setTimeout(() => navigate(`/auth/error?message=${encodeURIComponent(error)}`), 2000);
       return;
     }
 
-    console.log("Token from URL:", token ? "Token received" : "No token");
-    console.log("Is new user:", isNewUser);
-
     if (token && token.trim().length > 0) {
-      try {
-        console.log("Token found. Storing in localStorage...");
-        localStorage.setItem('authToken', token);
-        
-        setStatus('success');
-        setMessage(isNewUser ? 'Welcome! Setting up your account...' : 'Welcome back! Redirecting...');
-        
-        // Redirect based on whether user is new or returning
-        setTimeout(() => {
-          if (isNewUser) {
-            console.log("New user detected. Redirecting to onboarding...");
-            navigate('/onboarding', { replace: true });
-          } else {
-            console.log("Returning user. Redirecting to dashboard...");
-            navigate('/dashboard', { replace: true });
-          }
-        }, 1500);
-      } catch (error) {
-        console.error('Error storing token:', error);
-        setStatus('error');
-        setMessage('Failed to store authentication token');
-        setTimeout(() => {
-          navigate('/auth/error?message=Failed+to+store+authentication+token');
-        }, 2000);
-      }
+      setToken(token);
     } else {
-      console.error('Authentication failed: No token received in URL.');
       setStatus('error');
       setMessage('No authentication token received');
-      setTimeout(() => {
-        navigate('/auth/error?message=No+authentication+token+received');
-      }, 2000);
+      setTimeout(() => navigate('/auth/error?message=No+authentication+token+received'), 2000);
     }
-  }, [searchParams, navigate]);
+  }, [searchParams, navigate, setToken]);
+
+  useEffect(() => {
+    if (!loading && user) {
+      setStatus('success');
+      const isNewUser = searchParams.get('isNewUser') === 'true';
+      setMessage(isNewUser ? 'Welcome! Setting up your account...' : 'Welcome back! Redirecting...');
+      
+      setTimeout(() => {
+        if (isNewUser) {
+          navigate('/onboarding', { replace: true });
+        } else {
+          navigate('/dashboard', { replace: true });
+        }
+      }, 1500);
+    }
+  }, [user, loading, navigate, searchParams]);
 
   const renderStatusIcon = () => {
     switch (status) {

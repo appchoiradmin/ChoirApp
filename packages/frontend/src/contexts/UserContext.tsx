@@ -7,31 +7,37 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({
   children,
 }) => {
   const [user, setUser] = useState<User | null>(null);
-  const [token, setToken] = useState<string | null>(null);
+  const [token, _setToken] = useState<string | null>(() => localStorage.getItem('authToken'));
   const [loading, setLoading] = useState(true);
 
+  const setToken = (newToken: string | null) => {
+    _setToken(newToken);
+    if (newToken) {
+      localStorage.setItem('authToken', newToken);
+    } else {
+      localStorage.removeItem('authToken');
+    }
+  };
+
   const fetchUser = useCallback(async () => {
+    if (!token) {
+      setUser(null);
+      setLoading(false);
+      return;
+    }
+
     setLoading(true);
     try {
-      const storedToken = localStorage.getItem('authToken');
-      if (!storedToken) {
-        setUser(null);
-        setToken(null);
-        return;
-      }
-
-      setToken(storedToken);
-      const userData = await getCurrentUser(storedToken);
+      const userData = await getCurrentUser(token);
       setUser(userData);
     } catch (error) {
       console.error('Failed to fetch user', error);
       setUser(null);
-      setToken(null);
-      localStorage.removeItem('authToken');
+      setToken(null); // This will also clear localStorage
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [token]);
 
   const setChoirId = useCallback((choirId: string) => {
     setUser(prevUser => {
@@ -46,8 +52,13 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({
     fetchUser();
   }, [fetchUser]);
 
+  const signOut = useCallback(() => {
+    setUser(null);
+    setToken(null); // This will now clear state and localStorage
+  }, []);
+
   return (
-    <UserContext.Provider value={{ user, token, loading, refetchUser: fetchUser, setChoirId }}>
+    <UserContext.Provider value={{ user, token, setToken, loading, refetchUser: fetchUser, setChoirId, signOut }}>
       {children}
     </UserContext.Provider>
   );

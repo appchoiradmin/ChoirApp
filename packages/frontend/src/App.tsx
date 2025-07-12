@@ -1,4 +1,6 @@
-import { Routes, Route } from 'react-router-dom';
+import { useEffect } from 'react';
+import { Routes, Route, useNavigate, useLocation } from 'react-router-dom';
+import { useUser } from './hooks/useUser';
 import HomePage from './pages/HomePage.tsx';
 import OnboardingPage from './pages/OnboardingPage.tsx';
 import CreateChoirPage from './pages/CreateChoirPage.tsx';
@@ -21,7 +23,31 @@ import PlaylistTemplateDetailPage from './pages/PlaylistTemplateDetailPage.tsx';
 import EditPlaylistTemplatePage from './pages/EditPlaylistTemplatePage.tsx';
 import ChoirDashboardPage from './pages/ChoirDashboardPage.tsx';
 
+const PUBLIC_ROUTES = ['/', '/auth/callback', '/auth/error'];
+
 function App() {
+  const { user, loading } = useUser();
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  useEffect(() => {
+    if (loading) return;
+
+    const isPublicRoute = PUBLIC_ROUTES.includes(location.pathname);
+
+    if (!user && !isPublicRoute) {
+      // If user is not logged in and on a private route, redirect to home
+      navigate('/');
+    } else if (user && location.pathname === '/') {
+      // If user is logged in and on the homepage, redirect to dashboard
+      navigate('/dashboard');
+    }
+  }, [user, loading, navigate, location.pathname]);
+
+  if (loading) {
+    return <div>Loading...</div>; // Or a proper spinner component
+  }
+
   return (
     <Routes>
       <Route path="/" element={<HomePage />} />

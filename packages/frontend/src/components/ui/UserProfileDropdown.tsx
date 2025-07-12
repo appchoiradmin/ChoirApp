@@ -15,15 +15,22 @@ interface UserProfileDropdownProps {
 }
 
 const UserProfileDropdown: React.FC<UserProfileDropdownProps> = ({ className = '' }) => {
-  const { user, token } = useUser();
+  const { user, token, signOut } = useUser();
   const navigate = useNavigate();
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const portalRef = useRef<HTMLDivElement>(null);
 
   // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+      const target = event.target as Node;
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(target) &&
+        portalRef.current &&
+        !portalRef.current.contains(target)
+      ) {
         setIsOpen(false);
       }
     };
@@ -32,11 +39,10 @@ const UserProfileDropdown: React.FC<UserProfileDropdownProps> = ({ className = '
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
-  }, []);
+  }, [isOpen]); // Re-run when dropdown opens/closes
 
   const handleSignOut = () => {
-    localStorage.removeItem('authToken');
-    navigate('/');
+    signOut();
     setIsOpen(false);
   };
 
@@ -89,6 +95,7 @@ const UserProfileDropdown: React.FC<UserProfileDropdownProps> = ({ className = '
 
       {isOpen && createPortal(
         <div 
+          ref={portalRef}
           style={{
             position: 'fixed',
             top: '60px',
