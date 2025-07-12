@@ -1,4 +1,5 @@
 using ChoirApp.Application.Contracts;
+using ChoirApp.Domain.Entities;
 using FastEndpoints;
 using System;
 using System.Linq;
@@ -22,7 +23,7 @@ namespace ChoirApp.Backend.Endpoints.Playlist
             Verbs("DELETE");
             Routes("/playlist-templates/{Id}");
             AuthSchemes("Bearer");
-            Roles("ChoirAdmin", "SuperAdmin");
+            Roles(nameof(UserRole.ChoirAdmin));
         }
 
         public override async Task HandleAsync(DeletePlaylistTemplateRequest req, CancellationToken ct)

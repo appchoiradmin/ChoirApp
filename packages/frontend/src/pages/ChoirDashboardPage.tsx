@@ -7,6 +7,7 @@ import { useUser } from '../hooks/useUser';
 import { getChoirDetails } from '../services/choirService';
 import { getNextSunday } from '../utils/getNextSunday';
 import { ChoirDetails } from '../types/choir';
+import { UserRole } from '../constants/roles';
 import { 
   MusicalNoteIcon, 
   QueueListIcon, 
@@ -33,7 +34,7 @@ const ChoirDashboardPage: React.FC = () => {
   const { user, token } = useUser();
   const navigate = useNavigate();
 
-  const isAdmin = user?.choirs.some(c => c.id === choirId && c.role === 'Admin');
+    const isAdmin = user?.choirs.some(c => c.id === choirId && c.role === UserRole.ChoirAdmin);
 
   // Fetch choir details for navigation title
   useEffect(() => {

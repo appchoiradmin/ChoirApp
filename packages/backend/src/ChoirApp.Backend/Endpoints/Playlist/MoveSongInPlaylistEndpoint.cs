@@ -1,4 +1,5 @@
 using ChoirApp.Application.Contracts;
+using ChoirApp.Domain.Entities;
 using FastEndpoints;
 using System.Linq;
 using System.Security.Claims;
@@ -26,7 +27,7 @@ namespace ChoirApp.Backend.Endpoints.Playlist
         {
             Post("/playlists/{playlistId}/songs/{songId}/move");
             AuthSchemes("Bearer");
-            Roles("ChoirAdmin", "SuperAdmin");
+            Roles(nameof(UserRole.ChoirAdmin));
         }
 
         public override async Task HandleAsync(MoveSongInPlaylistRequest req, CancellationToken ct)

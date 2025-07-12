@@ -48,7 +48,7 @@ namespace ChoirApp.Infrastructure.Services
                 case UserRole.ChoirAdmin:
                     user.PromoteToAdmin();
                     break;
-                case UserRole.General:
+                case UserRole.GeneralUser:
                     user.DemoteToGeneral();
                     break;
             }
@@ -73,7 +73,7 @@ namespace ChoirApp.Infrastructure.Services
                 .Include(u => u.UserChoirs)
                     .ThenInclude(uc => uc.Choir)
                 .FirstOrDefaultAsync(u => u.UserId == userId);
-            
+
             if (user == null)
             {
                 return Result.Fail("User not found.");

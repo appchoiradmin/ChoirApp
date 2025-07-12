@@ -1,5 +1,6 @@
 using ChoirApp.Application.Contracts;
 using ChoirApp.Application.Dtos;
+using ChoirApp.Domain.Entities;
 using FastEndpoints;
 using System;
 using System.Threading;
@@ -19,7 +20,8 @@ namespace ChoirApp.Backend.Endpoints.Songs
         public override void Configure()
         {
             Get("/choirs/{ChoirId}/songs/{SongId}");
-            Roles("ChoirAdmin", "ChoirMember");
+            AuthSchemes("Bearer");
+            Roles(nameof(UserRole.ChoirAdmin), nameof(UserRole.ChoirMember));
         }
 
         public override async Task HandleAsync(GetChoirSongVersionByIdRequest req, CancellationToken ct)

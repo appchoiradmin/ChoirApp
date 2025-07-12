@@ -1,4 +1,5 @@
 using ChoirApp.Application.Contracts;
+using ChoirApp.Domain.Entities;
 using FastEndpoints;
 using System;
 using System.Threading;
@@ -20,7 +21,7 @@ namespace ChoirApp.Backend.Endpoints.Songs
             Verbs("DELETE");
             Routes("/master-songs/{SongId}/tags/{TagId}");
             AuthSchemes("Bearer");
-            Roles("ChoirAdmin", "SuperAdmin");
+            Roles(nameof(UserRole.ChoirAdmin));
         }
 
         public override async Task HandleAsync(RemoveTagFromSongRequest req, CancellationToken ct)

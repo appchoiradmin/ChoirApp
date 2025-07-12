@@ -2,6 +2,7 @@ using ChoirApp.Application.Contracts;
 using ChoirApp.Application.Dtos;
 using FastEndpoints;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using ChoirApp.Domain.Entities;
 using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
 
@@ -21,7 +22,7 @@ public class GetCurrentUserEndpoint : EndpointWithoutRequest<UserDto>
         Verbs("GET", "OPTIONS");
         Routes("/me");
         AuthSchemes(JwtBearerDefaults.AuthenticationScheme);
-        Roles("General", "ChoirAdmin", "SuperAdmin");
+        Roles(nameof(UserRole.GeneralUser), nameof(UserRole.ChoirAdmin), nameof(UserRole.ChoirMember));
     }
 
     public override async Task HandleAsync(CancellationToken ct)
@@ -59,7 +60,7 @@ public class GetCurrentUserEndpoint : EndpointWithoutRequest<UserDto>
                 {
                     Id = uc.Choir!.ChoirId,
                     Name = uc.Choir.ChoirName,
-                    Role = uc.IsAdmin ? "Admin" : "Member"
+                    Role = uc.IsAdmin ? nameof(UserRole.ChoirAdmin) : nameof(UserRole.ChoirMember)
                 }).ToList()
         };
 

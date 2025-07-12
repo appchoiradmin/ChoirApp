@@ -1,4 +1,5 @@
 using ChoirApp.Application.Contracts;
+using ChoirApp.Domain.Entities;
 using FastEndpoints;
 using System.Threading;
 using System.Threading.Tasks;
@@ -31,7 +32,7 @@ namespace ChoirApp.Backend.Endpoints.Songs
             Verbs("GET");
             Routes("/master-songs/count");
             AuthSchemes("Bearer");
-            Roles("ChoirAdmin", "SuperAdmin", "ChoirMember", "GeneralUser");
+            Roles(nameof(UserRole.ChoirAdmin), nameof(UserRole.ChoirMember), nameof(UserRole.GeneralUser));
         }
 
         public override async Task HandleAsync(CountMasterSongsRequest req, CancellationToken ct)

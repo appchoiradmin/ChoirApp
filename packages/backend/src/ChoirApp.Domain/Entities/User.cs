@@ -8,9 +8,9 @@ namespace ChoirApp.Domain.Entities;
 
 public enum UserRole
 {
-    General,
+    GeneralUser,
     ChoirAdmin,
-    SuperAdmin
+    ChoirMember
 }
 
 [Table("Users")]
@@ -63,7 +63,7 @@ public class User
         GoogleId = googleId;
         Name = name;
         Email = email;
-        Role = UserRole.General; // Default role
+        Role = UserRole.GeneralUser; // Default role
         HasCompletedOnboarding = false; // New users haven't completed onboarding
         CreatedAt = DateTime.UtcNow;
     }
@@ -91,14 +91,20 @@ public class User
     
     public void PromoteToAdmin()
     {
-        if(Role == UserRole.General)
+        if(Role == UserRole.GeneralUser)
             Role = UserRole.ChoirAdmin;
+    }
+
+    public void DemoteToMember()
+    {
+        if (Role == UserRole.ChoirAdmin)
+            Role = UserRole.ChoirMember;
     }
 
     public void DemoteToGeneral()
     {
         if(Role == UserRole.ChoirAdmin)
-            Role = UserRole.General;
+            Role = UserRole.GeneralUser;
     }
 
     public void CompleteOnboarding()

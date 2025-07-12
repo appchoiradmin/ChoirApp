@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { ChoirMember, ChoirRole } from '../../types/choir';
+import { UserRole } from '../../constants/roles';
 import { Card, Button } from '../ui';
 import {
   UserIcon,
@@ -37,10 +38,10 @@ const MemberCard: React.FC<MemberCardProps> = ({
 }) => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   
-  const isAdmin = member.role === 'Admin' || member.role === 'ChoirAdmin';
+    const isAdmin = member.role === UserRole.ChoirAdmin;
   
   const handleRoleToggle = () => {
-    const newRole = isAdmin ? 'Member' : 'Admin';
+        const newRole = isAdmin ? UserRole.ChoirMember : UserRole.ChoirAdmin;
     onUpdateRole(newRole);
     setDropdownOpen(false);
   };
@@ -186,7 +187,7 @@ const MembersList: React.FC<MembersListProps> = ({
     setExpandedMember(expandedMember === memberId ? null : memberId);
   };
 
-  const adminCount = members.filter(m => m.role === 'Admin' || m.role === 'ChoirAdmin').length;
+    const adminCount = members.filter(m => m.role === UserRole.ChoirAdmin).length;
   const memberCount = members.length - adminCount;
 
   if (members.length === 0) {

@@ -1,5 +1,6 @@
 using ChoirApp.Application.Contracts;
 using ChoirApp.Application.Dtos;
+using ChoirApp.Domain.Entities;
 using FastEndpoints;
 using System;
 using System.Threading;
@@ -21,7 +22,7 @@ namespace ChoirApp.Backend.Endpoints.Songs
             Verbs("GET");
             Routes("/master-songs/{Id}");
             AuthSchemes("Bearer");
-            Roles("ChoirAdmin", "SuperAdmin", "ChoirMember", "GeneralUser");
+            Roles(nameof(UserRole.ChoirAdmin), nameof(UserRole.ChoirMember), nameof(UserRole.GeneralUser));
         }
 
         public override async Task HandleAsync(GetMasterSongByIdRequest req, CancellationToken ct)

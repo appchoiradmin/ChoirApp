@@ -10,6 +10,7 @@ import { getInvitationsByChoir } from '../services/invitationService';
 import { useUser } from '../hooks/useUser';
 import { ChoirDetails, ChoirRole } from '../types/choir';
 import { Invitation } from '../types/invitation';
+import { UserRole } from '../constants/roles';
 import MembersListEnhanced from '../components/admin/MembersListEnhanced';
 import InviteMemberEnhanced from '../components/admin/InviteMemberEnhanced';
 import ChoirSongsList from '../components/admin/ChoirSongsList';
@@ -148,7 +149,7 @@ const ChoirAdminPageEnhanced: React.FC = () => {
 
   const stats = {
     totalMembers: choir.members.length,
-    admins: choir.members.filter(m => m.role === 'Admin' || m.role === 'ChoirAdmin').length,
+        admins: choir.members.filter(m => m.role === UserRole.ChoirAdmin).length,
     pendingInvitations: invitations.length,
     songs: 0 // This would come from ChoirSongsList component
   };

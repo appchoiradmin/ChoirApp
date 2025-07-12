@@ -1,4 +1,5 @@
 using ChoirApp.Application.Contracts;
+using ChoirApp.Domain.Entities;
 using ChoirApp.Application.Dtos;
 using FastEndpoints;
 using System;
@@ -18,7 +19,8 @@ namespace ChoirApp.Backend.Endpoints.Choir
         public override void Configure()
         {
             Get("/choirs/{ChoirId}");
-            AllowAnonymous(); // Or specify roles if choir info should be protected
+            AuthSchemes("Bearer");
+            Roles(nameof(UserRole.GeneralUser), nameof(UserRole.ChoirMember), nameof(UserRole.ChoirAdmin));
         }
 
         public override async Task HandleAsync(GetChoirRequest req, CancellationToken ct)
@@ -42,7 +44,7 @@ namespace ChoirApp.Backend.Endpoints.Choir
                     Id = uc.UserId,
                     Name = uc.User!.Name,
                     Email = uc.User!.Email,
-                    Role = uc.IsAdmin ? "Admin" : "Member"
+                    Role = uc.IsAdmin ? nameof(UserRole.ChoirAdmin) : nameof(UserRole.ChoirMember)
                 }).ToList()
             };
 

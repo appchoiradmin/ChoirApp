@@ -1,6 +1,8 @@
 import type { Choir } from './choir';
 
-export type UserRole = 'General' | 'ChoirAdmin' | 'SuperAdmin';
+import { UserRole as AppUserRole } from '../constants/roles';
+
+export type UserRole = AppUserRole;
 
 export interface User {
   id: string;

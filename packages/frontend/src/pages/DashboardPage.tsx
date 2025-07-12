@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { useUser } from '../hooks/useUser';
 import { getInvitations, acceptInvitation, rejectInvitation } from '../services/invitationService';
 import { Invitation } from '../types/invitation';
+import { UserRole } from '../constants/roles';
 import InvitationsList from '../components/InvitationsList';
 import { Card, Button, LoadingSpinner, Layout, Navigation } from '../components/ui';
 import { 
@@ -79,8 +80,8 @@ const DashboardPage: React.FC = () => {
   }
 
   const { name, email, choirs } = user;
-  const adminOfChoirs = choirs.filter(c => c.role === 'Admin');
-  const memberOfChoirs = choirs.filter(c => c.role === 'Member');
+  const adminOfChoirs = choirs.filter(c => c.role === UserRole.ChoirAdmin);
+  const memberOfChoirs = choirs.filter(c => c.role === UserRole.ChoirMember);
   const totalChoirs = choirs.length;
   const pendingInvitations = invitations.length;
 

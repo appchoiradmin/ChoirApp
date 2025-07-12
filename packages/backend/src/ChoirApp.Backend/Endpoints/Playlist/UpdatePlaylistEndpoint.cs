@@ -1,4 +1,5 @@
 using ChoirApp.Application.Contracts;
+using ChoirApp.Domain.Entities;
 using ChoirApp.Application.Dtos;
 using FastEndpoints;
 using System;
@@ -23,7 +24,7 @@ namespace ChoirApp.Backend.Endpoints.Playlist
             Verbs("PUT", "OPTIONS");
             Routes("/playlists/{Id}");
             AuthSchemes("Bearer");
-            Roles("ChoirAdmin", "SuperAdmin");
+            Roles(nameof(UserRole.ChoirAdmin));
         }
 
         public override async Task HandleAsync(UpdatePlaylistRequest req, CancellationToken ct)

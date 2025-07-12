@@ -1,4 +1,5 @@
 using ChoirApp.Application.Contracts;
+using ChoirApp.Domain.Entities;
 using FastEndpoints;
 using System.Security.Claims;
 
@@ -17,7 +18,7 @@ namespace ChoirApp.Backend.Endpoints.Playlist
         {
             Delete("/playlists/{playlistId}/songs/{songId}");
             AuthSchemes("Bearer");
-            Roles("ChoirAdmin", "SuperAdmin", "ChoirMember");
+            Roles(nameof(UserRole.ChoirAdmin), nameof(UserRole.ChoirMember));
         }
 
         public override async Task HandleAsync(CancellationToken ct)

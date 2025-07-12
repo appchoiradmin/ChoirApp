@@ -1,4 +1,5 @@
 using ChoirApp.Application.Contracts;
+using ChoirApp.Domain.Entities;
 using ChoirApp.Application.Dtos;
 using FastEndpoints;
 using System.Threading;
@@ -20,7 +21,7 @@ namespace ChoirApp.Backend.Endpoints.Songs
             Verbs("POST");
             Routes("/master-songs/{SongId}/tags");
             AuthSchemes("Bearer");
-            Roles("ChoirAdmin", "SuperAdmin");
+            Roles(nameof(UserRole.ChoirAdmin));
         }
 
         public override async Task HandleAsync(AddTagToSongRequest req, CancellationToken ct)

@@ -1,4 +1,5 @@
 using ChoirApp.Application.Contracts;
+using ChoirApp.Domain.Entities;
 using ChoirApp.Application.Dtos;
 using FastEndpoints;
 using System;
@@ -23,7 +24,7 @@ namespace ChoirApp.Backend.Endpoints.Choir
             Verbs("PUT", "OPTIONS");
             Routes("/choirs/{choirId}/members/{memberId}/role");
             AuthSchemes("Bearer");
-            Roles("ChoirAdmin", "SuperAdmin");
+            Roles(nameof(UserRole.ChoirAdmin));
         }
 
         public override async Task HandleAsync(UpdateMemberRoleRequest req, CancellationToken ct)

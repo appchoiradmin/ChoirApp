@@ -23,7 +23,7 @@ namespace ChoirApp.Backend.Endpoints.Playlist
             Verbs("POST", "OPTIONS");
             Routes("/playlists");
             AuthSchemes("Bearer");
-            Roles("ChoirAdmin", "SuperAdmin");
+            Roles(nameof(UserRole.ChoirAdmin));
         }
 
         public override async Task HandleAsync(CreatePlaylistDto req, CancellationToken ct)

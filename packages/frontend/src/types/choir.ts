@@ -1,6 +1,8 @@
+import { UserRole } from '../constants/roles';
+import type { User } from './user';
 import type { MasterSongDto } from './song';
 
-export type ChoirRole = 'Admin' | 'Member' | 'ChoirAdmin';
+export type ChoirRole = typeof UserRole.ChoirAdmin | typeof UserRole.ChoirMember;
 
 export interface Choir {
   id: string;

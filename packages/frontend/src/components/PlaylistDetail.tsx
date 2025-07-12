@@ -5,6 +5,7 @@ import { MasterSongDto } from '../types/song';
 import { getMasterSongById } from '../services/masterSongService';
 import { deletePlaylist } from '../services/playlistService';
 import { useUser } from '../hooks/useUser';
+import { UserRole } from '../constants/roles';
 
 interface PlaylistDetailProps {
   playlist: Playlist;
@@ -16,7 +17,7 @@ const PlaylistDetail: React.FC<PlaylistDetailProps> = ({ playlist, onPlaylistDel
   const [songDetails, setSongDetails] = useState<Record<string, MasterSongDto>>({});
   const { user, token } = useUser();
 
-  const isAdmin = user?.choirs.some(c => c.id === choirId && c.role === 'Admin');
+    const isAdmin = user?.choirs.some(c => c.id === choirId && c.role === UserRole.ChoirAdmin);
 
   const handleDelete = async () => {
     if (token) {

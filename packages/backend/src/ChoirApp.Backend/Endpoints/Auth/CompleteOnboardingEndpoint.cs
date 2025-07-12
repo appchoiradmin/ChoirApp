@@ -2,6 +2,7 @@ using ChoirApp.Application.Contracts;
 using ChoirApp.Application.Dtos;
 using FastEndpoints;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using ChoirApp.Domain.Entities;
 using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
 
@@ -21,7 +22,7 @@ public class CompleteOnboardingEndpoint : Endpoint<CompleteOnboardingRequest>
         Verbs("POST", "OPTIONS");
         Routes("/auth/complete-onboarding");
         AuthSchemes(JwtBearerDefaults.AuthenticationScheme);
-        Roles("General", "ChoirAdmin", "SuperAdmin");
+        Roles(nameof(UserRole.GeneralUser), nameof(UserRole.ChoirAdmin), nameof(UserRole.ChoirMember));
     }
 
     public override async Task HandleAsync(CompleteOnboardingRequest req, CancellationToken ct)

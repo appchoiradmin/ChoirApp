@@ -23,7 +23,7 @@ namespace ChoirApp.Backend.Endpoints.Choir
             Verbs("POST", "OPTIONS");
             Routes("/choirs");
             AuthSchemes("Bearer");
-            Roles("General", "ChoirAdmin", "SuperAdmin");
+            Roles(nameof(UserRole.GeneralUser), nameof(UserRole.ChoirAdmin));
         }
 
         public override async Task HandleAsync(CreateChoirDto req, CancellationToken ct)

@@ -1,4 +1,5 @@
 using ChoirApp.Application.Contracts;
+using ChoirApp.Domain.Entities;
 using ChoirApp.Application.Dtos;
 using FastEndpoints;
 using Microsoft.AspNetCore.Authorization;
@@ -14,7 +15,7 @@ public class GetAllTagsEndpoint : EndpointWithoutRequest<IEnumerable<TagDto>>
         Verbs("GET");
         Routes("/tags");
         AuthSchemes("Bearer");
-        Roles("ChoirAdmin", "SuperAdmin", "ChoirMember", "GeneralUser");
+        Roles(nameof(UserRole.ChoirAdmin), nameof(UserRole.ChoirMember), nameof(UserRole.GeneralUser));
     }
 
     public GetAllTagsEndpoint(IMasterSongService songService)

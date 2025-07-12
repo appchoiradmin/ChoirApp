@@ -1,5 +1,6 @@
 using ChoirApp.Application.Contracts;
 using ChoirApp.Application.Dtos;
+using ChoirApp.Domain.Entities;
 using FastEndpoints;
 using System.Threading;
 using System.Threading.Tasks;
@@ -20,7 +21,7 @@ namespace ChoirApp.Backend.Endpoints.Songs
             Verbs("POST");
             Routes("/master-songs");
             AuthSchemes("Bearer");
-            Roles("ChoirAdmin", "SuperAdmin");          
+            Roles(nameof(UserRole.ChoirAdmin));          
         }
 
         public override async Task HandleAsync(CreateMasterSongDto req, CancellationToken ct)

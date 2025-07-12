@@ -1,4 +1,5 @@
 using ChoirApp.Application.Contracts;
+using ChoirApp.Domain.Entities;
 using ChoirApp.Application.Dtos;
 using FastEndpoints;
 using System.Linq;
@@ -23,7 +24,7 @@ namespace ChoirApp.Backend.Endpoints.Choir
             Verbs("GET", "OPTIONS");
             Routes("/invitations");
             AuthSchemes("Bearer");
-            Roles("ChoirAdmin", "SuperAdmin", "Member", "General");
+            Roles(nameof(UserRole.GeneralUser), nameof(UserRole.ChoirAdmin), nameof(UserRole.ChoirMember));
         }
 
         public override async Task HandleAsync(CancellationToken ct)

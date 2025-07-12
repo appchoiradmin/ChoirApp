@@ -154,39 +154,35 @@ namespace ChoirApp.Infrastructure.Services
                 return Result.Fail("Only the choir admin can update member roles.");
             }
 
+            if (!Enum.TryParse<UserRole>(role, true, out var userRole))
+            {
+                return Result.Fail("Invalid role specified.");
+            }
+
             var member = choir.UserChoirs.FirstOrDefault(uc => uc.UserId == memberId);
             if (member == null)
             {
                 return Result.Fail("Member not found in this choir.");
             }
 
-            var normalizedRole = role;
-            if (string.Equals(role, "Admin", StringComparison.OrdinalIgnoreCase))
-            {
-                normalizedRole = "ChoirAdmin";
-            }
-            else if (string.Equals(role, "Member", StringComparison.OrdinalIgnoreCase))
-            {
-                normalizedRole = "General";
-            }
-
-            if (!Enum.TryParse<UserRole>(normalizedRole, true, out var userRole))
-            {
-                return Result.Fail("Invalid role specified.");
-            }
-
             member.IsAdmin = userRole == UserRole.ChoirAdmin;
             var user = await _context.Users.FindAsync(member.UserId);
-            if (user != null)
+            if (user == null)
             {
-                if (userRole == UserRole.ChoirAdmin)
-                {
-                    user.PromoteToAdmin();
-                }
-                else if (userRole == UserRole.General)
-                {
-                    user.DemoteToGeneral();
-                }
+                return Result.Fail("User not found.");
+            }
+
+            if (userRole == UserRole.ChoirAdmin)
+            {
+                user.PromoteToAdmin();
+            }
+            else if (userRole == UserRole.ChoirMember)
+            {
+                user.DemoteToMember();
+            }
+            else
+            {
+                return Result.Fail("Invalid role for a choir member.");
             }
 
             await _context.SaveChangesAsync();

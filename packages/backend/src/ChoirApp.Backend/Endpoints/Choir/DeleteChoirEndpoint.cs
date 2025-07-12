@@ -1,4 +1,5 @@
 using ChoirApp.Application.Contracts;
+using ChoirApp.Domain.Entities;
 using FastEndpoints;
 using System;
 using System.Linq;
@@ -24,7 +25,8 @@ namespace ChoirApp.Backend.Endpoints.Choir
         public override void Configure()
         {
             Delete("/choirs/{ChoirId}");
-            Roles("ChoirAdmin", "SuperAdmin");
+            AuthSchemes("Bearer");
+            Roles(nameof(UserRole.ChoirAdmin));
         }
 
         public override async Task HandleAsync(DeleteChoirRequest req, CancellationToken ct)
