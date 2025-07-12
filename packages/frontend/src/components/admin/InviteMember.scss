@@ -56,22 +56,15 @@
     .button {
       height: 2.5rem;
       padding: 0 1rem;
-      justify-content: center;
-      text-align: center;
       display: flex;
       align-items: center;
-      position: relative;
+      justify-content: center;
+      text-align: center;
       
-      .icon {
-        position: absolute;
-        left: 0.75rem;
-        margin-right: 0;
-      }
-      
-      .button-text {
-        width: 100%;
-        text-align: center;
-        margin: 0 auto;
+      &.send-button {
+        min-width: 100px;
+        font-weight: 500;
+        letter-spacing: 0.02em;
       }
       
       // Hide text on smaller screens to make button more compact
