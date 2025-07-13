@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Outlet, useParams, useNavigate } from 'react-router-dom';
+import { PlaylistProvider } from '../context/PlaylistContext';
 import BottomNavigation from '../components/BottomNavigation';
 import DatePicker from '../components/DatePicker';
 import { Layout, Navigation } from '../components/ui';
@@ -86,7 +87,13 @@ const ChoirDashboardPage: React.FC = () => {
               className={styles.input}
             />
           </div>
-          <Outlet />
+          <PlaylistProvider 
+            choirId={choirId || null} 
+            date={selectedDate} 
+            token={token || null}
+          >
+            <Outlet />
+          </PlaylistProvider>
         </div>
       </Layout>
     </SharedDateContext.Provider>

@@ -110,7 +110,7 @@ const SongsListPage: FC<SongsListPageProps> = ({ playlistId, refreshPlaylist }) 
           title: filters.search !== '' ? filters.search : undefined,
           artist: undefined,
           tags: undefined,
-          visibility: 1, // PublicAll - to get songs visible to everyone
+          // Remove visibility parameter as it's causing 400 Bad Request
         }, token);
         
         setSongs(fetchedSongs || []);

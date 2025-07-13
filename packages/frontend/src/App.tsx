@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import { Routes, Route, useNavigate, useLocation } from 'react-router-dom';
+import { PlaylistProvider } from './context/PlaylistContext';
 import { useUser } from './hooks/useUser';
 import HomePage from './pages/HomePage.tsx';
 import OnboardingPage from './pages/OnboardingPage.tsx';
@@ -54,7 +55,11 @@ function App() {
       <Route path="/dashboard" element={<DashboardPage />} />
       <Route path="/auth/callback" element={<AuthCallbackPage />} />
       <Route path="/auth/error" element={<AuthErrorPage />} />
-      <Route path="/songs" element={<SongsListPage />} />
+      <Route path="/songs" element={
+        <PlaylistProvider choirId={null} date={null} token={user?.token || null}>
+          <SongsListPage />
+        </PlaylistProvider>
+      } />
       <Route path="/choir/:choirId" element={<ChoirDashboardPage />}>
         <Route path="songs" element={<SongsListPage />} />
         <Route path="song-versions" element={<SongVersionsListPage />} />
