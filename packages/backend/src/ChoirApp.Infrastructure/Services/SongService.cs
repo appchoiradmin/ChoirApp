@@ -160,10 +160,8 @@ namespace ChoirApp.Infrastructure.Services
 
         public async Task<Result<List<SongDto>>> SearchSongsAsync(string searchTerm, Guid? userId, Guid? choirId)
         {
-            if (string.IsNullOrWhiteSpace(searchTerm))
-            {
-                return Result.Fail("Search term cannot be empty.");
-            }
+            // Allow empty search terms - this will return all songs that match the visibility criteria
+            searchTerm = searchTerm?.Trim() ?? string.Empty;
 
             var query = _dbContext.Songs
                 .Include(s => s.Creator)
@@ -193,14 +191,24 @@ namespace ChoirApp.Infrastructure.Services
                 query = query.Where(s => s.Visibility == Domain.Entities.SongVisibilityType.PublicAll);
             }
 
-            // Apply search term
-            var normalizedSearchTerm = searchTerm.ToLower();
-            var songs = await query
-                .Where(s => s.Title.ToLower().Contains(normalizedSearchTerm) ||
-                           (s.Artist != null && s.Artist.ToLower().Contains(normalizedSearchTerm)) ||
-                           s.Content.ToLower().Contains(normalizedSearchTerm) ||
-                           s.Tags.Any(t => t.Tag != null && t.Tag.TagName.ToLower().Contains(normalizedSearchTerm)))
-                .ToListAsync();
+            // Apply search term if not empty
+            var songs = new List<Domain.Entities.Song>();
+            
+            if (!string.IsNullOrWhiteSpace(searchTerm))
+            {
+                var normalizedSearchTerm = searchTerm.ToLower();
+                songs = await query
+                    .Where(s => s.Title.ToLower().Contains(normalizedSearchTerm) ||
+                               (s.Artist != null && s.Artist.ToLower().Contains(normalizedSearchTerm)) ||
+                               s.Content.ToLower().Contains(normalizedSearchTerm) ||
+                               s.Tags.Any(t => t.Tag != null && t.Tag.TagName.ToLower().Contains(normalizedSearchTerm)))
+                    .ToListAsync();
+            }
+            else
+            {
+                // If search term is empty, return all songs that match the visibility criteria
+                songs = await query.ToListAsync();
+            }
 
             var songDtos = new List<SongDto>();
             foreach (var song in songs)

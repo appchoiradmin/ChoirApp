@@ -127,6 +127,9 @@ export const searchSongs = async (params: SongSearchParams, token: string): Prom
   // Build query string from params
   const queryParams = new URLSearchParams();
   
+  // Add searchTerm parameter (required by backend)
+  if (params.searchTerm) queryParams.append('searchTerm', params.searchTerm);
+  
   if (params.title) queryParams.append('title', params.title);
   if (params.artist) queryParams.append('artist', params.artist);
   if (params.content) queryParams.append('content', params.content);

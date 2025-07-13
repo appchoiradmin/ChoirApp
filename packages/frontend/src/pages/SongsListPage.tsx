@@ -1,14 +1,14 @@
 import React, { useState, useEffect, useRef, FC } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { searchSongs } from '../services/songService';
-import { getPlaylistTemplatesByChoirId, addSongToPlaylist } from '../services/playlistService';
-import { useDisplayedPlaylistSections } from '../hooks/useDisplayedPlaylistSections';
+import { addSongToPlaylist } from '../services/playlistService';
 import { useUser } from '../hooks/useUser';
+import { useDisplayedPlaylistSections } from '../hooks/useDisplayedPlaylistSections';
 import { usePlaylistContext } from '../context/PlaylistContext';
 import { toast } from 'react-hot-toast';
 import { PlaylistTemplate } from '../types/playlist';
-import { SongDto } from '../types/song';
-import { Button, Card, LoadingSpinner } from '../components/ui';
+import { SongDto, SongSearchParams, SongVisibilityType } from '../types/song';
+import { Button, Card, LoadingSpinner, Navigation } from '../components/ui';
 import Layout from '../components/ui/Layout';
 import { MagnifyingGlassIcon, PlusIcon, ChevronUpIcon, ChevronDownIcon, CheckCircleIcon, XMarkIcon, CheckIcon, DocumentTextIcon, MusicalNoteIcon } from '@heroicons/react/24/outline';
 import './SongsListPage.scss';
@@ -25,12 +25,6 @@ interface FilterState {
   sortOrder: 'asc' | 'desc';
 }
 
-interface SongFilters {
-  search: string;
-  tags: string[];
-  visibility?: string;
-}
-
 const DEFAULT_SONGS_PER_PAGE = 12;
 
 // Detect if we're on mobile
@@ -43,7 +37,7 @@ const SongsListPage: FC<SongsListPageProps> = ({ playlistId, refreshPlaylist }) 
   const [dropdownOpen, setDropdownOpen] = useState<string | null>(null);
   const dropdownRefs = useRef<Record<string, HTMLDivElement | null>>({});
   const navigate = useNavigate();
-  const { sections, selectedTemplate, playlistId: playlistIdFromContext, refreshPlaylist: refreshPlaylistFromContext, setSelectedTemplate } = usePlaylistContext();
+  const { sections, selectedTemplate, setSelectedTemplate } = usePlaylistContext();
   const displayedSections = useDisplayedPlaylistSections(sections, selectedTemplate);
   const { token, user } = useUser();
   const isGeneralUser = !user?.choirId;
@@ -57,12 +51,11 @@ const SongsListPage: FC<SongsListPageProps> = ({ playlistId, refreshPlaylist }) 
   const [hasMore, setHasMore] = useState<boolean>(true);
   const [page, setPage] = useState<number>(0);
   const [loadingMore, setLoadingMore] = useState<boolean>(false);
-  const songsPerPage = 12;
   const loaderRef = useRef<HTMLDivElement>(null);
   
   // Back to top button state
   const [showBackToTop, setShowBackToTop] = useState<boolean>(false);
-  const [availableTemplates, setAvailableTemplates] = useState<PlaylistTemplate[]>([]);
+  const [availableTemplates] = useState<PlaylistTemplate[]>([]);
   const [templateDropdownOpen, setTemplateDropdownOpen] = useState<boolean>(false);
   const [filters, setFilters] = useState<FilterState>({
     search: '',
@@ -93,35 +86,32 @@ const SongsListPage: FC<SongsListPageProps> = ({ playlistId, refreshPlaylist }) 
   // Initial fetch for first page of songs
   useEffect(() => {
     const fetchInitialSongs = async () => {
-      if (!token) {
-        setError('Authentication token not found.');
-        setLoading(false);
-        return;
-      }
       try {
         setLoading(true);
-        const templatesData = user?.choirId ? 
-          await getPlaylistTemplatesByChoirId(user.choirId, token) : 
-          [];
+        // Use token from the useUser hook
+        // No need to create a separate variable
         
-        const fetchedSongs = await searchSongs({
+        // Prepare search parameters
+        const searchParams: SongSearchParams = {
+          searchTerm: filters.search || '', // Empty string is now handled by backend
           skip: 0,
           take: songsPerPage,
-          title: filters.search !== '' ? filters.search : undefined,
-          artist: undefined,
-          tags: undefined,
-          // Remove visibility parameter as it's causing 400 Bad Request
-        }, token);
+          visibility: SongVisibilityType.PublicAll
+        };
+        
+        // Add title/artist search if we have a search term
+        if (filters.search) {
+          searchParams.title = filters.search;
+          searchParams.artist = filters.search;
+        }
+        
+        const fetchedSongs = await searchSongs(searchParams, token || '');
         
         setSongs(fetchedSongs || []);
-        setAvailableTemplates(templatesData || []);
-        setPage(1); // We've loaded the first page
-        setHasMore(fetchedSongs.length === songsPerPage); // If we got fewer songs than requested, there are no more
-        setError(null);
-      } catch (err) {
-        console.error('Error fetching data:', err);
-        setError('Failed to load data');
-        toast.error('Failed to load data');
+        setHasMore(fetchedSongs.length === songsPerPage);
+      } catch (error) {
+        console.error('Error fetching data:', error);
+        setError('Failed to load songs. Please try again later.');
       } finally {
         setLoading(false);
       }
@@ -147,7 +137,7 @@ const SongsListPage: FC<SongsListPageProps> = ({ playlistId, refreshPlaylist }) 
 
   // Apply filters and sorting - for search functionality only
   // We don't filter or sort the loaded songs since we're using infinite scroll
-  const handleFilteredSearch = () => {
+  const handleFilteredSearch = async () => {
     // Reset pagination and fetch with new filters
     setPage(0);
     setSongs([]);
@@ -162,25 +152,27 @@ const SongsListPage: FC<SongsListPageProps> = ({ playlistId, refreshPlaylist }) 
       }
       
       try {
-        // Use search parameters if any are set
-        const searchParams: any = {
+        // Prepare search parameters
+        const searchParams: SongSearchParams = {
+          searchTerm: filters.search || '', // Empty string is now handled by backend
           skip: 0,
-          take: songsPerPage
+          take: songsPerPage,
+          visibility: SongVisibilityType.PublicAll
         };
         
+        // Add title/artist search if we have a search term
         if (filters.search) {
           searchParams.title = filters.search;
           searchParams.artist = filters.search;
-          searchParams.tag = filters.search;
         }
         
-        const songsData = await searchSongs(searchParams, token);
+        const songsData = await searchSongs(searchParams, token || '');
         setSongs(songsData || []);
         setPage(1);
         setHasMore(songsData.length === songsPerPage);
-      } catch (err) {
-        console.error('Error searching songs:', err);
-        toast.error('Failed to search songs');
+      } catch (error) {
+        console.error('Error searching songs:', error);
+        setError('Failed to search songs. Please try again later.');
       } finally {
         setLoading(false);
       }
@@ -229,23 +221,26 @@ const SongsListPage: FC<SongsListPageProps> = ({ playlistId, refreshPlaylist }) 
   
   // Load more songs for infinite scroll
   const loadMoreSongs = async () => {
-    if (!token || !hasMore || loadingMore) return;
+    if (loading || !hasMore) return;
     
     try {
       setLoadingMore(true);
       
-      const searchParams: any = {
+      // Prepare search parameters
+      const searchParams: SongSearchParams = {
+        searchTerm: filters.search || '', // Empty string is now handled by backend
         skip: page * songsPerPage,
-        take: songsPerPage
+        take: songsPerPage,
+        visibility: SongVisibilityType.PublicAll
       };
       
+      // Add title/artist search if we have a search term
       if (filters.search) {
         searchParams.title = filters.search;
         searchParams.artist = filters.search;
-        searchParams.tag = filters.search;
       }
       
-      const moreSongs = await searchSongs(searchParams, token);
+      const moreSongs = await searchSongs(searchParams, token || '');
       
       if (moreSongs.length === 0) {
         setHasMore(false);
@@ -254,9 +249,9 @@ const SongsListPage: FC<SongsListPageProps> = ({ playlistId, refreshPlaylist }) 
         setPage(prev => prev + 1);
         setHasMore(moreSongs.length === songsPerPage);
       }
-    } catch (err) {
-      console.error('Error loading more songs:', err);
-      toast.error('Failed to load more songs');
+    } catch (error) {
+      console.error('Error loading more songs:', error);
+      setError('Failed to load more songs. Please try again later.');
     } finally {
       setLoadingMore(false);
     }
@@ -277,14 +272,14 @@ const SongsListPage: FC<SongsListPageProps> = ({ playlistId, refreshPlaylist }) 
   
   // Add selected songs to playlist
   const addSelectedSongsToPlaylist = async (sectionId: string) => {
-    if (!token || !playlistId || selectedSongs.size === 0) {
+    if (!token || !playlistId || !sectionId || selectedSongs.size === 0) {
       return;
     }
     
     try {
       // Add each selected song to the playlist
       const promises = Array.from(selectedSongs).map(songId => 
-        addSongToPlaylist(playlistId, { songId, sectionId }, token)
+        addSongToPlaylist(playlistId, { songId, sectionId }, token || '')
       );
       
       await Promise.all(promises);
@@ -330,7 +325,9 @@ const SongsListPage: FC<SongsListPageProps> = ({ playlistId, refreshPlaylist }) 
   };
   
   return (
-    <Layout>
+    <Layout 
+      navigation={<Navigation title="Songs Library" showBackButton={true} />}
+    >
       <div className="songs-page">
         <div className="songs-page__header">
           <h1 className="songs-page__title">Songs Library</h1>
@@ -430,7 +427,24 @@ const SongsListPage: FC<SongsListPageProps> = ({ playlistId, refreshPlaylist }) 
           </div>
         ) : songs.length === 0 ? (
           <div className="songs-page__empty">
-            <p>No songs found</p>
+            <div className="songs-page__empty-icon">
+              <MusicalNoteIcon />
+            </div>
+            <h3 className="songs-page__empty-title">No songs found</h3>
+            <p className="songs-page__empty-message">
+              {filters.search ? 
+                `No songs match your search "${filters.search}". Try different keywords or clear your search.` : 
+                'No songs are available. Try adjusting your filters or adding new songs.'}
+            </p>
+            {!isGeneralUser && (
+              <Button
+                variant="primary"
+                onClick={() => navigate('/songs/create')}
+                leftIcon={<PlusIcon />}
+              >
+                Create a Song
+              </Button>
+            )}
           </div>
         ) : (
           <div className="songs-page__grid">
