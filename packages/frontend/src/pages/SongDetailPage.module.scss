@@ -1,9 +1,12 @@
+@use 'sass:color';
 @use '../styles/variables' as *;
 
 .container {
   padding: 2rem 0.5rem;
   background: $background;
   min-height: 100vh;
+  max-width: 800px;
+  margin: 0 auto;
 }
 
 .header {
@@ -84,7 +87,7 @@
   }
   
   &:disabled {
-    background-color: lighten($primary, 20%);
+    background-color: color.adjust($primary, $lightness: 20%);
     cursor: not-allowed;
   }
   
@@ -97,7 +100,7 @@
 .versionExists {
   margin-top: 1rem;
   padding: 0.75rem;
-  background-color: lighten($primary, 35%);
+  background-color: color.adjust($primary, $lightness: 35%);
   border-radius: 0.5rem;
   color: $primary;
   font-weight: 500;
@@ -135,4 +138,80 @@
   text-align: center;
   color: $text-light;
   font-size: $size-4;
+}
+
+// Form styles
+.formContainer {
+  background-color: white;
+  border-radius: 0.75rem;
+  padding: 1.5rem;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+  margin-bottom: 2rem;
+}
+
+.formTitle {
+  font-family: $family-primary;
+  font-size: $size-3;
+  color: $primary;
+  font-weight: 700;
+  margin-bottom: 1.5rem;
+  text-align: center;
+}
+
+.formGroup {
+  margin-bottom: 1.5rem;
+}
+
+.label {
+  display: block;
+  font-family: $family-secondary;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  color: $text;
+}
+
+.input, .select, .textarea {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid $border;
+  border-radius: 0.5rem;
+  font-family: $family-secondary;
+  font-size: 1rem;
+  transition: border-color 0.2s ease;
+  
+  &:focus {
+    outline: none;
+    border-color: $primary;
+    box-shadow: 0 0 0 2px color.adjust($primary, $alpha: -0.8);
+  }
+}
+
+.textarea {
+  min-height: 200px;
+  resize: vertical;
+}
+
+.submitButton {
+  display: block;
+  width: 100%;
+  padding: 0.75rem;
+  background-color: $primary;
+  color: white;
+  border: none;
+  border-radius: 0.5rem;
+  font-family: $family-primary;
+  font-weight: 600;
+  font-size: 1.1rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  
+  &:hover {
+    background-color: color.adjust($primary, $lightness: -5%);
+    transform: translateY(-1px);
+  }
+  
+  &:disabled {
+    background-color: color.adjust($primary, $lightness: 20%);
+    cursor: not-allowed;
+  }
 }

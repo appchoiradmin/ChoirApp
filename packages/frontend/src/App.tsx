@@ -12,6 +12,7 @@ import SongsListPage from './pages/SongsListPage.tsx';
 import SongVersionEditorPage from './pages/SongVersionEditorPage.tsx';
 import SongVersionsListPage from './pages/SongVersionsListPage.tsx';
 import ChoirAdminPage from './pages/ChoirAdminPage.tsx';
+import SongDetailPage from './pages/SongDetailPage.tsx';
 import ChoirPlaylistsTab from './pages/ChoirPlaylistsTab';
 import PlaylistDetailPage from './pages/PlaylistDetailPage.tsx';
 import CreatePlaylistPage from './pages/CreatePlaylistPage.tsx';
@@ -72,6 +73,7 @@ function App() {
       <Route path="/playlists/new" element={<CreatePlaylistPage />} />
       <Route path="/playlists/:playlistId" element={<PlaylistDetailPage />} />
       <Route path="/playlists/:playlistId/edit" element={<EditPlaylistPage />} />
+      <Route path="/songs/create" element={<SongDetailPage />} />
       <Route path="/choir/:choirId/playlist-templates" element={<PlaylistTemplatesPage />} />
       <Route path="/playlist-templates/new" element={<CreatePlaylistTemplatePage />} />
       <Route path="/playlist-templates/:templateId" element={<PlaylistTemplateDetailPage />} />

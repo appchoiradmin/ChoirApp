@@ -231,7 +231,7 @@ const DashboardPage: React.FC = () => {
             </Button>
           </Link>
 
-          <Link to="/create-master-song">
+          <Link to="/songs/create">
             <Button 
               variant="outlined" 
               className="quick-action-button"
@@ -239,7 +239,7 @@ const DashboardPage: React.FC = () => {
               <MusicalNoteIcon className="action-icon" />
               <div className="action-content">
                 <span className="action-title">Add Song</span>
-                <span className="action-subtitle">Create a new master song</span>
+                <span className="action-subtitle">Create a new song</span>
               </div>
             </Button>
           </Link>
