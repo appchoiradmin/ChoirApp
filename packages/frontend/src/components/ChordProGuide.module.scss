@@ -1,0 +1,104 @@
+@use '../styles/variables' as *;
+@use 'sass:color';
+
+.guideContainer {
+  margin-top: 1rem;
+  margin-bottom: 1.5rem;
+  border-radius: 0.5rem;
+  overflow: hidden;
+}
+
+.toggleButton {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.5rem 1rem;
+  background-color: $background;
+  color: $primary;
+  border: 1px solid $border;
+  border-radius: 0.5rem;
+  font-family: $family-secondary;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  
+  &:hover {
+    background-color: color.adjust($primary, $lightness: 35%);
+  }
+  
+  &::before {
+    content: '📝 ';
+    margin-right: 0.5rem;
+  }
+}
+
+.guideContent {
+  margin-top: 1rem;
+  padding: 1.25rem;
+  background-color: white;
+  border: 1px solid $border;
+  border-radius: 0.5rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.guideTitle {
+  font-family: $family-primary;
+  font-size: 1.25rem;
+  color: $primary;
+  font-weight: 700;
+  margin-bottom: 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid $border;
+}
+
+.guideSection {
+  margin-bottom: 1.5rem;
+  
+  h4 {
+    font-family: $family-primary;
+    font-size: 1rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    color: $text;
+  }
+  
+  p {
+    margin-bottom: 0.75rem;
+    font-size: 0.95rem;
+    color: $text;
+  }
+  
+  ul {
+    padding-left: 1.5rem;
+    
+    li {
+      margin-bottom: 0.5rem;
+      font-size: 0.95rem;
+      color: $text;
+    }
+  }
+}
+
+.codeExample {
+  padding: 0.75rem;
+  background-color: $background;
+  border: 1px solid $border;
+  border-radius: 0.25rem;
+  font-family: monospace;
+  font-size: 0.9rem;
+  white-space: pre-wrap;
+  overflow-x: auto;
+  margin: 0.5rem 0;
+  color: $text;
+}
+
+// Mobile responsiveness
+@media (max-width: 600px) {
+  .guideContent {
+    padding: 1rem;
+  }
+  
+  .codeExample {
+    font-size: 0.8rem;
+  }
+}

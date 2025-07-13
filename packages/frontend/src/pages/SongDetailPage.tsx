@@ -5,6 +5,7 @@ import type { SongDto, CreateSongDto } from '../types/song';
 import { SongVisibilityType } from '../types/song';
 import { useUser } from '../hooks/useUser';
 import ChordProViewer from '../components/ChordProViewer';
+import ChordProGuide from '../components/ChordProGuide';
 import styles from './SongDetailPage.module.scss';
 import Layout from '../components/ui/Layout';
 import Navigation from '../components/ui/Navigation';
@@ -178,6 +179,7 @@ const SongDetailPage: React.FC = () => {
 
         <div className={styles.formGroup}>
           <label htmlFor="chordProContent" className={styles.label}>ChordPro Content</label>
+          <ChordProGuide />
           <textarea
             id="chordProContent"
             value={chordProContent}

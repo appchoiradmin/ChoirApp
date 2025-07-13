@@ -170,7 +170,7 @@
   color: $text;
 }
 
-.input, .select, .textarea {
+.input, .textarea {
   width: 100%;
   padding: 0.75rem;
   border: 1px solid $border;
@@ -183,6 +183,45 @@
     outline: none;
     border-color: $primary;
     box-shadow: 0 0 0 2px color.adjust($primary, $alpha: -0.8);
+  }
+}
+
+.select {
+  position: relative;
+  display: block;
+  width: 100%;
+  
+  &::after {
+    content: '';
+    position: absolute;
+    right: 1.125rem;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 0.8rem;
+    height: 0.8rem;
+    border-right: 2px solid $text-light;
+    border-bottom: 2px solid $text-light;
+    pointer-events: none;
+    transform: translateY(-65%) rotate(45deg);
+  }
+  
+  select {
+    width: 100%;
+    padding: 0.75rem 2.5rem 0.75rem 0.75rem;
+    border: 1px solid $border;
+    border-radius: 0.5rem;
+    font-family: $family-secondary;
+    font-size: 1rem;
+    appearance: none;
+    background-color: white;
+    cursor: pointer;
+    transition: border-color 0.2s ease;
+    
+    &:focus {
+      outline: none;
+      border-color: $primary;
+      box-shadow: 0 0 0 2px color.adjust($primary, $alpha: -0.8);
+    }
   }
 }
 
