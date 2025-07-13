@@ -205,7 +205,7 @@ const DashboardPage: React.FC = () => {
       <Card className="quick-actions-card">
         <h2 className="section-title">Quick Actions</h2>
         <div className="quick-actions-grid">
-          <Link to="/master-songs">
+          <Link to="/songs">
             <Button 
               variant="outlined" 
               className="quick-action-button"

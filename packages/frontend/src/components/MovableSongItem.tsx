@@ -1,58 +1,40 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { PlaylistSong, PlaylistSection } from '../types/playlist';
-import { ChoirSongVersionDto } from '../types/choir';
-import { MasterSongDto } from '../types/song';
+import { SongDto } from '../types/song';
 import styles from './MovableSongItem.module.scss';
 
 interface MovableSongItemProps {
   song: PlaylistSong;
   section: PlaylistSection;
   sections: PlaylistSection[];
-  choirSongs: ChoirSongVersionDto[];
-  masterSongs: MasterSongDto[];
+  songs: SongDto[];
   onMoveSong: (song: PlaylistSong, fromSectionId: string, toSectionId: string) => void;
-  onRemoveSong: (sectionId: string, songId: string) => void;
+  onRemoveSong: () => void;
 }
+
+// No need for extended interface as we're fully embracing the unified model
 
 const MovableSongItem: React.FC<MovableSongItemProps> = ({
   song,
   section,
   sections,
-  choirSongs,
-  masterSongs,
+  songs,
   onMoveSong,
   onRemoveSong,
 }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const navigate = useNavigate();
 
-  // First try to get song data from the embedded properties (new structure)
+  // Get song data using the unified song model
   let title: string | undefined;
   let songId: string | undefined;
   
-  if (song.masterSong) {
-    title = song.masterSong.title;
-    songId = song.masterSong.songId;
-  } else if (song.choirSongVersion) {
-    // For choir songs, use the choir version title
-    title = song.choirSongVersion.title;
-    // Use the choirSongId as the song identifier for navigation
-    songId = song.choirSongVersion.choirSongId;
-  } else {
-    // Fallback: lookup in the arrays (old structure)
-    const songData = choirSongs.find(cs => cs.choirSongId === song.choirSongVersionId);
-    const masterSongFallback = !songData && song.masterSongId
-      ? masterSongs.find(ms => ms.songId === song.masterSongId)
-      : undefined;
-
-    if (songData && songData.masterSong) {
-      title = songData.masterSong.title;
-      songId = songData.masterSong.songId;
-    } else if (masterSongFallback) {
-      title = masterSongFallback.title;
-      songId = masterSongFallback.songId;
-    }
+  // Find the song in the songs array
+  const songData = songs.find(s => s.songId === song.songId);
+  if (songData) {
+    title = songData.title;
+    songId = songData.songId;
   }
 
   const openModal = () => setIsModalOpen(true);
@@ -60,7 +42,7 @@ const MovableSongItem: React.FC<MovableSongItemProps> = ({
 
   const handleNavigate = (e: React.MouseEvent, songId: string) => {
     e.preventDefault();
-    navigate(`/master-songs/${songId}`);
+    navigate(`/songs/${songId}`);
   };
 
   const handleMove = (toSectionId: string) => {
@@ -72,7 +54,7 @@ const MovableSongItem: React.FC<MovableSongItemProps> = ({
     <li className={styles['movable-song-item']}>
       {title && songId ? (
         <a
-          href={`/master-songs/${songId}`}
+          href={`/songs/${songId}`}
           onClick={e => handleNavigate(e, songId!)}
           tabIndex={0}
           aria-label={`View details for ${title}`}
@@ -94,7 +76,7 @@ const MovableSongItem: React.FC<MovableSongItemProps> = ({
         <button
           className="delete is-small ml-2"
           type="button"
-          onClick={() => onRemoveSong(section.id, song.id)}
+          onClick={onRemoveSong}
           aria-label="Remove song from section"
         ></button>
       </div>

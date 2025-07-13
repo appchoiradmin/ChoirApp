@@ -13,7 +13,7 @@ import { Invitation } from '../types/invitation';
 import { UserRole } from '../constants/roles';
 import MembersListEnhanced from '../components/admin/MembersListEnhanced';
 import InviteMemberEnhanced from '../components/admin/InviteMemberEnhanced';
-import ChoirSongsList from '../components/admin/ChoirSongsList';
+import SongVersionsList from '../components/admin/SongVersionsList';
 import InvitationsAccordion from '../components/admin/InvitationsAccordion';
 import { Button, LoadingSpinner } from '../components/ui';
 import Layout from '../components/ui/Layout';
@@ -153,7 +153,7 @@ const ChoirAdminPageEnhanced: React.FC = () => {
     totalMembers: choir.members.length,
         admins: choir.members.filter(m => m.role === UserRole.ChoirAdmin).length,
     pendingInvitations: invitations.length,
-    songs: 0 // This would come from ChoirSongsList component
+    songs: 0 // This would come from SongVersionsList component
   };
 
   return (
@@ -234,7 +234,7 @@ const ChoirAdminPageEnhanced: React.FC = () => {
           <Button
             variant="primary"
             leftIcon={<MusicalNoteIcon />}
-            onClick={() => navigate('/master-songs')}
+            onClick={() => navigate('/songs')}
             className="action-button"
           >
             Master Songs
@@ -305,7 +305,7 @@ const ChoirAdminPageEnhanced: React.FC = () => {
                     Songs customized for your choir
                   </p>
                 </div>
-                <ChoirSongsList choirId={choir.id} />
+                <SongVersionsList choirId={choir.id} />
               </div>
             </div>
           </div>

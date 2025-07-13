@@ -24,41 +24,32 @@ namespace ChoirApp.Domain.Entities
         [ForeignKey("PlaylistSectionId")]
         public PlaylistSection? PlaylistSection { get; private set; }
 
-        [Column("master_song_id")]
-        public Guid? MasterSongId { get; private set; }
+        [Column("song_id")]
+        public Guid SongId { get; private set; }
 
-        [ForeignKey("MasterSongId")]
-        public MasterSong? MasterSong { get; private set; }
-
-        [Column("choir_song_id")]
-        public Guid? ChoirSongVersionId { get; private set; }
-
-        [ForeignKey("ChoirSongVersionId")]
-        public ChoirSongVersion? ChoirSongVersion { get; private set; }
+        [ForeignKey("SongId")]
+        public Song? Song { get; private set; }
 
         private PlaylistSong() { }
 
-        private PlaylistSong(Guid playlistSectionId, int order, Guid? masterSongId, Guid? choirSongVersionId)
+        private PlaylistSong(Guid playlistSectionId, int order, Guid songId)
         {
             PlaylistSongId = Guid.NewGuid();
             PlaylistSectionId = playlistSectionId;
             Order = order;
-            MasterSongId = masterSongId;
-            ChoirSongVersionId = choirSongVersionId;
+            SongId = songId;
         }
 
-        public static Result<PlaylistSong> Create(Guid playlistSectionId, int order, Guid? masterSongId, Guid? choirSongVersionId)
+        public static Result<PlaylistSong> Create(Guid playlistSectionId, int order, Guid songId)
         {
             if (playlistSectionId == Guid.Empty)
                 return Result.Fail("A playlist song must be associated with a section.");
+                
+            if (songId == Guid.Empty)
+                return Result.Fail("A playlist song must be associated with a song.");
 
-            if (masterSongId == null && choirSongVersionId == null)
-                return Result.Fail("A playlist song must have either a master song or a choir song version.");
-
-            if (masterSongId != null && choirSongVersionId != null)
-                return Result.Fail("A playlist song cannot have both a master song and a choir song version.");
-
-            return Result.Ok(new PlaylistSong(playlistSectionId, order, masterSongId, choirSongVersionId));
+            var playlistSong = new PlaylistSong(playlistSectionId, order, songId);
+            return Result.Ok(playlistSong);
         }
 
         public void UpdateSection(Guid newPlaylistSectionId, int newOrder)

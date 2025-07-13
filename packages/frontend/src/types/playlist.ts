@@ -1,3 +1,5 @@
+import { SongDto } from './song';
+
 export interface Playlist {
   id: string;
   title?: string;
@@ -20,27 +22,13 @@ export interface PlaylistSection {
 export interface PlaylistSong {
   id: string;
   order: number;
-  masterSongId?: string;
-  choirSongVersionId?: string;
-  // Include actual song details to avoid extra API calls
-  masterSong?: {
-    songId: string;
-    title: string;
-    artist: string | null;
-    lyricsChordPro: string;
-  };
-  choirSongVersion?: {
-    choirSongId: string;
-    title: string;
-    artist: string | null;
-    lyricsChordPro: string;
-  };
+  songId: string;
+  song?: SongDto; // Using the unified SongDto
 }
 
 export interface AddSongToPlaylistDto {
   songId: string;
   sectionId: string;
-  choirSongVersionId?: string;
 }
 
 export interface PlaylistTemplate {

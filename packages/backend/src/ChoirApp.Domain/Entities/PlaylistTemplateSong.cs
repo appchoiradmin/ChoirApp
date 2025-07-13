@@ -24,41 +24,33 @@ namespace ChoirApp.Domain.Entities
         [ForeignKey("TemplateSectionId")]
         public PlaylistTemplateSection? TemplateSection { get; private set; }
 
-        [Column("master_song_id")]
-        public Guid? MasterSongId { get; private set; }
+        [Column("song_id")]
+        public Guid? SongId { get; private set; }
 
-        [ForeignKey("MasterSongId")]
-        public MasterSong? MasterSong { get; private set; }
-
-        [Column("choir_song_id")]
-        public Guid? ChoirSongVersionId { get; private set; }
-
-        [ForeignKey("ChoirSongVersionId")]
-        public ChoirSongVersion? ChoirSongVersion { get; private set; }
+        [ForeignKey("SongId")]
+        public Song? Song { get; private set; }
 
         private PlaylistTemplateSong() { }
 
-        private PlaylistTemplateSong(Guid templateSectionId, int order, Guid? masterSongId, Guid? choirSongVersionId)
+        private PlaylistTemplateSong(Guid templateSectionId, int order, Guid? songId)
         {
             TemplateSongId = Guid.NewGuid();
             TemplateSectionId = templateSectionId;
             Order = order;
-            MasterSongId = masterSongId;
-            ChoirSongVersionId = choirSongVersionId;
+            SongId = songId;
         }
 
-        public static Result<PlaylistTemplateSong> Create(Guid templateSectionId, int order, Guid? masterSongId, Guid? choirSongVersionId)
+        public static Result<PlaylistTemplateSong> Create(Guid templateSectionId, int order, Guid? songId)
         {
             if (templateSectionId == Guid.Empty)
                 return Result.Fail("A playlist template song must be associated with a section.");
 
-            if (masterSongId == null && choirSongVersionId == null)
-                return Result.Fail("A playlist template song must have either a master song or a choir song version.");
+            if (songId == null)
+            {
+                return Result.Fail("SongId must be provided.");
+            }
 
-            if (masterSongId != null && choirSongVersionId != null)
-                return Result.Fail("A playlist template song cannot have both a master song and a choir song version.");
-
-            return Result.Ok(new PlaylistTemplateSong(templateSectionId, order, masterSongId, choirSongVersionId));
+            return Result.Ok(new PlaylistTemplateSong(templateSectionId, order, songId));
         }
     }
 }

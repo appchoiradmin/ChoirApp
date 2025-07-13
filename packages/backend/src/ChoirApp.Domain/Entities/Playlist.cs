@@ -14,33 +14,33 @@ namespace ChoirApp.Domain.Entities
         [Column("playlist_id")]
         public Guid PlaylistId { get; private set; }
 
-        [Column("title")]
-        public string? Title { get; private set; }
+        [Required]
+        [Column("name")]
+        public string Name { get; private set; } = string.Empty;
+
+        [Column("description")]
+        public string? Description { get; private set; }
 
         [Required]
-        [Column("is_public")]
-        public bool IsPublic { get; private set; }
+        [Column("creator_id")]
+        public Guid CreatorId { get; private set; }
 
-        [Required]
-        [Column("creation_date")]
-        public DateTimeOffset CreationDate { get; private set; }
+        [ForeignKey("CreatorId")]
+        public User? Creator { get; private set; }
 
-        [Required]
-        [Column("date")]
-        public DateTime Date { get; private set; }
-
-        [Required]
         [Column("choir_id")]
-        public Guid ChoirId { get; private set; }
+        public Guid? ChoirId { get; private set; }
 
         [ForeignKey("ChoirId")]
         public Choir? Choir { get; private set; }
 
-        [Column("playlist_template_id")]
-        public Guid? PlaylistTemplateId { get; private set; }
+        [Required]
+        [Column("created_at")]
+        public DateTimeOffset CreatedAt { get; private set; } = DateTimeOffset.UtcNow;
 
-        [ForeignKey("PlaylistTemplateId")]
-        public PlaylistTemplate? PlaylistTemplate { get; private set; }
+        [Required]
+        [Column("visibility")]
+        public SongVisibilityType Visibility { get; private set; } = SongVisibilityType.Private;
 
         public ICollection<PlaylistSection> Sections { get; private set; } = new List<PlaylistSection>();
         public ICollection<PlaylistTag> PlaylistTags { get; private set; } = new List<PlaylistTag>();
@@ -49,36 +49,55 @@ namespace ChoirApp.Domain.Entities
         {
         }
 
-        private Playlist(string? title, Guid choirId, bool isPublic, DateTime date, Guid? playlistTemplateId)
+        private Playlist(string name, string? description, Guid creatorId, Guid? choirId, SongVisibilityType visibility)
         {
             PlaylistId = Guid.NewGuid();
-            Title = title;
+            Name = name;
+            Description = description;
+            CreatorId = creatorId;
             ChoirId = choirId;
-            IsPublic = isPublic;
-            CreationDate = DateTimeOffset.UtcNow;
-            Date = date;
-            PlaylistTemplateId = playlistTemplateId;
+            CreatedAt = DateTimeOffset.UtcNow;
+            Visibility = visibility;
         }
 
-        public static Result<Playlist> Create(string? title, Guid choirId, bool isPublic, DateTime date, Guid? playlistTemplateId)
+        public static Result<Playlist> Create(string name, string? description, Guid creatorId, Guid? choirId, SongVisibilityType visibility)
         {
-            if (choirId == Guid.Empty)
+            if (string.IsNullOrWhiteSpace(name))
             {
-                return Result.Fail("A playlist must be associated with a choir.");
+                return Result.Fail("Playlist name cannot be empty.");
             }
 
-            var playlist = new Playlist(title, choirId, isPublic, date, playlistTemplateId);
+            if (creatorId == Guid.Empty)
+            {
+                return Result.Fail("A playlist must have a creator.");
+            }
+
+            var playlist = new Playlist(name, description, creatorId, choirId, visibility);
             return Result.Ok(playlist);
         }
 
-        public void UpdateTitle(string? newTitle)
+        public void UpdateName(string newName)
         {
-            Title = newTitle;
+            if (!string.IsNullOrWhiteSpace(newName))
+            {
+                Name = newName;
+            }
+        }
+        
+        // Alias for UpdateName to maintain compatibility with existing code
+        public void UpdateTitle(string newTitle)
+        {
+            UpdateName(newTitle);
         }
 
-        public void SetVisibility(bool isPublic)
+        public void UpdateDescription(string? newDescription)
         {
-            IsPublic = isPublic;
+            Description = newDescription;
+        }
+
+        public void SetVisibility(SongVisibilityType visibility)
+        {
+            Visibility = visibility;
         }
 
         public Result AddSection(string sectionTitle)

@@ -1,41 +1,45 @@
-using ChoirApp.Application.Contracts;
+using System;
+using System.Linq;
+using ChoirApp.Application.Services;
+using ChoirApp.Backend.Endpoints.Songs.Requests;
+using ChoirApp.Backend.Endpoints.Songs.Responses;
 using ChoirApp.Domain.Entities;
-using ChoirApp.Application.Dtos;
 using FastEndpoints;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace ChoirApp.Backend.Endpoints.Songs
 {
-    public class AddTagToSongEndpoint : Endpoint<AddTagToSongRequest, MasterSongDto>
+    public class AddTagToSongEndpoint : Endpoint<AddTagToSongRequest>
     {
-        private readonly IMasterSongService _masterSongService;
+        private readonly ISongService _songService;
 
-        public AddTagToSongEndpoint(IMasterSongService masterSongService)
+        public AddTagToSongEndpoint(ISongService songService)
         {
-            _masterSongService = masterSongService;
+            _songService = songService;
         }
 
         public override void Configure()
         {
             Verbs("POST");
-            Routes("/master-songs/{SongId}/tags");
+            Routes("/songs/{songId}/tags");
             AuthSchemes("Bearer");
-            Roles(nameof(UserRole.ChoirAdmin));
+            Roles(nameof(UserRole.GeneralUser), nameof(UserRole.ChoirAdmin));
         }
 
         public override async Task HandleAsync(AddTagToSongRequest req, CancellationToken ct)
         {
-            var result = await _masterSongService.AddTagToSongAsync(req.SongId, req.TagName);
+            var songId = Route<Guid>("songId");
+            var result = await _songService.AddTagToSongAsync(songId, req.TagName);
 
             if (result.IsFailed)
             {
-                AddError(result.Errors[0].Message);
+                AddError(result.Errors.First().Message);
                 await SendErrorsAsync(cancellation: ct);
                 return;
             }
 
-            await SendAsync(result.Value, 200, ct);
+            await SendNoContentAsync(ct);
         }
     }
 }

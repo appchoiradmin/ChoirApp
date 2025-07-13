@@ -1,4 +1,4 @@
-using ChoirApp.Application.Contracts;
+using ChoirApp.Application.Services;
 using ChoirApp.Domain.Entities;
 using ChoirApp.Application.Dtos;
 using FastEndpoints;
@@ -8,7 +8,7 @@ namespace ChoirApp.Backend.Endpoints.Songs;
 
 public class GetAllTagsEndpoint : EndpointWithoutRequest<IEnumerable<TagDto>>
 {
-    private readonly IMasterSongService _songService;
+    private readonly ISongService _songService;
 
     public override void Configure()
     {
@@ -18,7 +18,7 @@ public class GetAllTagsEndpoint : EndpointWithoutRequest<IEnumerable<TagDto>>
         Roles(nameof(UserRole.ChoirAdmin), nameof(UserRole.ChoirMember), nameof(UserRole.GeneralUser));
     }
 
-    public GetAllTagsEndpoint(IMasterSongService songService)
+    public GetAllTagsEndpoint(ISongService songService)
     {
         _songService = songService;
     }

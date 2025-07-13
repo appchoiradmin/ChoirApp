@@ -1,6 +1,6 @@
 import React, { useState, KeyboardEvent, useEffect, useContext } from 'react';
 import { UserContext } from '../contexts/UserContext';
-import { getAllTags } from '../services/masterSongService';
+import { getAllTags } from '../services/songService';
 import type { TagDto } from '../types/song';
 
 interface TagInputProps {

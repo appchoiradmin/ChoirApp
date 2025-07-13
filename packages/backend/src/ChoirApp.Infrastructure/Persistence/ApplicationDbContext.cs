@@ -7,8 +7,8 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
 {
     public DbSet<User> Users { get; set; } = null!;
     public DbSet<Choir> Choirs { get; set; } = null!;
-    public DbSet<MasterSong> MasterSongs { get; set; } = null!;
-    public DbSet<ChoirSongVersion> ChoirSongVersions { get; set; } = null!;
+    public DbSet<Song> Songs { get; set; } = null!;
+    public DbSet<SongVisibility> SongVisibilities { get; set; } = null!;
     public DbSet<Playlist> Playlists { get; set; } = null!;
     public DbSet<PlaylistSection> PlaylistSections { get; set; } = null!;
     public DbSet<PlaylistSong> PlaylistSongs { get; set; } = null!;
@@ -30,8 +30,8 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
             .HasKey(st => new { st.SongId, st.TagId });
 
         modelBuilder.Entity<SongTag>()
-            .HasOne(st => st.MasterSong)
-            .WithMany(s => s.SongTags)
+            .HasOne(st => st.Song)
+            .WithMany(s => s.Tags)
             .HasForeignKey(st => st.SongId);
 
         modelBuilder.Entity<SongTag>()
@@ -76,11 +76,18 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
             .HasForeignKey(c => c.AdminUserId)
             .OnDelete(DeleteBehavior.Restrict);
 
-        // User -> ChoirSongVersion (Editor)
-        modelBuilder.Entity<ChoirSongVersion>()
-            .HasOne(csv => csv.Editor)
-            .WithMany(u => u.EditedSongs)
-            .HasForeignKey(csv => csv.EditorUserId)
+        // User -> Song (Creator)
+        modelBuilder.Entity<Song>()
+            .HasOne(s => s.Creator)
+            .WithMany(u => u.CreatedSongs)
+            .HasForeignKey(s => s.CreatorId)
+            .OnDelete(DeleteBehavior.Restrict);
+            
+        // Song -> Song (BaseSong relationship)
+        modelBuilder.Entity<Song>()
+            .HasOne(s => s.BaseSong)
+            .WithMany(s => s.Derivatives)
+            .HasForeignKey(s => s.BaseSongId)
             .OnDelete(DeleteBehavior.Restrict);
         
         // Unique constraints
@@ -95,9 +102,13 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
         modelBuilder.Entity<Choir>()
             .HasIndex(c => c.ChoirName)
             .IsUnique();
-
-        modelBuilder.Entity<ChoirSongVersion>()
-            .HasIndex(csv => new { csv.MasterSongId, csv.ChoirId })
+            
+        modelBuilder.Entity<Song>()
+            .HasIndex(s => s.SongId)
+            .IsUnique();
+            
+        modelBuilder.Entity<SongVisibility>()
+            .HasIndex(sv => new { sv.SongId, sv.ChoirId })
             .IsUnique();
 
         modelBuilder.Entity<Playlist>()

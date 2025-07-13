@@ -9,6 +9,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
+// Use aliases to resolve ambiguity between domain and DTO enums
+using DomainEntities = ChoirApp.Domain.Entities;
+using AppDto = ChoirApp.Application.Dtos;
+
 namespace ChoirApp.Infrastructure.Services
 {
     public class PlaylistService : IPlaylistService
@@ -26,7 +30,16 @@ namespace ChoirApp.Infrastructure.Services
             if (choir == null)
                 return Result.Fail("Choir not found.");
 
-            var playlistResult = Playlist.Create(playlistDto.Title, playlistDto.ChoirId, playlistDto.IsPublic, playlistDto.Date, playlistDto.PlaylistTemplateId);
+            // Convert IsPublic boolean to SongVisibilityType enum
+            var visibility = playlistDto.IsPublic ? DomainEntities.SongVisibilityType.PublicAll : DomainEntities.SongVisibilityType.Private;
+            
+            var playlistResult = Playlist.Create(
+                name: playlistDto.Title ?? string.Empty, 
+                description: null, 
+                creatorId: userId, 
+                choirId: playlistDto.ChoirId, 
+                visibility: visibility);
+                
             if (playlistResult.IsFailed)
                 return Result.Fail(playlistResult.Errors);
 
@@ -50,9 +63,12 @@ namespace ChoirApp.Infrastructure.Services
                         var newSection = playlist.Sections.Last();
                         foreach (var songTemplate in sectionTemplate.PlaylistTemplateSongs.OrderBy(s => s.Order))
                         {
-                            var songResult = newSection.AddSong(songTemplate.MasterSongId, songTemplate.ChoirSongVersionId);
-                            if (songResult.IsFailed)
-                                return Result.Fail(songResult.Errors);
+                            if (songTemplate.SongId.HasValue)
+                            {
+                                var songResult = newSection.AddSong(songTemplate.SongId.Value);
+                                if (songResult.IsFailed)
+                                    return Result.Fail(songResult.Errors);
+                            }
                         }
                     }
                 }
@@ -78,10 +94,7 @@ namespace ChoirApp.Infrastructure.Services
             var playlist = await _context.Playlists
                 .Include(p => p.Sections)
                 .ThenInclude(s => s.PlaylistSongs)
-                .ThenInclude(ps => ps.MasterSong)
-                .Include(p => p.Sections)
-                .ThenInclude(s => s.PlaylistSongs)
-                .ThenInclude(ps => ps.ChoirSongVersion)
+                .ThenInclude(ps => ps.Song)
                 .Include(p => p.PlaylistTags)
                 .ThenInclude(pt => pt.Tag)
                 .FirstOrDefaultAsync(p => p.PlaylistId == playlistId);
@@ -97,10 +110,7 @@ namespace ChoirApp.Infrastructure.Services
             var playlists = await _context.Playlists
                 .Include(p => p.Sections)
                 .ThenInclude(s => s.PlaylistSongs)
-                .ThenInclude(ps => ps.MasterSong)
-                .Include(p => p.Sections)
-                .ThenInclude(s => s.PlaylistSongs)
-                .ThenInclude(ps => ps.ChoirSongVersion)
+                .ThenInclude(ps => ps.Song)
                 .Where(p => p.ChoirId == choirId)
                 .ToListAsync();
 
@@ -123,7 +133,7 @@ namespace ChoirApp.Infrastructure.Services
 
             playlist.UpdateTitle(playlistDto.Title);
             if (playlistDto.IsPublic.HasValue)
-                playlist.SetVisibility(playlistDto.IsPublic.Value);
+                playlist.SetVisibility(playlistDto.IsPublic.Value ? DomainEntities.SongVisibilityType.PublicAll : DomainEntities.SongVisibilityType.Private);
 
             // Atomic update of sections and songs
             if (playlistDto.Sections != null)
@@ -149,7 +159,7 @@ namespace ChoirApp.Infrastructure.Services
                     int songOrder = 0;
                     foreach (var songDto in sectionDto.Songs)
                     {
-                        var songResult = ChoirApp.Domain.Entities.PlaylistSong.Create(section.SectionId, songOrder, songDto.MasterSongId, songDto.ChoirSongVersionId);
+                        var songResult = ChoirApp.Domain.Entities.PlaylistSong.Create(section.SectionId, songOrder, songDto.SongId);
                         if (songResult.IsFailed)
                             return Result.Fail(songResult.Errors);
                         var song = songResult.Value;
@@ -219,10 +229,7 @@ namespace ChoirApp.Infrastructure.Services
             var template = await _context.PlaylistTemplates
                 .Include(t => t.Sections)
                 .ThenInclude(s => s.PlaylistTemplateSongs)
-                .ThenInclude(ps => ps.MasterSong)
-                .Include(t => t.Sections)
-                .ThenInclude(s => s.PlaylistTemplateSongs)
-                .ThenInclude(ps => ps.ChoirSongVersion)
+                .ThenInclude(ps => ps.Song)
                 .FirstOrDefaultAsync(t => t.TemplateId == templateId);
 
             if (template == null)
@@ -313,17 +320,11 @@ namespace ChoirApp.Infrastructure.Services
             if (!Guid.TryParse(dto.SongId, out var songGuid))
                 return Result.Fail("Invalid song id");
 
-            var song = await _context.MasterSongs.FindAsync(songGuid);
+            var song = await _context.Songs.FindAsync(songGuid);
             if (song == null)
                 return Result.Fail("Song not found");
 
-            Guid? choirSongVersionGuid = null;
-            if (Guid.TryParse(dto.ChoirSongVersionId, out var parsedGuid))
-            {
-                choirSongVersionGuid = parsedGuid;
-            }
-
-            var songResult = section.AddSong(songGuid, choirSongVersionGuid);
+            var songResult = section.AddSong(songGuid);
             if (songResult.IsFailed)
                 return Result.Fail(songResult.Errors);
 

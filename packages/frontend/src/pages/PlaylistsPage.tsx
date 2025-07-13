@@ -5,8 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import { usePlaylistContext } from '../context/PlaylistContext';
 import MovableSongItem from '../components/MovableSongItem';
 import { PlaylistSong } from '../types/playlist';
-import { ChoirSongVersionDto } from '../types/choir';
-import { MasterSongDto } from '../types/song';
+import { SongDto } from '../types/song';
 import { useUser } from '../hooks/useUser';
 import { removeSongFromPlaylist, moveSongInPlaylist } from '../services/playlistService';
 import { Button, Card, LoadingSpinner } from '../components/ui';
@@ -96,8 +95,7 @@ const PlaylistsPage: React.FC = () => {
   } = usePlaylistContext();
   const { user } = useUser();
   const navigate = useNavigate();
-  const [choirSongs] = useState<ChoirSongVersionDto[]>([]);
-  const [masterSongs] = useState<MasterSongDto[]>([]);
+  const [songs] = useState<SongDto[]>([]);
   const [dropdownOpen, setDropdownOpen] = useState<string | null>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -183,7 +181,7 @@ const PlaylistsPage: React.FC = () => {
   };
 
   const handleAddSongs = () => {
-    navigate('/master-songs');
+    navigate('/songs');
   };
 
   const getTotalSongs = () => {
@@ -347,10 +345,9 @@ const PlaylistsPage: React.FC = () => {
                             song={song}
                             section={section}
                             sections={sections}
-                            choirSongs={choirSongs}
-                            masterSongs={masterSongs}
+                            songs={songs}
                             onMoveSong={handleMoveSong}
-                            onRemoveSong={handleRemoveSong}
+                            onRemoveSong={() => handleRemoveSong(section.id, song.id)}
                           />
                         ))}
                       </div>

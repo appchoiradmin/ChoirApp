@@ -2,13 +2,13 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useUser } from '../hooks/useUser';
 import { getPlaylistById as getPlaylist, getPlaylistsByChoirId, updatePlaylist, getPlaylistTemplatesByChoirId, removeSongFromPlaylist, UpdatePlaylistDto } from '../services/playlistService';
-import { MasterSongDto } from '../types/song';
+import { SongDto } from '../types/song';
 import { useDisplayedPlaylistSections } from '../hooks/useDisplayedPlaylistSections';
-import { getChoirSongsByChoirId } from '../services/choirSongService';
-import { getAllMasterSongs } from '../services/masterSongService';
+import { getSongsForChoir } from '../services/songService';
+import { searchSongs } from '../services/songService';
 import { PlaylistTemplate, PlaylistSection, PlaylistSong } from '../types/playlist';
 import { PlaylistProvider } from '../context/PlaylistContext';
-import { ChoirSongVersionDto } from '../types/choir';
+// Removed legacy ChoirSongVersionDto import
 import MovableSongItem from '../components/MovableSongItem';
 import { Button, Card, LoadingSpinner } from '../components/ui';
 import Layout from '../components/ui/Layout';
@@ -45,8 +45,8 @@ const EditPlaylistPage: React.FC = () => {
 
   const [selectedTemplate, setSelectedTemplate] = useState<PlaylistTemplate | null>(null);
   const [sections, setSections] = useState<PlaylistSection[]>([]);
-  const [choirSongs, setChoirSongs] = useState<ChoirSongVersionDto[]>([]);
-  const [masterSongs, setMasterSongs] = useState<MasterSongDto[]>([]);
+  const [choirSongs, setChoirSongs] = useState<SongDto[]>([]);
+  const [allSongs, setAllSongs] = useState<SongDto[]>([]);
   
   // UI State
   const [playlistSelectorOpen, setPlaylistSelectorOpen] = useState(false);
@@ -135,16 +135,16 @@ const EditPlaylistPage: React.FC = () => {
         console.log("Fetching initial data for playlist:", selectedPlaylistId);
         const playlist = await getPlaylist(selectedPlaylistId, token);
         
-        const [fetchedTemplates, fetchedSongs, fetchedMasterSongs] = await Promise.all([
+        const [fetchedTemplates, fetchedChoirSongs, fetchedAllSongs] = await Promise.all([
           getPlaylistTemplatesByChoirId(playlist.choirId, token),
-          getChoirSongsByChoirId(playlist.choirId, token),
-          getAllMasterSongs(token)
+          getSongsForChoir(playlist.choirId, token),
+          searchSongs({}, token)
         ]);
 
         console.log("Playlist data:", playlist);
         console.log("Templates data:", fetchedTemplates);
-        console.log("Fetched songs:", fetchedSongs);
-        console.log("Fetched master songs:", fetchedMasterSongs);
+        console.log("Fetched choir songs:", fetchedChoirSongs);
+        console.log("Fetched all songs:", fetchedAllSongs);
 
         setTitle(playlist.title || '');
         setIsPublic(playlist.isPublic);
@@ -164,8 +164,8 @@ const EditPlaylistPage: React.FC = () => {
         setSections(appliedSections); // sections is always the backend value
         setSelectedTemplate(templateToApply); // always set a template if available
 
-        setChoirSongs(fetchedSongs);
-        setMasterSongs(fetchedMasterSongs);
+        setChoirSongs(fetchedChoirSongs);
+        setAllSongs(fetchedAllSongs);
       } catch (error) {
         console.error('Error fetching playlist data:', error);
         setError('Failed to load playlist data');
@@ -187,7 +187,7 @@ const EditPlaylistPage: React.FC = () => {
       
       const newSections = sections.map(section => {
         if (section.id === sectionId) {
-          const newSongs = section.songs.filter(s => (s.choirSongVersionId || s.masterSongId) !== songId);
+          const newSongs = section.songs.filter(s => s.songId !== songId);
           return { ...section, songs: newSongs };
         }
         return section;
@@ -208,9 +208,9 @@ const EditPlaylistPage: React.FC = () => {
 
     let songToMove: PlaylistSong | undefined;
 
-    // Remove the song from the source section (support both choirSongVersionId and masterSongId)
-    const getSongKey = (s: PlaylistSong) => s.choirSongVersionId || s.masterSongId;
-    const songKey = song.choirSongVersionId || song.masterSongId;
+    // Remove the song from the source section
+    const getSongKey = (s: PlaylistSong) => s.songId;
+    const songKey = song.songId;
 
     const sectionsWithSongRemoved = sections.map(section => {
       if (section.id === fromSectionId) {
@@ -247,8 +247,7 @@ const EditPlaylistPage: React.FC = () => {
         title: section.title,
         order: sectionIdx,
         songs: section.songs.map((song, songIdx) => ({
-          masterSongId: song.masterSongId,
-          choirSongVersionId: song.choirSongVersionId,
+          songId: song.songId,
           order: songIdx,
         }))
       }));
@@ -283,7 +282,7 @@ const EditPlaylistPage: React.FC = () => {
 
   // Utility functions
   const handleAddSongs = () => {
-    navigate('/master-songs');
+    navigate('/songs');
   };
 
   const getTotalSongs = () => {
@@ -523,10 +522,9 @@ const EditPlaylistPage: React.FC = () => {
                                 song={song}
                                 section={section}
                                 sections={displayedSections}
-                                choirSongs={choirSongs}
-                                masterSongs={masterSongs}
+                                songs={[...choirSongs, ...allSongs]}
                                 onMoveSong={handleMoveSong}
-                                onRemoveSong={() => handleRemoveSongFromSection(section.id, song.choirSongVersionId || song.masterSongId!)}
+                                onRemoveSong={() => handleRemoveSongFromSection(section.id, song.songId)}
                               />
                             ))}
                           </div>

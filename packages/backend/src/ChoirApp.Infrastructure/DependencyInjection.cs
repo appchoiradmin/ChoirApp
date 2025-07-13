@@ -1,4 +1,5 @@
 using ChoirApp.Application.Contracts;
+using ChoirApp.Application.Services;
 using ChoirApp.Domain.Services;
 using ChoirApp.Infrastructure.Persistence;
 using ChoirApp.Infrastructure.Services;
@@ -22,8 +23,7 @@ public static class DependencyInjection
 
         services.AddScoped<ITokenService, TokenService>();
         services.AddScoped<IUserService, UserService>();
-        services.AddScoped<IMasterSongService, MasterSongService>();
-        services.AddScoped<IChoirSongService, ChoirSongService>();
+        services.AddScoped<ISongService, SongService>();
         services.AddScoped<IChoirService, ChoirService>();
         services.AddScoped<IPlaylistService, PlaylistService>();
         services.AddScoped<IInvitationService, InvitationService>();
@@ -31,5 +31,5 @@ public static class DependencyInjection
         services.AddScoped<IInvitationPolicy, InvitationPolicy>();
 
         return services;
-    }
+    }   
 }

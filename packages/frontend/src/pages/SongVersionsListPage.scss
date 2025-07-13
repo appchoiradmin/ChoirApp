@@ -1,0 +1,482 @@
+@use '../_variables.scss' as *;
+
+.song-versions-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: $spacing-md;
+
+  @media screen and (max-width: $mobile) {
+    padding: $spacing-sm;
+  }
+}
+
+// Loading State
+.loading-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: $spacing-xl 0;
+  gap: $spacing-md;
+
+  .loading-text {
+    color: $text-light;
+    font-size: 1rem;
+    margin: 0;
+  }
+}
+
+// Songs Header
+.songs-header {
+  margin-bottom: $spacing-lg;
+
+  .header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: $spacing-md;
+
+    @media screen and (max-width: $mobile) {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: $spacing-sm;
+    }
+
+    .header-titles {
+      .page-title {
+        font-size: 2rem;
+        font-weight: 700;
+        color: $text-dark;
+        margin: 0 0 $spacing-xs;
+
+        @media screen and (max-width: $tablet) {
+          font-size: 1.75rem;
+        }
+      }
+
+      .page-subtitle {
+        color: $text-light;
+        margin: 0;
+      }
+    }
+
+    .header-actions {
+      display: flex;
+      gap: $spacing-sm;
+      flex-wrap: wrap;
+
+      @media screen and (max-width: $mobile) {
+        width: 100%;
+        justify-content: flex-end;
+      }
+    }
+  }
+}
+
+// Search and Filters
+.search-filters {
+  background: white;
+  border-radius: $radius-lg;
+  box-shadow: $shadow-sm;
+  margin-bottom: $spacing-lg;
+  overflow: hidden;
+
+  .search-bar {
+    display: flex;
+    align-items: center;
+    padding: $spacing-md;
+    border-bottom: 1px solid $border-light;
+
+    .search-input {
+      flex: 1;
+      position: relative;
+
+      input {
+        width: 100%;
+        padding: $spacing-sm $spacing-md $spacing-sm $spacing-xl;
+        border: 1px solid $border;        
+        border-radius: $radius-md;        
+        font-size: 1rem;
+        transition: all $transition-normal;
+
+        &:focus {
+          outline: none;
+          border-color: $primary;
+          box-shadow: 0 0 0 2px rgba($primary, 0.2);
+        }
+      }
+
+      .search-icon {
+        position: absolute;
+        left: $spacing-sm;
+        top: 50%;
+        transform: translateY(-50%);      
+        width: 20px;
+        height: 20px;
+        color: $text-light;
+      }
+
+      .clear-search {
+        position: absolute;
+        right: $spacing-sm;
+        top: 50%;
+        transform: translateY(-50%);      
+        background: none;
+        border: none;
+        cursor: pointer;
+        color: $text-light;
+        padding: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        &:hover {
+          color: $danger;
+        }
+
+        .clear-icon {
+          width: 16px;
+          height: 16px;
+        }
+      }
+    }
+
+    .filter-toggle {
+      margin-left: $spacing-sm;
+      display: flex;
+      align-items: center;
+      gap: $spacing-xs;
+      padding: $spacing-sm $spacing-md;   
+      border: 1px solid $border;
+      border-radius: $radius-md;
+      background: white;
+      cursor: pointer;
+      transition: all $transition-normal; 
+      color: $text;
+
+      &:hover {
+        background: $color-neutral-100;   
+      }
+
+      .filter-icon {
+        width: 18px;
+        height: 18px;
+      }
+    }
+  }
+}
+
+// Bulk Actions
+.bulk-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: $spacing-md;
+  background: $color-neutral-100;
+  border-radius: $radius-lg;
+  margin-bottom: $spacing-md;
+  animation: slideDown 0.3s ease-out;     
+
+  .selection-info {
+    display: flex;
+    align-items: center;
+    gap: $spacing-sm;
+    color: $text;
+
+    .selection-count {
+      font-weight: 600;
+    }
+  }
+
+  .action-buttons {
+    display: flex;
+    gap: $spacing-sm;
+  }
+}
+
+// Songs Grid
+.songs-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: $spacing-md;
+  margin-bottom: $spacing-lg;
+
+  @media screen and (max-width: $tablet) {
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  }
+
+  @media screen and (max-width: $mobile) {
+    grid-template-columns: 1fr;
+  }
+}
+
+// Song Card
+.song-card {
+  cursor: pointer;
+  transition: all $transition-normal;     
+  border: 2px solid $border-light;        
+  border-radius: $radius-lg;
+  overflow: hidden;
+  background: white;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: $shadow-md;
+    border-color: $primary-300;
+  }
+
+  &.selected {
+    border-color: $primary;
+    background-color: rgba($primary, 0.05);
+  }
+
+  .card-checkbox {
+    position: absolute;
+    top: $spacing-sm;
+    right: $spacing-sm;
+    z-index: 2;
+    opacity: 0;
+    transition: opacity $transition-normal;
+
+    .checkbox-container {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: $shadow-sm;
+      border: 2px solid $border;
+      transition: all $transition-normal; 
+
+      &.selected {
+        background: $primary;
+        border-color: $primary;
+      }
+
+      .check-icon {
+        width: 16px;
+        height: 16px;
+        color: white;
+      }
+    }
+  }
+
+  &:hover .card-checkbox,
+  &.selected .card-checkbox {
+    opacity: 1;
+  }
+
+  .card-content {
+    padding: $spacing-md;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .song-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin: 0 0 $spacing-xs;
+    color: $text-dark;
+    line-height: 1.3;
+    word-break: break-word;
+  }
+
+  .song-artist {
+    font-size: 0.9rem;
+    color: $text-light;
+    margin: 0 0 $spacing-sm;
+  }
+
+  .song-meta {
+    margin-top: auto;
+    display: flex;
+    justify-content: space-between;       
+    align-items: flex-end;
+    font-size: 0.8rem;
+    color: $text-light;
+
+    .meta-left {
+      display: flex;
+      flex-direction: column;
+      gap: $spacing-xs;
+    }
+
+    .meta-right {
+      text-align: right;
+    }
+
+    .last-edited {
+      display: flex;
+      align-items: center;
+      gap: $spacing-xs;
+
+      .time-icon {
+        width: 14px;
+        height: 14px;
+      }
+    }
+
+    .editor-info {
+      display: flex;
+      align-items: center;
+      gap: $spacing-xs;
+
+      .user-icon {
+        width: 14px;
+        height: 14px;
+      }
+    }
+  }
+
+  .song-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: $spacing-xs;
+    margin-top: $spacing-sm;
+    margin-bottom: $spacing-sm;
+
+    .tag {
+      font-size: 0.7rem;
+      padding: 2px 8px;
+      border-radius: 12px;
+      background: $color-neutral-100;      
+      color: $text-light;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+
+      .tag-icon {
+        width: 10px;
+        height: 10px;
+      }
+    }
+  }
+
+  .card-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: $spacing-xs;
+    padding: $spacing-sm;
+    border-top: 1px solid $border-light;  
+    background: $color-neutral-100;        
+
+    .action-button {
+      padding: $spacing-xs;
+      border-radius: $radius-sm;
+      background: white;
+      border: 1px solid $border;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all $transition-normal; 
+
+      &:hover {
+        background: $color-neutral-100;    
+        border-color: $border-dark;       
+      }
+
+      .action-icon {
+        width: 16px;
+        height: 16px;
+        color: $text;
+      }
+
+      &.edit:hover {
+        color: $primary;
+        border-color: $primary;
+      }
+
+      &.view:hover {
+        color: $info;
+        border-color: $info;
+      }
+
+      &.delete:hover {
+        color: $danger;
+        border-color: $danger;
+      }
+    }
+  }
+}
+
+// Empty State
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: $spacing-xl 0;
+  gap: $spacing-md;
+
+  .empty-icon {
+    width: 64px;
+    height: 64px;
+    color: $text-muted;
+    opacity: 0.6;
+  }
+
+  .empty-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: $text-dark;
+    margin: 0;
+  }
+
+  .empty-message {
+    color: $text-light;
+    max-width: 400px;
+    margin: 0 0 $spacing-md;
+  }
+}
+
+// Responsive adjustments
+@media screen and (max-width: $mobile) {  
+  .song-versions-container {
+    padding: $spacing-sm;
+  }
+
+  .songs-header {
+    .header-content {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: $spacing-sm;
+    }
+
+    .header-actions {
+      width: 100%;
+      justify-content: space-between;     
+    }
+  }
+
+  .search-filters {
+    .search-bar {
+      flex-direction: column;
+      align-items: stretch;
+      gap: $spacing-sm;
+
+      .filter-toggle {
+        margin-left: 0;
+      }
+    }
+  }
+
+  .bulk-actions {
+    flex-direction: column;
+    gap: $spacing-sm;
+    align-items: flex-start;
+
+    .action-buttons {
+      width: 100%;
+      justify-content: flex-end;
+    }
+  }
+}

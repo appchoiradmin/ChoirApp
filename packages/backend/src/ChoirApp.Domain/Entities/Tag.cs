@@ -16,4 +16,5 @@ public class Tag
 
     public ICollection<SongTag> SongTags { get; set; } = new List<SongTag>();
     public ICollection<PlaylistTag> PlaylistTags { get; set; } = new List<PlaylistTag>();
+
 }

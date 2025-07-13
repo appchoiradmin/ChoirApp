@@ -48,13 +48,25 @@ export const rejectInvitation = async (invitationToken: string, token: string): 
 };
 
 export const getInvitationsByChoir = async (choirId: string, token: string): Promise<Invitation[]> => {
-  const response = await fetch(`${API_URL}/api/choirs/${choirId}/invitations`, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
-  if (!response.ok) {
-    throw new Error('Failed to fetch invitations');
+  try {
+    const response = await fetch(`${API_URL}/api/choirs/${choirId}/invitations`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    
+    if (response.status === 403) {
+      console.warn('User does not have permission to view choir invitations');
+      return []; // Return empty array instead of throwing error
+    }
+    
+    if (!response.ok) {
+      throw new Error('Failed to fetch invitations');
+    }
+    
+    return response.json();
+  } catch (error) {
+    console.error('Error fetching choir invitations:', error);
+    return []; // Return empty array on any error
   }
-  return response.json();
 }

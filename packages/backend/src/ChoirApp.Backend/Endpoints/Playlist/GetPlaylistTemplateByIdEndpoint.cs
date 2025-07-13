@@ -51,8 +51,7 @@ namespace ChoirApp.Backend.Endpoints.Playlist
                     {
                         Id = ps.TemplateSongId,
                         Order = ps.Order,
-                        MasterSongId = ps.MasterSongId,
-                        ChoirSongVersionId = ps.ChoirSongVersionId
+                        SongId = ps.SongId.HasValue ? ps.SongId.Value : Guid.Empty
                     }).ToList()
                 }).ToList()
             };

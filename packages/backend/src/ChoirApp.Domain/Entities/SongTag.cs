@@ -11,7 +11,7 @@ public class SongTag
     public Guid SongId { get; set; }
 
     [ForeignKey("SongId")]
-    public MasterSong? MasterSong { get; set; }
+    public Song? Song { get; set; }
 
     [Required]
     [Column("tag_id")]

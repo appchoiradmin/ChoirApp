@@ -1,6 +1,4 @@
 import { UserRole } from '../constants/roles';
-import type { User } from './user';
-import type { MasterSongDto } from './song';
 
 export type ChoirRole = typeof UserRole.ChoirAdmin | typeof UserRole.ChoirMember;
 
@@ -21,21 +19,5 @@ export interface ChoirDetails extends Choir {
   members: ChoirMember[];
 }
 
-export interface ChoirSongVersionDto {
-  choirSongId: string;
-  masterSongId: string;
-  choirId: string;
-  editedLyricsChordPro: string;
-  lastEditedDate: string;
-  editorUserId: string;
-  masterSong?: MasterSongDto;
-}
-
-export interface CreateChoirSongVersionDto {
-  masterSongId: string;
-  editedLyricsChordPro: string;
-}
-
-export interface UpdateChoirSongVersionDto {
-  editedLyricsChordPro: string;
-}
+// Legacy ChoirSongVersionDto interfaces have been removed
+// These have been replaced by SongVersionDto interfaces in types/song.ts

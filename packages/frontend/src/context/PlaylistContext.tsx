@@ -134,8 +134,7 @@ export const PlaylistProvider = ({
         title: string; 
         order: number; 
         songs: Array<{
-          masterSongId?: string;
-          choirSongVersionId?: string;
+          songId: string;
           order: number;
         }>;
       };
@@ -143,8 +142,7 @@ export const PlaylistProvider = ({
         title: s.title, 
         order: s.order,
         songs: (s.songs || []).map(song => ({
-          masterSongId: song.masterSongId,
-          choirSongVersionId: song.choirSongVersionId,
+          songId: song.songId,
           order: song.order
         }))
       }));

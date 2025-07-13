@@ -45,7 +45,7 @@ public class User
     public DateTime CreatedAt { get; private set; }
 
     public ICollection<Choir> AdminOfChoirs { get; private set; } = new List<Choir>();
-    public ICollection<ChoirSongVersion> EditedSongs { get; private set; } = new List<ChoirSongVersion>();
+    public ICollection<Song> CreatedSongs { get; private set; } = new List<Song>();
     public ICollection<UserChoir> UserChoirs { get; private set; } = new List<UserChoir>();
 
     // For EF Core

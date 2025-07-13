@@ -7,12 +7,9 @@ import CreateChoirPage from './pages/CreateChoirPage.tsx';
 import DashboardPage from './pages/DashboardPage.tsx';
 import AuthCallbackPage from './pages/AuthCallbackPage.tsx';
 import AuthErrorPage from './pages/AuthErrorPage.tsx';
-import MasterSongsListPage from './pages/MasterSongsListPage.tsx';
-import GeneralMasterSongsListWrapper from './components/GeneralMasterSongsListWrapper';
-import CreateMasterSongPage from './pages/CreateMasterSongPage.tsx';
-import MasterSongDetailPage from './pages/MasterSongDetailPage.tsx';
-import MasterSongListWrapper from './components/MasterSongListWrapper.tsx';
-import ChoirSongEditorPage from './pages/ChoirSongEditorPage.tsx';
+import SongsListPage from './pages/SongsListPage.tsx';
+import SongVersionEditorPage from './pages/SongVersionEditorPage.tsx';
+import SongVersionsListPage from './pages/SongVersionsListPage.tsx';
 import ChoirAdminPage from './pages/ChoirAdminPage.tsx';
 import ChoirPlaylistsTab from './pages/ChoirPlaylistsTab';
 import PlaylistDetailPage from './pages/PlaylistDetailPage.tsx';
@@ -57,16 +54,15 @@ function App() {
       <Route path="/dashboard" element={<DashboardPage />} />
       <Route path="/auth/callback" element={<AuthCallbackPage />} />
       <Route path="/auth/error" element={<AuthErrorPage />} />
-      <Route path="/master-songs" element={<GeneralMasterSongsListWrapper />} />
-      <Route path="/master-songs/create" element={<CreateMasterSongPage />} />
-      <Route path="/master-songs/:id" element={<MasterSongDetailPage />} />
+      <Route path="/songs" element={<SongsListPage />} />
       <Route path="/choir/:choirId" element={<ChoirDashboardPage />}>
-        <Route path="songs" element={<MasterSongListWrapper />} />
+        <Route path="songs" element={<SongsListPage />} />
+        <Route path="song-versions" element={<SongVersionsListPage />} />
         <Route path="playlists" element={<ChoirPlaylistsTab />} />
         <Route path="admin" element={<ChoirAdminPage />} />
         <Route path="playlists/:playlistId/edit" element={<EditPlaylistPage />} />
       </Route>
-      <Route path="/choir/:choirId/songs/:songId/edit" element={<ChoirSongEditorPage />} />
+      <Route path="/choir/:choirId/song-versions/:songId/edit" element={<SongVersionEditorPage />} />
       <Route path="/playlists" element={<ChoirPlaylistsTab />} />
       <Route path="/playlists/new" element={<CreatePlaylistPage />} />
       <Route path="/playlists/:playlistId" element={<PlaylistDetailPage />} />

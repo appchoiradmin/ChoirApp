@@ -13,32 +13,46 @@ import { Invitation } from '../types/invitation';
 import MembersList from '../components/admin/MembersList';
 import InviteMember from '../components/admin/InviteMember';
 import InvitationsAccordion from '../components/admin/InvitationsAccordion';
+import { UserRole } from '../constants/roles';
 
 const ChoirAdminPage: React.FC = () => {
   const { choirId } = useParams<{ choirId: string }>();
-  const { token, setChoirId } = useUser();
+  const { token, setChoirId, user } = useUser();
   const [choir, setChoir] = useState<ChoirDetails | null>(null);
   const [invitations, setInvitations] = useState<Invitation[]>([]);
   const pendingInvitations = invitations.filter(inv => inv.status === 'Pending');
   const sentInvitations = invitations.filter(inv => inv.status !== 'Pending');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isAdmin, setIsAdmin] = useState(false);
 
   const fetchChoirDetails = useCallback(async () => {
-    if (choirId && token) {
+    if (choirId && token && user) {
       try {
         setLoading(true);
         const details = await getChoirDetails(choirId, token);
-        const invitations = await getInvitationsByChoir(choirId, token);
+        
+        // Check if the current user is an admin of this choir
+        const currentUserMembership = details.members.find(member => member.id === user.id);
+        const userIsAdmin = currentUserMembership?.role === UserRole.ChoirAdmin;
+        setIsAdmin(userIsAdmin);
+        
+        // Only fetch invitations if user is an admin
+        let invitationsList: Invitation[] = [];
+        if (userIsAdmin) {
+          invitationsList = await getInvitationsByChoir(choirId, token);
+        }
+        
         setChoir(details);
-        setInvitations(invitations);
+        setInvitations(invitationsList);
       } catch (err) {
+        console.error('Error fetching choir details:', err);
         setError('Failed to fetch choir details.');
       } finally {
         setLoading(false);
       }
     }
-  }, [choirId, token]);
+  }, [choirId, token, user]);
 
   useEffect(() => {
     if (choirId) {
@@ -123,45 +137,57 @@ const ChoirAdminPage: React.FC = () => {
           <div className="level-left">
             <div>
               <h1 className="title is-3 mb-1">{choir.name}</h1>
-<p className="subtitle is-5 has-text-weight-semibold mb-4">Admin Panel</p>
-<p className="mb-5">Manage your choir members and playlist templates.</p>
+              {isAdmin ? (
+                <>
+                  <p className="subtitle is-5 has-text-weight-semibold mb-4">Admin Panel</p>
+                  <p className="mb-5">Manage your choir members and playlist templates.</p>
+                </>
+              ) : (
+                <p className="subtitle is-5 has-text-weight-semibold mb-4">Choir Details</p>
+              )}
             </div>
           </div>
           <div className="level-right"></div>
         </div>
         <hr />
         <div className="columns is-multiline">
-  <div className="column is-12-mobile is-7-tablet">
-    <section className="box mb-4">
-      <h2 className="title is-5 mb-3">Choir Members</h2>
-      <MembersList
-        members={choir.members}
-        onRemoveMember={handleRemoveMember}
-        onUpdateMemberRole={handleUpdateMemberRole}
-      />
-      <div className="mt-4">
-        <InviteMember onInviteMember={handleInviteMember} />
-      </div>
-    </section>
-    <section className="box mb-4">
-      <h2 className="title is-5 mb-3">Invitations</h2>
-      <InvitationsAccordion 
-        pendingInvitations={pendingInvitations} 
-        sentInvitations={sentInvitations} 
-      />
-    </section>
-  </div>
-  <div className="column is-12-mobile is-5-tablet">
-    <section className="box">
-      <h2 className="title is-5 mb-3">Playlist Templates</h2>
-      <Link to={`/choir/${choirId}/playlist-templates`} className="button is-info is-fullwidth">
-        <span className="icon"><i className="fas fa-list-alt"></i></span>
-        <span>Manage Playlist Templates</span>
-      </Link>
-      <p className="help mt-2">Create and edit reusable playlist structures for your choir's events.</p>
-    </section>
-  </div>
-</div>
+          <div className="column is-12-mobile is-7-tablet">
+            <section className="box mb-4">
+              <h2 className="title is-5 mb-3">Choir Members</h2>
+              <MembersList
+                members={choir.members}
+                onRemoveMember={isAdmin ? handleRemoveMember : undefined}
+                onUpdateMemberRole={isAdmin ? handleUpdateMemberRole : undefined}
+              />
+              {isAdmin && (
+                <div className="mt-4">
+                  <InviteMember onInviteMember={handleInviteMember} />
+                </div>
+              )}
+            </section>
+            {isAdmin && (
+              <section className="box mb-4">
+                <h2 className="title is-5 mb-3">Invitations</h2>
+                <InvitationsAccordion 
+                  pendingInvitations={pendingInvitations} 
+                  sentInvitations={sentInvitations} 
+                />
+              </section>
+            )}
+          </div>
+          {isAdmin && (
+            <div className="column is-12-mobile is-5-tablet">
+              <section className="box">
+                <h2 className="title is-5 mb-3">Playlist Templates</h2>
+                <Link to={`/choir/${choirId}/playlist-templates`} className="button is-info is-fullwidth">
+                  <span className="icon"><i className="fas fa-list-alt"></i></span>
+                  <span>Manage Playlist Templates</span>
+                </Link>
+                <p className="help mt-2">Create and edit reusable playlist structures for your choir's events.</p>
+              </section>
+            </div>
+          )}
+        </div>
       </div>
     </section>
   );

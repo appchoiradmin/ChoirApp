@@ -17,8 +17,8 @@ import './MembersList.scss';
 
 interface MembersListProps {
   members: ChoirMember[];
-  onRemoveMember: (userId: string) => void;
-  onUpdateMemberRole: (userId: string, role: ChoirRole) => void;
+  onRemoveMember?: (userId: string) => void;
+  onUpdateMemberRole?: (userId: string, role: ChoirRole) => void;
 }
 
 interface MemberCardProps {
@@ -232,8 +232,8 @@ const MembersList: React.FC<MembersListProps> = ({
           member={member}
           isExpanded={expandedMember === member.id}
           onToggleExpand={() => toggleExpand(member.id)}
-          onUpdateRole={(role) => onUpdateMemberRole(member.id, role)}
-          onRemove={() => onRemoveMember(member.id)}
+          onUpdateRole={(role) => onUpdateMemberRole && onUpdateMemberRole(member.id, role)}
+          onRemove={() => onRemoveMember && onRemoveMember(member.id)}
         />
       ))}
     </div>

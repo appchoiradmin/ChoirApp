@@ -29,7 +29,7 @@ public class Choir
     [ForeignKey("AdminUserId")]
     public User? Admin { get; private set; }
 
-    public ICollection<ChoirSongVersion> ChoirSongVersions { get; private set; } = new List<ChoirSongVersion>();
+
     public ICollection<Playlist> Playlists { get; private set; } = new List<Playlist>();
     public ICollection<PlaylistTemplate> PlaylistTemplates { get; private set; } = new List<PlaylistTemplate>();
     public ICollection<UserChoir> UserChoirs { get; private set; } = new List<UserChoir>();

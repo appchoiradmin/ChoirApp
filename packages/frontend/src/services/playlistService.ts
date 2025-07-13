@@ -93,8 +93,7 @@ export const addSongToPlaylist = async (
 };
 
 export interface UpdatePlaylistSongDto {
-  masterSongId?: string;
-  choirSongVersionId?: string;
+  songId: string;
   order: number;
 }
 

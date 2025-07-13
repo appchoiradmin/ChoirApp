@@ -2,24 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useUser } from '../hooks/useUser';
 import { createPlaylist, getPlaylistTemplatesByChoirId, getPlaylistTemplateById } from '../services/playlistService';
-import { getChoirSongsByChoirId } from '../services/choirSongService';
-import { getAllMasterSongs } from '../services/masterSongService';
+import { getSongsForChoir, searchSongs } from '../services/songService';
 import { PlaylistTemplate, PlaylistSection, PlaylistSong } from '../types/playlist';
-import { ChoirSongVersionDto } from '../types/choir';
-import { MasterSongDto } from '../types/song';
+import { SongDto } from '../types/song';
 import MovableSongItem from '../components/MovableSongItem';
-import { Button, Card, LoadingSpinner } from '../components/ui';
-import Layout from '../components/ui/Layout';
-import toast from 'react-hot-toast';
-import { 
-  PlusIcon, 
-  MusicalNoteIcon,
-  CalendarIcon,
-  DocumentTextIcon,
-  XMarkIcon,
-  CheckIcon,
-  ExclamationTriangleIcon
-} from '@heroicons/react/24/outline';
 import styles from './CreatePlaylistPage.module.scss';
 
 const CreatePlaylistPage: React.FC = () => {
@@ -31,21 +17,21 @@ const CreatePlaylistPage: React.FC = () => {
   const [templates, setTemplates] = useState<PlaylistTemplate[]>([]);
   const [selectedTemplate, setSelectedTemplate] = useState<PlaylistTemplate | null>(null);
   const [sections, setSections] = useState<PlaylistSection[]>([]);
-  const [choirSongs, setChoirSongs] = useState<ChoirSongVersionDto[]>([]);
-  const [masterSongs, setMasterSongs] = useState<MasterSongDto[]>([]);
+  const [choirSongs, setChoirSongs] = useState<SongDto[]>([]);
+  const [allSongs, setAllSongs] = useState<SongDto[]>([]);
 
   useEffect(() => {
     const fetchInitialData = async () => {
       if (user?.choirId && token) {
         try {
-          const [fetchedTemplates, fetchedSongs, fetchedMasterSongs] = await Promise.all([
+          const [fetchedTemplates, fetchedChoirSongs, fetchedAllSongs] = await Promise.all([
             getPlaylistTemplatesByChoirId(user.choirId, token),
-            getChoirSongsByChoirId(user.choirId, token),
-            getAllMasterSongs(token)
+            getSongsForChoir(user.choirId, token),
+            searchSongs({}, token)
           ]);
           setTemplates(fetchedTemplates);
-          setChoirSongs(fetchedSongs);
-          setMasterSongs(fetchedMasterSongs);
+          setChoirSongs(fetchedChoirSongs);
+          setAllSongs(fetchedAllSongs);
         } catch (error) {
           console.error(error);
         }
@@ -71,34 +57,34 @@ const CreatePlaylistPage: React.FC = () => {
   };
 
   const handleMoveSong = (song: PlaylistSong, fromSectionId: string, toSectionId: string) => {
-    setSections(prevSections => {
-      const fromSection = prevSections.find(s => s.id === fromSectionId);
-      const toSection = prevSections.find(s => s.id === toSectionId);
-      if (!fromSection || !toSection) return prevSections;
-      const songToMove = fromSection.songs.find(s => s === song);
-      if (!songToMove) return prevSections;
-      // Remove from old section
-      const newFromSongs = fromSection.songs.filter(s => s !== song);
-      // Add to new section at end
-      const newToSongs = [...toSection.songs, { ...songToMove, order: toSection.songs.length }];
-      return prevSections.map(s => {
-        if (s.id === fromSectionId) return { ...s, songs: newFromSongs };
-        if (s.id === toSectionId) return { ...s, songs: newToSongs };
-        return s;
-      });
-    });
+    // Remove from original section
+    const newSections = sections.map(s => 
+      s.id === fromSectionId
+        ? { ...s, songs: s.songs.filter(s => s.id !== song.id) }
+        : s
+    );
+
+    // Add to target section
+    const targetSectionIndex = newSections.findIndex(s => s.id === toSectionId);
+    if (targetSectionIndex >= 0) {
+      const targetSection = newSections[targetSectionIndex];
+      const updatedSongs = [...targetSection.songs, { ...song, order: targetSection.songs.length }];
+      newSections[targetSectionIndex] = { ...targetSection, songs: updatedSongs };
+    }
+
+    setSections(newSections);
   };
 
-  const handleRemoveSongFromSection = (sectionId: string, masterSongId: string) => {
-    setSections(prevSections => prevSections.map(s =>
+  const handleRemoveSongFromSection = (sectionId: string, songId: string) => {
+    setSections(sections.map(s => 
       s.id === sectionId
-        ? { ...s, songs: s.songs.filter(song => song.masterSongId !== masterSongId) }
+        ? { ...s, songs: s.songs.filter(song => song.songId !== songId)}
         : s
     ));
   };
 
-  const handleAddSongToSection = (sectionId: string, choirSongVersionId: string) => {
-    const song = choirSongs.find(s => s.choirSongId === choirSongVersionId);
+  const handleAddSongToSection = (sectionId: string, songId: string) => {
+    const song = choirSongs.find(s => s.songId === songId);
     if (!song) return;
 
     const newSections = sections.map(section => {
@@ -106,8 +92,7 @@ const CreatePlaylistPage: React.FC = () => {
         const newSong: PlaylistSong = {
           id: '', // This will be generated by the backend
           order: section.songs.length,
-          choirSongVersionId: song.choirSongId,
-          masterSongId: song.masterSongId
+          songId: song.songId
         };
         return { ...section, songs: [...section.songs, newSong] };
       }
@@ -199,14 +184,13 @@ const CreatePlaylistPage: React.FC = () => {
               <ul className={styles.songList}>
                 {section.songs.map((song) => (
                   <MovableSongItem
-                    key={song.choirSongVersionId || song.masterSongId}
+                    key={song.songId}
                     song={song}
                     section={section}
                     sections={sections}
-                    choirSongs={choirSongs}
-                    masterSongs={masterSongs}
+                    songs={[...choirSongs, ...allSongs]}
                     onMoveSong={handleMoveSong}
-                    onRemoveSong={() => handleRemoveSongFromSection(section.id, song.masterSongId!)}
+                    onRemoveSong={() => handleRemoveSongFromSection(section.id, song.songId)}
                   />
                 ))}
               </ul>
@@ -215,7 +199,7 @@ const CreatePlaylistPage: React.FC = () => {
                   <select onChange={(e) => handleAddSongToSection(section.id, e.target.value)}>
                     <option>Select a song</option>
                     {choirSongs.map(song => (
-                      <option key={song.choirSongId} value={song.choirSongId}>{song.masterSong?.title}</option>
+                      <option key={song.songId} value={song.songId}>{song.title}</option>
                     ))}
                   </select>
                 </div>

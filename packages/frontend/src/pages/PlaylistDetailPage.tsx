@@ -2,15 +2,15 @@ import React, { useEffect, useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useUser } from '../hooks/useUser';
 import { getPlaylistById, deletePlaylist } from '../services/playlistService';
-import { getChoirSongsByChoirId } from '../services/choirSongService';
+import { getSongsForChoir } from '../services/songService';
 import { Playlist } from '../types/playlist';
-import { ChoirSongVersionDto } from '../types/choir';
+import { SongDto } from '../types/song';
 
 const PlaylistDetailPage: React.FC = () => {
   const { playlistId } = useParams<{ playlistId: string }>();
   const { token } = useUser();
   const [playlist, setPlaylist] = useState<Playlist | null>(null);
-  const [choirSongs, setChoirSongs] = useState<ChoirSongVersionDto[]>([]);
+  const [songs, setSongs] = useState<SongDto[]>([]);
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -22,8 +22,8 @@ const PlaylistDetailPage: React.FC = () => {
           const fetchedPlaylist = await getPlaylistById(playlistId, token);
           setPlaylist(fetchedPlaylist);
           if (fetchedPlaylist) {
-            const fetchedSongs = await getChoirSongsByChoirId(fetchedPlaylist.choirId, token);
-            setChoirSongs(fetchedSongs);
+            const fetchedSongs = await getSongsForChoir(fetchedPlaylist.choirId, token);
+            setSongs(fetchedSongs);
           }
         } catch (err: any) {
           setError(err.message || 'Failed to fetch playlist');
@@ -77,11 +77,13 @@ const PlaylistDetailPage: React.FC = () => {
         <div key={section.id} className="mb-4">
           <h2 className="subtitle">{section.title}</h2>
           {section.songs.map((song) => {
-            const songData = choirSongs.find(cs => cs.choirSongId === song.choirSongVersionId);
+            // Find the song in our songs array using the unified model
+            const songData = songs.find(s => s.songId === song.songId);
+            
             return (
               <div key={song.id} className="box">
-                <Link to={`/master-songs/${song.masterSongId}`}>
-                  {songData?.masterSong?.title}
+                <Link to={`/songs/${song.songId}`}>
+                  {songData?.title || 'Unknown Song'}
                 </Link>
               </div>
             );

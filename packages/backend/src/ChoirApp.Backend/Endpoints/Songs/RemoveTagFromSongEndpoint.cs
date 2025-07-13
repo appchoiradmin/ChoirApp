@@ -1,41 +1,45 @@
-using ChoirApp.Application.Contracts;
+using System;
+using System.Linq;
+using ChoirApp.Application.Services;
 using ChoirApp.Domain.Entities;
 using FastEndpoints;
-using System;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace ChoirApp.Backend.Endpoints.Songs
 {
-    public class RemoveTagFromSongEndpoint : Endpoint<RemoveTagFromSongRequest>
+    public class RemoveTagFromSongEndpoint : EndpointWithoutRequest
     {
-        private readonly IMasterSongService _masterSongService;
+        private readonly ISongService _songService;
 
-        public RemoveTagFromSongEndpoint(IMasterSongService masterSongService)
+        public RemoveTagFromSongEndpoint(ISongService songService)
         {
-            _masterSongService = masterSongService;
+            _songService = songService;
         }
 
         public override void Configure()
         {
             Verbs("DELETE");
-            Routes("/master-songs/{SongId}/tags/{TagId}");
+            Routes("/songs/{songId}/tags/{tagId}");
             AuthSchemes("Bearer");
-            Roles(nameof(UserRole.ChoirAdmin));
+            Roles(nameof(UserRole.GeneralUser), nameof(UserRole.ChoirAdmin));
         }
 
-        public override async Task HandleAsync(RemoveTagFromSongRequest req, CancellationToken ct)
+        public override async Task HandleAsync(CancellationToken ct)
         {
-            var result = await _masterSongService.RemoveTagFromSongAsync(req.SongId, req.TagId);
+            var songId = Route<Guid>("songId");
+            var tagId = Route<Guid>("tagId");
+            
+            var result = await _songService.RemoveTagFromSongAsync(songId, tagId);
 
             if (result.IsFailed)
             {
-                AddError(result.Errors[0].Message);
+                AddError(result.Errors.First().Message);
                 await SendErrorsAsync(cancellation: ct);
                 return;
             }
 
-            await SendOkAsync(ct);
+            await SendNoContentAsync(ct);
         }
     }
 }

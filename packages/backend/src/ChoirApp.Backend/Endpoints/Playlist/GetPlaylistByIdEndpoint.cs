@@ -7,6 +7,9 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
+// Use alias to resolve ambiguity
+using DomainEntities = ChoirApp.Domain.Entities;
+
 namespace ChoirApp.Backend.Endpoints.Playlist
 {
     public class GetPlaylistByIdEndpoint : Endpoint<GetPlaylistByIdRequest, PlaylistDto>
@@ -39,10 +42,11 @@ namespace ChoirApp.Backend.Endpoints.Playlist
             var response = new PlaylistDto
             {
                 Id = playlist.PlaylistId,
-                Title = playlist.Title,
-                IsPublic = playlist.IsPublic,
-                ChoirId = playlist.ChoirId,
-                PlaylistTemplateId = playlist.PlaylistTemplateId,
+                Title = playlist.Name,
+                IsPublic = playlist.Visibility == DomainEntities.SongVisibilityType.PublicAll,
+                ChoirId = playlist.ChoirId ?? Guid.Empty,
+                Date = playlist.CreatedAt.DateTime,
+                PlaylistTemplateId = null, // This field doesn't exist in the new model
                 Sections = playlist.Sections
                     .OrderBy(s => s.Order)
                     .Select(s => new PlaylistSectionDto
@@ -56,30 +60,24 @@ namespace ChoirApp.Backend.Endpoints.Playlist
                     {
                         Id = ps.PlaylistSongId,
                         Order = ps.Order,
-                        MasterSongId = ps.MasterSongId,
-                        ChoirSongVersionId = ps.ChoirSongVersionId,
-                        MasterSong = ps.MasterSong == null ? null : new MasterSongDto
+                        SongId = ps.SongId,
+                        Song = ps.Song == null ? null : new SongDto
                         {
-                            SongId = ps.MasterSong.SongId,
-                            Title = ps.MasterSong.Title,
-                            Artist = ps.MasterSong.Artist,
-                            LyricsChordPro = ps.MasterSong.LyricsChordPro,
-                            Tags = ps.MasterSong.SongTags
-                                .Where(st => st.Tag != null)
-                                .Select(st => new TagDto
+                            SongId = ps.Song.SongId,
+                            Title = ps.Song.Title,
+                            Artist = ps.Song.Artist,
+                            Content = ps.Song.Content,
+                            CreatedAt = ps.Song.CreatedAt,
+                            CreatorId = ps.Song.CreatorId,
+                            CreatorName = ps.Song.Creator?.Name ?? string.Empty,
+                            Visibility = (Application.Dtos.SongVisibilityType)ps.Song.Visibility,
+                            Tags = ps.Song.Tags
+                                .Where(t => t.Tag != null)
+                                .Select(t => new TagDto
                                 {
-                                    TagId = st.Tag!.TagId,
-                                    TagName = st.Tag!.TagName
+                                    TagId = t.Tag!.TagId,
+                                    TagName = t.Tag!.TagName
                                 }).ToList()
-                        },
-                        ChoirSongVersion = ps.ChoirSongVersion == null ? null : new ChoirSongVersionDto
-                        {
-                            ChoirSongId = ps.ChoirSongVersion.ChoirSongId,
-                            MasterSongId = ps.ChoirSongVersion.MasterSongId,
-                            ChoirId = ps.ChoirSongVersion.ChoirId,
-                            EditedLyricsChordPro = ps.ChoirSongVersion.EditedLyricsChordPro,
-                            LastEditedDate = ps.ChoirSongVersion.LastEditedDate,
-                            EditorUserId = ps.ChoirSongVersion.EditorUserId
                         }
                     }).ToList()
                 }).ToList(),

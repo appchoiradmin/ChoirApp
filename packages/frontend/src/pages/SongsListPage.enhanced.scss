@@ -1,0 +1,86 @@
+@use '../styles/variables' as *;
+
+// Enhanced styles for the songs list page with more modern UI elements
+
+.songs-page {
+  &__card {
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    
+    &:hover {
+      border-color: $primary;
+    }
+  }
+  
+  &__search {
+    input {
+      transition: all 0.2s ease;
+      
+      &:focus {
+        box-shadow: 0 0 0 3px rgba($primary, 0.2);
+        border-color: $primary;
+        outline: none;
+      }
+    }
+  }
+  
+  &__song-tag {
+    transition: all 0.2s ease;
+    
+    &:hover {
+      background-color: $primary;
+      color: white;
+    }
+  }
+  
+  &__dropdown-menu {
+    transform-origin: top right;
+    animation: dropdown-appear 0.2s ease forwards;
+  }
+  
+  @keyframes dropdown-appear {
+    from {
+      opacity: 0;
+      transform: scale(0.95);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+  
+  &__back-to-top {
+    animation: fade-in 0.3s ease forwards;
+  }
+  
+  @keyframes fade-in {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  // Mobile-first enhancements
+  @media (max-width: 768px) {
+    &__card {
+      // Make cards more touch-friendly on mobile
+      &:active {
+        transform: scale(0.98);
+      }
+    }
+    
+    &__dropdown-menu {
+      width: 100%;
+      left: 0;
+      right: 0;
+    }
+    
+    &__back-to-top {
+      bottom: 1rem;
+      right: 1rem;
+    }
+  }
+}

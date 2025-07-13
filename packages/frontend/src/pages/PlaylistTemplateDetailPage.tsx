@@ -197,7 +197,7 @@ const PlaylistTemplateDetailPage: React.FC = () => {
                           {section.songs.map((song) => (
                             <div key={song.id} className="song-item">
                               <span className="song-id">
-                                ID: {song.masterSongId || song.choirSongVersionId}
+                                ID: {song.songId}
                               </span>
                             </div>
                           ))}

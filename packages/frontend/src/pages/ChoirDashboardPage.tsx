@@ -61,7 +61,7 @@ const ChoirDashboardPage: React.FC = () => {
   ];
 
   if (isAdmin) {
-    tabs.splice(2, 0, { name: 'Admin', path: `/choir/${choirId}/admin`, icon: <Cog6ToothIcon /> }); // Insert Admin as the last tab
+    tabs.push({ name: 'Admin', path: `/choir/${choirId}/admin`, icon: <Cog6ToothIcon /> }); // Add Admin as the last tab
   }
 
   return (

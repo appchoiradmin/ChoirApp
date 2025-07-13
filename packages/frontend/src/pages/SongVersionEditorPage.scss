@@ -1,0 +1,104 @@
+// SongVersionEditorPage Styles - Modern Design System Implementation
+@use '../_variables.scss' as *;
+
+// Main Container
+.song-editor-container {
+  min-height: calc(100vh - 4rem);
+  background: linear-gradient(135deg, $color-neutral-50 0%, $color-neutral-100 100%);
+  padding: $spacing-lg $spacing-md;
+  
+  @media (max-width: 768px) {
+    padding: $spacing-md $spacing-sm;
+  }
+}
+
+// Loading States
+.song-editor-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh;
+  gap: $spacing-lg;
+  
+  .loading-text {
+    font-size: $font-size-lg;
+    color: $color-neutral-600;
+    margin: 0;
+  }
+}
+
+.song-editor-error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh;
+  gap: $spacing-lg;
+  text-align: center;
+  
+  .error-icon {
+    width: 4rem;
+    height: 4rem;
+    color: $color-warning;
+  }
+  
+  .error-title {
+    font-size: $font-size-2xl;
+    font-weight: $font-weight-bold;
+    color: $color-neutral-900;
+    margin: 0;
+  }
+  
+  .error-message {
+    font-size: $font-size-lg;
+    color: $color-neutral-600;
+    margin: 0;
+    max-width: 24rem;
+  }
+}
+
+// Header Section
+.editor-header {
+  background: white;
+  border-radius: $radius-xl;
+  box-shadow: $shadow-sm;
+  padding: $spacing-xl;
+  margin-bottom: $spacing-2xl;
+  
+  .header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: $spacing-lg;
+    
+    @media (max-width: 768px) {
+      flex-direction: column;
+      gap: $spacing-md;
+    }
+  }
+  
+  .header-left {
+    display: flex;
+    align-items: flex-start;
+    gap: $spacing-lg;
+    flex: 1;
+    
+    @media (max-width: 640px) {
+      flex-direction: column;
+      gap: $spacing-md;
+    }
+    
+    .back-button {
+      display: flex;
+      align-items: center;
+      gap: $spacing-sm;
+      flex-shrink: 0;
+      
+      .button-icon {
+        width: 1.25rem;
+        height: 1.25rem;
+      }
+    }
+  }
+}

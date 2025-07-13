@@ -73,14 +73,14 @@ namespace ChoirApp.Domain.Entities
             Order = newOrder;
         }
 
-        public Result<PlaylistSong> AddSong(Guid? masterSongId, Guid? choirSongVersionId)
+        public Result<PlaylistSong> AddSong(Guid songId)
         {
-            if (!masterSongId.HasValue && !choirSongVersionId.HasValue)
+            if (songId == Guid.Empty)
             {
-                return Result.Fail("A song must have a master song or a choir song version.");
+                return Result.Fail("A valid song ID must be provided.");
             }
 
-            var newSongResult = PlaylistSong.Create(SectionId, PlaylistSongs.Count, masterSongId, choirSongVersionId);
+            var newSongResult = PlaylistSong.Create(SectionId, PlaylistSongs.Count, songId);
             if (newSongResult.IsFailed)
                 return Result.Fail(newSongResult.Errors);
 
