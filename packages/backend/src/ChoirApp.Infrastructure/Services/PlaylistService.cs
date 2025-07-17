@@ -49,7 +49,6 @@ namespace ChoirApp.Infrastructure.Services
             {
                 var template = await _context.PlaylistTemplates
                     .Include(t => t.Sections)
-                    .ThenInclude(s => s.PlaylistTemplateSongs)
                     .FirstOrDefaultAsync(t => t.TemplateId == playlistDto.PlaylistTemplateId.Value);
 
                 if (template != null)
@@ -60,16 +59,9 @@ namespace ChoirApp.Infrastructure.Services
                         if (sectionResult.IsFailed)
                             return Result.Fail(sectionResult.Errors);
 
+                        // Note: PlaylistTemplateSongs entity has been removed
+                        // Create an empty section without songs
                         var newSection = playlist.Sections.Last();
-                        foreach (var songTemplate in sectionTemplate.PlaylistTemplateSongs.OrderBy(s => s.Order))
-                        {
-                            if (songTemplate.SongId.HasValue)
-                            {
-                                var songResult = newSection.AddSong(songTemplate.SongId.Value);
-                                if (songResult.IsFailed)
-                                    return Result.Fail(songResult.Errors);
-                            }
-                        }
                     }
                 }
             }
@@ -228,8 +220,6 @@ namespace ChoirApp.Infrastructure.Services
         {
             var template = await _context.PlaylistTemplates
                 .Include(t => t.Sections)
-                .ThenInclude(s => s.PlaylistTemplateSongs)
-                .ThenInclude(ps => ps.Song)
                 .FirstOrDefaultAsync(t => t.TemplateId == templateId);
 
             if (template == null)
@@ -398,6 +388,35 @@ namespace ChoirApp.Infrastructure.Services
             var newOrder = toSection.PlaylistSongs.Count;
             songToMove.UpdateSection(toSection.SectionId, newOrder);
 
+            await _context.SaveChangesAsync();
+            return Result.Ok();
+        }
+
+        public async Task<Result> SetPlaylistTemplateDefaultAsync(Guid templateId, SetTemplateDefaultDto dto, Guid userId)
+        {
+            var template = await _context.PlaylistTemplates.FindAsync(templateId);
+            if (template == null)
+                return Result.Fail("Playlist template not found.");
+
+            var userChoir = await _context.UserChoirs.FirstOrDefaultAsync(uc => uc.UserId == userId && uc.ChoirId == template.ChoirId);
+            if (userChoir == null)
+                return Result.Fail("User is not a member of this choir.");
+
+            if (dto.IsDefault)
+            {
+                // Clear default status from all other templates in this choir
+                var otherDefaultTemplates = await _context.PlaylistTemplates
+                    .Where(t => t.ChoirId == template.ChoirId && t.IsDefault && t.TemplateId != templateId)
+                    .ToListAsync();
+                
+                foreach (var otherTemplate in otherDefaultTemplates)
+                {
+                    otherTemplate.SetDefault(false);
+                }
+            }
+
+            // Set the default status for this template
+            template.SetDefault(dto.IsDefault);
             await _context.SaveChangesAsync();
             return Result.Ok();
         }
