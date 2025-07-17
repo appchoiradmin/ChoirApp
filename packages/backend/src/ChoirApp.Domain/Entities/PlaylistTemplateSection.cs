@@ -29,8 +29,6 @@ namespace ChoirApp.Domain.Entities
         [ForeignKey("TemplateId")]
         public PlaylistTemplate? Template { get; private set; }
 
-        public ICollection<PlaylistTemplateSong> PlaylistTemplateSongs { get; private set; } = new List<PlaylistTemplateSong>();
-
         private PlaylistTemplateSection()
         {
             Title = string.Empty;

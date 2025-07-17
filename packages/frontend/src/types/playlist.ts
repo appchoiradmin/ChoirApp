@@ -36,6 +36,7 @@ export interface PlaylistTemplate {
   title: string;
   description?: string;
   choirId: string;
+  isDefault: boolean;
   sections: PlaylistTemplateSection[];
 }
 

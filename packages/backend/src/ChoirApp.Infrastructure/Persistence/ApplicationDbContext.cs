@@ -14,7 +14,6 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     public DbSet<PlaylistSong> PlaylistSongs { get; set; } = null!;
     public DbSet<PlaylistTemplate> PlaylistTemplates { get; set; } = null!;
     public DbSet<PlaylistTemplateSection> PlaylistTemplateSections { get; set; } = null!;
-    public DbSet<PlaylistTemplateSong> PlaylistTemplateSongs { get; set; } = null!;
     public DbSet<Tag> Tags { get; set; } = null!;
     public DbSet<SongTag> SongTags { get; set; } = null!;
     public DbSet<PlaylistTag> PlaylistTags { get; set; } = null!;
@@ -131,9 +130,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
             .HasIndex(pts => new { pts.TemplateId, pts.Order })
             .IsUnique();
 
-        modelBuilder.Entity<PlaylistTemplateSong>()
-            .HasIndex(pts => new { pts.TemplateSectionId, pts.Order })
-            .IsUnique();
+        // PlaylistTemplateSong entity has been removed
 
         modelBuilder.Entity<Tag>()
             .HasIndex(t => t.TagName)

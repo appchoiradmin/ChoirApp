@@ -42,17 +42,13 @@ namespace ChoirApp.Backend.Endpoints.Playlist
                 Title = template.Title,
                 Description = template.Description,
                 ChoirId = template.ChoirId,
+                IsDefault = template.IsDefault,
                 Sections = template.Sections.Select(s => new PlaylistTemplateSectionDto
                 {
                     Id = s.TemplateSectionId,
                     Title = s.Title,
                     Order = s.Order,
-                    Songs = s.PlaylistTemplateSongs.Select(ps => new PlaylistSongDto
-                    {
-                        Id = ps.TemplateSongId,
-                        Order = ps.Order,
-                        SongId = ps.SongId.HasValue ? ps.SongId.Value : Guid.Empty
-                    }).ToList()
+                    Songs = new List<PlaylistSongDto>()
                 }).ToList()
             };
 

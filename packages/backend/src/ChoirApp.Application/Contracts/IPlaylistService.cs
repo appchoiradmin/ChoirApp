@@ -20,6 +20,7 @@ namespace ChoirApp.Application.Contracts
         Task<Result<IEnumerable<PlaylistTemplate>>> GetPlaylistTemplatesByChoirIdAsync(Guid choirId);
         Task<Result> UpdatePlaylistTemplateAsync(Guid templateId, UpdatePlaylistTemplateDto templateDto, Guid userId);
         Task<Result> DeletePlaylistTemplateAsync(Guid templateId, Guid userId);
+        Task<Result> SetPlaylistTemplateDefaultAsync(Guid templateId, SetTemplateDefaultDto dto, Guid userId);
         Task<Result> AddSongToPlaylistAsync(string playlistId, AddSongToPlaylistDto dto);
         Task<Result> RemoveSongFromPlaylistAsync(string playlistId, string songId);
         Task<Result> MoveSongInPlaylistAsync(string playlistId, string songId, string fromSectionId, string toSectionId, Guid userId);

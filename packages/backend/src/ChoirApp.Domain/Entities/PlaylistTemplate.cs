@@ -25,6 +25,9 @@ namespace ChoirApp.Domain.Entities
         [Column("choir_id")]
         public Guid ChoirId { get; private set; }
 
+        [Column("is_default")]
+        public bool IsDefault { get; private set; }
+
         [ForeignKey("ChoirId")]
         public Choir? Choir { get; private set; }
 
@@ -35,15 +38,16 @@ namespace ChoirApp.Domain.Entities
             Title = string.Empty;
         }
 
-        private PlaylistTemplate(string title, Guid choirId, string? description)
+        private PlaylistTemplate(string title, Guid choirId, string? description, bool isDefault = false)
         {
             TemplateId = Guid.NewGuid();
             Title = title;
             ChoirId = choirId;
             Description = description;
+            IsDefault = isDefault;
         }
 
-        public static Result<PlaylistTemplate> Create(string title, Guid choirId, string? description)
+        public static Result<PlaylistTemplate> Create(string title, Guid choirId, string? description, bool isDefault = false)
         {
             if (string.IsNullOrWhiteSpace(title))
             {
@@ -55,7 +59,7 @@ namespace ChoirApp.Domain.Entities
                 return Result.Fail("A template must be associated with a choir.");
             }
 
-            var template = new PlaylistTemplate(title, choirId, description);
+            var template = new PlaylistTemplate(title, choirId, description, isDefault);
             return Result.Ok(template);
         }
 
@@ -70,6 +74,11 @@ namespace ChoirApp.Domain.Entities
         public void UpdateDescription(string? description)
         {
             Description = description;
+        }
+
+        public void SetDefault(bool isDefault)
+        {
+            IsDefault = isDefault;
         }
     }
 }

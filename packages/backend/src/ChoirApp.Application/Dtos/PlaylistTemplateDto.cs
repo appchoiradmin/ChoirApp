@@ -9,6 +9,7 @@ namespace ChoirApp.Application.Dtos
         public string Title { get; set; } = string.Empty;
         public string? Description { get; set; }
         public Guid ChoirId { get; set; }
+        public bool IsDefault { get; set; }
         public List<PlaylistTemplateSectionDto> Sections { get; set; } = new List<PlaylistTemplateSectionDto>();
     }
 
