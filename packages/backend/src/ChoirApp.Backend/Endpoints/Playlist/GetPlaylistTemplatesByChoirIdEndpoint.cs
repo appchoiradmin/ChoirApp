@@ -44,6 +44,7 @@ namespace ChoirApp.Backend.Endpoints.Playlist
                 Title = t.Title,
                 Description = t.Description,
                 ChoirId = t.ChoirId,
+                IsDefault = t.IsDefault,
                 Sections = t.Sections
                     .OrderBy(s => s.Order)
                     .Select(s => new PlaylistTemplateSectionDto
