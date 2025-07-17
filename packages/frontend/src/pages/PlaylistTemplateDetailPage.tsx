@@ -5,13 +5,12 @@ import { getPlaylistTemplateById, deletePlaylistTemplate } from '../services/pla
 import { PlaylistTemplate } from '../types/playlist';
 import Layout from '../components/ui/Layout';
 import Navigation from '../components/ui/Navigation';
-import Card from '../components/ui/Card';
+// Card import removed as it's not being used
 import Button from '../components/ui/Button';
 import { 
   PencilIcon, 
   TrashIcon, 
   DocumentTextIcon, 
-  MusicalNoteIcon,
   ExclamationCircleIcon 
 } from '@heroicons/react/24/outline';
 import './PlaylistTemplateDetailPage.scss';
@@ -102,7 +101,7 @@ const PlaylistTemplateDetailPage: React.FC = () => {
     );
   }
 
-  const totalSongs = template.sections.reduce((sum, section) => sum + section.songs.length, 0);
+  // We don't need to calculate totalSongs as we're removing that stat
 
   return (
     <Layout 
@@ -148,24 +147,17 @@ const PlaylistTemplateDetailPage: React.FC = () => {
             </div>
           </div>
         </div>
+        
+        {/* Template explanation */}
+        <div className="template-description-box">
+          <p>Templates define the structure for your playlists. Add sections here, then use this template to create playlists with actual songs.</p>
+        </div>
 
-        {/* Stats */}
+        {/* Stats - Simplified to only show relevant information */}
         <div className="template-stats">
           <div className="stat-card">
             <span className="stat-number">{template.sections.length}</span>
             <span className="stat-label">Sections</span>
-          </div>
-          <div className="stat-card">
-            <span className="stat-number">{totalSongs}</span>
-            <span className="stat-label">Total Songs</span>
-          </div>
-          <div className="stat-card">
-            <span className="stat-number">Recent</span>
-            <span className="stat-label">Created</span>
-          </div>
-          <div className="stat-card">
-            <span className="stat-number">Active</span>
-            <span className="stat-label">Status</span>
           </div>
         </div>
 
@@ -186,29 +178,8 @@ const PlaylistTemplateDetailPage: React.FC = () => {
                   </div>
                   
                   <div className="section-content">
-                    <div className="section-songs">
-                      <div className="songs-header">
-                        <span className="songs-label">Songs in this section</span>
-                        <span className="songs-count">{section.songs.length}</span>
-                      </div>
-                      
-                      {section.songs.length > 0 ? (
-                        <div className="songs-list">
-                          {section.songs.map((song) => (
-                            <div key={song.id} className="song-item">
-                              <MusicalNoteIcon className="song-icon" />
-                              <span className="song-title">
-                                Song Title Placeholder
-                              </span>
-                            </div>
-                          ))}
-                        </div>
-                      ) : (
-                        <div className="empty-songs">
-                          <MusicalNoteIcon className="empty-icon" />
-                          <p>No songs in this section yet</p>
-                        </div>
-                      )}
+                    <div className="section-placeholder">
+                      {/* Empty placeholder for section - explanation moved to header */}
                     </div>
                   </div>
                 </div>
