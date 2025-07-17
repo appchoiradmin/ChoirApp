@@ -1,12 +1,13 @@
 import React from 'react';
 import clsx from 'clsx';
+import styles from './Card.module.scss';
 
 interface CardProps {
   className?: string;
   children: React.ReactNode;
   hover?: boolean;
   padding?: 'none' | 'sm' | 'md' | 'lg';
-  onClick?: () => void;
+  onClick?: (event: React.MouseEvent<HTMLDivElement>) => void;
 }
 
 interface CardHeaderProps {
@@ -28,10 +29,10 @@ const Card = ({ className, children, hover = true, padding = 'md', onClick }: Ca
   return (
     <div
       className={clsx(
-        'card',
+        styles.card,
         {
-          'card-hover': hover,
-          [`card-padding-${padding}`]: padding !== 'md',
+          [styles.hover]: hover,
+          [styles[`padding-${padding}`]]: padding !== 'md',
           'cursor-pointer': onClick,
         },
         className
@@ -45,15 +46,15 @@ const Card = ({ className, children, hover = true, padding = 'md', onClick }: Ca
 
 const CardHeader = ({ className, children }: CardHeaderProps) => {
   return (
-    <header className={clsx('card-header', className)}>
-      <div className="card-header-title">{children}</div>
+    <header className={clsx(styles.header, className)}>
+      {children}
     </header>
   );
 };
 
 const CardContent = ({ className, children }: CardContentProps) => {
   return (
-    <div className={clsx('card-content', className)}>
+    <div className={clsx(styles.content, className)}>
       {children}
     </div>
   );
@@ -61,7 +62,7 @@ const CardContent = ({ className, children }: CardContentProps) => {
 
 const CardFooter = ({ className, children }: CardFooterProps) => {
   return (
-    <footer className={clsx('card-footer', className)}>
+    <footer className={clsx(styles.footer, className)}>
       {children}
     </footer>
   );

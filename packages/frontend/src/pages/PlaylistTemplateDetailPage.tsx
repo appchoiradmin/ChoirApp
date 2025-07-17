@@ -151,22 +151,22 @@ const PlaylistTemplateDetailPage: React.FC = () => {
 
         {/* Stats */}
         <div className="template-stats">
-          <Card className="stat-card">
+          <div className="stat-card">
             <span className="stat-number">{template.sections.length}</span>
             <span className="stat-label">Sections</span>
-          </Card>
-          <Card className="stat-card">
+          </div>
+          <div className="stat-card">
             <span className="stat-number">{totalSongs}</span>
             <span className="stat-label">Total Songs</span>
-          </Card>
-          <Card className="stat-card">
+          </div>
+          <div className="stat-card">
             <span className="stat-number">Recent</span>
             <span className="stat-label">Created</span>
-          </Card>
-          <Card className="stat-card">
+          </div>
+          <div className="stat-card">
             <span className="stat-number">Active</span>
             <span className="stat-label">Status</span>
-          </Card>
+          </div>
         </div>
 
         {/* Sections */}
@@ -179,7 +179,7 @@ const PlaylistTemplateDetailPage: React.FC = () => {
           {template.sections.length > 0 ? (
             <div className="sections-list">
               {template.sections.map((section, index) => (
-                <Card key={section.id} className="section-card">
+                <div key={section.id} className="section-card">
                   <div className="section-header">
                     <h3 className="section-title">{section.title}</h3>
                     <span className="section-order">#{index + 1}</span>
@@ -196,8 +196,9 @@ const PlaylistTemplateDetailPage: React.FC = () => {
                         <div className="songs-list">
                           {section.songs.map((song) => (
                             <div key={song.id} className="song-item">
-                              <span className="song-id">
-                                ID: {song.songId}
+                              <MusicalNoteIcon className="song-icon" />
+                              <span className="song-title">
+                                Song Title Placeholder
                               </span>
                             </div>
                           ))}
@@ -210,7 +211,7 @@ const PlaylistTemplateDetailPage: React.FC = () => {
                       )}
                     </div>
                   </div>
-                </Card>
+                </div>
               ))}
             </div>
           ) : (

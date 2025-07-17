@@ -7,6 +7,7 @@ export interface UserContextType {
   setToken: (token: string | null) => void;
   loading: boolean;
   refetchUser: () => Promise<void>;
+  refreshToken: () => Promise<boolean>;
   setChoirId: (choirId: string) => void;
   signOut: () => void;
 }

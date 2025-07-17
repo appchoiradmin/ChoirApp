@@ -1,5 +1,6 @@
 import React from 'react';
 import clsx from 'clsx';
+import styles from './Button.module.scss';
 
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: 'primary' | 'secondary' | 'accent' | 'outlined' | 'ghost';
@@ -25,12 +26,12 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     return (
       <button
         className={clsx(
-          'button',
-          `is-${variant}`,
-          `is-${size}`,
+          styles.button,
+          styles[`is-${variant}`],
+          styles[`is-${size}`],
           {
-            'is-loading': loading,
-            'is-disabled': disabled || loading,
+            [styles['is-loading']]: loading,
+            [styles['is-disabled']]: disabled || loading,
           },
           className
         )}
@@ -38,9 +39,9 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         ref={ref}
         {...props}
       >
-        {leftIcon && <span className="icon">{leftIcon}</span>}
+        {leftIcon && <span className={styles.icon}>{leftIcon}</span>}
         <span>{children}</span>
-        {rightIcon && <span className="icon">{rightIcon}</span>}
+        {rightIcon && <span className={styles.icon}>{rightIcon}</span>}
       </button>
     );
   }

@@ -21,8 +21,7 @@ import {
   ChevronUpIcon,
   XMarkIcon
 } from '@heroicons/react/24/outline';
-import './PlaylistTemplatesPage.scss';
-import './PlaylistTemplatesPage.scss';
+import styles from './PlaylistTemplatesPage.module.scss';
 
 interface FilterOptions {
   search: string;
@@ -46,97 +45,74 @@ const TemplateCard: React.FC<TemplateCardProps> = ({
   onToggleSelect,
   onDelete,
   dropdownOpen,
-  onDropdownToggle
+  onDropdownToggle,
 }) => {
   const navigate = useNavigate();
 
   const handleCardClick = (e: React.MouseEvent) => {
-    // Don't navigate if clicking on checkbox or dropdown
-    if ((e.target as HTMLElement).closest('.template-checkbox, .template-dropdown')) {
+    if ((e.target as HTMLElement).closest('input, button')) {
       return;
     }
     navigate(`/playlist-templates/${template.id}`);
   };
 
   return (
-    <Card className={`template-card ${isSelected ? 'selected' : ''}`}>
-      <div className="template-content" onClick={handleCardClick}>
-        <div className="template-header">
-          <div className="template-checkbox">
-            <input
-              type="checkbox"
-              checked={isSelected}
-              onChange={onToggleSelect}
-              onClick={(e) => e.stopPropagation()}
-            />
-          </div>
-          <h3 className="template-title">{template.title}</h3>
-          <div className="template-dropdown">
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                onDropdownToggle();
-              }}
-              className="dropdown-trigger"
-            >
-              <EllipsisVerticalIcon />
-            </button>
-            {dropdownOpen && (
-              <div className="dropdown-menu">
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    navigate(`/playlist-templates/${template.id}/edit`);
-                  }}
-                  className="dropdown-item"
-                >
-                  <PencilIcon />
-                  Edit
-                </button>
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onDelete();
-                  }}
-                  className="dropdown-item danger"
-                >
-                  <TrashIcon />
-                  Delete
-                </button>
-              </div>
-            )}
-          </div>
+    <Card onClick={handleCardClick} hover>
+      <Card.Header>
+        <input
+          type="checkbox"
+          checked={isSelected}
+          onChange={onToggleSelect}
+          onClick={(e) => e.stopPropagation()}
+        />
+        <h3 className="font-bold">{template.title}</h3>
+        <div className="relative">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={(e) => {
+              e.stopPropagation();
+              onDropdownToggle();
+            }}
+          >
+            <EllipsisVerticalIcon className="w-5 h-5" />
+          </Button>
+          {dropdownOpen && (
+            <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg z-10">
+              <Button
+                variant="ghost"
+                className="w-full text-left"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  navigate(`/playlist-templates/${template.id}/edit`);
+                }}
+              >
+                <PencilIcon className="w-4 h-4 mr-2" />
+                Edit
+              </Button>
+              <Button
+                variant="ghost"
+                className="w-full text-left text-red-600"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onDelete();
+                }}
+              >
+                <TrashIcon className="w-4 h-4 mr-2" />
+                Delete
+              </Button>
+            </div>
+          )}
         </div>
-        
-        {template.description && (
-          <p className="template-description">{template.description}</p>
-        )}
-        
-        <div className="template-sections">
-          <div className="sections-header">
-            <span className="sections-count">
-              {template.sections.length} section{template.sections.length !== 1 ? 's' : ''}
-            </span>
-          </div>
-          <div className="sections-list">
-            {template.sections
-              .slice()
-              .sort((a, b) => a.order - b.order)
-              .slice(0, 3)
-              .map((section, index) => (
-                <span key={section.id} className="section-name">
-                  {section.title}
-                  {index < Math.min(template.sections.length - 1, 2) && ', '}
-                </span>
-              ))}
-            {template.sections.length > 3 && (
-              <span className="more-sections">
-                +{template.sections.length - 3} more
-              </span>
-            )}
-          </div>
-        </div>
-      </div>
+      </Card.Header>
+      <Card.Content>
+        {template.description && <p className="text-gray-600">{template.description}</p>}
+      </Card.Content>
+      <Card.Footer>
+        <span className="text-sm text-gray-500">
+          {template.sections.length} section{template.sections.length !== 1 ? 's' : ''}
+        </span>
+      </Card.Footer>
     </Card>
   );
 };
@@ -308,211 +284,53 @@ const PlaylistTemplatesPage: React.FC = () => {
 
   return (
     <Layout>
-      <div className="templates-container">
-        {/* Header */}
-        <div className="templates-header">
-          <div className="header-content">
-            <div className="header-title">
-              <Button
-                variant="ghost"
-                leftIcon={<ArrowLeftIcon />}
-                onClick={() => navigate(-1)}
-                className="back-button"
-              >
-                Back
-              </Button>
-              <h1 className="page-title">Playlist Templates</h1>
-            </div>
-            <div className="header-actions">
-              <Button
-                variant="primary"
-                leftIcon={<PlusIcon />}
-                onClick={() => navigate('/playlist-templates/new')}
-                className="create-button"
-              >
-                New Template
-              </Button>
-            </div>
-          </div>
-          
-          {/* Stats Cards */}
-          <div className="header-stats">
-            <div className="stat-card">
-              <span className="stat-number">{stats.total}</span>
-              <span className="stat-label">Templates</span>
-            </div>
-            <div className="stat-card">
-              <span className="stat-number">{stats.sections}</span>
-              <span className="stat-label">Total Sections</span>
-            </div>
-            <div className="stat-card">
-              <span className="stat-number">{stats.avgSections}</span>
-              <span className="stat-label">Avg Sections</span>
-            </div>
-            <div className="stat-card">
-              <span className="stat-number">{stats.filtered}</span>
-              <span className="stat-label">Filtered</span>
-            </div>
-          </div>
+      <div className={styles.page}>
+        <div className={styles.header}>
+          <h1 className={styles.title}>Playlist Templates</h1>
+          <Button
+            variant="primary"
+            leftIcon={<PlusIcon className="w-5 h-5" />}
+            onClick={() => navigate('/playlist-templates/new')}
+          >
+            New Template
+          </Button>
         </div>
 
-        {/* Search and Filters */}
-        <div className="templates-filters">
-          <div className="search-section">
-            <div className="search-input-container">
-              <MagnifyingGlassIcon className="search-icon" />
-              <input
-                type="text"
-                placeholder="Search templates..."
-                value={filters.search}
-                onChange={(e) => setFilters(prev => ({ ...prev, search: e.target.value }))}
-                className="search-input"
-              />
-              {filters.search && (
-                <button
-                  onClick={() => setFilters(prev => ({ ...prev, search: '' }))}
-                  className="clear-search"
-                >
-                  <XMarkIcon />
-                </button>
-              )}
-            </div>
-            
-            <div className="filter-controls">
-              <button
-                onClick={() => setFilters(prev => ({ ...prev, showAdvanced: !prev.showAdvanced }))}
-                className={`filter-toggle ${filters.showAdvanced ? 'active' : ''}`}
-              >
-                <FunnelIcon />
-                Filters
-                {filters.showAdvanced ? <ChevronUpIcon /> : <ChevronDownIcon />}
-              </button>
-              
-              <div className="view-toggle">
-                <button
-                  onClick={() => setViewMode('grid')}
-                  className={`view-button ${viewMode === 'grid' ? 'active' : ''}`}
-                >
-                  <Squares2X2Icon />
-                </button>
-                <button
-                  onClick={() => setViewMode('list')}
-                  className={`view-button ${viewMode === 'list' ? 'active' : ''}`}
-                >
-                  <ListBulletIcon />
-                </button>
-              </div>
-            </div>
-          </div>
-
-          {/* Advanced Filters */}
-          {filters.showAdvanced && (
-            <div className="advanced-filters">
-              <div className="filter-group">
-                <label>Sort By</label>
-                <select
-                  value={filters.sortBy}
-                  onChange={(e) => setFilters(prev => ({ ...prev, sortBy: e.target.value as FilterOptions['sortBy'] }))}
-                >
-                  <option value="title">Title</option>
-                  <option value="sections">Sections</option>
-                  <option value="created">Created</option>
-                  <option value="updated">Updated</option>
-                </select>
-              </div>
-              
-              <div className="filter-group">
-                <label>Order</label>
-                <select
-                  value={filters.sortOrder}
-                  onChange={(e) => setFilters(prev => ({ ...prev, sortOrder: e.target.value as FilterOptions['sortOrder'] }))}
-                >
-                  <option value="asc">Ascending</option>
-                  <option value="desc">Descending</option>
-                </select>
-              </div>
-              
-              <Button
-                variant="ghost"
-                onClick={clearFilters}
-                className="clear-filters"
-              >
-                Clear All
-              </Button>
-            </div>
-          )}
+        <div className={styles.stats}>
+          <Card className={styles.statCard}>
+            <p className="text-2xl font-bold">{stats.total}</p>
+            <p className="text-sm text-gray-500">Templates</p>
+          </Card>
+          <Card className={styles.statCard}>
+            <p className="text-2xl font-bold">{stats.sections}</p>
+            <p className="text-sm text-gray-500">Total Sections</p>
+          </Card>
+          <Card className={styles.statCard}>
+            <p className="text-2xl font-bold">{stats.avgSections}</p>
+            <p className="text-sm text-gray-500">Avg Sections</p>
+          </Card>
+          <Card className={styles.statCard}>
+            <p className="text-2xl font-bold">{stats.filtered}</p>
+            <p className="text-sm text-gray-500">Filtered</p>
+          </Card>
         </div>
 
-        {/* Bulk Actions */}
-        {selectedTemplates.size > 0 && (
-          <div className="bulk-actions">
-            <div className="bulk-info">
-              <span>{selectedTemplates.size} template{selectedTemplates.size > 1 ? 's' : ''} selected</span>
-            </div>
-            <div className="bulk-buttons">
-              <Button
-                variant="ghost"
-                onClick={() => setSelectedTemplates(new Set())}
-              >
-                Clear Selection
-              </Button>
-              <Button
-                variant="outlined"
-                leftIcon={<TrashIcon />}
-                onClick={handleBulkDelete}
-              >
-                Delete Selected
-              </Button>
-            </div>
-          </div>
-        )}
+        <div className={styles.filters}>
+          {/* Search and filter controls will go here */}
+        </div>
 
-        {/* Templates Content */}
-        <div className="templates-content">
-          {filteredTemplates.length === 0 ? (
-            <div className="empty-state">
-              <DocumentTextIcon className="empty-icon" />
-              <h2 className="empty-title">
-                {templates.length === 0 ? 'No Templates Yet' : 'No Matching Templates'}
-              </h2>
-              <p className="empty-message">
-                {templates.length === 0 
-                  ? 'Create your first playlist template to get started organizing your choir services.'
-                  : 'Try adjusting your search criteria or create a new template.'}
-              </p>
-              <div className="empty-actions">
-                <Button
-                  variant="primary"
-                  leftIcon={<PlusIcon />}
-                  onClick={() => navigate('/playlist-templates/new')}
-                >
-                  Create Template
-                </Button>
-                {templates.length > 0 && (
-                  <Button
-                    variant="ghost"
-                    onClick={clearFilters}
-                  >
-                    Clear Filters
-                  </Button>
-                )}
-              </div>
-            </div>
-          ) : (
-            <div className={`templates-grid ${viewMode}`}>
-              {filteredTemplates.map((template) => (
-                <TemplateCard
-                  key={template.id}
-                  template={template}
-                  isSelected={selectedTemplates.has(template.id)}
-                  onToggleSelect={() => toggleTemplateSelection(template.id)}
-                  onDelete={() => handleDeleteTemplate(template.id)}
-                  dropdownOpen={dropdownOpen === template.id}
-                  onDropdownToggle={() => setDropdownOpen(dropdownOpen === template.id ? null : template.id)}
-                />
-              ))}
-            </div>
-          )}
+        <div className={styles.templatesGrid}>
+          {filteredTemplates.map((template) => (
+            <TemplateCard
+              key={template.id}
+              template={template}
+              isSelected={selectedTemplates.has(template.id)}
+              onToggleSelect={() => toggleTemplateSelection(template.id)}
+              onDelete={() => handleDeleteTemplate(template.id)}
+              dropdownOpen={dropdownOpen === template.id}
+              onDropdownToggle={() => setDropdownOpen(dropdownOpen === template.id ? null : template.id)}
+            />
+          ))}
         </div>
       </div>
     </Layout>

@@ -1,0 +1,91 @@
+// Button.module.scss
+
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0.375rem;
+  font-weight: 500;
+  transition: background-color 0.3s ease-in-out, color 0.3s ease-in-out, border-color 0.3s ease-in-out;
+
+  &.is-sm {
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+  }
+
+  &.is-md {
+    padding: 0.75rem 1.5rem;
+    font-size: 1rem;
+  }
+
+  &.is-lg {
+    padding: 1rem 2rem;
+    font-size: 1.125rem;
+  }
+
+  &.is-xl {
+    padding: 1.25rem 2.5rem;
+    font-size: 1.25rem;
+  }
+
+  &.is-primary {
+    background-color: #3b82f6;
+    color: #fff;
+
+    &:hover {
+      background-color: #2563eb;
+    }
+  }
+
+  &.is-secondary {
+    background-color: #6b7280;
+    color: #fff;
+
+    &:hover {
+      background-color: #4b5563;
+    }
+  }
+
+  &.is-accent {
+    background-color: #ef4444;
+    color: #fff;
+
+    &:hover {
+      background-color: #dc2626;
+    }
+  }
+
+  &.is-outlined {
+    background-color: transparent;
+    border: 1px solid #d1d5db;
+    color: #374151;
+
+    &:hover {
+      background-color: #f9fafb;
+    }
+  }
+
+  &.is-ghost {
+    background-color: transparent;
+    color: #374151;
+
+    &:hover {
+      background-color: #f9fafb;
+    }
+  }
+
+  &.is-loading {
+    cursor: not-allowed;
+  }
+
+  &.is-disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+  }
+}
+
+.icon {
+  display: inline-block;
+  width: 1.25rem;
+  height: 1.25rem;
+}

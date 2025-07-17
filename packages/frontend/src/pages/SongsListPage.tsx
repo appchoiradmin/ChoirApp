@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef, FC } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { searchSongs } from '../services/songService';
-import { addSongToPlaylist } from '../services/playlistService';
+import { addSongToPlaylist, getPlaylistTemplatesByChoirId, getPlaylistsByChoirId } from '../services/playlistService';
 import { useUser } from '../hooks/useUser';
 import { useDisplayedPlaylistSections } from '../hooks/useDisplayedPlaylistSections';
 import { usePlaylistContext } from '../context/PlaylistContext';
@@ -55,8 +55,11 @@ const SongsListPage: FC<SongsListPageProps> = ({ playlistId, refreshPlaylist }) 
   
   // Back to top button state
   const [showBackToTop, setShowBackToTop] = useState<boolean>(false);
-  const [availableTemplates] = useState<PlaylistTemplate[]>([]);
+  const [availableTemplates, setAvailableTemplates] = useState<PlaylistTemplate[]>([]);
   const [templateDropdownOpen, setTemplateDropdownOpen] = useState<boolean>(false);
+  const [activePlaylistId, setActivePlaylistId] = useState<string | null>(playlistId || null);
+  const [isLoadingPlaylists, setIsLoadingPlaylists] = useState<boolean>(false);
+  const [isAddingSongs, setIsAddingSongs] = useState<boolean>(false);
   const [filters, setFilters] = useState<FilterState>({
     search: '',
     sortBy: 'title',
@@ -270,20 +273,32 @@ const SongsListPage: FC<SongsListPageProps> = ({ playlistId, refreshPlaylist }) 
     });
   };
   
-  // Add selected songs to playlist
-  const addSelectedSongsToPlaylist = async (sectionId: string) => {
-    if (!token || !playlistId || !sectionId || selectedSongs.size === 0) {
+  // Add selected songs to a playlist section
+  const handleAddToSection = async (sectionId: string) => {
+    // Get the active choir ID - either from user context or the first choir in the list
+    const activeChoirId = user?.choirId || (user?.choirs && user.choirs.length > 0 ? user.choirs[0].id : null);
+    
+    if (!token || !activeChoirId) {
+      toast.error('You must be logged in and in a choir context to add songs to a playlist');
       return;
     }
     
+    if (!activePlaylistId && !playlistId) {
+      toast.error('No active playlist available');
+      return;
+    }
+    
+    const targetPlaylistId = playlistId || activePlaylistId;
+    
     try {
-      // Add each selected song to the playlist
-      const promises = Array.from(selectedSongs).map(songId => 
-        addSongToPlaylist(playlistId, { songId, sectionId }, token || '')
+      setIsAddingSongs(true);
+      
+      // Add each selected song to the playlist section
+      const promises = Array.from(selectedSongs).map(songId =>
+        addSongToPlaylist(targetPlaylistId!, { songId, sectionId }, token)
       );
       
       await Promise.all(promises);
-      
       toast.success(`Added ${selectedSongs.size} song(s) to playlist`);
       
       // Clear selection after adding
@@ -299,9 +314,49 @@ const SongsListPage: FC<SongsListPageProps> = ({ playlistId, refreshPlaylist }) 
     } catch (err) {
       console.error('Error adding songs to playlist:', err);
       toast.error('Failed to add songs to playlist');
+    } finally {
+      setIsAddingSongs(false);
     }
   };
   
+  // Load available templates and active playlist
+  useEffect(() => {
+    const fetchData = async () => {
+      // Get the active choir ID - either from user context or the first choir in the list
+      const activeChoirId = user?.choirId || (user?.choirs && user.choirs.length > 0 ? user.choirs[0].id : null);
+      
+      if (token && activeChoirId) {
+        setIsLoadingPlaylists(true);
+        try {
+          // Fetch templates
+          const templates = await getPlaylistTemplatesByChoirId(activeChoirId, token);
+          setAvailableTemplates(templates);
+          
+          // If we don't have a playlistId from props, try to find the most recent playlist
+          if (!playlistId) {
+            const playlists = await getPlaylistsByChoirId(activeChoirId, token);
+            if (playlists && playlists.length > 0) {
+              // Sort by date (newest first) and take the first one
+              const sortedPlaylists = [...playlists].sort((a, b) => {
+                const dateA = new Date(a.date).getTime();
+                const dateB = new Date(b.date).getTime();
+                return dateB - dateA;
+              });
+              
+              setActivePlaylistId(sortedPlaylists[0].id);
+            }
+          }
+        } catch (error) {
+          console.error('Error fetching data:', error);
+        } finally {
+          setIsLoadingPlaylists(false);
+        }
+      }
+    };
+    
+    fetchData();
+  }, [token, user, playlistId]);
+
   // Handle template selection
   const handleTemplateSelection = (template: PlaylistTemplate) => {
     setSelectedTemplate(template);
@@ -356,7 +411,7 @@ const SongsListPage: FC<SongsListPageProps> = ({ playlistId, refreshPlaylist }) 
         </div>
         
         {/* Template selection if in playlist context */}
-        {playlistId && user?.choirId && availableTemplates.length > 0 && (
+        {playlistId && user?.choirId && (
           <div className="template-selector">
             <div className="template-selector__label">
               <span>Template:</span>
@@ -380,15 +435,21 @@ const SongsListPage: FC<SongsListPageProps> = ({ playlistId, refreshPlaylist }) 
                     >
                       None
                     </div>
-                    {availableTemplates.map(template => (
-                      <div 
-                        key={template.id}
-                        className="template-selector__item"
-                        onClick={() => handleTemplateSelection(template)}
-                      >
-                        {template.title}
+                    {availableTemplates.length > 0 ? (
+                      availableTemplates.map(template => (
+                        <div 
+                          key={template.id}
+                          className="template-selector__item"
+                          onClick={() => handleTemplateSelection(template)}
+                        >
+                          {template.title}
+                        </div>
+                      ))
+                    ) : (
+                      <div className="template-selector__item template-selector__item--disabled">
+                        No templates available
                       </div>
-                    ))}
+                    )}
                   </div>
                 )}
               </div>
@@ -469,7 +530,7 @@ const SongsListPage: FC<SongsListPageProps> = ({ playlistId, refreshPlaylist }) 
                       <DocumentTextIcon /> View
                     </button>
                     
-                    {playlistId && (
+                    {user && user.choirs && user.choirs.length > 0 && (
                       <div className="songs-page__dropdown" ref={el => { dropdownRefs.current[song.songId] = el; }}>
                         <button onClick={() => toggleDropdown(song.songId)}>
                           {selectedSongs.has(song.songId) ? (
@@ -478,7 +539,7 @@ const SongsListPage: FC<SongsListPageProps> = ({ playlistId, refreshPlaylist }) 
                             </>
                           ) : (
                             <>
-                              <PlusIcon /> Add to Playlist
+                              <PlusIcon /> Add To
                             </>
                           )}
                         </button>
@@ -505,15 +566,40 @@ const SongsListPage: FC<SongsListPageProps> = ({ playlistId, refreshPlaylist }) 
                               Add directly to section:
                             </div>
                             
-                            {displayedSections.map(section => (
-                              <div 
-                                key={section.id}
-                                className="songs-page__dropdown-menu-item"
-                                onClick={() => addSelectedSongsToPlaylist(section.id)}
-                              >
-                                <MusicalNoteIcon /> {section.title}
+                            {isLoadingPlaylists ? (
+                              <div className="songs-page__dropdown-menu-item songs-page__dropdown-menu-item--disabled">
+                                <LoadingSpinner size="sm" /> Loading...
                               </div>
-                            ))}
+                            ) : displayedSections.length > 0 ? (
+                              displayedSections.map(section => (
+                                <div 
+                                  key={section.id}
+                                  className="songs-page__dropdown-menu-item"
+                                  onClick={() => {
+                                    const targetPlaylistId = playlistId || activePlaylistId;
+                                    if (!targetPlaylistId) {
+                                      toast.error('No active playlist available');
+                                      return;
+                                    }
+                                    if (selectedSongs.has(song.songId)) {
+                                      handleAddToSection(section.id);
+                                    } else {
+                                      // Create a single song set and call handleAddToSection
+                                      setSelectedSongs(new Set([song.songId]));
+                                      setTimeout(() => {
+                                        handleAddToSection(section.id);
+                                      }, 0);
+                                    }
+                                  }}
+                                >
+                                  <MusicalNoteIcon /> {section.title}
+                                </div>
+                              ))
+                            ) : (
+                              <div className="songs-page__dropdown-menu-item songs-page__dropdown-menu-item--disabled">
+                                No sections available
+                              </div>
+                            )}
                           </div>
                         )}
                       </div>

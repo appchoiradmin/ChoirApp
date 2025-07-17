@@ -30,7 +30,12 @@ namespace ChoirApp.Backend.Endpoints.Playlist
         public override async Task HandleAsync(CreatePlaylistTemplateDto req, CancellationToken ct)
         {
             var userIdClaim = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
-            if (!Guid.TryParse(userIdClaim, out var userId))
+            if (userIdClaim == null)
+            {
+                userIdClaim = User.Claims.FirstOrDefault(c => c.Type == "nameid")?.Value;
+            }
+            
+            if (string.IsNullOrEmpty(userIdClaim) || !Guid.TryParse(userIdClaim, out var userId))
             {
                 ThrowError("User not authenticated properly.");
                 return;

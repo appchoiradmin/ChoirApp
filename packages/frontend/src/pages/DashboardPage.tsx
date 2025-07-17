@@ -20,7 +20,7 @@ import { CheckCircleIcon as CheckCircleIconSolid } from '@heroicons/react/24/sol
 import './DashboardPage.scss';
 
 const DashboardPage: React.FC = () => {
-  const { user, loading, token } = useUser();
+  const { user, loading, token, refreshToken } = useUser();
   const [invitations, setInvitations] = useState<Invitation[]>([]);
 
   useEffect(() => {
@@ -32,6 +32,11 @@ const DashboardPage: React.FC = () => {
   const handleAccept = async (invitationToken: string) => {
     if (token) {
       await acceptInvitation(invitationToken, token);
+      
+      // After accepting an invitation, the user's role might change (e.g., becoming a choir admin)
+      // Refresh the token to update the role claim
+      await refreshToken();
+      
       setInvitations(invitations.filter(i => i.invitationToken !== invitationToken));
     }
   };

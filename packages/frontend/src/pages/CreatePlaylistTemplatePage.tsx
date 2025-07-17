@@ -23,7 +23,7 @@ interface SectionItem {
 }
 
 const CreatePlaylistTemplatePage: React.FC = () => {
-  const { user, token } = useUser();
+  const { user, token, refreshToken } = useUser();
   const navigate = useNavigate();
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
@@ -99,7 +99,14 @@ const CreatePlaylistTemplatePage: React.FC = () => {
     
     if (user?.choirId && token) {
       setLoading(true);
+      
       try {
+        // Refresh the token first to ensure we have the latest role claims
+        console.log('Refreshing token before creating playlist template...');
+        await refreshToken();
+        console.log('Token refreshed successfully');
+        
+        // Now create the playlist template with the refreshed token
         const payload: CreatePlaylistTemplatePayload = {
           title: title.trim(),
           description: description.trim(),

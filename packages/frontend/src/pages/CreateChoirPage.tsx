@@ -9,7 +9,7 @@ const CreateChoirPage: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
-  const { user, loading, token, refetchUser } = useUser();
+  const { user, loading, token, refreshToken } = useUser();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -21,7 +21,11 @@ const CreateChoirPage: React.FC = () => {
     setError(null);
     try {
       await createChoir(choirName, token);
-      await refetchUser();
+      
+      // After creating a choir, the user becomes a choir admin
+      // Refresh the token to update the role claim
+      await refreshToken();
+      
       navigate('/dashboard');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An unknown error occurred.');
