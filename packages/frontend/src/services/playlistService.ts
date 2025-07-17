@@ -279,3 +279,26 @@ export const moveSongInPlaylist = async (
     throw new Error('Failed to move song in playlist');
   }
 };
+
+export interface SetTemplateDefaultDto {
+  isDefault: boolean;
+}
+
+export const setPlaylistTemplateDefault = async (
+  templateId: string,
+  isDefault: boolean,
+  token: string
+): Promise<void> => {
+  const response = await fetch(`${API_URL}/api/playlist-templates/${templateId}/default`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({ isDefault }),
+  });
+
+  if (!response.ok) {
+    throw new Error('Failed to set template default status');
+  }
+};

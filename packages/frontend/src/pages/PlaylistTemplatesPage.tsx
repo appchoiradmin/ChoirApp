@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useUser } from '../hooks/useUser';
-import { getPlaylistTemplatesByChoirId, deletePlaylistTemplate } from '../services/playlistService';
+import { getPlaylistTemplatesByChoirId, deletePlaylistTemplate, setPlaylistTemplateDefault } from '../services/playlistService';
 import { PlaylistTemplate } from '../types/playlist';
 import { Button, Card, LoadingSpinner, Navigation } from '../components/ui';
 import Layout from '../components/ui/Layout';
@@ -12,13 +12,16 @@ import {
   DocumentTextIcon,
   EllipsisVerticalIcon,
   PencilIcon,
-  TrashIcon
+  TrashIcon,
+  StarIcon
 } from '@heroicons/react/24/outline';
+import { StarIcon as StarIconSolid } from '@heroicons/react/24/solid';
 import './PlaylistTemplatesPage.scss';
 
 interface TemplateCardProps {
   template: PlaylistTemplate;
   onDelete: () => void;
+  onSetDefault: () => void;
   dropdownOpen: boolean;
   onDropdownToggle: () => void;
 }
@@ -26,6 +29,7 @@ interface TemplateCardProps {
 const TemplateCard: React.FC<TemplateCardProps> = ({
   template,
   onDelete,
+  onSetDefault,
   dropdownOpen,
   onDropdownToggle,
 }) => {
@@ -41,11 +45,17 @@ const TemplateCard: React.FC<TemplateCardProps> = ({
   return (
     <Card onClick={handleCardClick} hover className="template-card">
       <Card.Header>
-        <h3 className="font-bold">{template.title}</h3>
-        <div className="relative">
+        <div className="card-title-container">
+          {template.isDefault && (
+            <StarIconSolid className="default-star-icon" title="Default template" />
+          )}
+          <h3 className="card-title">{template.title}</h3>
+        </div>
+        <div className="dropdown-container">
           <Button
             variant="ghost"
             size="sm"
+            className="dropdown-toggle"
             onClick={(e) => {
               e.stopPropagation();
               onDropdownToggle();
@@ -55,6 +65,19 @@ const TemplateCard: React.FC<TemplateCardProps> = ({
           </Button>
           {dropdownOpen && (
             <div className="dropdown-menu">
+              {!template.isDefault && (
+                <Button
+                  variant="ghost"
+                  className="dropdown-item"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onSetDefault();
+                  }}
+                >
+                  <StarIcon className="icon" />
+                  Set as Default
+                </Button>
+              )}
               <Button
                 variant="ghost"
                 className="dropdown-item"
@@ -85,9 +108,16 @@ const TemplateCard: React.FC<TemplateCardProps> = ({
         {template.description && <p className="template-description">{template.description}</p>}
       </Card.Content>
       <Card.Footer>
-        <span className="section-count">
-          {template.sections.length} section{template.sections.length !== 1 ? 's' : ''}
-        </span>
+        <div className="card-footer-content">
+          <span className="section-count">
+            {template.sections.length} section{template.sections.length !== 1 ? 's' : ''}
+          </span>
+          {template.isDefault && (
+            <span className="default-badge">
+              <StarIconSolid className="badge-icon" /> Default
+            </span>
+          )}
+        </div>
       </Card.Footer>
     </Card>
   );
@@ -149,12 +179,33 @@ const PlaylistTemplatesPage: React.FC = () => {
       }
     }
   };
+  
+  const handleSetDefaultTemplate = async (templateId: string) => {
+    if (!token) return;
+    
+    try {
+      // Optimistically update UI
+      setTemplates(prev =>
+        prev.map(t => ({
+          ...t,
+          isDefault: t.id === templateId
+        }))
+      );
 
-  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchTerm(e.target.value);
+      // Call API to update the default template
+      await setPlaylistTemplateDefault(templateId, true, token);
+      toast.success('Default template updated successfully');
+    } catch (err: any) {
+      console.error('Failed to set default template:', err);
+      toast.error('Failed to set default template');
+      
+      // Revert optimistic update on failure
+      if (choirId) {
+        const templatesData = await getPlaylistTemplatesByChoirId(choirId, token);
+        setTemplates(templatesData);
+      }
+    }
   };
-
-  const totalTemplates = templates.length;
 
   if (loading) {
     return (
@@ -196,7 +247,7 @@ const PlaylistTemplatesPage: React.FC = () => {
           <div className="header-content">
             <div className="stats-container">
               <Card className="stat-card">
-                <p className="stat-value">{totalTemplates}</p>
+                <p className="stat-value">{templates.length}</p>
                 <p className="stat-label">Templates</p>
               </Card>
             </div>
@@ -207,7 +258,7 @@ const PlaylistTemplatesPage: React.FC = () => {
                 type="text"
                 placeholder="Search templates..."
                 value={searchTerm}
-                onChange={handleSearchChange}
+                onChange={(e) => setSearchTerm(e.target.value)}
                 className="search-input"
               />
             </div>
@@ -243,6 +294,7 @@ const PlaylistTemplatesPage: React.FC = () => {
                 key={template.id}
                 template={template}
                 onDelete={() => handleDeleteTemplate(template.id)}
+                onSetDefault={() => handleSetDefaultTemplate(template.id)}
                 dropdownOpen={dropdownOpen === template.id}
                 onDropdownToggle={() => setDropdownOpen(dropdownOpen === template.id ? null : template.id)}
               />
