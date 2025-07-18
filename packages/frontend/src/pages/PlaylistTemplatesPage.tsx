@@ -196,7 +196,6 @@ const PlaylistTemplatesPage: React.FC = () => {
       await setPlaylistTemplateDefault(templateId, true, token);
       toast.success('Default template updated successfully');
     } catch (err: any) {
-      console.error('Failed to set default template:', err);
       toast.error('Failed to set default template');
       
       // Revert optimistic update on failure

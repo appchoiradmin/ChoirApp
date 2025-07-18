@@ -42,14 +42,6 @@ const SongsListPage: FC<SongsListPageProps> = ({ playlistId, refreshPlaylist }) 
   const { sections, selectedTemplate, setSelectedTemplate, choirId, isInitializing, createPlaylistIfNeeded, refreshPlaylist: refreshPlaylistContext, playlistId: contextPlaylistId } = usePlaylistContext();
   const displayedSections = useDisplayedPlaylistSections(sections, selectedTemplate);
   
-  // Debug logging to understand section ID mismatch
-  console.log('Debug - SongsListPage sections data:', {
-    sectionsFromContext: sections.length,
-    selectedTemplate: selectedTemplate?.title || 'none',
-    displayedSections: displayedSections.length,
-    sectionIds: displayedSections.map(s => ({ id: s.id, title: s.title })),
-    isPersisted: sections.length > 0 ? 'using playlist sections' : 'using template sections'
-  });
   const { token, user } = useUser();
   const isGeneralUser = !user?.choirId;
 
@@ -110,17 +102,11 @@ const SongsListPage: FC<SongsListPageProps> = ({ playlistId, refreshPlaylist }) 
         });
       });
       
-      console.log('🚨 DEBUG - Fetched playlist songs:', {
-        playlistId: contextPlaylistId,
-        totalSongs: songIds.size,
-        songIds: Array.from(songIds)
-      });
-      
       setPlaylistSongIds(songIds);
       // Also update selectedSongs to show "Added" flag immediately
       setSelectedSongs(songIds);
     } catch (error) {
-      console.error('Error fetching playlist songs:', error);
+      setError('Failed to fetch playlist songs.');
     }
   };
 
@@ -158,7 +144,6 @@ const SongsListPage: FC<SongsListPageProps> = ({ playlistId, refreshPlaylist }) 
         setSongs(fetchedSongs || []);
         setHasMore(fetchedSongs.length === songsPerPage);
       } catch (error) {
-        console.error('Error fetching data:', error);
         setError('Failed to load songs. Please try again later.');
       } finally {
         setLoading(false);
@@ -219,7 +204,6 @@ const SongsListPage: FC<SongsListPageProps> = ({ playlistId, refreshPlaylist }) 
         setPage(1);
         setHasMore(songsData.length === songsPerPage);
       } catch (error) {
-        console.error('Error searching songs:', error);
         setError('Failed to search songs. Please try again later.');
       } finally {
         setLoading(false);
@@ -303,7 +287,6 @@ const SongsListPage: FC<SongsListPageProps> = ({ playlistId, refreshPlaylist }) 
         setHasMore(moreSongs.length === songsPerPage);
       }
     } catch (error) {
-      console.error('Error loading more songs:', error);
       setError('Failed to load more songs. Please try again later.');
     } finally {
       setLoadingMore(false);
@@ -340,7 +323,7 @@ const SongsListPage: FC<SongsListPageProps> = ({ playlistId, refreshPlaylist }) 
             }
           }
         } catch (error) {
-          console.error('Error fetching data:', error);
+          setError('Failed to fetch data.');
         } finally {
           // Loading state is handled by PlaylistContext
         }
@@ -358,31 +341,10 @@ const SongsListPage: FC<SongsListPageProps> = ({ playlistId, refreshPlaylist }) 
   
   // Handle section selection from modal
   const handleSectionSelect = async (sectionId: string) => {
-    console.log('Debug - handleSectionSelect called with:', {
-      sectionId,
-      selectedSongForModal,
-      displayedSectionsCount: displayedSections.length,
-      playlistId: playlistId
-    });
-    
     if (!selectedSongForModal || !token) {
-      console.error('Debug - Missing required data:', {
-        selectedSongForModal,
-        token: token ? 'present' : 'missing'
-      });
-      toast.error('Unable to add song: missing required data');
+      setError('Missing required data.');
       return;
     }
-
-    console.log('🚨 CRITICAL DEBUG - Starting song addition process:', {
-      songId: selectedSongForModal,
-      sectionId,
-      playlistIdProp: playlistId,
-      contextPlaylistId,
-      targetPlaylistId: contextPlaylistId || playlistId,
-      activePlaylistId,
-      token: token ? 'present' : 'missing'
-    });
 
     try {
       setIsAddingSongs(true);
@@ -653,8 +615,8 @@ const SongsListPage: FC<SongsListPageProps> = ({ playlistId, refreshPlaylist }) 
                 <div className="songs-page__card-content">
                   <div className="songs-page__song-info">
                     <h3 
-                      className={`songs-page__song-title ${!choirId ? 'songs-page__song-title--clickable' : ''}`}
-                      onClick={() => !choirId && navigate(`/songs/${song.songId}`)}
+                      className="songs-page__song-title songs-page__song-title--clickable"
+                      onClick={() => navigate(`/songs/${song.songId}`)}
                     >
                       {song.title}
                     </h3>
