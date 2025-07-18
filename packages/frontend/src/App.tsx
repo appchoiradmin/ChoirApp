@@ -74,6 +74,7 @@ function App() {
       <Route path="/playlists/:playlistId" element={<PlaylistDetailPage />} />
       <Route path="/playlists/:playlistId/edit" element={<EditPlaylistPage />} />
       <Route path="/songs/create" element={<SongDetailPage />} />
+      <Route path="/songs/:songId" element={<SongDetailPage />} />
       <Route path="/choir/:choirId/playlist-templates" element={<PlaylistTemplatesPage />} />
       <Route path="/playlist-templates/new" element={<CreatePlaylistTemplatePage />} />
       <Route path="/playlist-templates/:templateId" element={<PlaylistTemplateDetailPage />} />

@@ -11,7 +11,7 @@ import Layout from '../components/ui/Layout';
 import Navigation from '../components/ui/Navigation';
 
 const SongDetailPage: React.FC = () => {
-  const { id } = useParams<{ id: string }>();
+  const { songId } = useParams<{ songId: string }>();
   const location = useLocation();
   const isCreateMode = location.pathname === '/songs/create';
   const navigate = useNavigate();
@@ -36,14 +36,14 @@ const SongDetailPage: React.FC = () => {
         return; // Wait for user to load
       }
 
-      if (isCreateMode || !id || !user?.token) {
+      if (isCreateMode || !songId || !user?.token) {
         setLoading(false); // Nothing to fetch in create mode
         setIsCheckingVersion(false);
         return;
       }
 
       try {
-        const data = await getSongById(id, user.token);
+        const data = await getSongById(songId, user.token);
         console.log('Song data:', data);
         setSong(data);
       } catch (err) {
@@ -58,19 +58,19 @@ const SongDetailPage: React.FC = () => {
     };
 
     fetchSong();
-  }, [id, user, userLoading]);
+  }, [songId, user, userLoading]);
 
   // Check if a version of this song already exists for the user's choir
   useEffect(() => {
     const checkExistingVersion = async () => {
-      if (!user?.token || !user?.choirId || !id || !song) {
+      if (!user?.token || !user?.choirId || !songId || !song) {
         setIsCheckingVersion(false);
         return;
       }
 
       try {
         const choirSongs = await getSongsForChoir(user.choirId, user.token);
-        const existingVersion = choirSongs.find(s => s.baseSongId === id);
+        const existingVersion = choirSongs.find(s => s.baseSongId === songId);
         setSongVersionExists(!!existingVersion);
       } catch (err) {
         console.error('Error checking for existing song version:', err);
@@ -82,17 +82,17 @@ const SongDetailPage: React.FC = () => {
     if (song) {
       checkExistingVersion();
     }
-  }, [id, song, user]);
+  }, [songId, song, user]);
 
   const handleCreateVersion = async () => {
-    if (!id || !user?.token || !user?.choirId || !selectedChoirId) {
+    if (!songId || !user?.token || !user?.choirId || !selectedChoirId) {
       return;
     }
 
     setIsProcessing(true);
     try {
       const newVersion = await createSongVersion(
-        id,
+        songId,
         {
           content: song?.content || '',
           visibility: SongVisibilityType.PublicChoirs,

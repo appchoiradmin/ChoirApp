@@ -23,6 +23,7 @@ export interface PlaylistContextType {
   isInitializing: boolean;
   isInitialized: boolean;
   playlistId: string | null;
+  choirId: string | null;
   error: string | null;
   isPlaylistReady: boolean;
   createPlaylistIfNeeded: () => Promise<{id: string, sections: PlaylistSection[]} | void>;
@@ -198,6 +199,7 @@ export const PlaylistProvider = ({
       isInitializing,
       isInitialized,
       playlistId,
+      choirId,
       error,
       isPlaylistReady,
       createPlaylistIfNeeded,

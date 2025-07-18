@@ -27,7 +27,9 @@ const EditPlaylistTemplatePage: React.FC = () => {
         .then((template: PlaylistTemplate) => {
           setTitle(template.title);
           setDescription(template.description || '');
-          setSections(template.sections);
+          // Sort sections by order property to ensure correct display
+          const sortedSections = [...template.sections].sort((a, b) => a.order - b.order);
+          setSections(sortedSections);
           setLoading(false);
         })
         .catch((error) => {
@@ -57,6 +59,10 @@ const EditPlaylistTemplatePage: React.FC = () => {
     if (index > 0) {
       const newSections = [...sections];
       [newSections[index], newSections[index - 1]] = [newSections[index - 1], newSections[index]];
+      // Update order properties to match new positions
+      newSections.forEach((section, i) => {
+        section.order = i;
+      });
       setSections(newSections);
     }
   };
@@ -65,6 +71,10 @@ const EditPlaylistTemplatePage: React.FC = () => {
     if (index < sections.length - 1) {
       const newSections = [...sections];
       [newSections[index], newSections[index + 1]] = [newSections[index + 1], newSections[index]];
+      // Update order properties to match new positions
+      newSections.forEach((section, i) => {
+        section.order = i;
+      });
       setSections(newSections);
     }
   };

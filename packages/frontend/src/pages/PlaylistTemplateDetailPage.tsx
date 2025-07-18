@@ -170,7 +170,9 @@ const PlaylistTemplateDetailPage: React.FC = () => {
           
           {template.sections.length > 0 ? (
             <div className="sections-list">
-              {template.sections.map((section, index) => (
+              {template.sections
+                .sort((a, b) => a.order - b.order)
+                .map((section, index) => (
                 <div key={section.id} className="section-card">
                   <div className="section-header">
                     <h3 className="section-title">{section.title}</h3>

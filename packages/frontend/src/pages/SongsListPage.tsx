@@ -10,9 +10,11 @@ import { PlaylistTemplate } from '../types/playlist';
 import { SongDto, SongSearchParams, SongVisibilityType } from '../types/song';
 import { Button, Card, LoadingSpinner, Navigation } from '../components/ui';
 import Layout from '../components/ui/Layout';
-import { MagnifyingGlassIcon, PlusIcon, ChevronUpIcon, ChevronDownIcon, CheckCircleIcon, XMarkIcon, CheckIcon, DocumentTextIcon, MusicalNoteIcon } from '@heroicons/react/24/outline';
+import { MagnifyingGlassIcon, PlusIcon, ChevronUpIcon, ChevronDownIcon, CheckCircleIcon, XMarkIcon, MusicalNoteIcon } from '@heroicons/react/24/outline';
+import SectionSelectionModal from '../components/SectionSelectionModal';
 import './SongsListPage.scss';
 import './SongsListPage.enhanced.scss';
+import './SongsListPage.mobile.scss';
 
 interface SongsListPageProps {
   playlistId?: string;
@@ -34,10 +36,10 @@ const isMobile = window.innerWidth < 768;
 const songsPerPage = isMobile ? 6 : DEFAULT_SONGS_PER_PAGE;
 
 const SongsListPage: FC<SongsListPageProps> = ({ playlistId, refreshPlaylist }) => {
-  const [dropdownOpen, setDropdownOpen] = useState<string | null>(null);
-  const dropdownRefs = useRef<Record<string, HTMLDivElement | null>>({});
+  const [sectionModalOpen, setSectionModalOpen] = useState<boolean>(false);
+  const [selectedSongForModal, setSelectedSongForModal] = useState<string | null>(null);
   const navigate = useNavigate();
-  const { sections, selectedTemplate, setSelectedTemplate } = usePlaylistContext();
+  const { sections, selectedTemplate, setSelectedTemplate, choirId, isInitializing } = usePlaylistContext();
   const displayedSections = useDisplayedPlaylistSections(sections, selectedTemplate);
   const { token, user } = useUser();
   const isGeneralUser = !user?.choirId;
@@ -58,33 +60,23 @@ const SongsListPage: FC<SongsListPageProps> = ({ playlistId, refreshPlaylist }) 
   const [availableTemplates, setAvailableTemplates] = useState<PlaylistTemplate[]>([]);
   const [templateDropdownOpen, setTemplateDropdownOpen] = useState<boolean>(false);
   const [activePlaylistId, setActivePlaylistId] = useState<string | null>(playlistId || null);
-  const [isLoadingPlaylists, setIsLoadingPlaylists] = useState<boolean>(false);
-  const [isAddingSongs, setIsAddingSongs] = useState<boolean>(false);
+  const [isAddingSongs, setIsAddingSongs] = useState(false);
   const [filters, setFilters] = useState<FilterState>({
     search: '',
     sortBy: 'title',
     sortOrder: 'asc'
   });
 
-  // Close dropdown when clicking outside
-  useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
-      if (dropdownOpen) {
-        const ref = dropdownRefs.current[dropdownOpen];
-        if (ref && !ref.contains(event.target as Node)) {
-          setDropdownOpen(null);
-        }
-      }
-    }
-    if (dropdownOpen) {
-      document.addEventListener('mousedown', handleClickOutside);
-    } else {
-      document.removeEventListener('mousedown', handleClickOutside);
-    }
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, [dropdownOpen]);
+  // Modal handlers
+  const openSectionModal = (songId: string) => {
+    setSelectedSongForModal(songId);
+    setSectionModalOpen(true);
+  };
+
+  const closeSectionModal = () => {
+    setSectionModalOpen(false);
+    setSelectedSongForModal(null);
+  };
 
   // Initial fetch for first page of songs
   useEffect(() => {
@@ -260,64 +252,7 @@ const SongsListPage: FC<SongsListPageProps> = ({ playlistId, refreshPlaylist }) 
     }
   };
   
-  // Toggle song selection
-  const toggleSongSelection = (songId: string) => {
-    setSelectedSongs(prev => {
-      const newSelection = new Set(prev);
-      if (newSelection.has(songId)) {
-        newSelection.delete(songId);
-      } else {
-        newSelection.add(songId);
-      }
-      return newSelection;
-    });
-  };
-  
-  // Add selected songs to a playlist section
-  const handleAddToSection = async (sectionId: string) => {
-    // Get the active choir ID - either from user context or the first choir in the list
-    const activeChoirId = user?.choirId || (user?.choirs && user.choirs.length > 0 ? user.choirs[0].id : null);
-    
-    if (!token || !activeChoirId) {
-      toast.error('You must be logged in and in a choir context to add songs to a playlist');
-      return;
-    }
-    
-    if (!activePlaylistId && !playlistId) {
-      toast.error('No active playlist available');
-      return;
-    }
-    
-    const targetPlaylistId = playlistId || activePlaylistId;
-    
-    try {
-      setIsAddingSongs(true);
-      
-      // Add each selected song to the playlist section
-      const promises = Array.from(selectedSongs).map(songId =>
-        addSongToPlaylist(targetPlaylistId!, { songId, sectionId }, token)
-      );
-      
-      await Promise.all(promises);
-      toast.success(`Added ${selectedSongs.size} song(s) to playlist`);
-      
-      // Clear selection after adding
-      setSelectedSongs(new Set());
-      
-      // Refresh the playlist to show the new songs
-      if (refreshPlaylist) {
-        refreshPlaylist();
-      }
-      
-      // Close all dropdowns
-      setDropdownOpen(null);
-    } catch (err) {
-      console.error('Error adding songs to playlist:', err);
-      toast.error('Failed to add songs to playlist');
-    } finally {
-      setIsAddingSongs(false);
-    }
-  };
+  // Note: Song selection and bulk operations removed in favor of individual modal-based additions
   
   // Load available templates and active playlist
   useEffect(() => {
@@ -326,7 +261,7 @@ const SongsListPage: FC<SongsListPageProps> = ({ playlistId, refreshPlaylist }) 
       const activeChoirId = user?.choirId || (user?.choirs && user.choirs.length > 0 ? user.choirs[0].id : null);
       
       if (token && activeChoirId) {
-        setIsLoadingPlaylists(true);
+        // Loading state is handled by PlaylistContext
         try {
           // Fetch templates
           const templates = await getPlaylistTemplatesByChoirId(activeChoirId, token);
@@ -349,7 +284,7 @@ const SongsListPage: FC<SongsListPageProps> = ({ playlistId, refreshPlaylist }) 
         } catch (error) {
           console.error('Error fetching data:', error);
         } finally {
-          setIsLoadingPlaylists(false);
+          // Loading state is handled by PlaylistContext
         }
       }
     };
@@ -363,9 +298,31 @@ const SongsListPage: FC<SongsListPageProps> = ({ playlistId, refreshPlaylist }) 
     setTemplateDropdownOpen(false);
   };
   
-  // Toggle dropdown for a specific song
-  const toggleDropdown = (songId: string) => {
-    setDropdownOpen(prev => prev === songId ? null : songId);
+  // Handle section selection from modal
+  const handleSectionSelect = async (sectionId: string) => {
+    if (!selectedSongForModal) return;
+    
+    // Add the selected song to the selected section
+    try {
+      setIsAddingSongs(true);
+      const targetPlaylistId = playlistId || activePlaylistId;
+      if (!targetPlaylistId) {
+        toast.error('No active playlist available');
+        return;
+      }
+      
+      await addSongToPlaylist(targetPlaylistId, { songId: selectedSongForModal, sectionId }, token || '');
+      toast.success('Song added to playlist successfully!');
+      
+      if (refreshPlaylist) {
+        refreshPlaylist();
+      }
+    } catch (error) {
+      console.error('Error adding song to playlist:', error);
+      toast.error('Failed to add song to playlist');
+    } finally {
+      setIsAddingSongs(false);
+    }
   };
   
   // Handle search input change
@@ -512,98 +469,47 @@ const SongsListPage: FC<SongsListPageProps> = ({ playlistId, refreshPlaylist }) 
             {songs.map(song => (
               <Card key={song.songId} className="songs-page__card">
                 <div className="songs-page__card-content">
-                  <h3 className="songs-page__song-title">{song.title}</h3>
-                  <p className="songs-page__song-artist">{song.artist || 'Unknown Artist'}</p>
-                  
-                  {song.tags && song.tags.length > 0 && (
-                    <div className="songs-page__song-tags">
-                      {song.tags.map(tag => (
-                        <span key={tag.tagId} className="songs-page__song-tag">
-                          {tag.tagName}
-                        </span>
-                      ))}
-                    </div>
-                  )}
-                  
-                  <div className="songs-page__card-actions">
-                    <button onClick={() => navigate(`/songs/${song.songId}`)}>
-                      <DocumentTextIcon /> View
-                    </button>
+                  <div className="songs-page__song-info">
+                    <h3 
+                      className={`songs-page__song-title ${!choirId ? 'songs-page__song-title--clickable' : ''}`}
+                      onClick={() => !choirId && navigate(`/songs/${song.songId}`)}
+                    >
+                      {song.title}
+                    </h3>
+                    {song.artist && (
+                      <p className="songs-page__song-artist">{song.artist}</p>
+                    )}
                     
-                    {user && user.choirs && user.choirs.length > 0 && (
-                      <div className="songs-page__dropdown" ref={el => { dropdownRefs.current[song.songId] = el; }}>
-                        <button onClick={() => toggleDropdown(song.songId)}>
+                    {song.tags && song.tags.length > 0 && (
+                      <div className="songs-page__song-tags">
+                        {song.tags.map(tag => (
+                          <span key={tag.tagId} className="songs-page__song-tag">
+                            {tag.tagName}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+                    
+                    <div className="songs-page__card-actions">
+                      {user && user.choirs && user.choirs.length > 0 && choirId && (
+                        <button 
+                          className={`songs-page__add-button ${selectedSongs.has(song.songId) ? 'songs-page__add-button--selected' : ''}`}
+                          onClick={() => openSectionModal(song.songId)}
+                          disabled={isAddingSongs}
+                          aria-label={selectedSongs.has(song.songId) ? 'Song selected' : 'Add song to playlist'}
+                        >
                           {selectedSongs.has(song.songId) ? (
                             <>
-                              <CheckCircleIcon /> Selected
+                              <CheckCircleIcon /> Added
                             </>
                           ) : (
                             <>
-                              <PlusIcon /> Add To
+                              <PlusIcon /> Add
                             </>
                           )}
                         </button>
-                        
-                        {dropdownOpen === song.songId && (
-                          <div className="songs-page__dropdown-menu">
-                            {selectedSongs.has(song.songId) ? (
-                              <div 
-                                className="songs-page__dropdown-menu-item"
-                                onClick={() => toggleSongSelection(song.songId)}
-                              >
-                                <XMarkIcon /> Remove from selection
-                              </div>
-                            ) : (
-                              <div 
-                                className="songs-page__dropdown-menu-item"
-                                onClick={() => toggleSongSelection(song.songId)}
-                              >
-                                <CheckIcon /> Select song
-                              </div>
-                            )}
-                            
-                            <div className="songs-page__dropdown-menu-header">
-                              Add directly to section:
-                            </div>
-                            
-                            {isLoadingPlaylists ? (
-                              <div className="songs-page__dropdown-menu-item songs-page__dropdown-menu-item--disabled">
-                                <LoadingSpinner size="sm" /> Loading...
-                              </div>
-                            ) : displayedSections.length > 0 ? (
-                              displayedSections.map(section => (
-                                <div 
-                                  key={section.id}
-                                  className="songs-page__dropdown-menu-item"
-                                  onClick={() => {
-                                    const targetPlaylistId = playlistId || activePlaylistId;
-                                    if (!targetPlaylistId) {
-                                      toast.error('No active playlist available');
-                                      return;
-                                    }
-                                    if (selectedSongs.has(song.songId)) {
-                                      handleAddToSection(section.id);
-                                    } else {
-                                      // Create a single song set and call handleAddToSection
-                                      setSelectedSongs(new Set([song.songId]));
-                                      setTimeout(() => {
-                                        handleAddToSection(section.id);
-                                      }, 0);
-                                    }
-                                  }}
-                                >
-                                  <MusicalNoteIcon /> {section.title}
-                                </div>
-                              ))
-                            ) : (
-                              <div className="songs-page__dropdown-menu-item songs-page__dropdown-menu-item--disabled">
-                                No sections available
-                              </div>
-                            )}
-                          </div>
-                        )}
-                      </div>
-                    )}
+                      )}
+                    </div>
                   </div>
                 </div>
               </Card>
@@ -625,6 +531,16 @@ const SongsListPage: FC<SongsListPageProps> = ({ playlistId, refreshPlaylist }) 
           </button>
         )}
       </div>
+      
+      {/* Section Selection Modal */}
+      <SectionSelectionModal
+        isOpen={sectionModalOpen}
+        onClose={closeSectionModal}
+        sections={displayedSections}
+        isLoading={isInitializing}
+        onSelectSection={handleSectionSelect}
+        title="Add to Section"
+      />
     </Layout>
   );
 };

@@ -83,7 +83,11 @@
   }
   
   &__card-content {
-    padding: 1rem;
+    padding: 0.75rem;
+    
+    @media (max-width: 768px) {
+      padding: 0.5rem;
+    }
   }
   
   &__song-title {
@@ -91,6 +95,20 @@
     font-size: 1.1rem;
     margin-bottom: 0.25rem;
     color: $primary;
+    
+    &--clickable {
+      cursor: pointer;
+      transition: color 0.2s ease;
+      
+      &:hover {
+        color: darken($primary, 10%);
+        text-decoration: underline;
+      }
+      
+      &:active {
+        color: darken($primary, 20%);
+      }
+    }
   }
   
   &__song-artist {
@@ -116,9 +134,13 @@
   
   &__card-actions {
     display: flex;
-    justify-content: space-between;
+    justify-content: flex-end;
     align-items: center;
-    margin-top: 1rem;
+    margin-top: 0.75rem;
+    
+    @media (max-width: 768px) {
+      margin-top: 0.5rem;
+    }
     
     button {
       background: none;
