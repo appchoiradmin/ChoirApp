@@ -8,6 +8,7 @@ import { PlaylistSong } from '../types/playlist';
 import { SongDto } from '../types/song';
 import { useUser } from '../hooks/useUser';
 import { removeSongFromPlaylist, moveSongInPlaylist } from '../services/playlistService';
+import { getSongById } from '../services/songService';
 import { Button, Card, LoadingSpinner } from '../components/ui';
 import Layout from '../components/ui/Layout';
 import toast from 'react-hot-toast';
@@ -95,9 +96,50 @@ const PlaylistsPage: React.FC = () => {
   } = usePlaylistContext();
   const { user } = useUser();
   const navigate = useNavigate();
-  const [songs] = useState<SongDto[]>([]);
+  const [songs, setSongs] = useState<SongDto[]>([]);
   const [dropdownOpen, setDropdownOpen] = useState<string | null>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
+
+  // Fetch song details when sections are loaded
+  useEffect(() => {
+    const fetchSongDetails = async () => {
+      if (!user?.token || !sections.length) return;
+      
+      console.log('🚨 DEBUG - PlaylistsPage fetching song details for sections:', sections.length);
+      const songDetailsMap: Record<string, SongDto> = {};
+      const songIds = new Set<string>();
+      
+      // Collect all unique song IDs from all sections
+      sections.forEach(section => {
+        console.log('🚨 DEBUG - Section:', section.title, 'has', section.songs.length, 'songs');
+        section.songs.forEach(song => {
+          if (song.songId) {
+            songIds.add(song.songId);
+            console.log('🚨 DEBUG - Found songId:', song.songId);
+          }
+        });
+      });
+      
+      console.log('🚨 DEBUG - Total unique song IDs to fetch:', songIds.size);
+      
+      // Fetch details for each unique song
+      for (const songId of songIds) {
+        try {
+          console.log('🚨 DEBUG - Fetching details for songId:', songId);
+          const songDetail = await getSongById(songId, user.token);
+          console.log('🚨 DEBUG - Fetched song detail:', songDetail.title);
+          songDetailsMap[songId] = songDetail;
+        } catch (error) {
+          console.error(`Failed to fetch song ${songId}:`, error);
+        }
+      }
+      
+      console.log('🚨 DEBUG - Final song details map:', Object.keys(songDetailsMap).length, 'songs');
+      setSongs(Object.values(songDetailsMap));
+    };
+    
+    fetchSongDetails();
+  }, [sections, user?.token]);
 
   // Close dropdown when clicking outside
   useEffect(() => {

@@ -33,12 +33,29 @@ namespace ChoirApp.Infrastructure.Services
             // Convert IsPublic boolean to SongVisibilityType enum
             var visibility = playlistDto.IsPublic ? DomainEntities.SongVisibilityType.PublicAll : DomainEntities.SongVisibilityType.Private;
             
+            // Parse the date from the DTO - this is critical for date-based playlist isolation
+            DateTimeOffset? playlistDate = null;
+            if (playlistDto.Date != default(DateTime))
+            {
+                // CRITICAL FIX: Properly handle UTC dates from frontend
+                // Frontend sends ISO string that gets parsed as DateTime without timezone info
+                // We need to treat it as UTC to preserve the exact date selected by user
+                playlistDate = new DateTimeOffset(playlistDto.Date, TimeSpan.Zero); // Treat as UTC
+                Console.WriteLine($"🚨 DEBUG - Backend creating playlist with date: {playlistDate} (UTC)");
+                Console.WriteLine($"🚨 DEBUG - Original DTO date: {playlistDto.Date} (Kind: {playlistDto.Date.Kind})");
+            }
+            else
+            {
+                Console.WriteLine("🚨 DEBUG - No date provided in DTO, using current time");
+            }
+            
             var playlistResult = Playlist.Create(
                 name: playlistDto.Title ?? string.Empty, 
                 description: null, 
                 creatorId: userId, 
                 choirId: playlistDto.ChoirId, 
-                visibility: visibility);
+                visibility: visibility,
+                createdAt: playlistDate);
                 
             if (playlistResult.IsFailed)
                 return Result.Fail(playlistResult.Errors);
@@ -300,12 +317,26 @@ namespace ChoirApp.Infrastructure.Services
             if (playlist == null)
                 return Result.Fail("Playlist not found.");
 
+            // Debug: Log all section IDs in the playlist
+            Console.WriteLine($"🚨 DEBUG - Playlist {playlistGuid} has {playlist.Sections.Count} sections:");
+            foreach (var s in playlist.Sections)
+            {
+                Console.WriteLine($"  - Section ID: {s.SectionId}, Title: {s.Title}");
+            }
+
             if (!Guid.TryParse(dto.SectionId, out var sectionGuid))
                 return Result.Fail("Invalid section id");
 
+            Console.WriteLine($"🚨 DEBUG - Looking for section ID: {sectionGuid}");
+
             var section = playlist.Sections.FirstOrDefault(s => s.SectionId == sectionGuid);
             if (section == null)
+            {
+                Console.WriteLine($"🚨 DEBUG - Section {sectionGuid} NOT FOUND in playlist {playlistGuid}");
                 return Result.Fail("Section not found in the playlist.");
+            }
+
+            Console.WriteLine($"🚨 DEBUG - Section {sectionGuid} FOUND: {section.Title}");
 
             if (!Guid.TryParse(dto.SongId, out var songGuid))
                 return Result.Fail("Invalid song id");

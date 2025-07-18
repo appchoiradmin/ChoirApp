@@ -49,18 +49,18 @@ namespace ChoirApp.Domain.Entities
         {
         }
 
-        private Playlist(string name, string? description, Guid creatorId, Guid? choirId, SongVisibilityType visibility)
+        private Playlist(string name, string? description, Guid creatorId, Guid? choirId, SongVisibilityType visibility, DateTimeOffset? createdAt = null)
         {
             PlaylistId = Guid.NewGuid();
             Name = name;
             Description = description;
             CreatorId = creatorId;
             ChoirId = choirId;
-            CreatedAt = DateTimeOffset.UtcNow;
+            CreatedAt = createdAt ?? DateTimeOffset.UtcNow;
             Visibility = visibility;
         }
 
-        public static Result<Playlist> Create(string name, string? description, Guid creatorId, Guid? choirId, SongVisibilityType visibility)
+        public static Result<Playlist> Create(string name, string? description, Guid creatorId, Guid? choirId, SongVisibilityType visibility, DateTimeOffset? createdAt = null)
         {
             if (string.IsNullOrWhiteSpace(name))
             {
@@ -72,7 +72,7 @@ namespace ChoirApp.Domain.Entities
                 return Result.Fail("A playlist must have a creator.");
             }
 
-            var playlist = new Playlist(name, description, creatorId, choirId, visibility);
+            var playlist = new Playlist(name, description, creatorId, choirId, visibility, createdAt);
             return Result.Ok(playlist);
         }
 

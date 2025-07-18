@@ -78,6 +78,13 @@ export const addSongToPlaylist = async (
   data: AddSongToPlaylistDto,
   token: string
 ): Promise<void> => {
+  console.log('Debug - API Call addSongToPlaylist:', {
+    playlistId,
+    data,
+    token: token ? 'present' : 'missing',
+    url: `${API_URL}/api/playlists/${playlistId}/songs`
+  });
+
   const response = await fetch(`${API_URL}/api/playlists/${playlistId}/songs`, {
     method: 'POST',
     headers: {
@@ -87,9 +94,34 @@ export const addSongToPlaylist = async (
     body: JSON.stringify(data),
   });
 
+  console.log('Debug - API Response:', {
+    status: response.status,
+    statusText: response.statusText,
+    ok: response.ok
+  });
+
   if (!response.ok) {
-    throw new Error('Failed to add song to playlist');
+    let errorMessage = 'Failed to add song to playlist';
+    try {
+      const errorData = await response.json();
+      console.error('Debug - API Error Response:', errorData);
+      
+      // Log detailed validation errors if available
+      if (errorData.errors) {
+        console.error('Debug - Validation Errors:', errorData.errors);
+        Object.keys(errorData.errors).forEach(field => {
+          console.error(`Debug - Field '${field}':`, errorData.errors[field]);
+        });
+      }
+      
+      errorMessage = errorData.message || errorData.title || errorMessage;
+    } catch (parseError) {
+      console.error('Debug - Failed to parse error response:', parseError);
+    }
+    throw new Error(errorMessage);
   }
+
+  console.log('Debug - Song added to playlist successfully');
 };
 
 export interface UpdatePlaylistSongDto {

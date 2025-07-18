@@ -29,12 +29,18 @@ const PlaylistDetail: React.FC<PlaylistDetailProps> = ({ playlist, onPlaylistDel
   useEffect(() => {
     const fetchSongDetails = async () => {
       if (token) {
+        console.log('🚨 DEBUG - PlaylistDetail fetching song details for playlist:', playlist.id);
+        console.log('🚨 DEBUG - Playlist sections:', playlist.sections);
         const details: Record<string, SongDto> = {};
         for (const section of playlist.sections) {
+          console.log('🚨 DEBUG - Processing section:', section.title, 'with', section.songs.length, 'songs');
           for (const song of section.songs) {
+            console.log('🚨 DEBUG - Processing song:', song);
             if (song.songId && !details[song.songId]) {
               try {
+                console.log('🚨 DEBUG - Fetching song details for songId:', song.songId);
                 const songDetail = await getSongById(song.songId, token);
+                console.log('🚨 DEBUG - Fetched song detail:', songDetail);
                 details[song.songId] = songDetail;
               } catch (error) {
                 console.error(`Failed to fetch song ${song.songId}`, error);
@@ -42,6 +48,7 @@ const PlaylistDetail: React.FC<PlaylistDetailProps> = ({ playlist, onPlaylistDel
             }
           }
         }
+        console.log('🚨 DEBUG - Final song details:', details);
         setSongDetails(details);
       }
     };
@@ -70,7 +77,20 @@ const PlaylistDetail: React.FC<PlaylistDetailProps> = ({ playlist, onPlaylistDel
           <ul>
             {section.songs.map((song) => (
               <li key={song.id}>
-                {song.songId ? songDetails[song.songId]?.title || 'Loading...' : 'N/A'}
+                {song.songId ? (
+                  songDetails[song.songId] ? (
+                    <Link 
+                      to={`/songs/${song.songId}`} 
+                      className="has-text-link"
+                    >
+                      {songDetails[song.songId].title}
+                    </Link>
+                  ) : (
+                    'Loading...'
+                  )
+                ) : (
+                  'Unknown song'
+                )}
               </li>
             ))}
           </ul>

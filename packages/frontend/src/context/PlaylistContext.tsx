@@ -76,15 +76,37 @@ export const PlaylistProvider = ({
       setIsInitialized(false);
       try {
         // 1. Try to fetch persisted playlists for choir
+        console.log('🚨 CRITICAL - PlaylistContext initializing for choirId:', choirId);
         const playlists = await getPlaylistsByChoirId(choirId, token);
+        console.log('🚨 CRITICAL - API returned playlists:', playlists);
         // Find playlist for the requested date (or next Sunday)
         const targetDate = date || getNextSunday();
         const targetDateStr = targetDate.toISOString().split('T')[0]; // YYYY-MM-DD
+        console.log('🚨 CRITICAL - Looking for playlist with date:', targetDateStr);
+        
+        // Find playlist for the exact target date only
         const persisted = playlists.find(p => {
           const dateStr = typeof p.date === 'string' ? p.date : (p.date instanceof Date ? p.date.toISOString().split('T')[0] : '');
+          console.log('🚨 CRITICAL - Checking playlist:', { id: p.id, date: dateStr, matches: dateStr.startsWith(targetDateStr) });
           return dateStr.startsWith(targetDateStr);
         });
+        
         if (persisted) {
+          console.log('🚨 CRITICAL - Found exact date match, using playlist:', {
+            id: persisted.id,
+            date: persisted.date
+          });
+        } else {
+          console.log('🚨 CRITICAL - No playlist found for date:', targetDateStr, '- will show empty playlist with template sections');
+        }
+        if (persisted) {
+          console.log('Debug - PlaylistContext found persisted playlist:', {
+            playlistId: persisted.id,
+            sectionsCount: persisted.sections?.length || 0,
+            sectionIds: persisted.sections?.map(s => ({ id: s.id, title: s.title })) || [],
+            templateTitle: persisted.template?.title || 'none'
+          });
+          console.log('🚨 CRITICAL - Raw persisted playlist sections:', persisted.sections);
           setSections(persisted.sections || []);
           setSelectedTemplate(persisted.template || null);
           setPlaylistId(persisted.id);
@@ -130,6 +152,13 @@ export const PlaylistProvider = ({
   const createPlaylistIfNeeded = async () => {
     if (isPersisted || !choirId || !token) return;
     try {
+      console.log('🚨 DEBUG - createPlaylistIfNeeded called with:', {
+        date: date ? date.toISOString() : 'null',
+        choirId,
+        isPersisted,
+        selectedTemplate: selectedTemplate?.title
+      });
+      
       // Include songs when creating the playlist
       type SectionCreationPayload = { 
         title: string; 
@@ -147,9 +176,14 @@ export const PlaylistProvider = ({
           order: song.order
         }))
       }));
+      
+      // CRITICAL FIX: Use the exact date passed to the context, don't fallback to getNextSunday
+      const playlistDate = date || new Date(); // Use current date if no date provided
+      console.log('🚨 DEBUG - Creating playlist with date:', playlistDate.toISOString());
+      
       const created = await import('../services/playlistService').then(mod => mod.createPlaylist({
         choirId,
-        date: (date || getNextSunday()).toISOString(),
+        date: playlistDate.toISOString(),
         sections: sectionsForCreation as any, // Cast to any to satisfy backend payload
         playlistTemplateId: selectedTemplate?.id,
         isPublic: false,
