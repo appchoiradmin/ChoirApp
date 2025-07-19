@@ -1,0 +1,39 @@
+name: Deploy to Azure
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build-and-deploy-backend:
+    runs-on: windows-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up .NET
+      uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: '8.0.x'
+    
+    - name: Restore dependencies
+      run: dotnet restore
+      working-directory: ./packages/backend/src/ChoirApp.Backend
+    
+    - name: Build
+      run: dotnet build --no-restore --configuration Release
+      working-directory: ./packages/backend/src/ChoirApp.Backend
+    
+    - name: Publish
+      run: dotnet publish --no-build --configuration Release --output ./publish
+      working-directory: ./packages/backend/src/ChoirApp.Backend
+    
+    - name: Deploy to Azure App Service
+      uses: azure/webapps-deploy@v2
+      with:
+        app-name: 'choirapp-backend-b7evgyahfthjf3aa'
+        slot-name: 'production'
+        publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
+        package: ./packages/backend/src/ChoirApp.Backend/publish
