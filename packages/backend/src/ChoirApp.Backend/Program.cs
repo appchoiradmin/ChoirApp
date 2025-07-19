@@ -26,12 +26,15 @@ builder.Services.AddControllers();
 // Configure authentication
 builder.Services.AddAuth(builder.Configuration, builder.Environment);
 
+// Get CORS origins from configuration
+var corsOrigins = builder.Configuration.GetSection("CorsOrigins").Get<string[]>() ?? new[] { "http://localhost:5173" };
+
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowFrontend",
         policy =>
         {
-            policy.WithOrigins("http://localhost:5173")
+            policy.WithOrigins(corsOrigins)
                   .AllowAnyHeader()
                   .AllowAnyMethod()
                   .AllowCredentials()
