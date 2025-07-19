@@ -1,3 +1,4 @@
+@use 'sass:color';
 @use '../styles/variables' as *;
 
 .songs-page {
@@ -101,12 +102,12 @@
       transition: color 0.2s ease;
       
       &:hover {
-        color: darken($primary, 10%);
+        color: color.adjust($primary, $lightness: -10%);
         text-decoration: underline;
       }
       
       &:active {
-        color: darken($primary, 20%);
+        color: color.adjust($primary, $lightness: -20%);
       }
     }
   }

@@ -50,9 +50,14 @@ def parse_song_page(url):
             artist = h2.text.split(":", 1)[-1].strip()
         else:
             artist = "Música Católica"
-        # Chords/lyrics extraction
-        pre = soup.find("pre")
-        chords = pre.text.strip() if pre else ""
+        # Chords/lyrics extraction - find the pre tag with the most content (actual song)
+        pres = soup.find_all("pre")
+        chords = ""
+        if pres:
+            # Find the pre tag with the most content (likely the song content)
+            longest_pre = max(pres, key=lambda p: len(p.text.strip()))
+            chords = longest_pre.text.strip()
+            print(f"  Found {len(pres)} pre tags, using one with {len(chords)} characters")
         chordpro = to_chordpro_format(chords)
         # Metadata (tags, source, etc.)
         tags = []
@@ -107,38 +112,87 @@ def to_chordpro_format(text):
     Each pair of lines: chords, lyrics -> merged to [CHORD]lyric.
     Preserves blank lines and lines without chords.
     Adds {start_of_verse}/{end_of_verse} markers for blocks.
+    Handles section labels like INTRO:, VERSE:, CHORUS: properly.
     """
     lines = text.splitlines()
     result = []
     i = 0
+    
+    def is_section_label(line):
+        """Check if a line is a section label like INTRO:, VERSE:, CHORUS:, etc."""
+        line = line.strip().upper()
+        section_keywords = ['INTRO:', 'VERSE:', 'CHORUS:', 'BRIDGE:', 'OUTRO:', 'CODA:', 'ESTRIBILLO:', 'VERSO:']
+        return any(line.startswith(keyword) or line == keyword.rstrip(':') for keyword in section_keywords)
+    
     while i < len(lines):
+        current_line = lines[i].strip()
+        
         # Skip empty lines
-        if lines[i].strip() == "":
+        if current_line == "":
             result.append("")
             i += 1
             continue
-        # If next line exists and is not blank, treat as chords+lyrics
-        if i+1 < len(lines) and lines[i+1].strip() != "":
-            chords_line = lines[i]
-            lyric_line = lines[i+1]
-            merged = merge_chords_lyrics(chords_line, lyric_line)
-            # Start a new verse if previous line was blank or start of file
+        
+        # Check if current line is a section label
+        if is_section_label(current_line):
+            # Add section label as-is (not as a chord)
             if not result or result[-1] == "":
                 result.append("{start_of_verse}")
-            result.append(merged)
-            # If next next line is blank or end, close verse
-            if i+2 >= len(lines) or lines[i+2].strip() == "":
-                result.append("{end_of_verse}")
-            i += 2
+            result.append(current_line)
+            i += 1
+            continue
+        
+        # If next line exists and is not blank, and current line is not a section label
+        if i+1 < len(lines) and lines[i+1].strip() != "" and not is_section_label(lines[i+1]):
+            chords_line = lines[i]
+            lyric_line = lines[i+1]
+            
+            # Check if the chords line looks like actual chords (contains chord-like patterns)
+            if has_chord_patterns(chords_line):
+                merged = merge_chords_lyrics(chords_line, lyric_line)
+                # Start a new verse if previous line was blank or start of file
+                if not result or result[-1] == "":
+                    result.append("{start_of_verse}")
+                result.append(merged)
+                # If next next line is blank or end, close verse
+                if i+2 >= len(lines) or lines[i+2].strip() == "":
+                    result.append("{end_of_verse}")
+                i += 2
+            else:
+                # Treat as single line (not chord/lyric pair)
+                if not result or result[-1] == "":
+                    result.append("{start_of_verse}")
+                result.append(current_line)
+                if i+1 >= len(lines) or lines[i+1].strip() == "":
+                    result.append("{end_of_verse}")
+                i += 1
         else:
             # No chord line, just lyrics or single line
             if not result or result[-1] == "":
                 result.append("{start_of_verse}")
-            result.append(lines[i])
+            result.append(current_line)
             if i+1 >= len(lines) or lines[i+1].strip() == "":
                 result.append("{end_of_verse}")
             i += 1
     return "\n".join(result)
+
+def has_chord_patterns(line):
+    """Check if a line contains chord-like patterns (Spanish chord names)"""
+    import re
+    # Common Spanish chord patterns
+    chord_patterns = [
+        r'\b(DO|RE|MI|FA|SOL|LA|SI)\b',  # Basic Spanish chords
+        r'\b[A-G][#b]?m?\b',  # English chord notation (C, Dm, F#, etc.)
+        r'\b(LAm|REm|MIm|FAm|SOLm|SIm)\b',  # Minor Spanish chords
+        r'\b(DO#|RE#|FA#|SOL#|LA#)\b',  # Sharp chords
+        r'\b[A-G][#b]?(sus[24]?|maj[79]?|m[679]?|dim|aug|add[0-9])\b',  # Complex chords
+        r'/[A-G][#b]?\b'  # Slash chords like LA/DO#
+    ]
+    
+    for pattern in chord_patterns:
+        if re.search(pattern, line, re.IGNORECASE):
+            return True
+    return False
 
 def merge_chords_lyrics(chords_line, lyric_line):
     """

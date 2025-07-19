@@ -1,3 +1,4 @@
+@use 'sass:color';
 @use '../styles/variables' as *;
 
 // Enhanced mobile-first song card styles
@@ -46,7 +47,7 @@
       transition: color 0.2s ease;
       
       &:hover {
-        color: darken($primary, 10%);
+        color: color.adjust($primary, $lightness: -10%);
         text-decoration: underline;
       }
     }
@@ -105,7 +106,7 @@
   }
   
   &__add-button {
-    background: linear-gradient(135deg, $primary 0%, darken($primary, 10%) 100%) !important;
+    background: linear-gradient(135deg, $primary 0%, color.adjust($primary, $lightness: -10%) 100%) !important;
     color: white !important;
     border: none !important;
     border-radius: 0.5rem !important;
@@ -139,7 +140,7 @@
     &:hover {
       transform: translateY(-1px) !important;
       box-shadow: 0 4px 8px rgba($primary, 0.3) !important;
-      background: linear-gradient(135deg, darken($primary, 5%) 0%, darken($primary, 15%) 100%) !important;
+      background: linear-gradient(135deg, color.adjust($primary, $lightness: -5%) 0%, color.adjust($primary, $lightness: -15%) 100%) !important;
     }
     
     &:active {
@@ -156,11 +157,11 @@
     
     // Selected state styling
     &--selected {
-      background: linear-gradient(135deg, $success 0%, darken($success, 10%) 100%) !important;
+      background: linear-gradient(135deg, $success 0%, color.adjust($success, $lightness: -10%) 100%) !important;
       box-shadow: 0 2px 4px rgba($success, 0.2) !important;
       
       &:hover {
-        background: linear-gradient(135deg, darken($success, 5%) 0%, darken($success, 15%) 100%) !important;
+        background: linear-gradient(135deg, color.adjust($success, $lightness: -5%) 0%, color.adjust($success, $lightness: -15%) 100%) !important;
         box-shadow: 0 4px 8px rgba($success, 0.3) !important;
       }
     }
