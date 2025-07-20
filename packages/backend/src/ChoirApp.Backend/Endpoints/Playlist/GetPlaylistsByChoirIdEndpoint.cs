@@ -27,7 +27,7 @@ namespace ChoirApp.Backend.Endpoints.Playlist
             Verbs("GET", "OPTIONS");
             Routes("/choirs/{ChoirId}/playlists");
             AuthSchemes("Bearer");
-            Roles(nameof(UserRole.GeneralUser), nameof(UserRole.ChoirAdmin), nameof(UserRole.ChoirMember));
+            Roles(nameof(UserRole.ChoirAdmin), nameof(UserRole.ChoirMember));
         }
 
         public override async Task HandleAsync(GetPlaylistsByChoirIdRequest req, CancellationToken ct)

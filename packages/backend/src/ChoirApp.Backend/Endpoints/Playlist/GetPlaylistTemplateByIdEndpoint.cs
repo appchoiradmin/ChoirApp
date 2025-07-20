@@ -22,7 +22,7 @@ namespace ChoirApp.Backend.Endpoints.Playlist
         {
             Get("/playlist-templates/{Id}");
             AuthSchemes("Bearer");
-            Roles(nameof(UserRole.GeneralUser), nameof(UserRole.ChoirAdmin), nameof(UserRole.ChoirMember));
+            Roles(nameof(UserRole.ChoirAdmin), nameof(UserRole.ChoirMember));
         }
 
         public override async Task HandleAsync(GetPlaylistTemplateByIdRequest req, CancellationToken ct)
