@@ -67,6 +67,9 @@ const SongsListPage: FC<SongsListPageProps> = ({ playlistId, refreshPlaylist }) 
     sortBy: 'title',
     sortOrder: 'asc'
   });
+  
+  // Search debounce timeout ref
+  const searchTimeoutRef = useRef<number | null>(null);
 
   // Modal handlers
   const openSectionModal = (songId: string) => {
@@ -202,52 +205,9 @@ const SongsListPage: FC<SongsListPageProps> = ({ playlistId, refreshPlaylist }) 
     
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
-  }, [token, user?.choirId, songsPerPage, filters.search]);
+  }, [token, user?.choirId, songsPerPage]); // Removed filters.search dependency to avoid conflicts
 
-  // Apply filters and sorting - for search functionality only
-  // We don't filter or sort the loaded songs since we're using infinite scroll
-  const handleFilteredSearch = async () => {
-    // Reset pagination and fetch with new filters
-    setPage(0);
-    setSongs([]);
-    setHasMore(true);
-    setLoading(true);
-    
-    const fetchFilteredSongs = async () => {
-      if (!token) {
-        setError('Authentication token not found.');
-        setLoading(false);
-        return;
-      }
-      
-      try {
-        // Prepare search parameters
-        const searchParams: SongSearchParams = {
-          searchTerm: filters.search || '', // Empty string is now handled by backend
-          skip: 0,
-          take: songsPerPage,
-          visibility: SongVisibilityType.PublicAll
-        };
-        
-        // Add title/artist search if we have a search term
-        if (filters.search) {
-          searchParams.title = filters.search;
-          searchParams.artist = filters.search;
-        }
-        
-        const songsData = await searchSongs(searchParams, token || '');
-        setSongs(songsData || []);
-        setPage(1);
-        setHasMore(songsData.length === songsPerPage);
-      } catch (error) {
-        setError('Failed to search songs. Please try again later.');
-      } finally {
-        setLoading(false);
-      }
-    };
-    
-    fetchFilteredSongs();
-  };
+
   
   // Handle back to top button click
   const scrollToTop = () => {
@@ -493,15 +453,77 @@ const SongsListPage: FC<SongsListPageProps> = ({ playlistId, refreshPlaylist }) 
     }
   };
   
-  // Handle search input change
+  // Handle search input changes
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFilters(prev => ({ ...prev, search: e.target.value }));
+    const newSearchValue = e.target.value;
+    setFilters(prev => ({
+      ...prev,
+      search: newSearchValue
+    }));
+    
+    // Debounce the search to avoid too many API calls
+    // Clear any existing timeout
+    if (searchTimeoutRef.current) {
+      clearTimeout(searchTimeoutRef.current);
+    }
+    
+    // Set a new timeout to trigger search after user stops typing
+    searchTimeoutRef.current = setTimeout(() => {
+      // Trigger search with the new value
+      performSearch(newSearchValue);
+    }, 300); // 300ms debounce
   };
   
+  // Perform search with given search term
+  const performSearch = async (searchTerm: string) => {
+    try {
+      setLoading(true);
+      setPage(0);
+      setSongs([]);
+      setHasMore(true);
+      
+      if (!token) {
+        setError('Authentication token not found.');
+        return;
+      }
+      
+      // Prepare search parameters
+      const searchParams: SongSearchParams = {
+        searchTerm: searchTerm || '', // Use the provided search term
+        skip: 0,
+        take: songsPerPage,
+        visibility: SongVisibilityType.PublicAll
+      };
+      
+      // Don't add title/artist parameters - let the backend handle the search logic
+      // The backend already searches title, artist, and content based on searchTerm
+      
+      console.log('🔍 Performing search with params:', searchParams);
+      const songsData = await searchSongs(searchParams, token);
+      console.log('🔍 Search results:', songsData?.length || 0, 'songs');
+      console.log('🔍 Search results data:', songsData);
+      
+      setSongs(songsData || []);
+      console.log('🔍 Songs state should be updated with:', songsData?.length || 0, 'songs');
+      setPage(1);
+      setHasMore((songsData?.length || 0) === songsPerPage);
+    } catch (error) {
+      console.error('Search error:', error);
+      setError('Failed to search songs. Please try again later.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   // Handle search form submission
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    handleFilteredSearch();
+    // Clear any pending debounced search
+    if (searchTimeoutRef.current) {
+      clearTimeout(searchTimeoutRef.current);
+    }
+    // Perform search immediately with current search term
+    performSearch(filters.search);
   };
   
   return (
@@ -510,7 +532,14 @@ const SongsListPage: FC<SongsListPageProps> = ({ playlistId, refreshPlaylist }) 
     >
       <div className="songs-page">
         <div className="songs-page__header">
-          <h1 className="songs-page__title">Songs Library</h1>
+          <h1 className="songs-page__title">
+            Songs Library
+            {filters.search && (
+              <span className="songs-page__search-indicator">
+                - Searching for "{filters.search}" ({songs.length} results)
+              </span>
+            )}
+          </h1>
           
           <div className="songs-page__actions">
             <form onSubmit={handleSearchSubmit} className="songs-page__search">
@@ -611,7 +640,10 @@ const SongsListPage: FC<SongsListPageProps> = ({ playlistId, refreshPlaylist }) 
               Retry
             </Button>
           </div>
-        ) : songs.length === 0 ? (
+        ) : (() => {
+          console.log('🎯 Frontend render check: songs.length =', songs.length, 'songs =', songs);
+          return songs.length === 0;
+        })() ? (
           <div className="songs-page__empty">
             <div className="songs-page__empty-icon">
               <MusicalNoteIcon />
