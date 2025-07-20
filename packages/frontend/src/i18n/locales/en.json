@@ -402,7 +402,13 @@
     "failedToUpdateRole": "Failed to update member role. Please try again.",
     "errorLoadingChoirAdmin": "Error loading choir admin.",
     "noChoirFound": "No choir found.",
-    "backToDashboard": "Back to Dashboard"
+    "backToDashboard": "Back to Dashboard",
+    "inviteNewMember": "Invite New Member",
+    "enterEmailAddress": "Enter email address",
+    "send": "Send",
+    "sentInvitations": "Sent Invitations",
+    "promoteToAdmin": "Promote to Admin",
+    "demoteToMember": "Demote to Member"
   },
   "createPlaylist": {
     "title": "New Playlist",
@@ -695,5 +701,12 @@
   },
   "chordProViewer": {
     "noContent": "No song content to display."
-  }
+  },
+  "inviteNewMember": "Invite New Member",
+  "enterEmailAddress": "Enter email address",
+  "send": "Send",
+  "sentInvitations": "Sent Invitations",
+  "promoteToAdmin": "Promote to Admin",
+  "demoteToMember": "Demote to Member",
+  "removeMember": "Remove Member"
 }

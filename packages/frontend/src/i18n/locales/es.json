@@ -360,7 +360,13 @@
     "failedToUpdateRole": "Error al actualizar el rol del miembro. Por favor intenta de nuevo.",
     "errorLoadingChoirAdmin": "Error al cargar administración del coro.",
     "noChoirFound": "No se encontró el coro.",
-    "backToDashboard": "Volver al Panel"
+    "backToDashboard": "Volver al Panel",
+    "inviteNewMember": "Invitar Nuevo Miembro",
+    "enterEmailAddress": "Ingresa dirección de correo",
+    "send": "Enviar",
+    "sentInvitations": "Invitaciones Enviadas",
+    "promoteToAdmin": "Promover a Administrador",
+    "demoteToMember": "Degradar a Miembro"
   },
   "createPlaylist": {
     "title": "Nueva Lista de Reproducción",
@@ -653,5 +659,12 @@
   },
   "chordProViewer": {
     "noContent": "No hay contenido de canción para mostrar."
-  }
+  },
+  "inviteNewMember": "Invitar Nuevo Miembro",
+  "enterEmailAddress": "Ingresa dirección de correo",
+  "send": "Enviar",
+  "sentInvitations": "Invitaciones Enviadas",
+  "promoteToAdmin": "Promover a Administrador",
+  "demoteToMember": "Degradar a Miembro",
+  "removeMember": "Eliminar Miembro"
 }
