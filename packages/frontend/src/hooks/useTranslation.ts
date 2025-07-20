@@ -4,6 +4,8 @@ export const useTranslation = () => {
   const { t, i18n } = useI18nTranslation();
 
   const changeLanguage = (language: string) => {
+    // Manually update localStorage to ensure persistence
+    localStorage.setItem('choirapp-language', language);
     i18n.changeLanguage(language);
   };
 

@@ -123,6 +123,34 @@
     "createChoirButton": "Create Choir",
     "choirCreated": "Choir created successfully!"
   },
+  "dashboard": {
+    "title": "Dashboard",
+    "welcomeBack": "Welcome back, {{name}}!",
+    "createChoir": "Create Choir",
+    "totalChoirs": "Total Choirs",
+    "asAdmin": "As Admin",
+    "pendingInvites": "Pending Invites",
+    "asMember": "As Member",
+    "completeSetup": "Complete Your Setup",
+    "percentComplete": "{{percent}}% Complete",
+    "progressSteps": {
+      "completeProfile": "Complete profile setup",
+      "joinChoir": "Join or create a choir",
+      "addSongs": "Add songs to your choir"
+    },
+    "quickActionsTitle": "Quick Actions",
+    "browseSongs": "Browse Songs",
+    "browseSongsDesc": "Explore our song library",
+    "addSong": "Add Song",
+    "createPlaylistDesc": "Start organizing your music",
+    "choirsYouManage": "Choirs You Manage",
+    "choirsYouAreIn": "Choirs You're In",
+    "administrator": "Administrator",
+    "member": "Member",
+    "noChoirsYet": "No Choirs Yet",
+    "noChoirsDescription": "Create your first choir or wait for an invitation to get started.",
+    "createFirstChoir": "Create Your First Choir"
+  },
   "songs": {
     "songsTitle": "Songs",
     "song": "Song",

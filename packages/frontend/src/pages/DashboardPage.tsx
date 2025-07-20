@@ -269,7 +269,7 @@ const DashboardPage: React.FC = () => {
       <div className="choirs-section">
         {adminOfChoirs.length > 0 && (
           <Card className="choirs-card">
-            <h2 className="section-title">Choirs You Manage</h2>
+            <h2 className="section-title">{t('dashboard.choirsYouManage')}</h2>
             <div className="choirs-grid">
               {adminOfChoirs.map(choir => (
                 <Link 
@@ -284,7 +284,7 @@ const DashboardPage: React.FC = () => {
                       </div>
                       <div className="choir-details">
                         <h3 className="choir-name">{choir.name}</h3>
-                        <p className="choir-role">Administrator</p>
+                        <p className="choir-role">{t('dashboard.administrator')}</p>
                       </div>
                       <div className="choir-arrow">
                         <ChartBarIcon className="arrow-icon" />
@@ -299,7 +299,7 @@ const DashboardPage: React.FC = () => {
 
         {memberOfChoirs.length > 0 && (
           <Card className="choirs-card">
-            <h2 className="section-title">Choirs You're In</h2>
+            <h2 className="section-title">{t('dashboard.choirsYouAreIn')}</h2>
             <div className="choirs-grid">
               {memberOfChoirs.map(choir => (
                 <Link 
@@ -314,7 +314,7 @@ const DashboardPage: React.FC = () => {
                       </div>
                       <div className="choir-details">
                         <h3 className="choir-name">{choir.name}</h3>
-                        <p className="choir-role">Member</p>
+                        <p className="choir-role">{t('dashboard.member')}</p>
                       </div>
                       <div className="choir-arrow">
                         <ChartBarIcon className="arrow-icon" />
@@ -331,9 +331,9 @@ const DashboardPage: React.FC = () => {
           <Card className="empty-state-card">
             <div className="empty-state-content">
               <UserGroupIcon className="empty-state-icon" />
-              <h3 className="empty-state-title">No Choirs Yet</h3>
+              <h3 className="empty-state-title">{t('dashboard.noChoirsYet')}</h3>
               <p className="empty-state-subtitle">
-                Create your first choir or wait for an invitation to get started.
+                {t('dashboard.noChoirsDescription')}
               </p>
               <Link to="/create-choir">
                 <Button 
@@ -341,7 +341,7 @@ const DashboardPage: React.FC = () => {
                   className="empty-state-action"
                 >
                   <PlusIcon className="button-icon" />
-                  Create Your First Choir
+                  {t('dashboard.createFirstChoir')}
                 </Button>
               </Link>
             </div>

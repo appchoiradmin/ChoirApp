@@ -34,6 +34,30 @@ const PlaylistHeader: React.FC<{
 }> = ({ title, date, totalSongs, totalSections, duration, isPrivate = true }) => {
   const { t, getCurrentLanguage } = useTranslation();
   
+  // Get current language for reactive updates
+  const currentLanguage = getCurrentLanguage();
+  
+  const formatDateWithCapitalization = (dateObj: Date) => {
+    try {
+      const dateString = dateObj.toLocaleDateString(currentLanguage, {
+        weekday: 'long',
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+      });
+      return dateString.charAt(0).toUpperCase() + dateString.slice(1);
+    } catch (error) {
+      // Fallback to English if there's an error
+      const dateString = dateObj.toLocaleDateString('en', {
+        weekday: 'long',
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+      });
+      return dateString.charAt(0).toUpperCase() + dateString.slice(1);
+    }
+  };
+  
   return (
     <div className="playlist-header">
       <div className="header-content">
@@ -45,15 +69,7 @@ const PlaylistHeader: React.FC<{
           <div className="playlist-meta">
             <span className="meta-item">
               <CalendarIcon className="meta-icon" />
-              {(() => {
-              const dateString = date.toLocaleDateString(getCurrentLanguage(), {
-                weekday: 'long',
-                year: 'numeric',
-                month: 'short',
-                day: 'numeric',
-              });
-              return dateString.charAt(0).toUpperCase() + dateString.slice(1);
-            })()}
+              {formatDateWithCapitalization(date)}
             </span>
             <span className="meta-item">
               <MusicalNoteIcon className="meta-icon" />
@@ -108,6 +124,30 @@ const PlaylistsPage: React.FC = () => {
   const [songs, setSongs] = useState<SongDto[]>([]);
   const [dropdownOpen, setDropdownOpen] = useState<string | null>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
+
+  // Get current language for reactive updates
+  const currentLanguage = getCurrentLanguage();
+  
+  const formatDateTitle = (dateObj: Date) => {
+    try {
+      const dateString = dateObj.toLocaleDateString(currentLanguage, {
+        weekday: 'long',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+      });
+      return dateString.charAt(0).toUpperCase() + dateString.slice(1);
+    } catch (error) {
+      // Fallback to English if there's an error
+      const dateString = dateObj.toLocaleDateString('en', {
+        weekday: 'long',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+      });
+      return dateString.charAt(0).toUpperCase() + dateString.slice(1);
+    }
+  };
 
   // Fetch song details when sections are loaded
   useEffect(() => {
@@ -340,15 +380,7 @@ const PlaylistsPage: React.FC = () => {
         )}
         {/* Header Section */}
         <PlaylistHeader
-          title={(() => {
-            const dateString = selectedDate.toLocaleDateString(getCurrentLanguage(), {
-              weekday: 'long',
-              year: 'numeric',
-              month: 'long',
-              day: 'numeric',
-            });
-            return dateString.charAt(0).toUpperCase() + dateString.slice(1);
-          })()}
+          title={formatDateTitle(selectedDate)}
           date={selectedDate}
           totalSongs={getTotalSongs()}
           totalSections={sections.length}

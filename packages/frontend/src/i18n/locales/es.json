@@ -127,6 +127,34 @@
     "createChoirButton": "Crear Coro",
     "choirCreated": "¡Coro creado exitosamente!"
   },
+  "dashboard": {
+    "title": "Panel de Control",
+    "welcomeBack": "¡Bienvenido de vuelta, {{name}}!",
+    "createChoir": "Crear Coro",
+    "totalChoirs": "Total de Coros",
+    "asAdmin": "Como Administrador",
+    "pendingInvites": "Invitaciones Pendientes",
+    "asMember": "Como Miembro",
+    "completeSetup": "Completa tu Configuración",
+    "percentComplete": "{{percent}}% Completado",
+    "progressSteps": {
+      "completeProfile": "Completar configuración del perfil",
+      "joinChoir": "Unirse o crear un coro",
+      "addSongs": "Agregar canciones a tu coro"
+    },
+    "quickActionsTitle": "Acciones Rápidas",
+    "browseSongs": "Explorar Canciones",
+    "browseSongsDesc": "Explora nuestra biblioteca de canciones",
+    "addSong": "Agregar Canción",
+    "createPlaylistDesc": "Comienza a organizar tu música",
+    "choirsYouManage": "Coros que Administras",
+    "choirsYouAreIn": "Coros en los que Estás",
+    "administrator": "Administrador",
+    "member": "Miembro",
+    "noChoirsYet": "Aún No Tienes Coros",
+    "noChoirsDescription": "Crea tu primer coro o espera una invitación para comenzar.",
+    "createFirstChoir": "Crea Tu Primer Coro"
+  },
   "songs": {
     "songsTitle": "Canciones",
     "song": "Canción",
