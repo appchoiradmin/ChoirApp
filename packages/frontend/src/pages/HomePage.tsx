@@ -54,19 +54,19 @@ const HomePage: React.FC = () => {
               <div className="hero-card card-1">
                 <div className="card-content">
                   <UserGroupIcon className="card-icon" />
-                  <h3 className="card-title">Manage Choirs</h3>
+                  <h3 className="card-title">{t('home.heroCards.manageChoirs')}</h3>
                 </div>
               </div>
               <div className="hero-card card-2">
                 <div className="card-content">
                   <MusicalNoteIcon className="card-icon" />
-                  <h3 className="card-title">Song Library</h3>
+                  <h3 className="card-title">{t('home.heroCards.songLibrary')}</h3>
                 </div>
               </div>
               <div className="hero-card card-3">
                 <div className="card-content">
                   <QueueListIcon className="card-icon" />
-                  <h3 className="card-title">Smart Playlists</h3>
+                  <h3 className="card-title">{t('home.heroCards.smartPlaylists')}</h3>
                 </div>
               </div>
             </div>
@@ -85,9 +85,9 @@ const HomePage: React.FC = () => {
       <section className="features-section">
         <div className="features-content">
           <div className="features-header">
-            <h2 className="features-title">Why Choose ChoirApp?</h2>
+            <h2 className="features-title">{t('home.features.title')}</h2>
             <p className="features-subtitle">
-              Everything you need to manage your choir in one beautiful platform
+              {t('home.features.subtitle')}
             </p>
           </div>
           
@@ -97,19 +97,18 @@ const HomePage: React.FC = () => {
                 <div className="feature-icon-wrapper primary">
                   <UserGroupIcon className="feature-icon" />
                 </div>
-                <h3 className="feature-title">Choir Management</h3>
+                <h3 className="feature-title">{t('home.features.choirManagement.title')}</h3>
                 <p className="feature-description">
-                  Easily manage your choir members, roles, and permissions. 
-                  Send invitations and organize your musical community.
+                  {t('home.features.choirManagement.description')}
                 </p>
                 <div className="feature-benefits">
                   <div className="benefit-item">
                     <CheckCircleIcon className="benefit-icon" />
-                    <span>Member invitations</span>
+                    <span>{t('home.features.choirManagement.benefits.memberInvitations')}</span>
                   </div>
                   <div className="benefit-item">
                     <CheckCircleIcon className="benefit-icon" />
-                    <span>Role management</span>
+                    <span>{t('home.features.choirManagement.benefits.roleManagement')}</span>
                   </div>
                 </div>
               </div>
@@ -120,19 +119,18 @@ const HomePage: React.FC = () => {
                 <div className="feature-icon-wrapper secondary">
                   <MusicalNoteIcon className="feature-icon" />
                 </div>
-                <h3 className="feature-title">Song Library</h3>
+                <h3 className="feature-title">{t('home.features.songLibrary.title')}</h3>
                 <p className="feature-description">
-                  Comprehensive song database with ChordPro support. 
-                  Create choir-specific versions and manage your repertoire.
+                  {t('home.features.songLibrary.description')}
                 </p>
                 <div className="feature-benefits">
                   <div className="benefit-item">
                     <CheckCircleIcon className="benefit-icon" />
-                    <span>ChordPro support</span>
+                    <span>{t('home.features.songLibrary.benefits.chordproSupport')}</span>
                   </div>
                   <div className="benefit-item">
                     <CheckCircleIcon className="benefit-icon" />
-                    <span>Custom arrangements</span>
+                    <span>{t('home.features.songLibrary.benefits.customArrangements')}</span>
                   </div>
                 </div>
               </div>
@@ -143,19 +141,18 @@ const HomePage: React.FC = () => {
                 <div className="feature-icon-wrapper accent">
                   <QueueListIcon className="feature-icon" />
                 </div>
-                <h3 className="feature-title">Smart Playlists</h3>
+                <h3 className="feature-title">{t('home.features.smartPlaylists.title')}</h3>
                 <p className="feature-description">
-                  Create dynamic playlists for services and events. 
-                  Use templates and organize songs by sections.
+                  {t('home.features.smartPlaylists.description')}
                 </p>
                 <div className="feature-benefits">
                   <div className="benefit-item">
                     <CheckCircleIcon className="benefit-icon" />
-                    <span>Template system</span>
+                    <span>{t('home.features.smartPlaylists.benefits.templateSystem')}</span>
                   </div>
                   <div className="benefit-item">
                     <CheckCircleIcon className="benefit-icon" />
-                    <span>Event scheduling</span>
+                    <span>{t('home.features.smartPlaylists.benefits.eventScheduling')}</span>
                   </div>
                 </div>
               </div>
@@ -170,19 +167,19 @@ const HomePage: React.FC = () => {
           <div className="stats-grid">
             <div className="stat-item">
               <div className="stat-number">500+</div>
-              <div className="stat-label">Active Choirs</div>
+              <div className="stat-label">{t('home.stats.activeChoirs')}</div>
             </div>
             <div className="stat-item">
               <div className="stat-number">10,000+</div>
-              <div className="stat-label">Songs Managed</div>
+              <div className="stat-label">{t('home.stats.songsManaged')}</div>
             </div>
             <div className="stat-item">
               <div className="stat-number">50,000+</div>
-              <div className="stat-label">Choir Members</div>
+              <div className="stat-label">{t('home.stats.choirMembers')}</div>
             </div>
             <div className="stat-item">
               <div className="stat-number">99.9%</div>
-              <div className="stat-label">Uptime</div>
+              <div className="stat-label">{t('home.stats.uptime')}</div>
             </div>
           </div>
           
@@ -195,15 +192,15 @@ const HomePage: React.FC = () => {
                   ))}
                 </div>
                 <p className="testimonial-text">
-                  "ChoirApp has revolutionized how we manage our choir. The song library and playlist features are incredible!"
+                  "{t('home.testimonial.text')}"
                 </p>
                 <div className="testimonial-author">
                   <div className="author-avatar">
                     <MusicalNoteIcon className="avatar-icon" />
                   </div>
                   <div className="author-info">
-                    <div className="author-name">Sarah Johnson</div>
-                    <div className="author-role">Choir Director</div>
+                    <div className="author-name">{t('home.testimonial.authorName')}</div>
+                    <div className="author-role">{t('home.testimonial.authorRole')}</div>
                   </div>
                 </div>
               </div>
@@ -215,23 +212,23 @@ const HomePage: React.FC = () => {
       {/* CTA Section */}
       <section className="cta-section">
         <div className="cta-content">
-          <h2 className="cta-title">Ready to Transform Your Choir?</h2>
+          <h2 className="cta-title">{t('home.cta.title')}</h2>
           <p className="cta-subtitle">
-            Join thousands of choir directors already using ChoirApp to manage their musical communities
+            {t('home.cta.subtitle')}
           </p>
           
           <div className="cta-features">
             <div className="cta-feature">
               <ShieldCheckIcon className="cta-feature-icon" />
-              <span>Secure & Reliable</span>
+              <span>{t('home.cta.features.secure')}</span>
             </div>
             <div className="cta-feature">
               <ClockIcon className="cta-feature-icon" />
-              <span>Quick Setup</span>
+              <span>{t('home.cta.features.quickSetup')}</span>
             </div>
             <div className="cta-feature">
               <DevicePhoneMobileIcon className="cta-feature-icon" />
-              <span>Mobile Friendly</span>
+              <span>{t('home.cta.features.mobileFriendly')}</span>
             </div>
           </div>
           
@@ -242,11 +239,11 @@ const HomePage: React.FC = () => {
             className="cta-button"
           >
             <MusicalNoteIcon className="button-icon" />
-            Start Your Musical Journey
+            {t('home.cta.button')}
           </Button>
           
           <p className="cta-note">
-            Free to get started • No credit card required
+            {t('home.cta.note')}
           </p>
         </div>
       </section>

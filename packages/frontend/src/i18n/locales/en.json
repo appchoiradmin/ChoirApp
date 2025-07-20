@@ -57,18 +57,63 @@
   },
   "home": {
     "title": "Welcome to ChoirApp",
-    "subtitle": "Your comprehensive digital platform for choir management, song organization, and seamless musical collaboration.",
-    "getStarted": "Get Started with Google",
+    "subtitle": "The complete solution for managing your choir, songs, and performances",
+    "getStarted": "Get Started",
     "learnMore": "Learn More",
+    "heroCards": {
+      "manageChoirs": "Manage Choirs",
+      "songLibrary": "Song Library",
+      "smartPlaylists": "Smart Playlists"
+    },
     "features": {
-      "songManagement": "Song Management",
-      "songManagementDesc": "Organize and manage your choir's song library with ease",
-      "playlistCreation": "Playlist Creation",
-      "playlistCreationDesc": "Create custom playlists for services and rehearsals",
-      "collaboration": "Collaboration",
-      "collaborationDesc": "Work together with your choir members seamlessly",
-      "mobileFirst": "Mobile First",
-      "mobileFirstDesc": "Optimized for mobile devices during performances"
+      "title": "Why Choose ChoirApp?",
+      "subtitle": "Everything you need to manage your choir in one beautiful platform",
+      "choirManagement": {
+        "title": "Choir Management",
+        "description": "Easily manage your choir members, roles, and permissions. Send invitations and organize your musical community.",
+        "benefits": {
+          "memberInvitations": "Member invitations",
+          "roleManagement": "Role management"
+        }
+      },
+      "songLibrary": {
+        "title": "Song Library",
+        "description": "Comprehensive song database with ChordPro support. Create choir-specific versions and manage your repertoire.",
+        "benefits": {
+          "chordproSupport": "ChordPro support",
+          "customArrangements": "Custom arrangements"
+        }
+      },
+      "smartPlaylists": {
+        "title": "Smart Playlists",
+        "description": "Create dynamic playlists for services and events. Use templates and organize songs by sections.",
+        "benefits": {
+          "templateSystem": "Template system",
+          "eventScheduling": "Event scheduling"
+        }
+      }
+    },
+    "stats": {
+      "activeChoirs": "Active Choirs",
+      "songsManaged": "Songs Managed",
+      "choirMembers": "Choir Members",
+      "uptime": "Uptime"
+    },
+    "testimonial": {
+      "text": "ChoirApp has revolutionized how we manage our choir. The song library and playlist features are incredible!",
+      "authorName": "Sarah Johnson",
+      "authorRole": "Choir Director"
+    },
+    "cta": {
+      "title": "Ready to Transform Your Choir?",
+      "subtitle": "Join thousands of choir directors already using ChoirApp to manage their musical communities",
+      "features": {
+        "secure": "Secure & Reliable",
+        "quickSetup": "Quick Setup",
+        "mobileFriendly": "Mobile Friendly"
+      },
+      "button": "Start Your Musical Journey",
+      "note": "Free to get started • No credit card required"
     }
   },
   "dashboard": {

@@ -59,17 +59,63 @@
   },
   "home": {
     "title": "Bienvenido a ChoirApp",
-    "subtitle": "La plataforma definitiva para gestionar coros y listas de reproducción",
+    "subtitle": "La solución completa para gestionar tu coro, canciones y actuaciones",
     "getStarted": "Comenzar",
-    "signInToStart": "Inicia sesión para comenzar",
+    "learnMore": "Saber Más",
+    "heroCards": {
+      "manageChoirs": "Gestionar Coros",
+      "songLibrary": "Biblioteca Musical",
+      "smartPlaylists": "Listas Inteligentes"
+    },
     "features": {
-      "title": "Características",
-      "songManagement": "Gestión de Canciones",
-      "songManagementDesc": "Organiza y gestiona tu biblioteca de canciones",
-      "playlistCreation": "Creación de Listas",
-      "playlistCreationDesc": "Crea listas personalizadas para servicios y eventos",
-      "choirCollaboration": "Colaboración de Coro",
-      "choirCollaborationDesc": "Colabora con miembros del coro en tiempo real"
+      "title": "¿Por Qué Elegir ChoirApp?",
+      "subtitle": "Todo lo que necesitas para gestionar tu coro en una plataforma hermosa",
+      "choirManagement": {
+        "title": "Gestión de Coros",
+        "description": "Gestiona fácilmente los miembros, roles y permisos de tu coro. Envía invitaciones y organiza tu comunidad musical.",
+        "benefits": {
+          "memberInvitations": "Invitaciones de miembros",
+          "roleManagement": "Gestión de roles"
+        }
+      },
+      "songLibrary": {
+        "title": "Biblioteca Musical",
+        "description": "Base de datos completa de canciones con soporte ChordPro. Crea versiones específicas para el coro y gestiona tu repertorio.",
+        "benefits": {
+          "chordproSupport": "Soporte ChordPro",
+          "customArrangements": "Arreglos personalizados"
+        }
+      },
+      "smartPlaylists": {
+        "title": "Listas Inteligentes",
+        "description": "Crea listas dinámicas para servicios y eventos. Usa plantillas y organiza canciones por secciones.",
+        "benefits": {
+          "templateSystem": "Sistema de plantillas",
+          "eventScheduling": "Programación de eventos"
+        }
+      }
+    },
+    "stats": {
+      "activeChoirs": "Coros Activos",
+      "songsManaged": "Canciones Gestionadas",
+      "choirMembers": "Miembros de Coros",
+      "uptime": "Tiempo Activo"
+    },
+    "testimonial": {
+      "text": "ChoirApp ha revolucionado cómo gestionamos nuestro coro. ¡Las funciones de biblioteca musical y listas son increíbles!",
+      "authorName": "Sarah Johnson",
+      "authorRole": "Directora de Coro"
+    },
+    "cta": {
+      "title": "¿Listo para Transformar tu Coro?",
+      "subtitle": "Únete a miles de directores de coro que ya usan ChoirApp para gestionar sus comunidades musicales",
+      "features": {
+        "secure": "Seguro y Confiable",
+        "quickSetup": "Configuración Rápida",
+        "mobileFriendly": "Compatible con Móviles"
+      },
+      "button": "Comienza tu Viaje Musical",
+      "note": "Gratis para comenzar • No se requiere tarjeta de crédito"
     }
   },
   "dashboard": {
