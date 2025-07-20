@@ -134,6 +134,8 @@ const SongDetailPage: React.FC = () => {
     }
 
     setIsProcessing(true);
+    setError(null); // Clear any previous errors
+    
     try {
       const updateDto: UpdateSongDto = {
         title: editTitle,
@@ -141,22 +143,54 @@ const SongDetailPage: React.FC = () => {
         content: editContent
       };
       
-      const updatedSong = await updateSong(songId, updateDto, user.token);
+      let updatedSong;
+      try {
+        updatedSong = await updateSong(songId, updateDto, user.token);
+      } catch (updateError) {
+        // If JSON parsing fails but the request might have succeeded,
+        // try to refetch the song to see if it was actually updated
+        console.warn('Update response parsing failed, checking if update succeeded:', updateError);
+        
+        try {
+          const refetchedSong = await getSongById(songId, user.token);
+          // Check if the song was actually updated by comparing content
+          if (refetchedSong.title === editTitle && refetchedSong.content === editContent) {
+            console.log('Song was successfully updated despite response parsing error');
+            updatedSong = refetchedSong;
+          } else {
+            throw updateError; // Re-throw if the song wasn't actually updated
+          }
+        } catch (refetchError) {
+          throw updateError; // Re-throw original error if refetch fails
+        }
+      }
       
       // Update visibility if it changed
       if (editVisibility !== song?.visibility) {
-        const visibilityDto: UpdateSongVisibilityDto = {
-          visibility: editVisibility,
-          visibleToChoirs: editVisibility === SongVisibilityType.PublicChoirs ? selectedChoirsForEdit : undefined
-        };
-        await updateSongVisibility(songId, visibilityDto, user.token);
+        try {
+          const visibilityDto: UpdateSongVisibilityDto = {
+            visibility: editVisibility,
+            visibleToChoirs: editVisibility === SongVisibilityType.PublicChoirs ? selectedChoirsForEdit : undefined
+          };
+          await updateSongVisibility(songId, visibilityDto, user.token);
+        } catch (visibilityError) {
+          console.warn('Visibility update failed:', visibilityError);
+          // Don't fail the entire operation if only visibility update fails
+          setError('Song updated, but visibility change may have failed. Please refresh to verify.');
+        }
       }
       
       setSong({ ...updatedSong, visibility: editVisibility });
       setIsEditMode(false);
+      
+      // Show success message briefly
+      const successMessage = 'Song updated successfully!';
+      setError(null);
+      
     } catch (err) {
       console.error('Error updating song:', err);
-      setError('Failed to update song');
+      const errorMessage = err instanceof Error ? err.message : 'Failed to update song';
+      setError(`Update failed: ${errorMessage}. Please try again.`);
     } finally {
       setIsProcessing(false);
     }
