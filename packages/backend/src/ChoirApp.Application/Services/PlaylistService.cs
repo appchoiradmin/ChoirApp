@@ -219,7 +219,10 @@ namespace ChoirApp.Application.Services
             if (existingTemplates.Any(t => t.Title == templateDto.Title))
                 return Result.Fail("A template with this title already exists in the choir.");
 
-            var templateResult = PlaylistTemplate.Create(templateDto.Title, templateDto.ChoirId, templateDto.Description);
+            // Check if this will be the first template for the choir
+            bool isFirstTemplate = !existingTemplates.Any();
+
+            var templateResult = PlaylistTemplate.Create(templateDto.Title, templateDto.ChoirId, templateDto.Description, isFirstTemplate);
             if (templateResult.IsFailed)
                 return Result.Fail(templateResult.Errors);
 
