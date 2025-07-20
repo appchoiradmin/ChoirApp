@@ -24,7 +24,7 @@ namespace ChoirApp.Backend.Endpoints.Songs
             Verbs("GET");
             Routes("/songs/search");
             AuthSchemes("Bearer");
-            Roles(nameof(UserRole.GeneralUser), nameof(UserRole.ChoirAdmin));
+            Roles(nameof(UserRole.GeneralUser), nameof(UserRole.ChoirAdmin), nameof(UserRole.ChoirMember));
         }
 
         public override async Task HandleAsync(Requests.SearchSongsRequest req, CancellationToken ct)

@@ -32,6 +32,16 @@ namespace ChoirApp.Application.Services
                 await _userRepository.AddAsync(user);
                 await _userRepository.SaveChangesAsync();
             }
+            else
+            {
+                // For existing users, reload with choir relationships for proper JWT role determination
+                var userWithChoirs = await _userRepository.GetByIdWithChoirsAsync(user.UserId);
+                if (userWithChoirs == null)
+                {
+                    return Result.Fail($"User with ID {user.UserId} not found when reloading with choirs.");
+                }
+                user = userWithChoirs;
+            }
 
             return Result.Ok(user);
         }

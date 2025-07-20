@@ -27,7 +27,7 @@ namespace ChoirApp.Backend.Endpoints.Playlist
         {
             Post("/playlists/{playlistId}/songs/{songId}/move");
             AuthSchemes("Bearer");
-            Roles(nameof(UserRole.ChoirAdmin));
+            Roles(nameof(UserRole.ChoirAdmin), nameof(UserRole.ChoirMember));
         }
 
         public override async Task HandleAsync(MoveSongInPlaylistRequest req, CancellationToken ct)

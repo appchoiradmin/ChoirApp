@@ -20,7 +20,7 @@ namespace ChoirApp.Backend.Endpoints.Playlist
         {
             Post("/playlists/{PlaylistId}/songs");
             AuthSchemes("Bearer");
-            Roles(nameof(UserRole.ChoirAdmin));
+            Roles(nameof(UserRole.ChoirAdmin), nameof(UserRole.ChoirMember));
         }
 
         public override async Task HandleAsync(AddSongToPlaylistRequest req, CancellationToken ct)

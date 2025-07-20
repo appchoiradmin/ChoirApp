@@ -91,7 +91,20 @@ namespace ChoirApp.Infrastructure.Services
                     return UserRole.ChoirAdmin;
                 }
                 
-                // Otherwise, return their base role
+                // Check if the user is a member of any choir (but not an admin)
+                var isChoirMember = _context.UserChoirs
+                    .Any(uc => uc.UserId == user.UserId && !uc.IsAdmin);
+                
+                _logger.LogInformation("User {UserId} is choir member: {IsMember}", user.UserId, isChoirMember);
+                
+                // If the user is a choir member, return ChoirMember role
+                if (isChoirMember)
+                {
+                    _logger.LogInformation("Assigning ChoirMember role to user {UserId}", user.UserId);
+                    return UserRole.ChoirMember;
+                }
+                
+                // Otherwise, return their base role (GeneralUser)
                 _logger.LogInformation("Using base role {Role} for user {UserId}", user.Role, user.UserId);
                 return user.Role;
             }
