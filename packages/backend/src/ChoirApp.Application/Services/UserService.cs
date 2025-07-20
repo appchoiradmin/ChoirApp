@@ -1,26 +1,27 @@
 using ChoirApp.Application.Contracts;
 using ChoirApp.Domain.Entities;
-using ChoirApp.Infrastructure.Persistence;
 using FluentResults;
-using Microsoft.EntityFrameworkCore;
+using System;
+using System.Threading.Tasks;
 
-namespace ChoirApp.Infrastructure.Services
+namespace ChoirApp.Application.Services
 {
     public class UserService : IUserService
     {
-        private readonly ApplicationDbContext _context;
+        private readonly IUserRepository _userRepository;
 
-        public UserService(ApplicationDbContext context)
+        public UserService(IUserRepository userRepository)
         {
-            _context = context;
+            _userRepository = userRepository;
         }
 
         public async Task<Result<User>> FindOrCreateUserAsync(string googleId, string name, string email)
         {
-            var user = await _context.Users.FirstOrDefaultAsync(u => u.GoogleId == googleId);
+            var user = await _userRepository.GetByEmailAsync(email);
 
             if (user == null)
             {
+                // Business rule: Create user using domain logic
                 var userResult = User.Create(googleId, name, email);
                 if (userResult.IsFailed)
                 {
@@ -28,8 +29,8 @@ namespace ChoirApp.Infrastructure.Services
                 }
 
                 user = userResult.Value;
-                _context.Users.Add(user);
-                await _context.SaveChangesAsync();
+                await _userRepository.AddAsync(user);
+                await _userRepository.SaveChangesAsync();
             }
 
             return Result.Ok(user);
@@ -37,12 +38,13 @@ namespace ChoirApp.Infrastructure.Services
 
         public async Task<Result> UpdateUserRoleAsync(Guid userId, UserRole newRole)
         {
-            var user = await _context.Users.FindAsync(userId);
+            var user = await _userRepository.GetByIdAsync(userId);
             if (user == null)
             {
                 return Result.Fail($"User with ID {userId} not found.");
             }
 
+            // Business rule: Apply role changes using domain logic
             switch (newRole)
             {
                 case UserRole.ChoirAdmin:
@@ -53,13 +55,13 @@ namespace ChoirApp.Infrastructure.Services
                     break;
             }
 
-            await _context.SaveChangesAsync();
+            await _userRepository.SaveChangesAsync();
             return Result.Ok();
         }
 
         public async Task<Result<User>> GetUserByEmailAsync(string email)
         {
-            var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
+            var user = await _userRepository.GetByEmailAsync(email);
             if (user == null)
             {
                 return Result.Fail("User not found.");
@@ -69,11 +71,7 @@ namespace ChoirApp.Infrastructure.Services
 
         public async Task<Result<User>> GetUserByIdAsync(Guid userId)
         {
-            var user = await _context.Users
-                .Include(u => u.UserChoirs)
-                    .ThenInclude(uc => uc.Choir)
-                .FirstOrDefaultAsync(u => u.UserId == userId);
-
+            var user = await _userRepository.GetByIdWithChoirsAsync(userId);
             if (user == null)
             {
                 return Result.Fail("User not found.");
@@ -83,20 +81,22 @@ namespace ChoirApp.Infrastructure.Services
 
         public async Task<Result> CompleteOnboardingAsync(Guid userId, string userType)
         {
-            var user = await _context.Users.FindAsync(userId);
+            var user = await _userRepository.GetByIdAsync(userId);
             if (user == null)
             {
                 return Result.Fail($"User with ID {userId} not found.");
             }
 
+            // Business rule: Complete onboarding using domain logic
             user.CompleteOnboarding();
 
+            // Business rule: Set initial role based on user type
             if (userType == "admin")
             {
                 user.PromoteToAdmin();
             }
 
-            await _context.SaveChangesAsync();
+            await _userRepository.SaveChangesAsync();
             return Result.Ok();
         }
     }

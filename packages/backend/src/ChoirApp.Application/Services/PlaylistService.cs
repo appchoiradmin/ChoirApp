@@ -1,9 +1,7 @@
 using ChoirApp.Application.Contracts;
 using ChoirApp.Application.Dtos;
 using ChoirApp.Domain.Entities;
-using ChoirApp.Infrastructure.Persistence;
 using FluentResults;
-using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,20 +11,30 @@ using System.Threading.Tasks;
 using DomainEntities = ChoirApp.Domain.Entities;
 using AppDto = ChoirApp.Application.Dtos;
 
-namespace ChoirApp.Infrastructure.Services
+namespace ChoirApp.Application.Services
 {
     public class PlaylistService : IPlaylistService
     {
-        private readonly ApplicationDbContext _context;
+        private readonly IPlaylistRepository _playlistRepository;
+        private readonly IChoirRepository _choirRepository;
+        private readonly IPlaylistTemplateRepository _playlistTemplateRepository;
+        private readonly ISongRepository _songRepository;
 
-        public PlaylistService(ApplicationDbContext context)
+        public PlaylistService(
+            IPlaylistRepository playlistRepository,
+            IChoirRepository choirRepository,
+            IPlaylistTemplateRepository playlistTemplateRepository,
+            ISongRepository songRepository)
         {
-            _context = context;
+            _playlistRepository = playlistRepository;
+            _choirRepository = choirRepository;
+            _playlistTemplateRepository = playlistTemplateRepository;
+            _songRepository = songRepository;
         }
 
         public async Task<Result<Playlist>> CreatePlaylistAsync(CreatePlaylistDto playlistDto, Guid userId)
         {
-            var choir = await _context.Choirs.FindAsync(playlistDto.ChoirId);
+            var choir = await _choirRepository.GetByIdAsync(playlistDto.ChoirId);
             if (choir == null)
                 return Result.Fail("Choir not found.");
 
@@ -64,9 +72,7 @@ namespace ChoirApp.Infrastructure.Services
 
             if (playlistDto.PlaylistTemplateId.HasValue)
             {
-                var template = await _context.PlaylistTemplates
-                    .Include(t => t.Sections)
-                    .FirstOrDefaultAsync(t => t.TemplateId == playlistDto.PlaylistTemplateId.Value);
+                var template = await _playlistTemplateRepository.GetByIdWithSectionsAsync(playlistDto.PlaylistTemplateId.Value);
 
                 if (template != null)
                 {
@@ -92,22 +98,13 @@ namespace ChoirApp.Infrastructure.Services
                 }
             }
 
-            _context.Playlists.Add(playlist);
-            await _context.SaveChangesAsync();
-
+            await _playlistRepository.AddAsync(playlist);
             return Result.Ok(playlist);
         }
 
         public async Task<Result<Playlist>> GetPlaylistByIdAsync(Guid playlistId)
         {
-            var playlist = await _context.Playlists
-                .Include(p => p.Sections)
-                .ThenInclude(s => s.PlaylistSongs)
-                .ThenInclude(ps => ps.Song)
-                .Include(p => p.PlaylistTags)
-                .ThenInclude(pt => pt.Tag)
-                .FirstOrDefaultAsync(p => p.PlaylistId == playlistId);
-
+            var playlist = await _playlistRepository.GetByIdWithSectionsAsync(playlistId);
             if (playlist == null)
                 return Result.Fail("Playlist not found.");
 
@@ -116,98 +113,110 @@ namespace ChoirApp.Infrastructure.Services
 
         public async Task<Result<IEnumerable<Playlist>>> GetPlaylistsByChoirIdAsync(Guid choirId)
         {
-            var playlists = await _context.Playlists
-                .Include(p => p.Sections)
-                .ThenInclude(s => s.PlaylistSongs)
-                .ThenInclude(ps => ps.Song)
-                .Where(p => p.ChoirId == choirId)
-                .ToListAsync();
-
+            var playlists = await _playlistRepository.GetByChoirIdAsync(choirId);
             return Result.Ok(playlists.AsEnumerable());
+        }
+
+        public async Task<Result<Playlist>> GetPlaylistByChoirIdAndDateAsync(Guid choirId, DateTimeOffset date, Guid userId)
+        {
+            // Check if user is a member of this choir
+            var userChoir = await _choirRepository.GetUserChoirAsync(userId, choirId);
+            if (userChoir == null)
+                return Result.Fail("User is not a member of this choir.");
+
+            var playlist = await _playlistRepository.GetByChoirIdAndDateAsync(choirId, date);
+            if (playlist == null)
+                return Result.Fail("Playlist not found for the specified date.");
+
+            return Result.Ok(playlist);
         }
 
         public async Task<Result> UpdatePlaylistAsync(Guid playlistId, UpdatePlaylistDto playlistDto, Guid userId)
         {
-            // Load playlist with sections and songs
-            var playlist = await _context.Playlists
-                .Include(p => p.Sections)
-                    .ThenInclude(s => s.PlaylistSongs)
-                .FirstOrDefaultAsync(p => p.PlaylistId == playlistId);
+            var playlist = await _playlistRepository.GetByIdWithSectionsAsync(playlistId);
             if (playlist == null)
                 return Result.Fail("Playlist not found.");
 
-            var userChoir = await _context.UserChoirs.FirstOrDefaultAsync(uc => uc.UserId == userId && uc.ChoirId == playlist.ChoirId);
+            // Check if user is a member of this choir
+            if (!playlist.ChoirId.HasValue)
+                return Result.Fail("Playlist is not associated with a choir.");
+            
+            var userChoir = await _choirRepository.GetUserChoirAsync(userId, playlist.ChoirId.Value);
             if (userChoir == null)
                 return Result.Fail("User is not a member of this choir.");
 
-            playlist.UpdateTitle(playlistDto.Title);
+            playlist.UpdateTitle(playlistDto.Title ?? "");
             if (playlistDto.IsPublic.HasValue)
-                playlist.SetVisibility(playlistDto.IsPublic.Value ? DomainEntities.SongVisibilityType.PublicAll : DomainEntities.SongVisibilityType.Private);
+            {
+                var visibility = playlistDto.IsPublic.Value ? DomainEntities.SongVisibilityType.PublicAll : DomainEntities.SongVisibilityType.Private;
+                playlist.SetVisibility(visibility);
+            }
 
             // Atomic update of sections and songs
             if (playlistDto.Sections != null)
             {
-                // Remove all existing songs and sections
-                foreach (var section in playlist.Sections.ToList())
-                {
-                    _context.PlaylistSongs.RemoveRange(section.PlaylistSongs);
-                }
-                _context.PlaylistSections.RemoveRange(playlist.Sections);
-                await _context.SaveChangesAsync();
+                // Remove all existing songs and sections atomically
+                await _playlistRepository.RemoveAllSectionsAsync(playlist.PlaylistId);
+                await _playlistRepository.SaveChangesAsync();
 
                 // Recreate sections and songs from DTO
                 int sectionOrder = 0;
                 foreach (var sectionDto in playlistDto.Sections)
                 {
-                    var sectionResult = ChoirApp.Domain.Entities.PlaylistSection.Create(sectionDto.Title, playlist.PlaylistId, sectionOrder);
+                    var sectionResult = PlaylistSection.Create(sectionDto.Title, playlist.PlaylistId, sectionOrder);
                     if (sectionResult.IsFailed)
                         return Result.Fail(sectionResult.Errors);
+                    
                     var section = sectionResult.Value;
-                    _context.PlaylistSections.Add(section);
+                    await _playlistRepository.AddSectionAsync(section);
 
                     int songOrder = 0;
                     foreach (var songDto in sectionDto.Songs)
                     {
-                        var songResult = ChoirApp.Domain.Entities.PlaylistSong.Create(section.SectionId, songOrder, songDto.SongId);
+                        var songResult = PlaylistSong.Create(section.SectionId, songOrder, songDto.SongId);
                         if (songResult.IsFailed)
                             return Result.Fail(songResult.Errors);
+                        
                         var song = songResult.Value;
-                        _context.PlaylistSongs.Add(song);
+                        await _playlistRepository.AddPlaylistSongAsync(song);
                         songOrder++;
                     }
                     sectionOrder++;
                 }
             }
 
-            await _context.SaveChangesAsync();
+            await _playlistRepository.UpdateAsync(playlist);
+            await _playlistRepository.SaveChangesAsync();
             return Result.Ok();
         }
 
         public async Task<Result> DeletePlaylistAsync(Guid playlistId, Guid userId)
         {
-            var playlist = await _context.Playlists.FindAsync(playlistId);
+            var playlist = await _playlistRepository.GetByIdAsync(playlistId);
             if (playlist == null)
                 return Result.Fail("Playlist not found.");
 
-            var userChoir = await _context.UserChoirs.FirstOrDefaultAsync(uc => uc.UserId == userId && uc.ChoirId == playlist.ChoirId);
+            // Check if user is a member of this choir
+            if (!playlist.ChoirId.HasValue)
+                return Result.Fail("Playlist is not associated with a choir.");
+            
+            var userChoir = await _choirRepository.GetUserChoirAsync(userId, playlist.ChoirId.Value);
             if (userChoir == null)
                 return Result.Fail("User is not a member of this choir.");
 
-            _context.Playlists.Remove(playlist);
-            await _context.SaveChangesAsync();
+            await _playlistRepository.DeleteAsync(playlist);
             return Result.Ok();
         }
 
+        // Playlist Template Methods
         public async Task<Result<PlaylistTemplate>> CreatePlaylistTemplateAsync(CreatePlaylistTemplateDto templateDto, Guid userId)
         {
-            var choir = await _context.Choirs.FindAsync(templateDto.ChoirId);
+            var choir = await _choirRepository.GetByIdAsync(templateDto.ChoirId);
             if (choir == null)
                 return Result.Fail("Choir not found.");
 
-            var existingTemplate = await _context.PlaylistTemplates
-                .FirstOrDefaultAsync(t => t.ChoirId == templateDto.ChoirId && t.Title == templateDto.Title);
-
-            if (existingTemplate != null)
+            var existingTemplates = await _playlistTemplateRepository.GetByChoirIdAsync(templateDto.ChoirId);
+            if (existingTemplates.Any(t => t.Title == templateDto.Title))
                 return Result.Fail("A template with this title already exists in the choir.");
 
             var templateResult = PlaylistTemplate.Create(templateDto.Title, templateDto.ChoirId, templateDto.Description);
@@ -215,7 +224,7 @@ namespace ChoirApp.Infrastructure.Services
                 return Result.Fail(templateResult.Errors);
 
             var template = templateResult.Value;
-            _context.PlaylistTemplates.Add(template);
+            await _playlistTemplateRepository.AddAsync(template);
 
             for (int i = 0; i < templateDto.Sections.Count; i++)
             {
@@ -225,20 +234,16 @@ namespace ChoirApp.Infrastructure.Services
                 {
                     return Result.Fail(sectionResult.Errors);
                 }
-                _context.PlaylistTemplateSections.Add(sectionResult.Value);
+                await _playlistTemplateRepository.AddTemplateSectionAsync(sectionResult.Value);
             }
 
-            await _context.SaveChangesAsync();
-
+            await _playlistTemplateRepository.SaveChangesAsync();
             return Result.Ok(template);
         }
 
         public async Task<Result<PlaylistTemplate>> GetPlaylistTemplateByIdAsync(Guid templateId)
         {
-            var template = await _context.PlaylistTemplates
-                .Include(t => t.Sections)
-                .FirstOrDefaultAsync(t => t.TemplateId == templateId);
-
+            var template = await _playlistTemplateRepository.GetByIdWithSectionsAsync(templateId);
             if (template == null)
                 return Result.Fail("Playlist template not found.");
 
@@ -247,21 +252,18 @@ namespace ChoirApp.Infrastructure.Services
 
         public async Task<Result<IEnumerable<PlaylistTemplate>>> GetPlaylistTemplatesByChoirIdAsync(Guid choirId)
         {
-            var templates = await _context.PlaylistTemplates
-                .Include(t => t.Sections)
-                .Where(t => t.ChoirId == choirId)
-                .ToListAsync();
-
+            var templates = await _playlistTemplateRepository.GetByChoirIdAsync(choirId);
             return Result.Ok(templates.AsEnumerable());
         }
 
         public async Task<Result> UpdatePlaylistTemplateAsync(Guid templateId, UpdatePlaylistTemplateDto templateDto, Guid userId)
         {
-            var template = await _context.PlaylistTemplates.Include(t => t.Sections).FirstOrDefaultAsync(t => t.TemplateId == templateId);
+            var template = await _playlistTemplateRepository.GetByIdWithSectionsAsync(templateId);
             if (template == null)
                 return Result.Fail("Playlist template not found.");
 
-            var userChoir = await _context.UserChoirs.FirstOrDefaultAsync(uc => uc.UserId == userId && uc.ChoirId == template.ChoirId);
+            // Check if user is a member of this choir
+            var userChoir = await _choirRepository.GetUserChoirAsync(userId, template.ChoirId);
             if (userChoir == null)
                 return Result.Fail("User is not a member of this choir.");
 
@@ -273,7 +275,7 @@ namespace ChoirApp.Infrastructure.Services
 
             if (templateDto.Sections != null)
             {
-                _context.PlaylistTemplateSections.RemoveRange(template.Sections);
+                await _playlistTemplateRepository.RemoveAllTemplateSectionsAsync(template.TemplateId);
                 for (int i = 0; i < templateDto.Sections.Count; i++)
                 {
                     var sectionTitle = templateDto.Sections[i];
@@ -282,38 +284,65 @@ namespace ChoirApp.Infrastructure.Services
                     {
                         return Result.Fail(sectionResult.Errors);
                     }
-                    _context.PlaylistTemplateSections.Add(sectionResult.Value);
+                    await _playlistTemplateRepository.AddTemplateSectionAsync(sectionResult.Value);
                 }
             }
 
-            await _context.SaveChangesAsync();
+            await _playlistTemplateRepository.UpdateAsync(template);
+            await _playlistTemplateRepository.SaveChangesAsync();
             return Result.Ok();
         }
 
         public async Task<Result> DeletePlaylistTemplateAsync(Guid templateId, Guid userId)
         {
-            var template = await _context.PlaylistTemplates.FindAsync(templateId);
+            var template = await _playlistTemplateRepository.GetByIdAsync(templateId);
             if (template == null)
                 return Result.Fail("Playlist template not found.");
 
-            var userChoir = await _context.UserChoirs.FirstOrDefaultAsync(uc => uc.UserId == userId && uc.ChoirId == template.ChoirId);
+            // Check if user is a member of this choir
+            var userChoir = await _choirRepository.GetUserChoirAsync(userId, template.ChoirId);
             if (userChoir == null)
                 return Result.Fail("User is not a member of this choir.");
 
-            _context.PlaylistTemplates.Remove(template);
-            await _context.SaveChangesAsync();
+            await _playlistTemplateRepository.DeleteAsync(template);
             return Result.Ok();
         }
 
+        public async Task<Result> SetPlaylistTemplateDefaultAsync(Guid templateId, SetTemplateDefaultDto dto, Guid userId)
+        {
+            var template = await _playlistTemplateRepository.GetByIdAsync(templateId);
+            if (template == null)
+                return Result.Fail("Playlist template not found.");
+
+            var userChoir = await _choirRepository.GetUserChoirAsync(userId, template.ChoirId);
+            if (userChoir == null)
+                return Result.Fail("User is not a member of this choir.");
+
+            if (dto.IsDefault)
+            {
+                // Clear default status from all other templates in this choir
+                var otherDefaultTemplates = await _playlistTemplateRepository.GetByChoirIdAsync(template.ChoirId);
+                
+                foreach (var otherTemplate in otherDefaultTemplates.Where(t => t.IsDefault && t.TemplateId != templateId))
+                {
+                    otherTemplate.SetDefault(false);
+                    await _playlistTemplateRepository.UpdateAsync(otherTemplate);
+                }
+            }
+
+            // Set the default status for this template
+            template.SetDefault(dto.IsDefault);
+            await _playlistTemplateRepository.UpdateAsync(template);
+            return Result.Ok();
+        }
+
+        // Song Management Methods - Migrated from Infrastructure
         public async Task<Result> AddSongToPlaylistAsync(string playlistId, AddSongToPlaylistDto dto)
         {
             if (!Guid.TryParse(playlistId, out var playlistGuid))
                 return Result.Fail("Invalid playlist id");
 
-            var playlist = await _context.Playlists
-                .Include(p => p.Sections)
-                .ThenInclude(s => s.PlaylistSongs)
-                .FirstOrDefaultAsync(p => p.PlaylistId == playlistGuid);
+            var playlist = await _playlistRepository.GetByIdWithFullDetailsAsync(playlistGuid);
             if (playlist == null)
                 return Result.Fail("Playlist not found.");
 
@@ -341,7 +370,7 @@ namespace ChoirApp.Infrastructure.Services
             if (!Guid.TryParse(dto.SongId, out var songGuid))
                 return Result.Fail("Invalid song id");
 
-            var song = await _context.Songs.FindAsync(songGuid);
+            var song = await _songRepository.GetByIdAsync(songGuid);
             if (song == null)
                 return Result.Fail("Song not found");
 
@@ -349,8 +378,8 @@ namespace ChoirApp.Infrastructure.Services
             if (songResult.IsFailed)
                 return Result.Fail(songResult.Errors);
 
-            _context.PlaylistSongs.Add(songResult.Value);
-            await _context.SaveChangesAsync();
+            await _playlistRepository.AddPlaylistSongAsync(songResult.Value);
+            await _playlistRepository.SaveChangesAsync();
             return Result.Ok();
         }
 
@@ -361,11 +390,7 @@ namespace ChoirApp.Infrastructure.Services
                 return Result.Fail("Invalid GUID format.");
             }
 
-            var playlist = await _context.Playlists
-                .Include(p => p.Sections)
-                .ThenInclude(s => s.PlaylistSongs)
-                .FirstOrDefaultAsync(p => p.PlaylistId == playlistGuid);
-
+            var playlist = await _playlistRepository.GetByIdWithFullDetailsAsync(playlistGuid);
             if (playlist == null)
                 return Result.Fail("Playlist not found.");
 
@@ -376,8 +401,8 @@ namespace ChoirApp.Infrastructure.Services
             if (songToRemove == null)
                 return Result.Fail("Song not found in playlist.");
 
-            _context.PlaylistSongs.Remove(songToRemove);
-            await _context.SaveChangesAsync();
+            await _playlistRepository.RemovePlaylistSongAsync(songToRemove);
+            await _playlistRepository.SaveChangesAsync();
 
             return Result.Ok();
         }
@@ -392,18 +417,17 @@ namespace ChoirApp.Infrastructure.Services
                 return Result.Fail("Invalid GUID format.");
             }
 
-            var playlist = await _context.Playlists
-                .Include(p => p.Sections)
-                .ThenInclude(s => s.PlaylistSongs)
-                .FirstOrDefaultAsync(p => p.PlaylistId == playlistGuid);
-
+            var playlist = await _playlistRepository.GetByIdWithFullDetailsAsync(playlistGuid);
             if (playlist == null)
                 return Result.Fail("Playlist not found.");
 
             // Verify user permissions
-            var userChoir = await _context.UserChoirs.FirstOrDefaultAsync(uc => uc.UserId == userId && uc.ChoirId == playlist.ChoirId);
-            if (userChoir == null)
-                return Result.Fail("User is not a member of this choir.");
+            if (playlist.ChoirId.HasValue)
+            {
+                var userChoir = await _choirRepository.GetUserChoirAsync(userId, playlist.ChoirId.Value);
+                if (userChoir == null)
+                    return Result.Fail("User is not a member of this choir.");
+            }
 
             var fromSection = playlist.Sections.FirstOrDefault(s => s.SectionId == fromSectionGuid);
             var toSection = playlist.Sections.FirstOrDefault(s => s.SectionId == toSectionGuid);
@@ -419,36 +443,8 @@ namespace ChoirApp.Infrastructure.Services
             var newOrder = toSection.PlaylistSongs.Count;
             songToMove.UpdateSection(toSection.SectionId, newOrder);
 
-            await _context.SaveChangesAsync();
-            return Result.Ok();
-        }
-
-        public async Task<Result> SetPlaylistTemplateDefaultAsync(Guid templateId, SetTemplateDefaultDto dto, Guid userId)
-        {
-            var template = await _context.PlaylistTemplates.FindAsync(templateId);
-            if (template == null)
-                return Result.Fail("Playlist template not found.");
-
-            var userChoir = await _context.UserChoirs.FirstOrDefaultAsync(uc => uc.UserId == userId && uc.ChoirId == template.ChoirId);
-            if (userChoir == null)
-                return Result.Fail("User is not a member of this choir.");
-
-            if (dto.IsDefault)
-            {
-                // Clear default status from all other templates in this choir
-                var otherDefaultTemplates = await _context.PlaylistTemplates
-                    .Where(t => t.ChoirId == template.ChoirId && t.IsDefault && t.TemplateId != templateId)
-                    .ToListAsync();
-                
-                foreach (var otherTemplate in otherDefaultTemplates)
-                {
-                    otherTemplate.SetDefault(false);
-                }
-            }
-
-            // Set the default status for this template
-            template.SetDefault(dto.IsDefault);
-            await _context.SaveChangesAsync();
+            await _playlistRepository.UpdatePlaylistSongAsync(songToMove);
+            await _playlistRepository.SaveChangesAsync();
             return Result.Ok();
         }
     }

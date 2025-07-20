@@ -2,31 +2,36 @@ using ChoirApp.Application.Contracts;
 using ChoirApp.Application.Dtos;
 using ChoirApp.Domain.Entities;
 using ChoirApp.Domain.Services;
-using ChoirApp.Infrastructure.Persistence;
 using FluentResults;
-using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace ChoirApp.Infrastructure.Services
+namespace ChoirApp.Application.Services
 {
     public class InvitationService : IInvitationService
     {
-        private readonly ApplicationDbContext _context;
+        private readonly IChoirRepository _choirRepository;
+        private readonly IUserRepository _userRepository;
+        private readonly IInvitationRepository _invitationRepository;
         private readonly IInvitationPolicy _invitationPolicy;
 
-        public InvitationService(ApplicationDbContext context, IInvitationPolicy invitationPolicy)
+        public InvitationService(
+            IChoirRepository choirRepository,
+            IUserRepository userRepository,
+            IInvitationRepository invitationRepository,
+            IInvitationPolicy invitationPolicy)
         {
-            _context = context;
+            _choirRepository = choirRepository;
+            _userRepository = userRepository;
+            _invitationRepository = invitationRepository;
             _invitationPolicy = invitationPolicy;
         }
 
         public async Task<Result> CreateInvitationAsync(InviteUserDto inviteDto, Guid inviterId)
         {
-            var choir = await _context.Choirs.FindAsync(inviteDto.ChoirId);
+            var choir = await _choirRepository.GetByIdAsync(inviteDto.ChoirId);
             if (choir == null)
             {
                 return Result.Fail("Choir not found.");
@@ -48,22 +53,21 @@ namespace ChoirApp.Infrastructure.Services
                 return Result.Fail(invitationResult.Errors);
             }
 
-            _context.ChoirInvitations.Add(invitationResult.Value);
-            await _context.SaveChangesAsync();
+            await _invitationRepository.AddAsync(invitationResult.Value);
+            await _invitationRepository.SaveChangesAsync();
             return Result.Ok();
         }
 
         public async Task<Result> AcceptInvitationAsync(AcceptInvitationDto acceptInvitationDto, Guid userId)
         {
-            var invitation = await _context.ChoirInvitations
-                .FirstOrDefaultAsync(i => i.InvitationToken == acceptInvitationDto.InvitationToken && i.Status == InvitationStatus.Pending);
+            var invitation = await _invitationRepository.GetByTokenAsync(acceptInvitationDto.InvitationToken);
 
-            if (invitation == null)
+            if (invitation == null || invitation.Status != InvitationStatus.Pending)
             {
                 return Result.Fail("Invalid or expired invitation token.");
             }
 
-            var user = await _context.Users.FindAsync(userId);
+            var user = await _userRepository.GetByIdAsync(userId);
             if (user == null)
             {
                 return Result.Fail("User not found.");
@@ -74,9 +78,7 @@ namespace ChoirApp.Infrastructure.Services
                 return Result.Fail("This invitation is not for you.");
             }
 
-            var choir = await _context.Choirs
-                .Include(c => c.UserChoirs)
-                .FirstOrDefaultAsync(c => c.ChoirId == invitation.ChoirId);
+            var choir = await _choirRepository.GetByIdWithMembersAsync(invitation.ChoirId);
 
             if (choir == null)
             {
@@ -89,25 +91,26 @@ namespace ChoirApp.Infrastructure.Services
 
             if (addMemberResult.IsFailed)
             {
-                await _context.SaveChangesAsync();
+                await _invitationRepository.SaveChangesAsync();
                 return addMemberResult;
             }
 
-            await _context.SaveChangesAsync();
+            await _choirRepository.UpdateAsync(choir);
+            await _invitationRepository.UpdateAsync(invitation);
+            await _invitationRepository.SaveChangesAsync();
             return Result.Ok();
         }
 
         public async Task<Result> RejectInvitationAsync(RejectInvitationDto rejectInvitationDto, Guid userId)
         {
-            var invitation = await _context.ChoirInvitations
-                .FirstOrDefaultAsync(i => i.InvitationToken == rejectInvitationDto.InvitationToken && i.Status == InvitationStatus.Pending);
+            var invitation = await _invitationRepository.GetByTokenAsync(rejectInvitationDto.InvitationToken);
 
-            if (invitation == null)
+            if (invitation == null || invitation.Status != InvitationStatus.Pending)
             {
                 return Result.Fail("Invalid or expired invitation token.");
             }
 
-            var user = await _context.Users.FindAsync(userId);
+            var user = await _userRepository.GetByIdAsync(userId);
             if (user == null)
             {
                 return Result.Fail("User not found.");
@@ -120,52 +123,45 @@ namespace ChoirApp.Infrastructure.Services
 
             invitation.Reject();
 
-            await _context.SaveChangesAsync();
+            await _invitationRepository.UpdateAsync(invitation);
+            await _invitationRepository.SaveChangesAsync();
             return Result.Ok();
         }
 
         public async Task<List<InvitationDto>> GetInvitationsAsync(Guid userId)
         {
-            var user = await _context.Users.FindAsync(userId);
+            var user = await _userRepository.GetByIdAsync(userId);
             if (user == null)
             {
                 return new List<InvitationDto>();
             }
 
-            var invitations = await _context.ChoirInvitations
-                .Where(i => i.Email == user.Email && i.Status == InvitationStatus.Pending)
-                .Include(i => i.Choir)
-                .Select(i => new InvitationDto
-                {
-                    InvitationToken = i.InvitationToken,
-                    ChoirId = i.ChoirId,
-                    ChoirName = i.Choir.ChoirName,
-                    Email = i.Email,
-                    Status = i.Status.ToString(),
-                    SentAt = i.DateSent
-                })
-                .ToListAsync();
+            var invitations = await _invitationRepository.GetPendingByEmailAsync(user.Email);
 
-            return invitations;
+            return invitations.Select(i => new InvitationDto
+            {
+                InvitationToken = i.InvitationToken,
+                ChoirId = i.ChoirId,
+                ChoirName = i.Choir?.ChoirName ?? "Unknown Choir",
+                Email = i.Email,
+                Status = i.Status.ToString(),
+                SentAt = i.DateSent
+            }).ToList();
         }
 
         public async Task<List<InvitationDto>> GetInvitationsByChoirAsync(Guid choirId)
         {
-            var invitations = await _context.ChoirInvitations
-                .Where(i => i.ChoirId == choirId)
-                .Include(i => i.Choir)
-                .Select(i => new InvitationDto
-                {
-                    InvitationToken = i.InvitationToken,
-                    ChoirId = i.ChoirId,
-                    ChoirName = i.Choir.ChoirName,
-                    Email = i.Email,
-                    Status = i.Status.ToString(),
-                    SentAt = i.DateSent
-                })
-                .ToListAsync();
+            var invitations = await _invitationRepository.GetByChoirIdAsync(choirId);
 
-            return invitations;
+            return invitations.Select(i => new InvitationDto
+            {
+                InvitationToken = i.InvitationToken,
+                ChoirId = i.ChoirId,
+                ChoirName = i.Choir?.ChoirName ?? "Unknown Choir",
+                Email = i.Email,
+                Status = i.Status.ToString(),
+                SentAt = i.DateSent
+            }).ToList();
         }
     }
 }

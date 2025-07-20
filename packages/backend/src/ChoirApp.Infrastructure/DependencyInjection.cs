@@ -1,7 +1,7 @@
 using ChoirApp.Application.Contracts;
-using ChoirApp.Application.Services;
 using ChoirApp.Domain.Services;
 using ChoirApp.Infrastructure.Persistence;
+using ChoirApp.Infrastructure.Repositories;
 using ChoirApp.Infrastructure.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -21,13 +21,18 @@ public static class DependencyInjection
             );
         }
 
+        // Register Infrastructure-specific services (external concerns)
         services.AddScoped<ITokenService, TokenService>();
-        services.AddScoped<IUserService, UserService>();
-        services.AddScoped<ISongService, SongService>();
-        services.AddScoped<IChoirService, ChoirService>();
-        services.AddScoped<IPlaylistService, PlaylistService>();
-        services.AddScoped<IInvitationService, InvitationService>();
         services.AddScoped<IChoirUniquenessChecker, ChoirUniquenessChecker>();
+        
+        // Register Repository implementations (data access)
+        services.AddScoped<IChoirRepository, ChoirRepository>();
+        services.AddScoped<IUserRepository, UserRepository>();
+        services.AddScoped<ISongRepository, SongRepository>();
+        services.AddScoped<IPlaylistRepository, PlaylistRepository>();
+        services.AddScoped<IPlaylistTemplateRepository, PlaylistTemplateRepository>();
+        services.AddScoped<IInvitationRepository, InvitationRepository>();
+        services.AddScoped<ITagRepository, TagRepository>();
         services.AddScoped<IInvitationPolicy, InvitationPolicy>();
 
         return services;
