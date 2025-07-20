@@ -89,23 +89,23 @@ const SongsListPage: FC<SongsListPageProps> = ({ playlistId, refreshPlaylist }) 
 
   // Function to fetch songs already in the current playlist
   const fetchPlaylistSongs = async () => {
-    console.log('🚨 DEBUG - fetchPlaylistSongs called with:', { contextPlaylistId, token: token ? 'present' : 'missing' });
+
     
     if (!token) {
-      console.log('🚨 DEBUG - No token, clearing song states');
+
       return;
     }
     
     // If no playlist exists (template-only state), clear all song states
     if (!contextPlaylistId) {
-      console.log('🚨 DEBUG - No playlist ID, clearing song states for template-only view');
+
       setPlaylistSongIds(new Set());
       setSelectedSongs(new Set());
       return;
     }
     
     try {
-      console.log('🚨 DEBUG - Fetching playlist songs for playlist:', contextPlaylistId);
+
       // Import the playlist service to get playlist details
       const { getPlaylistById } = await import('../services/playlistService');
       const playlist = await getPlaylistById(contextPlaylistId, token);
@@ -118,12 +118,12 @@ const SongsListPage: FC<SongsListPageProps> = ({ playlistId, refreshPlaylist }) 
         });
       });
       
-      console.log('🚨 DEBUG - Found songs in playlist:', Array.from(songIds));
+
       setPlaylistSongIds(songIds);
       // Also update selectedSongs to show "Added" flag immediately
       setSelectedSongs(songIds);
     } catch (error) {
-      console.log('🚨 DEBUG - Error fetching playlist songs:', error);
+
       setError('Failed to fetch playlist songs.');
       // Clear states on error
       setPlaylistSongIds(new Set());
@@ -140,12 +140,6 @@ const SongsListPage: FC<SongsListPageProps> = ({ playlistId, refreshPlaylist }) 
 
   // Handle dynamic date selection - refresh playlist songs and clear selections when PlaylistContext updates
   useEffect(() => {
-    console.log('🚨 DEBUG - PlaylistContext changed, refreshing playlist songs:', {
-      contextPlaylistId,
-      sectionsCount: sections.length,
-      selectedTemplate: selectedTemplate?.title,
-      isInitializing
-    });
     
     // Clear previous selections when context changes (new date selected)
     setSelectedSongs(new Set());
@@ -339,25 +333,18 @@ const SongsListPage: FC<SongsListPageProps> = ({ playlistId, refreshPlaylist }) 
       let targetPlaylistId = contextPlaylistId || playlistId; // Use context playlist ID first
       
       if (!targetPlaylistId) {
-        console.log('Debug - No playlist exists, creating one...');
         try {
           const createdPlaylist = await createPlaylistIfNeeded();
           if (createdPlaylist && createdPlaylist.id) {
             targetPlaylistId = createdPlaylist.id;
             // Using contextPlaylistId from PlaylistContext instead
-            console.log('Debug - Playlist created successfully:', {
-              playlistId: targetPlaylistId,
-              sections: createdPlaylist.sections?.length || 0
-            });
             
             // CRITICAL: After playlist creation, we need to refresh the context
             // to get the actual playlist section IDs (not template IDs)
-            console.log('Debug - Refreshing playlist context to get actual section IDs...');
             await refreshPlaylistContext();
             
             // IMPORTANT: Don't exit early - continue with the song addition using the newly created playlist
             // The refreshPlaylistContext should have updated the sections with real playlist section IDs
-            console.log('Debug - Context refreshed, continuing with song addition using real playlist sections');
             
             // Update the targetPlaylistId for the rest of the function
             // No need to reopen modal - continue with the song addition
@@ -369,46 +356,24 @@ const SongsListPage: FC<SongsListPageProps> = ({ playlistId, refreshPlaylist }) 
           toast.error('Failed to create playlist. Please try again.');
           return;
         }
-      }
-
-      console.log('Debug - Adding song to playlist:', {
-        songId: selectedSongForModal,
-        sectionId,
-        targetPlaylistId,
-        token: token ? 'present' : 'missing'
-      });
+      }     
       
       // Debug: Check if the sectionId exists in the current displayedSections
-      const sectionExists = displayedSections.find(s => s.id === sectionId);
-      console.log('🚨 CRITICAL DEBUG - Section validation before API call:', {
-        sectionId,
-        sectionExists: !!sectionExists,
-        sectionTitle: sectionExists?.title || 'NOT FOUND',
-        allAvailableSections: displayedSections.map(s => ({ id: s.id, title: s.title })),
-        sectionsFromContext: sections.length,
-        usingTemplateOrPlaylist: sections.length > 0 ? 'PLAYLIST SECTIONS' : 'TEMPLATE SECTIONS'
-      });
+      const sectionExists = displayedSections.find(s => s.id === sectionId);    
       
       // CRITICAL FIX: If we don't find the section in displayedSections, it means we're still using template IDs
       // In this case, we need to find the corresponding section by title in the actual playlist sections
-      if (!sectionExists && sections.length > 0) {
-        console.log('🚨 CRITICAL - Section ID not found, attempting to map by title...');
+      if (!sectionExists && sections.length > 0) {      
         const templateSection = selectedTemplate?.sections?.find(ts => ts.id === sectionId);
         if (templateSection) {
           const playlistSection = sections.find(ps => ps.title === templateSection.title);
-          if (playlistSection) {
-            console.log('🚨 CRITICAL - Found matching playlist section by title:', {
-              originalSectionId: sectionId,
-              newSectionId: playlistSection.id,
-              sectionTitle: playlistSection.title
-            });
+          if (playlistSection) {        
             sectionId = playlistSection.id; // Use the real playlist section ID
           }
         }
       }
       
-      // Step 2: Add the song to the playlist
-      console.log('🚨 CRITICAL DEBUG - About to call API with sectionId:', sectionId);
+      // Step 2: Add the song to the playlist     
       await addSongToPlaylist(
         targetPlaylistId,
         {
@@ -418,8 +383,6 @@ const SongsListPage: FC<SongsListPageProps> = ({ playlistId, refreshPlaylist }) 
         token
       );
 
-      console.log('Debug - Song added successfully');
-      
       // Step 3: Update UI state to show song as selected
       setSelectedSongs(prev => new Set([...prev, selectedSongForModal]));
       setPlaylistSongIds(prev => new Set([...prev, selectedSongForModal])); // Also update playlist songs
@@ -498,13 +461,8 @@ const SongsListPage: FC<SongsListPageProps> = ({ playlistId, refreshPlaylist }) 
       // Don't add title/artist parameters - let the backend handle the search logic
       // The backend already searches title, artist, and content based on searchTerm
       
-      console.log('🔍 Performing search with params:', searchParams);
       const songsData = await searchSongs(searchParams, token);
-      console.log('🔍 Search results:', songsData?.length || 0, 'songs');
-      console.log('🔍 Search results data:', songsData);
-      
       setSongs(songsData || []);
-      console.log('🔍 Songs state should be updated with:', songsData?.length || 0, 'songs');
       setPage(1);
       setHasMore((songsData?.length || 0) === songsPerPage);
     } catch (error) {
@@ -640,10 +598,7 @@ const SongsListPage: FC<SongsListPageProps> = ({ playlistId, refreshPlaylist }) 
               Retry
             </Button>
           </div>
-        ) : (() => {
-          console.log('🎯 Frontend render check: songs.length =', songs.length, 'songs =', songs);
-          return songs.length === 0;
-        })() ? (
+        ) : songs.length === 0 ? (
           <div className="songs-page__empty">
             <div className="songs-page__empty-icon">
               <MusicalNoteIcon />

@@ -144,25 +144,17 @@ export const searchSongs = async (params: SongSearchParams, token: string): Prom
     params.tags.forEach(tag => queryParams.append('tags', tag));
   }
 
-  console.log('🔍 Frontend searchSongs - Making request to:', `${API_BASE_URL}/api/songs/search?${queryParams.toString()}`);
-  
   const response = await fetch(`${API_BASE_URL}/api/songs/search?${queryParams.toString()}`, {
     headers: {
       'Authorization': `Bearer ${token}`
     }
   });
 
-  console.log('🔍 Frontend searchSongs - Response status:', response.status, response.statusText);
-
   if (!response.ok) {
     throw new Error(`Failed to search songs: ${response.statusText}`);
   }
 
-  const result = await response.json();
-  console.log('🔍 Frontend searchSongs - Response data:', result);
-  console.log('🔍 Frontend searchSongs - Response length:', result?.length || 0);
-  
-  return result;
+  return await response.json();
 };
 
 /**
