@@ -72,12 +72,15 @@ namespace ChoirApp.Application.Services
 
             if (playlistDto.PlaylistTemplateId.HasValue)
             {
+                Console.WriteLine($"🚨 DEBUG - Creating playlist with template ID: {playlistDto.PlaylistTemplateId.Value}");
                 var template = await _playlistTemplateRepository.GetByIdWithSectionsAsync(playlistDto.PlaylistTemplateId.Value);
 
                 if (template != null)
                 {
+                    Console.WriteLine($"🚨 DEBUG - Template found: {template.Title} with {template.Sections.Count} sections");
                     foreach (var sectionTemplate in template.Sections.OrderBy(s => s.Order))
                     {
+                        Console.WriteLine($"🚨 DEBUG - Adding section: {sectionTemplate.Title} (Order: {sectionTemplate.Order})");
                         var sectionResult = playlist.AddSection(sectionTemplate.Title);
                         if (sectionResult.IsFailed)
                             return Result.Fail(sectionResult.Errors);
@@ -85,7 +88,12 @@ namespace ChoirApp.Application.Services
                         // Note: PlaylistTemplateSongs entity has been removed
                         // Create an empty section without songs
                         var newSection = playlist.Sections.Last();
+                        Console.WriteLine($"🚨 DEBUG - Section created with ID: {newSection.SectionId}");
                     }
+                }
+                else
+                {
+                    Console.WriteLine($"🚨 DEBUG - Template NOT FOUND for ID: {playlistDto.PlaylistTemplateId.Value}");
                 }
             }
             else
@@ -99,6 +107,7 @@ namespace ChoirApp.Application.Services
             }
 
             await _playlistRepository.AddAsync(playlist);
+            await _playlistRepository.SaveChangesAsync();
             return Result.Ok(playlist);
         }
 
@@ -125,10 +134,63 @@ namespace ChoirApp.Application.Services
                 return Result.Fail("User is not a member of this choir.");
 
             var playlist = await _playlistRepository.GetByChoirIdAndDateAsync(choirId, date);
-            if (playlist == null)
-                return Result.Fail("Playlist not found for the specified date.");
+            if (playlist != null)
+                return Result.Ok(playlist);
 
-            return Result.Ok(playlist);
+            // If no playlist exists for this date, get the default template and create a virtual playlist
+            var defaultTemplate = await _playlistTemplateRepository.GetDefaultByChoirIdAsync(choirId);
+            if (defaultTemplate == null)
+                return Result.Fail("No playlist found for the specified date and no default template available.");
+
+            // Load template with sections
+            var templateWithSections = await _playlistTemplateRepository.GetByIdWithSectionsAsync(defaultTemplate.TemplateId);
+            if (templateWithSections == null)
+                return Result.Fail("Default template not found.");
+
+            // Create a virtual playlist based on the default template
+            var virtualPlaylist = CreateVirtualPlaylistFromTemplate(templateWithSections, choirId, date);
+            return Result.Ok(virtualPlaylist);
+        }
+
+        /// <summary>
+        /// Creates a virtual playlist from a template for display when no actual playlist exists for a date
+        /// </summary>
+        private Playlist CreateVirtualPlaylistFromTemplate(PlaylistTemplate template, Guid choirId, DateTimeOffset date)
+        {
+            // Create a virtual playlist with a temporary ID and the template structure
+            var virtualPlaylistResult = Playlist.Create(
+                name: $"Template: {template.Title}",
+                description: "Virtual playlist based on default template",
+                creatorId: Guid.Empty, // Virtual playlist, no specific creator
+                choirId: choirId,
+                visibility: DomainEntities.SongVisibilityType.Private,
+                createdAt: date
+            );
+
+            if (virtualPlaylistResult.IsFailed)
+                throw new InvalidOperationException("Failed to create virtual playlist from template");
+
+            var virtualPlaylist = virtualPlaylistResult.Value;
+
+            // Add sections from the template to the virtual playlist
+            if (template.Sections != null)
+            {
+                foreach (var templateSection in template.Sections.OrderBy(s => s.Order))
+                {
+                    var sectionResult = PlaylistSection.Create(
+                        title: templateSection.Title,
+                        playlistId: virtualPlaylist.PlaylistId,
+                        order: templateSection.Order
+                    );
+
+                    if (sectionResult.IsSuccess)
+                    {
+                        virtualPlaylist.Sections.Add(sectionResult.Value);
+                    }
+                }
+            }
+
+            return virtualPlaylist;
         }
 
         public async Task<Result> UpdatePlaylistAsync(Guid playlistId, UpdatePlaylistDto playlistDto, Guid userId)

@@ -3,7 +3,7 @@ using System.Linq;
 using System.Security.Claims;
 using System.Threading;
 using System.Threading.Tasks;
-using ChoirApp.Application.Services;
+using ChoirApp.Application.Contracts;
 using ChoirApp.Domain.Entities;
 using FastEndpoints;
 

@@ -46,6 +46,15 @@ namespace ChoirApp.Infrastructure.Repositories
         public async Task<List<Playlist>> GetByChoirIdAsync(Guid choirId)
         {
             return await _context.Playlists
+                .Include(p => p.Sections)
+                .ThenInclude(s => s.PlaylistSongs)
+                .ThenInclude(ps => ps.Song)
+                .ThenInclude(s => s.Tags)
+                .ThenInclude(st => st.Tag)
+                .Include(p => p.Sections)
+                .ThenInclude(s => s.PlaylistSongs)
+                .ThenInclude(ps => ps.Song)
+                .ThenInclude(s => s.Creator)
                 .Where(p => p.ChoirId == choirId)
                 .OrderByDescending(p => p.CreatedAt)
                 .ToListAsync();

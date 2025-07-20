@@ -32,15 +32,22 @@ namespace ChoirApp.Backend.Endpoints.Playlist
 
         public override async Task HandleAsync(GetPlaylistsByChoirIdRequest req, CancellationToken ct)
         {
+            Console.WriteLine($"🚨 DEBUG - GetPlaylistsByChoirIdEndpoint called for choir: {req.ChoirId}");
             var result = await _playlistService.GetPlaylistsByChoirIdAsync(req.ChoirId);
 
             if (result.IsFailed)
             {
+                Console.WriteLine($"🚨 DEBUG - Service failed: {result.Errors.FirstOrDefault()?.Message}");
                 await SendNotFoundAsync(ct);
                 return;
             }
 
             var playlists = result.Value;
+            Console.WriteLine($"🚨 DEBUG - Found {playlists.Count()} playlists for choir {req.ChoirId}");
+            foreach (var playlist in playlists)
+            {
+                Console.WriteLine($"  - Playlist: {playlist.PlaylistId} ({playlist.Name}) with {playlist.Sections.Count} sections, Date: {playlist.CreatedAt}");
+            }
             var response = playlists.Select(p => new PlaylistDto
             {
                 Id = p.PlaylistId,

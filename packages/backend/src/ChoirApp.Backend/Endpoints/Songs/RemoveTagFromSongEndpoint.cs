@@ -1,6 +1,6 @@
 using System;
 using System.Linq;
-using ChoirApp.Application.Services;
+using ChoirApp.Application.Contracts;
 using ChoirApp.Domain.Entities;
 using FastEndpoints;
 using System.Threading;

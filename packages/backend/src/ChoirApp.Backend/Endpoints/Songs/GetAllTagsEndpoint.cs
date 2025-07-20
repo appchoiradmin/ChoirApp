@@ -1,4 +1,4 @@
-using ChoirApp.Application.Services;
+using ChoirApp.Application.Contracts;
 using ChoirApp.Domain.Entities;
 using ChoirApp.Application.Dtos;
 using FastEndpoints;

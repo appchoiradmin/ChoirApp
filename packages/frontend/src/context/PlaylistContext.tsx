@@ -63,7 +63,9 @@ export const PlaylistProvider = ({
   // Only fetch playlists and templates, do not auto-create playlist
   useEffect(() => {
     async function initialize() {
+      console.log('🚨 DEBUG - PlaylistContext initialization called with:', { choirId, date, token: token ? 'present' : 'missing' });
       if (!choirId || !token) {
+        console.log('🚨 DEBUG - Missing choirId or token, resetting state');
         setSections([]);
         setSelectedTemplate(null);
         setPlaylistId(null);
@@ -94,18 +96,26 @@ export const PlaylistProvider = ({
           setIsPersisted(true);
         } else {
           // No playlist exists: just load template for preview
+          console.log('🚨 DEBUG - No playlist found for date, fetching templates for choir:', choirId);
           const templates = await getPlaylistTemplatesByChoirId(choirId, token);
+          console.log('🚨 DEBUG - Templates fetched:', templates);
+          
           if (templates.length > 0) {
             const defaultTemplate = templates[0];
+            console.log('🚨 DEBUG - Using default template:', defaultTemplate);
+            console.log('🚨 DEBUG - Template sections:', defaultTemplate.sections);
+            
             const mappedSections = (defaultTemplate.sections || []).map(section => ({
               id: section.id,
               title: section.title,
               order: section.order,
               songs: section.songs || [],
             }));
+            console.log('🚨 DEBUG - Mapped sections:', mappedSections);
             setSections(mappedSections);
             setSelectedTemplate(defaultTemplate);
           } else {
+            console.log('🚨 DEBUG - No templates found for choir');
             setSections([]);
             setSelectedTemplate(null);
           }
@@ -115,6 +125,7 @@ export const PlaylistProvider = ({
         setIsInitialized(true);
         setIsInitializing(false);
       } catch (error) {
+        console.log('🚨 DEBUG - Error in PlaylistContext initialization:', error);
         setError(`Failed to load playlist: ${error instanceof Error ? error.message : 'Unknown error'}`);
         setSections([]);
         setSelectedTemplate(null);
@@ -126,6 +137,11 @@ export const PlaylistProvider = ({
     }
     initialize();
     return () => {};
+  }, [choirId, date, token]);
+
+  // Debug: Track when dependencies change
+  useEffect(() => {
+    console.log('🚨 DEBUG - PlaylistContext dependencies changed:', { choirId, date, token: token ? 'present' : 'missing' });
   }, [choirId, date, token]);
 
   // Expose a function to create the playlist only when needed (e.g., on first change)
@@ -176,20 +192,33 @@ export const PlaylistProvider = ({
   const refreshPlaylist = async () => {
     if (!choirId || !token) return;
     try {
+      console.log('🚨 DEBUG - refreshPlaylist called with:', { choirId, date });
       const playlists = await getPlaylistsByChoirId(choirId, token);
+      console.log('🚨 DEBUG - refreshPlaylist received playlists:', playlists);
+      
       const targetDate = date || getNextSunday();
       const targetDateStr = targetDate.toISOString().split('T')[0];
+      console.log('🚨 DEBUG - Looking for playlist with date:', targetDateStr);
+      
       const persisted = playlists.find(p => {
         const dateStr = typeof p.date === 'string' ? p.date : (p.date instanceof Date ? p.date.toISOString().split('T')[0] : '');
+        console.log('🚨 DEBUG - Checking playlist date:', { playlistId: p.id, playlistDate: dateStr, targetDate: targetDateStr, matches: dateStr.startsWith(targetDateStr) });
         return dateStr.startsWith(targetDateStr);
       });
+      
       if (persisted) {
+        console.log('🚨 DEBUG - Found matching playlist:', persisted);
+        console.log('🚨 DEBUG - Playlist sections:', persisted.sections);
         setSections(persisted.sections || []);
         setSelectedTemplate(persisted.template || null);
         setPlaylistId(persisted.id);
         setIsPersisted(true);
+      } else {
+        console.log('🚨 DEBUG - No matching playlist found for date:', targetDateStr);
+        console.log('🚨 DEBUG - Available playlist dates:', playlists.map(p => ({ id: p.id, date: p.date })));
       }
     } catch (error) {
+      console.log('🚨 DEBUG - refreshPlaylist error:', error);
       setError(`Failed to refresh playlist: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   };

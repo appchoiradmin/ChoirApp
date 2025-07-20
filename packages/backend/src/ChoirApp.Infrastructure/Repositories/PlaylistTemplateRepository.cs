@@ -33,6 +33,7 @@ namespace ChoirApp.Infrastructure.Repositories
         public async Task<List<PlaylistTemplate>> GetByChoirIdAsync(Guid choirId)
         {
             return await _context.PlaylistTemplates
+                .Include(pt => pt.Sections)
                 .Where(pt => pt.ChoirId == choirId)
                 .OrderBy(pt => pt.Title)
                 .ToListAsync();

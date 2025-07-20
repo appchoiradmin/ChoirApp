@@ -4,7 +4,7 @@ using System.Security.Claims;
 using System.Threading;
 using System.Threading.Tasks;
 using ChoirApp.Application.Dtos;
-using ChoirApp.Application.Services;
+using ChoirApp.Application.Contracts;
 using ChoirApp.Backend.Endpoints.Songs.Requests;
 using ChoirApp.Backend.Endpoints.Songs.Responses;
 using ChoirApp.Domain.Entities;

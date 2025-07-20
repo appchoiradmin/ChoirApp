@@ -4,7 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace ChoirApp.Application.Services
+namespace ChoirApp.Application.Contracts
 {
     public interface ISongService
     {
