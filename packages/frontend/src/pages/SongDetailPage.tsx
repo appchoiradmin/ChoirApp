@@ -4,6 +4,7 @@ import { getSongById, createSongVersion, getSongsForChoir, createSong, updateSon
 import type { SongDto, CreateSongDto, UpdateSongDto, UpdateSongVisibilityDto, CreateSongVersionDto } from '../types/song';
 import { SongVisibilityType } from '../types/song';
 import { useUser } from '../hooks/useUser';
+import { useTranslation } from '../hooks/useTranslation';
 import ChordProViewer from '../components/ChordProViewer';
 import ChordProGuide from '../components/ChordProGuide';
 import styles from './SongDetailPage.module.scss';
@@ -16,6 +17,7 @@ const SongDetailPage: React.FC = () => {
   const isCreateMode = location.pathname === '/songs/create';
   const navigate = useNavigate();
   const { user, loading: userLoading } = useUser();
+  const { t } = useTranslation();
   const [song, setSong] = useState<SongDto | null>(null);
   const [loading, setLoading] = useState<boolean>(!isCreateMode);
   const [error, setError] = useState<string | null>(null);
@@ -249,58 +251,58 @@ const SongDetailPage: React.FC = () => {
 
   const renderCreateForm = () => (
     <div className={styles.formContainer}>
-      <h2 className={styles.formTitle}>Create New Song</h2>
+      <h2 className={styles.formTitle}>{t('songs.createNewSong')}</h2>
       <form onSubmit={handleCreateSong}>
         <div className={styles.formGroup}>
-          <label htmlFor="title" className={styles.label}>Title</label>
+          <label htmlFor="title" className={styles.label}>{t('songs.title')}</label>
           <input
             id="title"
             type="text"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             className={styles.input}
-            placeholder="Enter song title"
+            placeholder={t('songs.enterSongTitle')}
             required
           />
         </div>
 
         <div className={styles.formGroup}>
-          <label htmlFor="artist" className={styles.label}>Artist</label>
+          <label htmlFor="artist" className={styles.label}>{t('songs.artist')}</label>
           <input
             id="artist"
             type="text"
             value={artist}
             onChange={(e) => setArtist(e.target.value)}
             className={styles.input}
-            placeholder="Enter artist name (optional)"
+            placeholder={t('songs.enterArtistNameOptional')}
           />
         </div>
 
         <div className={styles.formGroup}>
-          <label htmlFor="visibility" className={styles.label}>Visibility</label>
+          <label htmlFor="visibility" className={styles.label}>{t('songs.visibility')}</label>
           <select
             id="visibility"
             value={visibility}
             onChange={(e) => setVisibility(Number(e.target.value) as SongVisibilityType)}
             className={styles.select}
           >
-            <option value={SongVisibilityType.Private}>Private</option>
-            <option value={SongVisibilityType.PublicAll}>Public to All</option>
-            <option value={SongVisibilityType.PublicChoirs}>Public to Choirs</option>
+            <option value={SongVisibilityType.Private}>{t('songs.private')}</option>
+            <option value={SongVisibilityType.PublicAll}>{t('songs.publicToAll')}</option>
+            <option value={SongVisibilityType.PublicChoirs}>{t('songs.publicToChoirs')}</option>
           </select>
         </div>
         
         {/* Choir selection for create form */}
         {visibility === SongVisibilityType.PublicChoirs && user?.choirs && (
           <div className={styles.formGroup}>
-            <label className={styles.label}>Share with Choirs ({user.choirs.length} available)</label>
+            <label className={styles.label}>{t('songs.shareWithChoirsCount', { count: user.choirs.length })}</label>
             
             {/* Filter input for large choir lists */}
             {user.choirs.length > 5 && (
               <div className={styles.filterContainer}>
                 <input
                   type="text"
-                  placeholder="Filter choirs..."
+                  placeholder={t('songs.filterChoirs')}
                   value={createChoirFilter}
                   onChange={(e) => setCreateChoirFilter(e.target.value)}
                   className={styles.filterInput}
@@ -312,14 +314,14 @@ const SongDetailPage: React.FC = () => {
             {selectedChoirsForCreate.length > 0 && (
               <div className={styles.selectedSummary}>
                 <span className={styles.selectedCount}>
-                  {selectedChoirsForCreate.length} choir{selectedChoirsForCreate.length !== 1 ? 's' : ''} selected
+                  {selectedChoirsForCreate.length} {t('songs.choirsSelected')}
                 </span>
                 <button
                   type="button"
                   onClick={() => setSelectedChoirsForCreate([])}
                   className={styles.clearSelection}
                 >
-                  Clear all
+                  {t('songs.clearAll')}
                 </button>
               </div>
             )}
@@ -354,14 +356,14 @@ const SongDetailPage: React.FC = () => {
                 choir.name.toLowerCase().includes(createChoirFilter.toLowerCase())
               ).length === 0 && (
                 <div className={styles.noResults}>
-                  No choirs match "{createChoirFilter}"
+                  {t('songs.noChoirsMatchFilter', { filter: createChoirFilter })}
                 </div>
               )}
               
               {/* Show message when no choirs available */}
               {user.choirs.length === 0 && (
                 <div className={styles.noChoirs}>
-                  You are not a member of any choirs yet.
+                  {t('songs.notMemberOfAnyChoirs')}
                 </div>
               )}
             </div>
@@ -375,7 +377,7 @@ const SongDetailPage: React.FC = () => {
                   className={styles.selectAllButton}
                   disabled={selectedChoirsForCreate.length === user.choirs.length}
                 >
-                  Select All
+                  {t('songs.selectAll')}
                 </button>
               </div>
             )}
@@ -383,14 +385,14 @@ const SongDetailPage: React.FC = () => {
         )}
 
         <div className={styles.formGroup}>
-          <label htmlFor="chordProContent" className={styles.label}>ChordPro Content</label>
+          <label htmlFor="chordProContent" className={styles.label}>{t('songs.chordProContent')}</label>
           <ChordProGuide />
           <textarea
             id="chordProContent"
             value={chordProContent}
             onChange={(e) => setChordProContent(e.target.value)}
             className={styles.textarea}
-            placeholder="Enter your song in ChordPro format"
+            placeholder={t('songs.enterChordPro')}
             rows={10}
             required
           />
@@ -401,7 +403,7 @@ const SongDetailPage: React.FC = () => {
           disabled={isProcessing}
           className={styles.submitButton}
         >
-          {isProcessing ? 'Creating...' : 'Create Song'}
+          {isProcessing ? t('songs.creating') : t('songs.createSong')}
         </button>
       </form>
     </div>
@@ -412,13 +414,13 @@ const SongDetailPage: React.FC = () => {
       <Layout 
         navigation={
           <Navigation 
-            title="Loading..." 
+            title={t('common.loading')} 
             showBackButton={true}
             onBackClick={() => navigate(-1)}
           />
         }
       >
-        <div className={styles.loading}>Loading...</div>
+        <div className={styles.loading}>{t('common.loading')}...</div>
       </Layout>
     );
   }
@@ -428,7 +430,7 @@ const SongDetailPage: React.FC = () => {
       <Layout 
         navigation={
           <Navigation 
-            title="Error" 
+            title={t('common.error')} 
             showBackButton={true}
             onBackClick={() => navigate(-1)}
           />
@@ -444,7 +446,7 @@ const SongDetailPage: React.FC = () => {
       <Layout 
         navigation={
           <Navigation 
-            title="Create Song" 
+            title={t('songs.createSong')} 
             showBackButton={true}
             onBackClick={() => navigate(-1)}
           />
@@ -460,13 +462,13 @@ const SongDetailPage: React.FC = () => {
       <Layout 
         navigation={
           <Navigation 
-            title="Not Found" 
+            title={t('songs.notFound')} 
             showBackButton={true}
             onBackClick={() => navigate(-1)}
           />
         }
       >
-        <div className={styles.notFound}>Song not found</div>
+        <div className={styles.notFound}>{t('songs.songNotFound')}</div>
       </Layout>
     );
   }
@@ -476,7 +478,7 @@ const SongDetailPage: React.FC = () => {
     <div className={styles.editContainer}>
       <div className={styles.editForm}>
         <div className={styles.formGroup}>
-          <label htmlFor="editTitle" className={styles.label}>Title</label>
+          <label htmlFor="editTitle" className={styles.label}>{t('songs.title')}</label>
           <input
             id="editTitle"
             type="text"
@@ -488,19 +490,19 @@ const SongDetailPage: React.FC = () => {
         </div>
         
         <div className={styles.formGroup}>
-          <label htmlFor="editArtist" className={styles.label}>Artist</label>
+          <label htmlFor="editArtist" className={styles.label}>{t('songs.artist')}</label>
           <input
             id="editArtist"
             type="text"
             value={editArtist}
             onChange={(e) => setEditArtist(e.target.value)}
             className={styles.input}
-            placeholder="Enter artist name"
+            placeholder={t('songs.enterArtistName')}
           />
         </div>
         
         <div className={styles.formGroup}>
-          <label htmlFor="editVisibility" className={styles.label}>Visibility</label>
+          <label htmlFor="editVisibility" className={styles.label}>{t('songs.visibility')}</label>
           <select
             id="editVisibility"
             value={editVisibility}
@@ -535,7 +537,7 @@ const SongDetailPage: React.FC = () => {
             {selectedChoirsForEdit.length > 0 && (
               <div className={styles.selectedSummary}>
                 <span className={styles.selectedCount}>
-                  {selectedChoirsForEdit.length} choir{selectedChoirsForEdit.length !== 1 ? 's' : ''} selected
+                  {selectedChoirsForEdit.length} {t('songs.choirsSelected')}
                 </span>
                 <button
                   type="button"
@@ -577,7 +579,7 @@ const SongDetailPage: React.FC = () => {
                 choir.name.toLowerCase().includes(editChoirFilter.toLowerCase())
               ).length === 0 && (
                 <div className={styles.noResults}>
-                  No choirs match "{editChoirFilter}"
+                  {t('songs.noChoirsMatch')} "{editChoirFilter}"
                 </div>
               )}
               

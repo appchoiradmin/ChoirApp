@@ -1,6 +1,7 @@
 import React from 'react';
 import { PlaylistSection } from '../types/playlist';
 import { MusicalNoteIcon } from '@heroicons/react/24/outline';
+import { useTranslation } from '../hooks/useTranslation';
 
 interface SectionSelectionModalProps {
   isOpen: boolean;
@@ -16,9 +17,11 @@ const SectionSelectionModal: React.FC<SectionSelectionModalProps> = ({
   onClose,
   sections,
   onSelectSection,
-  title = "Add Song To Section",
+  title,
   isLoading = false
 }) => {
+  const { t } = useTranslation();
+  const modalTitle = title || t('sectionSelectionModal.title');
   if (!isOpen) return null;
 
   const handleSectionSelect = (sectionId: string) => {
@@ -32,8 +35,8 @@ const SectionSelectionModal: React.FC<SectionSelectionModalProps> = ({
       <div className="section-modal animate-up">
         <div className="section-modal-drag-handle"></div>
         <div className="section-modal-header">
-          <span className="section-modal-title">{title}</span>
-          <button className="section-modal-close" aria-label="close" onClick={onClose}>
+          <span className="section-modal-title">{modalTitle}</span>
+          <button className="section-modal-close" aria-label={t('sectionSelectionModal.close')} onClick={onClose}>
             <span aria-hidden="true">&times;</span>
           </button>
         </div>
@@ -41,7 +44,7 @@ const SectionSelectionModal: React.FC<SectionSelectionModalProps> = ({
           {isLoading ? (
             <div className="section-modal-loading">
               <div className="loading-spinner"></div>
-              <span>Loading sections...</span>
+              <span>{t('sectionSelectionModal.loadingSections')}</span>
             </div>
           ) : sections.length > 0 ? (
             <ul className="section-modal-list">
@@ -60,13 +63,13 @@ const SectionSelectionModal: React.FC<SectionSelectionModalProps> = ({
           ) : (
             <div className="section-modal-empty">
               <MusicalNoteIcon className="section-modal-empty-icon" />
-              <span>No sections available</span>
+              <span>{t('sectionSelectionModal.noSectionsAvailable')}</span>
             </div>
           )}
         </div>
         <div className="section-modal-footer">
           <button className="section-modal-cancel-btn" onClick={onClose}>
-            Cancel
+            {t('sectionSelectionModal.cancel')}
           </button>
         </div>
       </div>

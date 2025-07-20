@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useUser } from '../hooks/useUser';
+import { useTranslation } from '../hooks/useTranslation';
 import { getSongsForChoir } from '../services/songService';
 import { Button, LoadingSpinner } from '../components/ui';
 import Layout from '../components/ui/Layout';
@@ -34,6 +35,7 @@ interface FilterState {
 }
 
 const SongVersionsListPage: React.FC = () => {
+  const { t } = useTranslation();
   const { loading: userContextLoading, token } = useUser();
   const { choirId } = useParams<{ choirId: string }>();
   const navigate = useNavigate();
@@ -58,7 +60,7 @@ const SongVersionsListPage: React.FC = () => {
       }
 
       if (!token || !choirId) {
-        setError('No authentication token or choir ID provided');
+        setError(t('errors.unauthorized'));
         setLoading(false);
         return;
       }
@@ -70,8 +72,8 @@ const SongVersionsListPage: React.FC = () => {
         setError(null);
       } catch (err) {
         console.error('Error fetching song versions:', err);
-        setError('Failed to load song versions');
-        toast.error('Failed to load song versions');
+        setError(t('songs.failedToLoadSongVersions'));
+        toast.error(t('songs.failedToLoadSongVersions'));
       } finally {
         setLoading(false);
       }
@@ -279,7 +281,7 @@ const SongVersionsListPage: React.FC = () => {
     if (selectedSongs.size === 0) return;
     
     const confirmDelete = window.confirm(
-      `Are you sure you want to delete ${selectedSongs.size} song version${selectedSongs.size > 1 ? 's' : ''}?`
+      t('songs.confirmDeleteSongs', { count: selectedSongs.size })
     );
     
     if (confirmDelete) {
@@ -290,7 +292,7 @@ const SongVersionsListPage: React.FC = () => {
         // );
         // await Promise.all(deletePromises);
         
-        toast.success(`${selectedSongs.size} song version${selectedSongs.size > 1 ? 's' : ''} deleted successfully`);
+        toast.success(t('songs.songsDeletedSuccess', { count: selectedSongs.size }));
         setSelectedSongs(new Set());
         
         // Refresh song list
@@ -298,7 +300,8 @@ const SongVersionsListPage: React.FC = () => {
         setSongs(updatedSongs);
       } catch (err) {
         console.error('Error deleting song versions:', err);
-        toast.error('Failed to delete song versions');
+        toast.error(t('songs.errorDeletingSongs'));
+        toast.error(t('songs.errorDeletingSongs'));
       }
     }
   };
@@ -328,10 +331,10 @@ const SongVersionsListPage: React.FC = () => {
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
       
-      toast.success(`${selectedSongs.size} song version${selectedSongs.size > 1 ? 's' : ''} exported successfully`);
+      toast.success(t('songs.exportSuccess', { count: selectedSongs.size }));
     } catch (err) {
       console.error('Error exporting song versions:', err);
-      toast.error('Failed to export song versions');
+      toast.error(t('songs.exportError'));
     }
   };
 
@@ -349,9 +352,9 @@ const SongVersionsListPage: React.FC = () => {
   const handleDeleteSelected = () => {
     if (selectedSongs.size === 0) return;
     
-    if (window.confirm(`Are you sure you want to delete ${selectedSongs.size} song version(s)?`)) {
+    if (window.confirm(t('songs.deleteConfirmation', { count: selectedSongs.size }))) {
       // Implement delete functionality here
-      toast.success(`${selectedSongs.size} song version(s) deleted successfully`);
+      toast.success(t('songs.deleteSuccess', { count: selectedSongs.size }));
       setSelectedSongs(new Set());
     }
   };
@@ -362,7 +365,7 @@ const SongVersionsListPage: React.FC = () => {
       <Layout>
         <div className="song-versions-loading">
           <LoadingSpinner size="lg" />
-          <p className="loading-text">Loading song versions...</p>
+          <p className="loading-text">{t('songs.loadingSongVersions')}</p>
         </div>
       </Layout>
     );
@@ -374,20 +377,20 @@ const SongVersionsListPage: React.FC = () => {
       <Layout>
         <div className="song-versions-error">
           <InformationCircleIcon className="error-icon" />
-          <h2 className="error-title">Something went wrong</h2>
+          <h2 className="error-title">{t('songs.somethingWentWrong')}</h2>
           <p className="error-message">{error}</p>
           <div className="error-actions">
             <Button 
               variant="primary" 
               onClick={() => window.location.reload()}
             >
-              Try Again
+              {t('songs.tryAgain')}
             </Button>
             <Button 
               variant="secondary" 
               onClick={() => navigate(`/choirs/${choirId}`)}
             >
-              Back to Choir
+              {t('songs.backToChoir')}
             </Button>
           </div>
         </div>
@@ -402,9 +405,9 @@ const SongVersionsListPage: React.FC = () => {
         <div className="songs-header">
           <div className="header-content">
             <div className="header-left">
-              <h1 className="page-title">Songs</h1>
+              <h1 className="page-title">{t('songs.songs')}</h1>
               <p className="page-subtitle">
-                {filteredAndSortedSongs.length} {filteredAndSortedSongs.length === 1 ? 'song' : 'songs'} available
+                {t('songs.songsAvailable', { count: filteredAndSortedSongs.length })}
               </p>
             </div>
             
@@ -415,13 +418,13 @@ const SongVersionsListPage: React.FC = () => {
                 leftIcon={<PlusIcon className="button-icon" />}
                 className="mr-2"
               >
-                New Song
+                {t('songs.newSong')}
               </Button>
               <Button 
                 variant="outlined" 
                 onClick={handleBulkSelection}
               >
-                {selectedSongs.size === filteredAndSortedSongs.length ? 'Deselect All' : 'Select All'}
+                {selectedSongs.size === filteredAndSortedSongs.length ? t('songs.deselectAll') : t('common.selectAll')}
               </Button>
           </div>
           
@@ -435,8 +438,8 @@ const SongVersionsListPage: React.FC = () => {
             >
               <CheckCircleIcon className="icon" />
               {selectedSongs.size === filteredAndSortedSongs.length && filteredAndSortedSongs.length > 0 
-                ? 'Deselect All' 
-                : 'Select All'
+                ? t('songs.deselectAllButton') 
+                : t('songs.selectAllButton')
               }
             </Button>
               </div>
@@ -447,7 +450,7 @@ const SongVersionsListPage: React.FC = () => {
                   <MagnifyingGlassIcon className="search-icon" />
                   <input
                     type="text"
-                    placeholder="Search songs..."
+                    placeholder={t('songs.searchSongsPlaceholder')}
                     value={filters.search}
                     onChange={handleSearchChange}
                     className="search-input"
@@ -456,7 +459,7 @@ const SongVersionsListPage: React.FC = () => {
                     <button
                       className="clear-search-button"
                       onClick={handleClearSearch}
-                      aria-label="Clear search"
+                      aria-label={t('songs.clearSearch')}
                     >
                       <XMarkIcon className="clear-icon" />
                     </button>
@@ -469,20 +472,20 @@ const SongVersionsListPage: React.FC = () => {
                 onClick={handleToggleFilters}
               >
                 <FunnelIcon className="filter-icon" />
-                {filters.showAdvancedFilters ? 'Hide Filters' : 'Show Filters'}
+                {filters.showAdvancedFilters ? t('songs.hideFilters') : t('songs.showFilters')}
               </button>
             </div>
             
             {filters.showAdvancedFilters && (
               <div className="advanced-filters">
                 <div className="filter-section">
-                  <h3 className="filter-title">Sort By</h3>
+                  <h3 className="filter-title">{t('songs.sortByLabel')}</h3>
                   <div className="sort-options">
                     <button 
                       className={`sort-option ${filters.sortBy === 'title' ? 'active' : ''}`}
                       onClick={() => handleSortChange('title')}
                     >
-                      Title
+                      {t('songs.titleSort')}
                       {filters.sortBy === 'title' && (
                         <span className="sort-direction">
                           {filters.sortOrder === 'asc' ? '↑' : '↓'}
@@ -493,7 +496,7 @@ const SongVersionsListPage: React.FC = () => {
                       className={`sort-option ${filters.sortBy === 'artist' ? 'active' : ''}`}
                       onClick={() => handleSortChange('artist')}
                     >
-                      Artist
+                      {t('songs.artistSort')}
                       {filters.sortBy === 'artist' && (
                         <span className="sort-direction">
                           {filters.sortOrder === 'asc' ? '↑' : '↓'}
@@ -504,7 +507,7 @@ const SongVersionsListPage: React.FC = () => {
                       className={`sort-option ${filters.sortBy === 'createdAt' ? 'active' : ''}`}
                       onClick={() => handleSortChange('createdAt')}
                     >
-                      Date
+                      {t('songs.dateSort')}
                       {filters.sortBy === 'createdAt' && (
                         <span className="sort-direction">
                           {filters.sortOrder === 'asc' ? '↑' : '↓'}
@@ -515,7 +518,7 @@ const SongVersionsListPage: React.FC = () => {
                       className={`sort-option ${filters.sortBy === 'tags' ? 'active' : ''}`}
                       onClick={() => handleSortChange('tags')}
                     >
-                      Tags
+                      {t('songs.tagsSort')}
                       {filters.sortBy === 'tags' && (
                         <span className="sort-direction">
                           {filters.sortOrder === 'asc' ? '↑' : '↓'}
@@ -527,7 +530,7 @@ const SongVersionsListPage: React.FC = () => {
                 
                 {allTags.length > 0 && (
                   <div className="filter-section">
-                    <h3 className="filter-title">Filter by Tags</h3>
+                    <h3 className="filter-title">{t('songs.filterByTagsLabel')}</h3>
                     <div className="tag-filters">
                       {allTags.map(tag => (
                         <button
@@ -552,7 +555,7 @@ const SongVersionsListPage: React.FC = () => {
                     onClick={handleClearFilters}
                     disabled={!filters.search && filters.selectedTags.length === 0 && filters.sortBy === 'createdAt'}
                   >
-                    Clear All Filters
+                    {t('songs.clearAllFilters')}
                   </Button>
                 </div>
               </div>
@@ -566,7 +569,7 @@ const SongVersionsListPage: React.FC = () => {
             <div className="selection-info">
               <CheckCircleIcon className="selection-icon" />
               <span className="selection-count">{selectedSongs.size}</span> 
-              {selectedSongs.size === 1 ? 'song' : 'songs'} selected
+              {t('songs.songsSelected', { count: selectedSongs.size })}
             </div>
             
             <div className="action-buttons">
@@ -575,14 +578,14 @@ const SongVersionsListPage: React.FC = () => {
                 onClick={handleDeleteSelected}
                 leftIcon={<TrashIcon className="button-icon" />}
               >
-                Delete Selected
+                {t('songs.deleteSelected')}
               </Button>
               
               <Button 
                 variant="secondary" 
                 onClick={() => setSelectedSongs(new Set())}
               >
-                Clear Selection
+                {t('songs.clearSelection')}
               </Button>
             </div>
           </div>
@@ -594,7 +597,7 @@ const SongVersionsListPage: React.FC = () => {
             <div className="bulk-info">
               <CheckCircleIcon className="bulk-icon" />
               <span className="bulk-count">
-                {selectedSongs.size} song{selectedSongs.size !== 1 ? 's' : ''} selected
+                {t('songs.songsSelected', { count: selectedSongs.size })}
               </span>
             </div>
             <div className="bulk-buttons">
@@ -604,7 +607,7 @@ const SongVersionsListPage: React.FC = () => {
                 onClick={handleBulkDelete}
               >
                 <TrashIcon className="icon" />
-                Delete
+                {t('songs.delete')}
               </Button>
               <Button
                 variant="secondary"
@@ -612,7 +615,7 @@ const SongVersionsListPage: React.FC = () => {
                 onClick={handleBulkExport}
               >
                 <DocumentTextIcon className="icon" />
-                Export
+                {t('songs.exportSelected')}
               </Button>
             </div>
           </div>
@@ -644,7 +647,7 @@ const SongVersionsListPage: React.FC = () => {
                 <div className="card-content">
                   <h3 className="song-title">{song.title}</h3>
                   {song.artist && (
-                    <p className="song-artist">by {song.artist}</p>
+                    <p className="song-artist">{t('songs.songBy', { artist: song.artist })}</p>
                   )}
                   
                   {song.tags && song.tags.length > 0 && (
@@ -672,7 +675,7 @@ const SongVersionsListPage: React.FC = () => {
                   <button 
                     className="action-button edit"
                     onClick={(e) => handleEditSong(song.songId, e)}
-                    aria-label="Edit song"
+                    aria-label={t('songs.editSongAriaLabel')}
                   >
                     <PencilIcon className="action-icon" />
                   </button>
@@ -680,7 +683,7 @@ const SongVersionsListPage: React.FC = () => {
                   <button 
                     className="action-button view"
                     onClick={(e) => handleViewSong(song.songId, e)}
-                    aria-label="View song"
+                    aria-label={t('songs.viewSongAriaLabel')}
                   >
                     <EyeIcon className="action-icon" />
                   </button>
@@ -691,19 +694,19 @@ const SongVersionsListPage: React.FC = () => {
         ) : (
           <div className="empty-state">
             <DocumentTextIcon className="empty-icon" />
-            <h2 className="empty-title">No songs found</h2>
+            <h2 className="empty-title">{t('songs.noSongsFoundTitle')}</h2>
             <p className="empty-message">
               {filters.search || filters.selectedTags.length > 0 
-                ? "No songs match your current filters. Try adjusting your search criteria."
-                : "There are no song versions in this choir yet. Create your first song version to get started."}
+                ? t('songs.noSongsMatchFilters')
+                : t('songs.noSongsInChoir')}
             </p>
             {(filters.search || filters.selectedTags.length > 0) ? (
               <Button variant="secondary" onClick={handleClearFilters}>
-                Clear Filters
+                {t('songs.clearFiltersButton')}
               </Button>
             ) : (
               <Button variant="primary" onClick={handleCreateSong} leftIcon={<PlusIcon className="button-icon" />}>
-                Create Song
+                {t('songs.createSongButton')}
               </Button>
             )}
           </div>

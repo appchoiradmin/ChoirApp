@@ -13,11 +13,13 @@ import {
   DocumentTextIcon, 
   ExclamationCircleIcon 
 } from '@heroicons/react/24/outline';
+import { useTranslation } from '../hooks/useTranslation';
 import './PlaylistTemplateDetailPage.scss';
 
 const PlaylistTemplateDetailPage: React.FC = () => {
   const { templateId } = useParams<{ templateId: string }>();
   const { token } = useUser();
+  const { t } = useTranslation();
   const [template, setTemplate] = useState<PlaylistTemplate | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -31,7 +33,7 @@ const PlaylistTemplateDetailPage: React.FC = () => {
           const fetchedTemplate = await getPlaylistTemplateById(templateId, token);
           setTemplate(fetchedTemplate);
         } catch (err: any) {
-          setError(err.message || 'Failed to fetch playlist template');
+          setError(err.message || t('playlistTemplateDetail.failedToFetch'));
         } finally {
           setLoading(false);
         }
@@ -44,7 +46,7 @@ const PlaylistTemplateDetailPage: React.FC = () => {
     if (!template || !templateId || !token) return;
     
     const confirmed = window.confirm(
-      `Are you sure you want to delete "${template.title}"? This action cannot be undone.`
+      t('playlistTemplateDetail.deleteConfirm', { title: template.title })
     );
     
     if (confirmed) {
@@ -54,7 +56,7 @@ const PlaylistTemplateDetailPage: React.FC = () => {
         navigate('/playlist-templates');
       } catch (err: any) {
         console.error('Failed to delete template:', err);
-        setError('Failed to delete template');
+        setError(t('playlistTemplateDetail.failedToDelete'));
       } finally {
         setDeleting(false);
       }
@@ -76,10 +78,10 @@ const PlaylistTemplateDetailPage: React.FC = () => {
       <Layout>
         <div className="template-detail-error">
           <ExclamationCircleIcon className="error-icon" />
-          <h2 className="error-title">Error Loading Template</h2>
+          <h2 className="error-title">{t('playlistTemplateDetail.errorLoadingTitle')}</h2>
           <p className="error-message">{error}</p>
           <Button variant="primary" onClick={() => navigate(-1)}>
-            Go Back
+            {t('playlistTemplateDetail.goBack')}
           </Button>
         </div>
       </Layout>
@@ -91,10 +93,10 @@ const PlaylistTemplateDetailPage: React.FC = () => {
       <Layout>
         <div className="template-detail-error">
           <DocumentTextIcon className="error-icon" />
-          <h2 className="error-title">Template Not Found</h2>
-          <p className="error-message">The requested template could not be found.</p>
+          <h2 className="error-title">{t('playlistTemplateDetail.templateNotFoundTitle')}</h2>
+          <p className="error-message">{t('playlistTemplateDetail.templateNotFoundMessage')}</p>
           <Button variant="primary" onClick={() => navigate(-1)}>
-            Go Back
+            {t('playlistTemplateDetail.goBack')}
           </Button>
         </div>
       </Layout>
@@ -107,7 +109,7 @@ const PlaylistTemplateDetailPage: React.FC = () => {
     <Layout 
       navigation={
         <Navigation 
-          title="Template Details" 
+          title={t('playlistTemplateDetail.title')} 
           showBackButton={true} 
           onBackClick={() => navigate(-1)}
         />
@@ -133,7 +135,7 @@ const PlaylistTemplateDetailPage: React.FC = () => {
                 onClick={() => navigate(`/playlist-templates/${templateId}/edit`)}
                 className="action-button"
               >
-                Edit Template
+                {t('playlistTemplateDetail.editTemplate')}
               </Button>
               <Button
                 variant="outlined"
@@ -142,7 +144,7 @@ const PlaylistTemplateDetailPage: React.FC = () => {
                 disabled={deleting}
                 className="action-button"
               >
-                {deleting ? 'Deleting...' : 'Delete Template'}
+                {deleting ? t('playlistTemplateDetail.deleting') : t('playlistTemplateDetail.deleteTemplate')}
               </Button>
             </div>
           </div>
@@ -150,22 +152,22 @@ const PlaylistTemplateDetailPage: React.FC = () => {
         
         {/* Template explanation */}
         <div className="template-description-box">
-          <p>Templates define the structure for your playlists. Add sections here, then use this template to create playlists with actual songs.</p>
+          <p>{t('playlistTemplateDetail.templateExplanation')}</p>
         </div>
 
         {/* Stats - Simplified to only show relevant information */}
         <div className="template-stats">
           <div className="stat-card">
             <span className="stat-number">{template.sections.length}</span>
-            <span className="stat-label">Sections</span>
+            <span className="stat-label">{t('playlistTemplateDetail.sectionsLabel')}</span>
           </div>
         </div>
 
         {/* Sections */}
         <div className="template-content">
           <div className="sections-header">
-            <h2 className="sections-title">Template Sections</h2>
-            <span className="sections-count">{template.sections.length} sections</span>
+            <h2 className="sections-title">{t('playlistTemplateDetail.templateSections')}</h2>
+            <span className="sections-count">{t('playlistTemplateDetail.sectionsCount', { count: template.sections.length })}</span>
           </div>
           
           {template.sections.length > 0 ? (
@@ -176,7 +178,7 @@ const PlaylistTemplateDetailPage: React.FC = () => {
                 <div key={section.id} className="section-card">
                   <div className="section-header">
                     <h3 className="section-title">{section.title}</h3>
-                    <span className="section-order">#{index + 1}</span>
+                    <span className="section-order">{t('playlistTemplateDetail.sectionNumber', { number: index + 1 })}</span>
                   </div>
                   
                   <div className="section-content">
@@ -190,14 +192,14 @@ const PlaylistTemplateDetailPage: React.FC = () => {
           ) : (
             <div className="empty-sections">
               <DocumentTextIcon className="empty-icon" />
-              <h3 className="empty-title">No Sections</h3>
-              <p className="empty-message">This template doesn't have any sections yet.</p>
+              <h3 className="empty-title">{t('playlistTemplateDetail.noSectionsTitle')}</h3>
+              <p className="empty-message">{t('playlistTemplateDetail.noSectionsMessage')}</p>
               <Button
                 variant="primary"
                 leftIcon={<PencilIcon />}
                 onClick={() => navigate(`/playlist-templates/${templateId}/edit`)}
               >
-                Add Sections
+                {t('playlistTemplateDetail.addSections')}
               </Button>
             </div>
           )}

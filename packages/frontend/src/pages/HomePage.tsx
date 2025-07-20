@@ -10,11 +10,14 @@ import {
   ClockIcon,
   DevicePhoneMobileIcon
 } from '@heroicons/react/24/outline';
+import { useTranslation } from '../hooks/useTranslation';
 import './HomePage.scss';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '';
 
 const HomePage: React.FC = () => {
+  const { t } = useTranslation();
+  
   return (
     <div className="homepage">
       {/* Hero Section */}
@@ -22,11 +25,10 @@ const HomePage: React.FC = () => {
         <div className="hero-content">
           <div className="hero-text">
             <h1 className="hero-title">
-              Welcome to <span className="hero-accent">ChoirApp</span>
+              {t('home.title').split('ChoirApp')[0]}<span className="hero-accent">ChoirApp</span>
             </h1>
             <p className="hero-subtitle">
-              Your comprehensive digital platform for choir management, 
-              song organization, and seamless musical collaboration.
+              {t('home.subtitle')}
             </p>
             <div className="hero-actions">
               <Button
@@ -36,14 +38,14 @@ const HomePage: React.FC = () => {
                 className="hero-cta-primary"
               >
                 <MusicalNoteIcon className="button-icon" />
-                Get Started with Google
+                {t('home.getStarted')}
               </Button>
               <Button
                 variant="outlined"
                 size="lg"
                 className="hero-cta-secondary"
               >
-                Learn More
+                {t('home.learnMore')}
               </Button>
             </div>
           </div>

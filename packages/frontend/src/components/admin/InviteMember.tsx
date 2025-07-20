@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useTranslation } from '../../hooks/useTranslation';
 import './InviteMember.scss';
 
 interface InviteMemberProps {
@@ -6,6 +7,7 @@ interface InviteMemberProps {
 }
 
 const InviteMember: React.FC<InviteMemberProps> = ({ onInviteMember }) => {
+  const { t } = useTranslation();
   const [email, setEmail] = useState('');
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -19,7 +21,7 @@ const InviteMember: React.FC<InviteMemberProps> = ({ onInviteMember }) => {
   return (
     <div className="invite-member-card card">
       <header className="card-header">
-        <p className="card-header-title">Invite New Member</p>
+        <p className="card-header-title">{t('inviteNewMember')}</p>
       </header>
       <div className="card-content">
         <form onSubmit={handleSubmit} className="invite-form">
@@ -28,20 +30,20 @@ const InviteMember: React.FC<InviteMemberProps> = ({ onInviteMember }) => {
               <input
                 className="input"
                 type="email"
-                placeholder="Enter email address"
+                placeholder={t('enterEmailAddress')}
                 value={email}
                 onChange={e => setEmail(e.target.value)}
                 required
-                aria-label="Email address"
+                aria-label={t('emailAddress')}
               />
             </div>
             <div className="control send-button-container">
               <button 
                 className="button is-primary send-button" 
                 type="submit"
-                aria-label="Send invitation"
+                aria-label={t('sendInvitation')}
               >
-                Send
+                {t('send')}
               </button>
             </div>
           </div>

@@ -5,10 +5,12 @@ import { getPlaylistById, deletePlaylist } from '../services/playlistService';
 import { getSongsForChoir } from '../services/songService';
 import { Playlist } from '../types/playlist';
 import { SongDto } from '../types/song';
+import { useTranslation } from '../hooks/useTranslation';
 
 const PlaylistDetailPage: React.FC = () => {
   const { playlistId } = useParams<{ playlistId: string }>();
   const { token } = useUser();
+  const { t } = useTranslation();
   const [playlist, setPlaylist] = useState<Playlist | null>(null);
   const [songs, setSongs] = useState<SongDto[]>([]);
   const navigate = useNavigate();
@@ -26,7 +28,7 @@ const PlaylistDetailPage: React.FC = () => {
             setSongs(fetchedSongs);
           }
         } catch (err: any) {
-          setError(err.message || 'Failed to fetch playlist');
+          setError(err.message || t('playlistDetail.failedToFetch'));
         } finally {
           setLoading(false);
         }
@@ -36,19 +38,19 @@ const PlaylistDetailPage: React.FC = () => {
   }, [playlistId, token]);
 
   if (loading) {
-    return <div>Loading...</div>;
+    return <div>{t('playlistDetail.loading')}</div>;
   }
 
   if (error) {
-    return <div>Error: {error}</div>;
+    return <div>{t('playlistDetail.error', { message: error })}</div>;
   }
 
   if (!playlist) {
-    return <div>Playlist not found.</div>;
+    return <div>{t('playlistDetail.notFound')}</div>;
   }
 
   const handleDelete = async () => {
-    if (window.confirm('Are you sure you want to delete this playlist?')) {
+    if (window.confirm(t('playlistDetail.deleteConfirm'))) {
       if (playlistId && token) {
         try {
           await deletePlaylist(playlistId, token);
@@ -66,10 +68,10 @@ const PlaylistDetailPage: React.FC = () => {
         <h1 className="title">{playlist.title}</h1>
         <div>
           <Link to={`/playlists/${playlistId}/edit`} className="button is-primary mr-2">
-            Edit Playlist
+            {t('playlistDetail.editPlaylist')}
           </Link>
           <button onClick={handleDelete} className="button is-danger">
-            Delete Playlist
+            {t('playlistDetail.deletePlaylist')}
           </button>
         </div>
       </div>
@@ -83,7 +85,7 @@ const PlaylistDetailPage: React.FC = () => {
             return (
               <div key={song.id} className="box">
                 <Link to={`/songs/${song.songId}`}>
-                  {songData?.title || 'Unknown Song'}
+                  {songData?.title || t('playlistDetail.unknownSong')}
                 </Link>
               </div>
             );

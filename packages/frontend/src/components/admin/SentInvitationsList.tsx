@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useTranslation } from '../../hooks/useTranslation';
 import { Invitation } from '../../types/invitation';
 
 interface SentInvitationsListProps {
@@ -6,10 +7,24 @@ interface SentInvitationsListProps {
 }
 
 const SentInvitationsList: React.FC<SentInvitationsListProps> = ({ invitations }) => {
+  const { t } = useTranslation();
   const [expandedEmail, setExpandedEmail] = useState<string | null>(null);
 
+  const getTranslatedStatus = (status: string) => {
+    switch (status.toLowerCase()) {
+      case 'pending':
+        return t('pending');
+      case 'accepted':
+        return t('accepted');
+      case 'rejected':
+        return t('rejected');
+      default:
+        return status;
+    }
+  };
+
   if (invitations.length === 0) {
-    return <p>No invitations sent yet.</p>;
+    return <p>{t('noInvitationsSentYet')}</p>;
   }
 
   const groupedInvitations = invitations.reduce((acc, invitation) => {
@@ -27,7 +42,7 @@ const SentInvitationsList: React.FC<SentInvitationsListProps> = ({ invitations }
 
   return (
     <div>
-      <h3 className="title is-4">Sent Invitations</h3>
+      <h3 className="title is-4">{t('sentInvitations')}</h3>
       <div className="list">
         {Object.entries(groupedInvitations).map(([email, userInvitations]) => (
           <div key={email} className="list-item">
@@ -35,7 +50,7 @@ const SentInvitationsList: React.FC<SentInvitationsListProps> = ({ invitations }
               <div>
                 <span className="has-text-link">{email}</span>
                 <span className={`tag is-${userInvitations[0].status === 'Pending' ? 'warning' : userInvitations[0].status === 'Accepted' ? 'success' : 'danger'}`}>
-                  {userInvitations[0].status}
+                  {getTranslatedStatus(userInvitations[0].status)}
                 </span>
               </div>
               {userInvitations.length > 1 && (
@@ -50,7 +65,7 @@ const SentInvitationsList: React.FC<SentInvitationsListProps> = ({ invitations }
                   <div key={invitation.invitationToken} className="list-item">
                     <span>{new Date(invitation.sentAt).toLocaleString()}</span>
                     <span className={`tag is-${invitation.status === 'Pending' ? 'warning' : invitation.status === 'Accepted' ? 'success' : 'danger'}`}>
-                      {invitation.status}
+                      {getTranslatedStatus(invitation.status)}
                     </span>
                   </div>
                 ))}

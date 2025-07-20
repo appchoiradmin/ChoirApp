@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef, useContext } from 'react';
 // Import SharedDateContext to access the shared date
 import { SharedDateContext } from './ChoirDashboardPage';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from '../hooks/useTranslation';
 import { usePlaylistContext } from '../context/PlaylistContext';
 import MovableSongItem from '../components/MovableSongItem';
 import { PlaylistSong } from '../types/playlist';
@@ -30,62 +31,67 @@ const PlaylistHeader: React.FC<{
   totalSections: number;
   duration: string;
   isPrivate?: boolean;
-}> = ({ title, date, totalSongs, totalSections, duration, isPrivate = true }) => (
-  <div className="playlist-header">
-    <div className="header-content">
-      <div className="header-left">
-        <h1 className="playlist-title">
-          <MusicalNoteIcon className="title-icon" />
-          {title}
-        </h1>
-        <div className="playlist-meta">
-          <span className="meta-item">
-            <CalendarIcon className="meta-icon" />
-            {date.toLocaleDateString(undefined, {
-              weekday: 'long',
-              year: 'numeric',
-              month: 'short',
-              day: 'numeric',
-            })}
-          </span>
-          <span className="meta-item">
-            <MusicalNoteIcon className="meta-icon" />
-            {totalSongs} song{totalSongs !== 1 ? 's' : ''}
-          </span>
-          <span className="meta-item">
-            <ClockIcon className="meta-icon" />
-            {duration}
-          </span>
-          {isPrivate && (
-            <span className="meta-item private-badge">
-              <UserGroupIcon className="meta-icon" />
-              Private
+}> = ({ title, date, totalSongs, totalSections, duration, isPrivate = true }) => {
+  const { t } = useTranslation();
+  
+  return (
+    <div className="playlist-header">
+      <div className="header-content">
+        <div className="header-left">
+          <h1 className="playlist-title">
+            <MusicalNoteIcon className="title-icon" />
+            {title}
+          </h1>
+          <div className="playlist-meta">
+            <span className="meta-item">
+              <CalendarIcon className="meta-icon" />
+              {date.toLocaleDateString(undefined, {
+                weekday: 'long',
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric',
+              })}
             </span>
-          )}
+            <span className="meta-item">
+              <MusicalNoteIcon className="meta-icon" />
+              {t('playlists.songCount', { count: totalSongs })}
+            </span>
+            <span className="meta-item">
+              <ClockIcon className="meta-icon" />
+              {duration}
+            </span>
+            {isPrivate && (
+              <span className="meta-item private-badge">
+                <UserGroupIcon className="meta-icon" />
+                {t('playlists.private')}
+              </span>
+            )}
+          </div>
+        </div>
+        <div className="header-actions">
+          {/* ...existing code for header actions... */}
         </div>
       </div>
-      <div className="header-actions">
-        {/* ...existing code for header actions... */}
-      </div>
-    </div>
-    {/* Stats Cards - Mobile Optimized */}
-    <div className="header-stats">
-      <div className="stat-card">
-        <span className="stat-number">{totalSections}</span>
-        <span className="stat-label">Sections</span>
-      </div>
-      <div className="stat-card">
-        <span className="stat-number">{totalSongs}</span>
-        <span className="stat-label">Total Songs</span>
-      </div>
+      {/* Stats Cards - Mobile Optimized */}
+      <div className="header-stats">
+        <div className="stat-card">
+          <span className="stat-number">{totalSections}</span>
+          <span className="stat-label">{t('playlists.sections')}</span>
+        </div>
+        <div className="stat-card">
+          <span className="stat-number">{totalSongs}</span>
+          <span className="stat-label">{t('playlists.totalSongs')}</span>
+        </div>
 
+      </div>
     </div>
-  </div>
-);
+  );
+};
 
 const PlaylistsPage: React.FC = () => {
   // Use the shared date context
   const { selectedDate } = useContext(SharedDateContext);
+  const { t } = useTranslation();
   const { 
     sections, 
     isInitializing, 
@@ -137,7 +143,7 @@ const PlaylistsPage: React.FC = () => {
           songDetailsMap[songId] = songDetail;
         } catch (error) {
           console.error(`Failed to fetch song ${songId}:`, error);
-          toast.error(`Failed to fetch details for a song.`);
+          toast.error(t('playlists.failedToFetchSong'));
         }
       }
 
@@ -194,12 +200,12 @@ const PlaylistsPage: React.FC = () => {
         toSectionId
       }, user.token);
       
-      toast.success('Song moved successfully');
+      toast.success(t('playlists.songMovedSuccessfully'));
     } catch (error) {
 
       // Revert local state on error
       setSections(sections);
-      toast.error('Failed to move song');
+      toast.error(t('playlists.failedToMoveSong'));
     }
   };
 
@@ -222,10 +228,10 @@ const PlaylistsPage: React.FC = () => {
       });
 
       setSections(updatedSections);
-      toast.success('Song removed from playlist');
+      toast.success(t('playlists.songRemovedFromPlaylist'));
     } catch (error) {
 
-      toast.error('Failed to remove song');
+      toast.error(t('playlists.failedToRemoveSong'));
     }
   };
 
@@ -249,7 +255,7 @@ const PlaylistsPage: React.FC = () => {
         <div className="playlists-container">
           <div className="playlist-loading">
             <LoadingSpinner size="lg" />
-            <p className="loading-text">Loading playlist...</p>
+            <p className="loading-text">{t('playlists.loadingPlaylist')}</p>
           </div>
         </div>
       </Layout>
@@ -263,14 +269,14 @@ const PlaylistsPage: React.FC = () => {
         <div className="playlists-container">
           <div className="playlist-error">
             <InformationCircleIcon className="error-icon" />
-            <h2 className="error-title">Unable to Load Playlist</h2>
+            <h2 className="error-title">{t('playlists.unableToLoadPlaylist')}</h2>
             <p className="error-message">{error}</p>
             <div className="error-actions">
               <Button 
                 variant="primary" 
                 onClick={() => window.location.reload()}
               >
-                Try Again
+                {t('playlists.tryAgain')}
               </Button>
             </div>
           </div>
@@ -286,7 +292,7 @@ const PlaylistsPage: React.FC = () => {
         <div className="playlists-container">
           <div className="playlist-loading">
             <LoadingSpinner size="lg" />
-            <p className="loading-text">Preparing playlist...</p>
+            <p className="loading-text">{t('playlists.preparingPlaylist')}</p>
           </div>
         </div>
       </Layout>
@@ -300,14 +306,14 @@ const PlaylistsPage: React.FC = () => {
         <div className="playlists-container">
           <div className="playlist-error">
             <InformationCircleIcon className="error-icon" />
-            <h2 className="error-title">Unable to Load Playlist</h2>
+            <h2 className="error-title">{t('playlists.unableToLoadPlaylist')}</h2>
             <p className="error-message">{error}</p>
             <div className="error-actions">
               <Button 
                 variant="primary" 
                 onClick={() => window.location.reload()}
               >
-                Try Again
+                {t('playlists.tryAgain')}
               </Button>
             </div>
           </div>
@@ -325,7 +331,7 @@ const PlaylistsPage: React.FC = () => {
           <div className="virtual-playlist-banner">
             <InformationCircleIcon className="virtual-playlist-icon" />
             <span>
-              This playlist is a preview based on your default template. It will be saved only after you add the first song.
+              {t('playlists.virtualPlaylistBanner')}
             </span>
           </div>
         )}
@@ -348,10 +354,9 @@ const PlaylistsPage: React.FC = () => {
           {sections.length === 0 ? (
             <div className="empty-state">
               <MusicalNoteIcon className="empty-icon" />
-              <h2 className="empty-title">No Sections Yet</h2>
+              <h2 className="empty-title">{t('playlists.noSectionsYet')}</h2>
               <p className="empty-message">
-                Start building your playlist by adding songs to sections.
-                Use templates or create custom sections to organize your music.
+                {t('playlists.startBuildingPlaylist')}
               </p>
               <div className="empty-actions">
                 <Button 
@@ -360,13 +365,13 @@ const PlaylistsPage: React.FC = () => {
                   onClick={handleAddSongs}
                   className="empty-cta"
                 >
-                  Add Songs
+                  {t('playlists.addSongs')}
                 </Button>
                 <Button 
                   variant="outlined" 
                   onClick={() => navigate('/playlist-templates')}
                 >
-                  Browse Templates
+                  {t('playlists.browseTemplates')}
                 </Button>
               </div>
             </div>
@@ -377,11 +382,11 @@ const PlaylistsPage: React.FC = () => {
                   <Card>
                     <div className="section-header">
                       <h3 className="section-title">
-                        {section.title || 'Untitled Section'}
+                        {section.title || t('playlists.untitledSection')}
                       </h3>
                       <div className="section-meta">
                         <span className="song-count">
-                          {section.songs?.length || 0} song{(section.songs?.length || 0) !== 1 ? 's' : ''}
+                          {t('playlists.songCount', { count: section.songs?.length || 0 })}
                         </span>
                       </div>
                     </div>
@@ -402,9 +407,8 @@ const PlaylistsPage: React.FC = () => {
                       </div>
                     ) : (
                       <div className="section-empty">
-                        <p className="empty-text">No songs in this section yet.</p>
-                        <p className="section-add-instructions">
-                          To add songs, go to the <b>Songs</b> tab and add them to your playlist.
+                        <p className="empty-text">{t('playlists.noSongsInSection')}</p>
+                        <p className="section-add-instructions" dangerouslySetInnerHTML={{ __html: t('playlists.sectionAddInstructions') }}>
                         </p>
                       </div>
                     )}

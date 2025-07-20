@@ -1,5 +1,6 @@
 import React from 'react';
 import { PlaylistTemplate, PlaylistSection } from '../types/playlist';
+import { useTranslation } from '../hooks/useTranslation';
 
 interface PlaylistTemplateGuideProps {
   template: PlaylistTemplate;
@@ -7,6 +8,7 @@ interface PlaylistTemplateGuideProps {
 }
 
 const PlaylistTemplateGuide: React.FC<PlaylistTemplateGuideProps> = ({ template, onStart }) => {
+  const { t } = useTranslation();
   return (
     <div className="box">
       <h2 className="title is-4">Playlist Template: {template.title}</h2>
@@ -19,14 +21,14 @@ const PlaylistTemplateGuide: React.FC<PlaylistTemplateGuideProps> = ({ template,
             <div key={section.id} className="mb-3">
               <h3 className="title is-6">{section.title}</h3>
               <ul>
-                <li className="has-text-grey-light">(No songs yet)</li>
+                <li className="has-text-grey-light">({t('playlistTemplateGuide.noSongsYet')})</li>
               </ul>
             </div>
           ))}
       </div>
       {onStart && (
         <button className="button is-primary mt-4" onClick={onStart}>
-          Start Playlist
+          {t('playlistTemplateGuide.startPlaylist')}
         </button>
       )}
     </div>

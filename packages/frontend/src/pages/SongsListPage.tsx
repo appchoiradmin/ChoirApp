@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { searchSongs } from '../services/songService';
 import { addSongToPlaylist, getPlaylistTemplatesByChoirId } from '../services/playlistService';
 import { useUser } from '../hooks/useUser';
+import { useTranslation } from '../hooks/useTranslation';
 import { useDisplayedPlaylistSections } from '../hooks/useDisplayedPlaylistSections';
 import { usePlaylistContext } from '../context/PlaylistContext';
 import { toast } from 'react-hot-toast';
@@ -41,6 +42,7 @@ const SongsListPage: FC<SongsListPageProps> = ({ playlistId, refreshPlaylist }) 
   const navigate = useNavigate();
   const { sections, selectedTemplate, setSelectedTemplate, choirId, isInitializing, createPlaylistIfNeeded, refreshPlaylist: refreshPlaylistContext, playlistId: contextPlaylistId } = usePlaylistContext();
   const displayedSections = useDisplayedPlaylistSections(sections, selectedTemplate);
+  const { t } = useTranslation();
   
   const { token, user } = useUser();
   const isGeneralUser = !user?.choirId;
@@ -277,7 +279,7 @@ const SongsListPage: FC<SongsListPageProps> = ({ playlistId, refreshPlaylist }) 
         setHasMore(moreSongs.length === songsPerPage);
       }
     } catch (error) {
-      setError('Failed to load more songs. Please try again later.');
+      setError(t('songs.failedToLoadSongs'));
     } finally {
       setLoadingMore(false);
     }
@@ -410,7 +412,7 @@ const SongsListPage: FC<SongsListPageProps> = ({ playlistId, refreshPlaylist }) 
       
     } catch (error) {
       console.error('Debug - Error adding song to playlist:', error);
-      toast.error('Failed to add song to playlist');
+      toast.error(t('songs.failedToAddSong'));
     } finally {
       setIsAddingSongs(false);
     }
@@ -446,7 +448,7 @@ const SongsListPage: FC<SongsListPageProps> = ({ playlistId, refreshPlaylist }) 
       setHasMore(true);
       
       if (!token) {
-        setError('Authentication token not found.');
+        setError(t('songs.authTokenNotFound'));
         return;
       }
       
@@ -467,7 +469,7 @@ const SongsListPage: FC<SongsListPageProps> = ({ playlistId, refreshPlaylist }) 
       setHasMore((songsData?.length || 0) === songsPerPage);
     } catch (error) {
       console.error('Search error:', error);
-      setError('Failed to search songs. Please try again later.');
+      setError(t('songs.failedToSearchSongs'));
     } finally {
       setLoading(false);
     }
@@ -486,15 +488,15 @@ const SongsListPage: FC<SongsListPageProps> = ({ playlistId, refreshPlaylist }) 
   
   return (
     <Layout 
-      navigation={<Navigation title="Songs Library" showBackButton={true} />}
+      navigation={<Navigation title={t('songs.songsLibrary')} showBackButton={true} />}
     >
       <div className="songs-page">
         <div className="songs-page__header">
           <h1 className="songs-page__title">
-            Songs Library
+            {t('songs.songsLibrary')}
             {filters.search && (
               <span className="songs-page__search-indicator">
-                - Searching for "{filters.search}" ({songs.length} results)
+                - {t('songs.searchingFor')} "{filters.search}" ({songs.length} {t('songs.results')})
               </span>
             )}
           </h1>
@@ -504,7 +506,7 @@ const SongsListPage: FC<SongsListPageProps> = ({ playlistId, refreshPlaylist }) 
               <MagnifyingGlassIcon />
               <input 
                 type="text" 
-                placeholder="Search songs..." 
+                placeholder={t('songs.searchSongs')} 
                 value={filters.search}
                 onChange={handleSearchChange}
               />
@@ -516,7 +518,7 @@ const SongsListPage: FC<SongsListPageProps> = ({ playlistId, refreshPlaylist }) 
                 onClick={() => navigate('/songs/create')}
                 leftIcon={<PlusIcon />}
               >
-                Create Song
+                {t('songs.createSong')}
               </Button>
             )}
           </div>
@@ -526,13 +528,13 @@ const SongsListPage: FC<SongsListPageProps> = ({ playlistId, refreshPlaylist }) 
         {playlistId && user?.choirId && (
           <div className="template-selector">
             <div className="template-selector__label">
-              <span>Template:</span>
+              <span>{t('songs.template')}:</span>
               <div className="template-selector__dropdown">
                 <button 
                   onClick={() => setTemplateDropdownOpen(!templateDropdownOpen)}
                   className="template-selector__current"
                 >
-                  {selectedTemplate ? selectedTemplate.title : 'None'}
+                  {selectedTemplate ? selectedTemplate.title : t('songs.none')}
                   {templateDropdownOpen ? <ChevronUpIcon /> : <ChevronDownIcon />}
                 </button>
                 
@@ -545,7 +547,7 @@ const SongsListPage: FC<SongsListPageProps> = ({ playlistId, refreshPlaylist }) 
                         setTemplateDropdownOpen(false);
                       }}
                     >
-                      None
+                      {t('songs.none')}
                     </div>
                     {availableTemplates.length > 0 ? (
                       availableTemplates.map(template => (
@@ -559,7 +561,7 @@ const SongsListPage: FC<SongsListPageProps> = ({ playlistId, refreshPlaylist }) 
                       ))
                     ) : (
                       <div className="template-selector__item template-selector__item--disabled">
-                        No templates available
+                        {t('songs.noTemplatesAvailable')}
                       </div>
                     )}
                   </div>
@@ -572,13 +574,13 @@ const SongsListPage: FC<SongsListPageProps> = ({ playlistId, refreshPlaylist }) 
         {/* Selection actions */}
         {playlistId && selectedSongs.size > 0 && (
           <div className="selection-actions">
-            <span>{selectedSongs.size} song(s) selected</span>
+            <span>{selectedSongs.size} {t('songs.songsSelected')}</span>
             <Button 
               variant="secondary"
               onClick={() => setSelectedSongs(new Set())}
               leftIcon={<XMarkIcon />}
             >
-              Clear Selection
+              {t('songs.clearSelection')}
             </Button>
           </div>
         )}
@@ -595,7 +597,7 @@ const SongsListPage: FC<SongsListPageProps> = ({ playlistId, refreshPlaylist }) 
               variant="primary"
               onClick={() => window.location.reload()}
             >
-              Retry
+              {t('songs.retry')}
             </Button>
           </div>
         ) : songs.length === 0 ? (
@@ -603,11 +605,11 @@ const SongsListPage: FC<SongsListPageProps> = ({ playlistId, refreshPlaylist }) 
             <div className="songs-page__empty-icon">
               <MusicalNoteIcon />
             </div>
-            <h3 className="songs-page__empty-title">No songs found</h3>
+            <h3 className="songs-page__empty-title">{t('songs.noSongsFound')}</h3>
             <p className="songs-page__empty-message">
               {filters.search ? 
-                `No songs match your search "${filters.search}". Try different keywords or clear your search.` : 
-                'No songs are available. Try adjusting your filters or adding new songs.'}
+                `${t('songs.noSongsMatch')} "${filters.search}". ${t('songs.tryDifferentKeywords')}` : 
+                t('songs.noSongsAvailable')}
             </p>
             {!isGeneralUser && (
               <Button
@@ -615,7 +617,7 @@ const SongsListPage: FC<SongsListPageProps> = ({ playlistId, refreshPlaylist }) 
                 onClick={() => navigate('/songs/create')}
                 leftIcon={<PlusIcon />}
               >
-                Create a Song
+                {t('songs.createASong')}
               </Button>
             )}
           </div>
@@ -651,15 +653,15 @@ const SongsListPage: FC<SongsListPageProps> = ({ playlistId, refreshPlaylist }) 
                           className={`songs-page__add-button ${isSongInPlaylist(song.songId) ? 'songs-page__add-button--selected' : ''}`}
                           onClick={() => openSectionModal(song.songId)}
                           disabled={isAddingSongs}
-                          aria-label={isSongInPlaylist(song.songId) ? 'Song already in playlist' : 'Add song to playlist'}
+                          aria-label={isSongInPlaylist(song.songId) ? t('songs.songAlreadyInPlaylist') : t('songs.addSongToPlaylist')}
                         >
                           {isSongInPlaylist(song.songId) ? (
                             <>
-                              <CheckCircleIcon /> Added
+                              <CheckCircleIcon /> {t('songs.added')}
                             </>
                           ) : (
                             <>
-                              <PlusIcon /> Add
+                              <PlusIcon /> {t('songs.add')}
                             </>
                           )}
                         </button>
@@ -694,7 +696,7 @@ const SongsListPage: FC<SongsListPageProps> = ({ playlistId, refreshPlaylist }) 
         sections={displayedSections}
         isLoading={isInitializing}
         onSelectSection={handleSectionSelect}
-        title="Add to Section"
+        title={t('songs.addToSection')}
       />
     </Layout>
   );

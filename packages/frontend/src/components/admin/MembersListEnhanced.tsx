@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { ChoirMember, ChoirRole } from '../../types/choir';
 import { UserRole } from '../../constants/roles';
+import { useTranslation } from '../../hooks/useTranslation';
 import { Card, Button } from '../ui';
 import {
   UserIcon,
@@ -36,6 +37,7 @@ const MemberCard: React.FC<MemberCardProps> = ({
   onUpdateRole,
   onRemove
 }) => {
+  const { t } = useTranslation();
   const [dropdownOpen, setDropdownOpen] = useState(false);
   
     const isAdmin = member.role === UserRole.ChoirAdmin;
@@ -47,7 +49,7 @@ const MemberCard: React.FC<MemberCardProps> = ({
   };
 
   const handleRemove = () => {
-    if (window.confirm(`Are you sure you want to remove ${member.name} from the choir?`)) {
+    if (window.confirm(t('confirmRemoveMember', { name: member.name }))) {
       onRemove();
     }
     setDropdownOpen(false);
@@ -75,7 +77,7 @@ const MemberCard: React.FC<MemberCardProps> = ({
             <div className="member-meta">
               <span className={`role-badge ${isAdmin ? 'admin' : 'member'}`}>
                 {isAdmin ? <ShieldCheckIcon /> : <UserGroupIcon />}
-                {isAdmin ? 'Admin' : 'Member'}
+                {isAdmin ? t('admin') : t('member')}
               </span>
             </div>
           </div>
@@ -102,7 +104,7 @@ const MemberCard: React.FC<MemberCardProps> = ({
                     className="dropdown-item"
                   >
                     <PencilIcon />
-                    {isAdmin ? 'Demote to Member' : 'Promote to Admin'}
+                    {isAdmin ? t('demoteToMember') : t('promoteToAdmin')}
                   </button>
                   <button
                     onClick={(e) => {
@@ -112,7 +114,7 @@ const MemberCard: React.FC<MemberCardProps> = ({
                     className="dropdown-item danger"
                   >
                     <TrashIcon />
-                    Remove Member
+                    {t('removeMember')}
                   </button>
                 </div>
               )}
@@ -137,7 +139,7 @@ const MemberCard: React.FC<MemberCardProps> = ({
             <div className="detail-item">
               <EnvelopeIcon className="detail-icon" />
               <div className="detail-content">
-                <span className="detail-label">Email</span>
+                <span className="detail-label">{t('email')}</span>
                 <span className="detail-value">{member.email}</span>
               </div>
             </div>
@@ -145,8 +147,8 @@ const MemberCard: React.FC<MemberCardProps> = ({
             <div className="detail-item">
               <ShieldCheckIcon className="detail-icon" />
               <div className="detail-content">
-                <span className="detail-label">Role</span>
-                <span className="detail-value">{isAdmin ? 'Administrator' : 'Member'}</span>
+                <span className="detail-label">{t('role')}</span>
+                <span className="detail-value">{isAdmin ? t('administrator') : t('member')}</span>
               </div>
             </div>
             
@@ -158,7 +160,7 @@ const MemberCard: React.FC<MemberCardProps> = ({
                 onClick={() => handleRoleToggle()}
                 className="role-button"
               >
-                {isAdmin ? 'Demote to Member' : 'Promote to Admin'}
+                {isAdmin ? t('demoteToMember') : t('promoteToAdmin')}
               </Button>
               <Button
                 variant="outlined"
@@ -166,7 +168,7 @@ const MemberCard: React.FC<MemberCardProps> = ({
                 onClick={handleRemove}
                 className="remove-button danger"
               >
-                Remove Member
+                {t('removeMember')}
               </Button>
             </div>
           </div>
@@ -181,6 +183,7 @@ const MembersList: React.FC<MembersListProps> = ({
   onRemoveMember,
   onUpdateMemberRole,
 }) => {
+  const { t } = useTranslation();
   const [expandedMember, setExpandedMember] = useState<string | null>(null);
 
   const toggleExpand = (memberId: string) => {
@@ -195,9 +198,9 @@ const MembersList: React.FC<MembersListProps> = ({
       <Card className="members-empty">
         <div className="empty-state">
           <UserGroupIcon className="empty-icon" />
-          <h3 className="empty-title">No Members Yet</h3>
+          <h3 className="empty-title">{t('noMembersYet')}</h3>
           <p className="empty-message">
-            Start building your choir by inviting members to join.
+            {t('startBuildingChoir')}
           </p>
         </div>
       </Card>
@@ -210,17 +213,17 @@ const MembersList: React.FC<MembersListProps> = ({
       <div className="members-stats">
         <div className="stat-item">
           <UsersIcon className="stat-icon" />
-          <span className="stat-label">Total:</span>
+          <span className="stat-label">{t('total')}</span>
           <span className="stat-value">{members.length}</span>
         </div>
         <div className="stat-item">
           <ShieldCheckIcon className="stat-icon" />
-          <span className="stat-label">Admins:</span>
+          <span className="stat-label">{t('admins')}</span>
           <span className="stat-value">{adminCount}</span>
         </div>
         <div className="stat-item">
           <UserGroupIcon className="stat-icon" />
-          <span className="stat-label">Members:</span>
+          <span className="stat-label">{t('members')}</span>
           <span className="stat-value">{memberCount}</span>
         </div>
       </div>

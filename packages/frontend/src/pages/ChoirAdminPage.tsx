@@ -8,6 +8,7 @@ import {
 } from '../services/choirService';
 import { getInvitationsByChoir } from '../services/invitationService';
 import { useUser } from '../hooks/useUser';
+import { useTranslation } from '../hooks/useTranslation';
 import { ChoirDetails, ChoirRole } from '../types/choir';
 import { Invitation } from '../types/invitation';
 import MembersList from '../components/admin/MembersList';
@@ -18,6 +19,7 @@ import { UserRole } from '../constants/roles';
 const ChoirAdminPage: React.FC = () => {
   const { choirId } = useParams<{ choirId: string }>();
   const { token, setChoirId, user } = useUser();
+  const { t } = useTranslation();
   const [choir, setChoir] = useState<ChoirDetails | null>(null);
   const [invitations, setInvitations] = useState<Invitation[]>([]);
   const pendingInvitations = invitations.filter(inv => inv.status === 'Pending');
@@ -47,7 +49,7 @@ const ChoirAdminPage: React.FC = () => {
         setInvitations(invitationsList);
       } catch (err) {
         console.error('Error fetching choir details:', err);
-        setError('Failed to fetch choir details.');
+        setError(t('choirAdmin.failedToFetchChoirDetails'));
       } finally {
         setLoading(false);
       }
@@ -65,24 +67,24 @@ const ChoirAdminPage: React.FC = () => {
     if (choirId && token) {
       try {
         await inviteUser(choirId, email, token);
-        alert('Invitation sent successfully!');
+        alert(t('choirAdmin.invitationSentSuccessfully'));
         fetchChoirDetails(); // Refresh the list
       } catch (error) {
         console.error('Failed to invite member:', error);
-        alert('Failed to invite member. Please try again.');
+        alert(t('choirAdmin.failedToInviteMember'));
       }
     }
   };
 
   const handleRemoveMember = async (userId: string) => {
     if (choirId && token) {
-      if (window.confirm('Are you sure you want to remove this member?')) {
+      if (window.confirm(t('choirAdmin.removeMemberConfirmation'))) {
         try {
           await removeMember(choirId, userId, token);
           fetchChoirDetails(); // Refresh the list
         } catch (error) {
           console.error('Failed to remove member:', error);
-          alert('Failed to remove member. Please try again.');
+          alert(t('choirAdmin.failedToRemoveMember'));
         }
       }
     }
@@ -95,7 +97,7 @@ const ChoirAdminPage: React.FC = () => {
         fetchChoirDetails(); // Refresh the list
       } catch (error) {
         console.error('Failed to update member role:', error);
-        alert('Failed to update member role. Please try again.');
+        alert(t('choirAdmin.failedToUpdateMemberRole'));
       }
     }
   };
@@ -104,7 +106,7 @@ const ChoirAdminPage: React.FC = () => {
     return (
       <section className="section">
         <div className="container">
-          <p>Loading choir admin...</p>
+          <p>{t('choirAdmin.loadingChoirAdmin')}</p>
         </div>
       </section>
     );
@@ -124,7 +126,7 @@ const ChoirAdminPage: React.FC = () => {
     return (
       <section className="section">
         <div className="container">
-          <p>Choir not found.</p>
+          <p>{t('choirAdmin.choirNotFound')}</p>
         </div>
       </section>
     );
@@ -139,11 +141,11 @@ const ChoirAdminPage: React.FC = () => {
               <h1 className="title is-3 mb-1">{choir.name}</h1>
               {isAdmin ? (
                 <>
-                  <p className="subtitle is-5 has-text-weight-semibold mb-4">Admin Panel</p>
-                  <p className="mb-5">Manage your choir members and playlist templates.</p>
+                  <p className="subtitle is-5 has-text-weight-semibold mb-4">{t('choirAdmin.adminPanel')}</p>
+                  <p className="mb-5">{t('choirAdmin.manageDescription')}</p>
                 </>
               ) : (
-                <p className="subtitle is-5 has-text-weight-semibold mb-4">Choir Details</p>
+                <p className="subtitle is-5 has-text-weight-semibold mb-4">{t('choirAdmin.choirDetails')}</p>
               )}
             </div>
           </div>
@@ -153,7 +155,7 @@ const ChoirAdminPage: React.FC = () => {
         <div className="columns is-multiline">
           <div className="column is-12-mobile is-7-tablet">
             <section className="box mb-4">
-              <h2 className="title is-5 mb-3">Choir Members</h2>
+              <h2 className="title is-5 mb-3">{t('choirAdmin.choirMembers')}</h2>
               <MembersList
                 members={choir.members}
                 onRemoveMember={isAdmin ? handleRemoveMember : undefined}
@@ -167,7 +169,7 @@ const ChoirAdminPage: React.FC = () => {
             </section>
             {isAdmin && (
               <section className="box mb-4">
-                <h2 className="title is-5 mb-3">Invitations</h2>
+                <h2 className="title is-5 mb-3">{t('choirAdmin.invitations')}</h2>
                 <InvitationsAccordion 
                   pendingInvitations={pendingInvitations} 
                   sentInvitations={sentInvitations} 
@@ -178,12 +180,12 @@ const ChoirAdminPage: React.FC = () => {
           {isAdmin && (
             <div className="column is-12-mobile is-5-tablet">
               <section className="box">
-                <h2 className="title is-5 mb-3">Playlist Templates</h2>
+                <h2 className="title is-5 mb-3">{t('choirAdmin.playlistTemplates')}</h2>
                 <Link to={`/choir/${choirId}/playlist-templates`} className="button is-info is-fullwidth">
                   <span className="icon"><i className="fas fa-list-alt"></i></span>
-                  <span>Manage Playlist Templates</span>
+                  <span>{t('choirAdmin.managePlaylistTemplates')}</span>
                 </Link>
-                <p className="help mt-2">Create and edit reusable playlist structures for your choir's events.</p>
+                <p className="help mt-2">{t('choirAdmin.playlistTemplatesDescription')}</p>
               </section>
             </div>
           )}

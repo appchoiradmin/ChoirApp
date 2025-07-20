@@ -2,6 +2,7 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeftIcon } from '@heroicons/react/24/outline';
 import UserProfileDropdown from './UserProfileDropdown';
+import { useTranslation } from '../../hooks/useTranslation';
 import './Navigation.scss';
 
 interface NavigationProps {
@@ -20,6 +21,7 @@ const Navigation: React.FC<NavigationProps> = ({
   showUserProfile = true
 }) => {
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   const handleBackClick = () => {
     if (onBackClick) {
@@ -37,7 +39,7 @@ const Navigation: React.FC<NavigationProps> = ({
             <button
               className="navbar-item button is-ghost has-text-white"
               onClick={handleBackClick}
-              aria-label="Go back"
+              aria-label={t('common.back')}
             >
               <ArrowLeftIcon className="icon" style={{ width: '1.25rem', height: '1.25rem' }} />
             </button>
@@ -46,6 +48,13 @@ const Navigation: React.FC<NavigationProps> = ({
           <span className="navbar-item has-text-white is-size-5 has-text-weight-bold">
             {title}
           </span>
+          
+          {/* Custom actions */}
+          {actions && (
+            <div className="navbar-item">
+              {actions}
+            </div>
+          )}
           
           {/* User profile on the right side of navbar-brand */}
           {showUserProfile && (

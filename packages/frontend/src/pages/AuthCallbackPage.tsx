@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { useUser } from '../hooks/useUser';
+import { useTranslation } from '../hooks/useTranslation';
 import { motion } from 'framer-motion';
 import { MusicalNoteIcon, CheckIcon, ExclamationTriangleIcon } from '@heroicons/react/24/outline';
 import { Layout } from '../components/ui';
@@ -9,8 +10,9 @@ const AuthCallbackPage: React.FC = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const { setToken, user, loading } = useUser();
+  const { t } = useTranslation();
   const [status, setStatus] = useState<'loading' | 'success' | 'error'>('loading');
-  const [message, setMessage] = useState('Authenticating...');
+  const [message, setMessage] = useState(t('auth.authenticating'));
 
   useEffect(() => {
     const token = searchParams.get('token');
@@ -27,8 +29,8 @@ const AuthCallbackPage: React.FC = () => {
       setToken(token);
     } else {
       setStatus('error');
-      setMessage('No authentication token received');
-      setTimeout(() => navigate('/auth/error?message=No+authentication+token+received'), 2000);
+      setMessage(t('auth.noTokenReceived'));
+      setTimeout(() => navigate(`/auth/error?message=${encodeURIComponent(t('auth.noTokenReceived'))}`), 2000);
     }
   }, [searchParams, navigate, setToken]);
 
@@ -36,7 +38,7 @@ const AuthCallbackPage: React.FC = () => {
     if (!loading && user) {
       setStatus('success');
       const isNewUser = searchParams.get('isNewUser') === 'true';
-      setMessage(isNewUser ? 'Welcome! Setting up your account...' : 'Welcome back! Redirecting...');
+      setMessage(isNewUser ? t('auth.welcomeNewUser') : t('auth.welcomeBackUser'));
       
       setTimeout(() => {
         if (isNewUser) {
@@ -111,9 +113,9 @@ const AuthCallbackPage: React.FC = () => {
                     animate={{ opacity: 1 }}
                     transition={{ delay: 0.3 }}
                   >
-                    {status === 'loading' && 'Authenticating...'}
-                    {status === 'success' && 'Success!'}
-                    {status === 'error' && 'Authentication Error'}
+                    {status === 'loading' && t('auth.authenticating')}
+                    {status === 'success' && t('auth.success')}
+                    {status === 'error' && t('auth.authenticationError')}
                   </motion.h1>
                   
                   <motion.p 
@@ -132,7 +134,7 @@ const AuthCallbackPage: React.FC = () => {
                       animate={{ opacity: 1 }}
                       transition={{ delay: 0.7 }}
                     >
-                      <progress className="progress is-primary" max="100">Loading...</progress>
+                      <progress className="progress is-primary" max="100">{t('auth.loading')}</progress>
                     </motion.div>
                   )}
                 </div>

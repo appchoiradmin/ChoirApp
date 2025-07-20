@@ -4,6 +4,9 @@ import { BrowserRouter } from 'react-router-dom';
 import App from './App';
 import { UserProvider } from './contexts/UserContext.tsx';
 
+// Initialize i18n
+import './i18n';
+
 import './theme.scss';
 import './index.css';
 

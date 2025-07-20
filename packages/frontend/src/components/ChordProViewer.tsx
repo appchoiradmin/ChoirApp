@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from '../hooks/useTranslation';
 import './ChordProViewer.css';
 
 interface ChordProViewerProps {
@@ -18,6 +19,7 @@ interface ParsedLine {
 }
 
 const ChordProViewer: React.FC<ChordProViewerProps> = ({ source }) => {
+  const { t } = useTranslation();
   const parseChordPro = (text: string): ParsedLine[] => {
     if (!text) return [];
     const lines = text.split('\n');
@@ -63,7 +65,7 @@ const ChordProViewer: React.FC<ChordProViewerProps> = ({ source }) => {
   const parsedSong = parseChordPro(source);
 
   if (!source) {
-    return <div className="chord-pro-viewer">No song content to display.</div>;
+    return <div className="chord-pro-viewer">{t('chordProViewer.noContent')}</div>;
   }
 
   return (

@@ -17,6 +17,7 @@ import {
   ExclamationTriangleIcon,
   BookmarkIcon as SaveIcon
 } from '@heroicons/react/24/outline';
+import { useTranslation } from '../hooks/useTranslation';
 import './SongVersionEditorPage.scss';
 
 import { SongDto } from '../types/song';
@@ -25,6 +26,7 @@ const SongVersionEditorPage: React.FC = () => {
   const { choirId, songId } = useParams<{ choirId: string; songId: string }>();
   const navigate = useNavigate();
   const { token } = useUser();
+  const { t } = useTranslation();
   
   const [song, setSong] = useState<SongDto | null>(null);
   const [content, setContent] = useState('');
@@ -74,7 +76,7 @@ const SongVersionEditorPage: React.FC = () => {
         setContent(songData.content || '');
       } catch (error) {
         console.error('Error loading song:', error);
-        toast.error('Failed to load song');
+        toast.error(t('songVersionEditor.failedToLoad'));
       } finally {
         setIsLoading(false);
       }
@@ -102,10 +104,10 @@ const SongVersionEditorPage: React.FC = () => {
       }, token);
       setHasUnsavedChanges(false);
       setLastSaved(new Date());
-      toast.success('Song saved successfully!');
+      toast.success(t('songVersionEditor.savedSuccessfully'));
     } catch (error) {
       console.error('Error saving song:', error);
-      toast.error('Failed to save song');
+      toast.error(t('songVersionEditor.failedToSave'));
     } finally {
       setSaving(false);
     }
@@ -114,7 +116,7 @@ const SongVersionEditorPage: React.FC = () => {
   // Handle back navigation
   const handleBack = () => {
     if (hasUnsavedChanges) {
-      if (window.confirm('You have unsaved changes. Are you sure you want to leave?')) {
+      if (window.confirm(t('songVersionEditor.unsavedChangesConfirm'))) {
         navigate(`/choirs/${choirId}`);
       }
     } else {
@@ -145,7 +147,7 @@ const SongVersionEditorPage: React.FC = () => {
       <Layout>
         <div className="song-editor-loading">
           <LoadingSpinner size="lg" />
-          <p className="loading-text">Loading song editor...</p>
+          <p className="loading-text">{t('songVersionEditor.loadingText')}</p>
         </div>
       </Layout>
     );
@@ -156,11 +158,11 @@ const SongVersionEditorPage: React.FC = () => {
       <Layout>
         <div className="song-editor-error">
           <ExclamationTriangleIcon className="error-icon" />
-          <h2 className="error-title">Song Not Found</h2>
-          <p className="error-message">The requested song could not be found.</p>
+          <h2 className="error-title">{t('songVersionEditor.songNotFoundTitle')}</h2>
+          <p className="error-message">{t('songVersionEditor.songNotFoundMessage')}</p>
           <Button variant="primary" onClick={() => navigate(`/choirs/${choirId}`)}>
             <ArrowLeftIcon className="button-icon" />
-            Back to Choir
+            {t('songVersionEditor.backToChoir')}
           </Button>
         </div>
       </Layout>
@@ -181,14 +183,14 @@ const SongVersionEditorPage: React.FC = () => {
                 className="back-button"
               >
                 <ArrowLeftIcon className="button-icon" />
-                Back
+                {t('songVersionEditor.back')}
               </Button>
               
               <div className="song-editor-header">
                 <h1 className="song-title">{song?.title}</h1>
                 {song && (
                   <div className="song-metadata">
-                    {song.artist && <span className="song-artist">by {song.artist}</span>}
+                    {song.artist && <span className="song-artist">{t('songVersionEditor.by', { artist: song.artist })}</span>}
                     <div className="song-tags">
                       {song.tags && song.tags.length > 0 && (
                         <div className="tags-container">
@@ -208,12 +210,12 @@ const SongVersionEditorPage: React.FC = () => {
                 {hasUnsavedChanges ? (
                   <span className="unsaved-indicator">
                     <ClockIcon className="status-icon" />
-                    Unsaved changes
+                    {t('songVersionEditor.unsavedChanges')}
                   </span>
                 ) : lastSaved ? (
                   <span className="saved-indicator">
                     <CheckCircleIcon className="status-icon" />
-                    Saved {lastSaved.toLocaleTimeString()}
+                    {t('songVersionEditor.saved', { time: lastSaved.toLocaleTimeString() })}
                   </span>
                 ) : null}
               </div>
@@ -227,12 +229,12 @@ const SongVersionEditorPage: React.FC = () => {
                 {isPreviewMode ? (
                   <>
                     <PencilIcon className="button-icon" />
-                    Edit
+                    {t('songVersionEditor.edit')}
                   </>
                 ) : (
                   <>
                     <EyeIcon className="button-icon" />
-                    Preview
+                    {t('songVersionEditor.preview')}
                   </>
                 )}
               </Button>
@@ -245,7 +247,7 @@ const SongVersionEditorPage: React.FC = () => {
                 loading={isSaving}
               >
                 <SaveIcon className="button-icon" />
-                Save
+                {t('songVersionEditor.save')}
               </Button>
             </div>
           </div>
@@ -257,7 +259,7 @@ const SongVersionEditorPage: React.FC = () => {
             <Card className="preview-card">
               <div className="preview-header">
                 <MusicalNoteIcon className="preview-icon" />
-                <h3>Preview Mode</h3>
+                <h3>{t('songVersionEditor.previewMode')}</h3>
               </div>
               <ChordProViewer source={content} />
             </Card>
@@ -266,7 +268,7 @@ const SongVersionEditorPage: React.FC = () => {
               <div className="editor-toolbar">
                 <div className="toolbar-left">
                   <DocumentTextIcon className="editor-icon" />
-                  <h3>ChordPro Editor</h3>
+                  <h3>{t('songVersionEditor.chordProEditor')}</h3>
                 </div>
                 
                 <div className="toolbar-right">
@@ -276,7 +278,7 @@ const SongVersionEditorPage: React.FC = () => {
                       checked={autoSaveEnabled}
                       onChange={(e) => setAutoSaveEnabled(e.target.checked)}
                     />
-                    Auto-save
+                    {t('songVersionEditor.autoSave')}
                   </label>
                 </div>
               </div>
@@ -286,14 +288,14 @@ const SongVersionEditorPage: React.FC = () => {
                   className="chord-pro-editor"
                   value={content}
                   onChange={(e) => handleContentChange(e.target.value)}
-                  placeholder="Enter ChordPro content here..."
+                  placeholder={t('songVersionEditor.placeholder')}
                   spellCheck={false}
                 />
               </div>
 
               <div className="editor-footer">
                 <div className="editor-tips">
-                  <p><strong>Tips:</strong> Use {'{'}C{'}'} for chords, [Verse 1] for sections. Press Ctrl+S to save, Ctrl+P to preview.</p>
+                  <p><strong>{t('songVersionEditor.tips')}</strong></p>
                 </div>
               </div>
             </Card>
@@ -304,13 +306,13 @@ const SongVersionEditorPage: React.FC = () => {
         {song?.baseSongId && song.content !== content && (
           <Card className="reference-card">
             <div className="reference-header">
-              <h3>Original Song Content</h3>
+              <h3>{t('songVersionEditor.originalSongContent')}</h3>
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={() => song && setContent(song.content)}
               >
-                Reset to Original
+                {t('songVersionEditor.resetToOriginal')}
               </Button>
             </div>
             <ChordProViewer source={song?.content || ''} />

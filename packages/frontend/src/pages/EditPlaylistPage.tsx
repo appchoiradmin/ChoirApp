@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useUser } from '../hooks/useUser';
+import { useTranslation } from '../hooks/useTranslation';
 import { getPlaylistById as getPlaylist, getPlaylistsByChoirId, updatePlaylist, getPlaylistTemplatesByChoirId, removeSongFromPlaylist, UpdatePlaylistDto } from '../services/playlistService';
 import { SongDto } from '../types/song';
 import { useDisplayedPlaylistSections } from '../hooks/useDisplayedPlaylistSections';
@@ -30,6 +31,7 @@ import './EditPlaylistPage.scss';
 
 const EditPlaylistPage: React.FC = () => {
   const { token } = useUser();
+  const { t } = useTranslation();
   const { playlistId: routePlaylistId } = useParams<{ playlistId: string }>();
   const navigate = useNavigate();
 
@@ -75,7 +77,7 @@ const EditPlaylistPage: React.FC = () => {
             setSelectedPlaylist(playlist);
           } catch (err) { 
             console.error('Error fetching route playlist:', err);
-            setError('Failed to load playlist');
+            setError(t('editPlaylist.failedToLoad'));
             return;
           }
         }
@@ -197,7 +199,7 @@ const EditPlaylistPage: React.FC = () => {
       toast.success('Song removed from playlist');
     } catch (error) {
       console.error('Error removing song:', error);
-      toast.error('Failed to remove song');
+      toast.error(t('editPlaylist.failedToRemoveSong'));
     } finally {
       setSaving(false);
     }
@@ -300,7 +302,7 @@ const EditPlaylistPage: React.FC = () => {
   };
 
   const getPlaylistDisplayDate = (playlist: any) => {
-    if (!playlist.date) return 'No Date';
+    if (!playlist.date) return t('editPlaylist.noDate');
     return new Date(playlist.date).toLocaleDateString(undefined, { 
       weekday: 'long', 
       year: 'numeric', 
@@ -316,7 +318,7 @@ const EditPlaylistPage: React.FC = () => {
         <div className="edit-playlist-container">
           <div className="playlist-loading">
             <LoadingSpinner size="lg" />
-            <p className="loading-text">Loading playlist...</p>
+            <p className="loading-text">{t('editPlaylist.loadingPlaylist')}</p>
           </div>
         </div>
       </Layout>
@@ -330,14 +332,14 @@ const EditPlaylistPage: React.FC = () => {
         <div className="edit-playlist-container">
           <div className="playlist-error">
             <InformationCircleIcon className="error-icon" />
-            <h2 className="error-title">Unable to Load Playlist</h2>
+            <h2 className="error-title">{t('editPlaylist.unableToLoad')}</h2>
             <p className="error-message">{error}</p>
             <div className="error-actions">
               <Button variant="primary" onClick={() => window.location.reload()}>
-                Try Again
+                {t('editPlaylist.tryAgain')}
               </Button>
               <Button variant="outlined" onClick={() => navigate('/playlists')}>
-                Back to Playlists
+                {t('editPlaylist.backToPlaylists')}
               </Button>
             </div>
           </div>

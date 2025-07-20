@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Invitation } from '../types/invitation';
 import styles from './InvitationsList.module.scss';
+import { useTranslation } from '../hooks/useTranslation';
 
 interface InvitationsListProps {
   invitations: Invitation[];
@@ -9,10 +10,11 @@ interface InvitationsListProps {
 }
 
 const InvitationsList: React.FC<InvitationsListProps> = ({ invitations, onAccept, onReject }) => {
+  const { t } = useTranslation();
   const [expandedChoir, setExpandedChoir] = useState<string | null>(null);
 
   if (invitations.length === 0) {
-    return <p>You have no pending invitations.</p>;
+    return <p>{t('invitationsList.noPendingInvitations')}</p>;
   }
 
   const groupedInvitations = invitations.reduce((acc, invitation) => {
@@ -34,7 +36,7 @@ const InvitationsList: React.FC<InvitationsListProps> = ({ invitations, onAccept
         <div key={choirName} className={styles.listItem}>
           <div onClick={() => toggleExpand(choirName)} className={styles.choirHeader}>
             <p>
-              You have been invited to join <strong className={styles.choirName}>{choirName}</strong>.
+              {t('invitationsList.invitedToJoin')} <strong className={styles.choirName}>{choirName}</strong>.
             </p>
             {choirInvitations.length > 1 && (
               <span className={styles.icon}>
@@ -49,10 +51,10 @@ const InvitationsList: React.FC<InvitationsListProps> = ({ invitations, onAccept
                   <span>{new Date(invitation.sentAt).toLocaleString()}</span>
                   <div className="buttons">
                     <button className={styles.button + ' ' + styles.acceptButton} onClick={() => onAccept(invitation.invitationToken)}>
-                      Accept
+                      {t('invitationsList.accept')}
                     </button>
                     <button className={styles.button + ' ' + styles.rejectButton} onClick={() => onReject(invitation.invitationToken)}>
-                      Reject
+                      {t('invitationsList.reject')}
                     </button>
                   </div>
                 </div>

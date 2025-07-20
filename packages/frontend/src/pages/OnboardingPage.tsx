@@ -4,9 +4,11 @@ import { motion } from 'framer-motion';
 import { UserGroupIcon, MusicalNoteIcon, ArrowRightIcon, CheckIcon, SparklesIcon } from '@heroicons/react/24/outline';
 import { completeOnboarding } from '../services/userService';
 import { Button, Card, Layout } from '../components/ui';
+import { useTranslation } from '../hooks/useTranslation';
 import './OnboardingPage.scss';
 
 const OnboardingPage: React.FC = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [selectedUserType, setSelectedUserType] = useState<'admin' | 'general' | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -23,7 +25,7 @@ const OnboardingPage: React.FC = () => {
       }
     } catch (error) {
       console.error('Error completing onboarding:', error);
-      navigate('/auth/error?message=Failed+to+complete+onboarding');
+      navigate(`/auth/error?message=${encodeURIComponent(t('onboarding.failedToComplete'))}`);
     } finally {
       setIsLoading(false);
     }
@@ -45,10 +47,10 @@ const OnboardingPage: React.FC = () => {
               >
                 <SparklesIcon className="welcome-icon" />
                 <h1 className="title is-1-desktop is-2-tablet is-3-mobile welcome-title">
-                  Welcome to ChoirApp! 🎵
+                  {t('onboarding.welcomeTitle')}
                 </h1>
                 <p className="subtitle is-3-desktop is-4-tablet is-5-mobile welcome-subtitle">
-                  Let's get you started with your musical journey
+                  {t('onboarding.welcomeSubtitle')}
                 </p>
               </motion.div>
 
@@ -60,9 +62,9 @@ const OnboardingPage: React.FC = () => {
                 className="has-text-centered mb-6"
               >
                 <Card className="instructions-card mb-5">
-                  <h2 className="title is-4 has-text-primary mb-3">Choose how you'd like to use ChoirApp:</h2>
+                  <h2 className="title is-4 has-text-primary mb-3">{t('onboarding.chooseHowToUse')}</h2>
                   <p className="subtitle is-6 has-text-grey">
-                    Don't worry - you can always change this later or be invited to join choirs.
+                    {t('onboarding.canChangeAnytime')}
                   </p>
                 </Card>
               </motion.div>
@@ -97,8 +99,8 @@ const OnboardingPage: React.FC = () => {
                           />
                         </div>
                         <div className="media-content">
-                          <p className="title is-4">Choir Administrator</p>
-                          <p className="subtitle is-6 has-text-grey">Lead and manage a choir</p>
+                          <p className="title is-4">{t('onboarding.choirAdministrator')}</p>
+                          <p className="subtitle is-6 has-text-grey">{t('onboarding.leadAndManage')}</p>
                           {selectedUserType === 'admin' && (
                             <motion.div
                               initial={{ scale: 0 }}
@@ -115,21 +117,21 @@ const OnboardingPage: React.FC = () => {
 
                       <div className="content">
                         <div className="mb-4">
-                          <p className="has-text-weight-semibold mb-2">Perfect for:</p>
+                          <p className="has-text-weight-semibold mb-2">{t('onboarding.perfectFor')}</p>
                           <ul className="is-size-7">
-                            <li>Choir directors and music ministers</li>
-                            <li>Those who want to create and manage choirs</li>
-                            <li>Leaders who invite and organize choir members</li>
+                            <li>{t('onboarding.choirDirectors')}</li>
+                            <li>{t('onboarding.createAndManage')}</li>
+                            <li>{t('onboarding.leadersWhoInvite')}</li>
                           </ul>
                         </div>
                         
                         <div>
-                          <p className="has-text-weight-semibold mb-2">You'll be able to:</p>
+                          <p className="has-text-weight-semibold mb-2">{t('onboarding.youllBeAbleTo')}</p>
                           <ul className="is-size-7">
-                            <li>Create and manage your choir</li>
-                            <li>Invite unlimited choir members</li>
-                            <li>Create playlists and templates for services</li>
-                            <li>Manage choir-specific song versions</li>
+                            <li>{t('onboarding.createManageChoir')}</li>
+                            <li>{t('onboarding.inviteUnlimited')}</li>
+                            <li>{t('onboarding.createPlaylistsTemplates')}</li>
+                            <li>{t('onboarding.manageChoirVersions')}</li>
                           </ul>
                         </div>
                       </div>
@@ -159,8 +161,8 @@ const OnboardingPage: React.FC = () => {
                           />
                         </div>
                         <div className="media-content">
-                          <p className="title is-4">General User</p>
-                          <p className="subtitle is-6 has-text-grey">Explore and discover music</p>
+                          <p className="title is-4">{t('onboarding.generalUser')}</p>
+                          <p className="subtitle is-6 has-text-grey">{t('onboarding.exploreAndJoin')}</p>
                           {selectedUserType === 'general' && (
                             <motion.div
                               initial={{ scale: 0 }}
@@ -177,21 +179,21 @@ const OnboardingPage: React.FC = () => {
 
                       <div className="content">
                         <div className="mb-4">
-                          <p className="has-text-weight-semibold mb-2">Perfect for:</p>
+                          <p className="has-text-weight-semibold mb-2">{t('onboarding.perfectFor')}</p>
                           <ul className="is-size-7">
-                            <li>Music enthusiasts and casual users</li>
-                            <li>Those exploring before joining a choir</li>
-                            <li>Anyone wanting access to the song database</li>
+                            <li>{t('onboarding.choirMembers')}</li>
+                            <li>{t('onboarding.wantToJoin')}</li>
+                            <li>{t('onboarding.singersWhoWant')}</li>
                           </ul>
                         </div>
                         
                         <div>
-                          <p className="has-text-weight-semibold mb-2">You'll be able to:</p>
+                          <p className="has-text-weight-semibold mb-2">{t('onboarding.youllBeAbleTo')}</p>
                           <ul className="is-size-7">
-                            <li>Browse the complete master song database</li>
-                            <li>View public playlists from other choirs</li>
-                            <li>Search and discover new music</li>
-                            <li>Join choirs when invited by administrators</li>
+                            <li>{t('onboarding.browsePublicSongs')}</li>
+                            <li>{t('onboarding.joinMultipleChoirs')}</li>
+                            <li>{t('onboarding.accessChoirResources')}</li>
+                            <li>{t('onboarding.participateInServices')}</li>
                           </ul>
                         </div>
                       </div>
@@ -215,7 +217,7 @@ const OnboardingPage: React.FC = () => {
                     onClick={() => handleCompleteOnboarding(selectedUserType)}
                     className="continue-button"
                   >
-                    {selectedUserType === 'admin' ? 'Create My Choir' : 'Start Exploring'}
+                    {selectedUserType === 'admin' ? t('onboarding.createMyChoir') : t('onboarding.startExploring')}
                     <ArrowRightIcon className="icon ml-2" style={{ width: '1.25rem', height: '1.25rem' }} />
                   </Button>
                 </motion.div>

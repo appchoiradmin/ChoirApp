@@ -3,37 +3,39 @@ import { useSearchParams, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { ExclamationTriangleIcon, HomeIcon, ArrowLeftIcon } from '@heroicons/react/24/outline';
 import { Button, Card, Layout } from '../components/ui';
+import { useTranslation } from '../hooks/useTranslation';
 
 const AuthErrorPage: React.FC = () => {
   const [searchParams] = useSearchParams();
-  const errorMessage = searchParams.get('message') || 'An unknown error occurred during authentication.';
+  const { t } = useTranslation();
+  const errorMessage = searchParams.get('message') || t('authError.defaultMessage');
 
   const getErrorDetails = (message: string) => {
     const lowerMessage = message.toLowerCase();
     
     if (lowerMessage.includes('token')) {
       return {
-        title: 'Authentication Token Error',
-        description: 'There was an issue with your authentication token. This usually happens when the login session expires.',
-        suggestion: 'Please try signing in again.'
+        title: t('authError.tokenError.title'),
+        description: t('authError.tokenError.description'),
+        suggestion: t('authError.tokenError.suggestion')
       };
     } else if (lowerMessage.includes('network') || lowerMessage.includes('connection')) {
       return {
-        title: 'Connection Error',
-        description: 'Unable to connect to our authentication service.',
-        suggestion: 'Please check your internet connection and try again.'
+        title: t('authError.networkError.title'),
+        description: t('authError.networkError.description'),
+        suggestion: t('authError.networkError.suggestion')
       };
     } else if (lowerMessage.includes('cancelled') || lowerMessage.includes('denied')) {
       return {
-        title: 'Authentication Cancelled',
-        description: 'The authentication process was cancelled or access was denied.',
-        suggestion: 'You can try signing in again or contact support if this persists.'
+        title: t('authError.cancelledError.title'),
+        description: t('authError.cancelledError.description'),
+        suggestion: t('authError.cancelledError.suggestion')
       };
     } else {
       return {
-        title: 'Authentication Error',
-        description: 'Something went wrong during the authentication process.',
-        suggestion: 'Please try signing in again or contact support if the problem continues.'
+        title: t('authError.genericError.title'),
+        description: t('authError.genericError.description'),
+        suggestion: t('authError.genericError.suggestion')
       };
     }
   };
@@ -85,14 +87,14 @@ const AuthErrorPage: React.FC = () => {
                     </p>
                     
                     <div className="notification is-warning is-light">
-                      <p className="has-text-weight-semibold mb-2">What you can do:</p>
+                      <p className="has-text-weight-semibold mb-2">{t('authError.whatYouCanDo')}</p>
                       <p>{errorDetails.suggestion}</p>
                     </div>
                     
-                    {errorMessage !== 'An unknown error occurred during authentication.' && (
+                    {errorMessage !== t('authError.defaultMessage') && (
                       <details className="mt-4">
                         <summary className="has-text-weight-semibold cursor-pointer">
-                          Technical Details
+                          {t('authError.technicalDetails')}
                         </summary>
                         <div className="notification is-light mt-2">
                           <code className="has-text-danger">
@@ -115,7 +117,7 @@ const AuthErrorPage: React.FC = () => {
                         size="lg"
                       >
                         <HomeIcon className="icon mr-2" style={{ width: '1.25rem', height: '1.25rem' }} />
-                        Back to Home
+                        {t('authError.backToHome')}
                       </Button>
                     </Link>
                     
@@ -125,7 +127,7 @@ const AuthErrorPage: React.FC = () => {
                       onClick={() => window.history.back()}
                     >
                       <ArrowLeftIcon className="icon mr-2" style={{ width: '1.25rem', height: '1.25rem' }} />
-                      Go Back
+                      {t('authError.goBack')}
                     </Button>
                   </motion.div>
                 </Card>

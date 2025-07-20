@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import {
   getChoirDetails,
   inviteUser,
@@ -32,6 +33,7 @@ const ChoirAdminPageEnhanced: React.FC = () => {
   const { choirId } = useParams<{ choirId: string }>();
   const { token, setChoirId } = useUser();
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const [choir, setChoir] = useState<ChoirDetails | null>(null);
   const [invitations, setInvitations] = useState<Invitation[]>([]);
   const pendingInvitations = invitations.filter(inv => inv.status === 'Pending');
@@ -51,8 +53,8 @@ const ChoirAdminPageEnhanced: React.FC = () => {
         setChoir(details);
         setInvitations(invitationsData);
       } catch (err) {
-        setError('Failed to fetch choir details.');
-        toast.error('Failed to load choir details');
+        setError(t('choirAdmin.failedToFetchChoirDetails'));
+        toast.error(t('choirAdmin.failedToFetchChoirDetails'));
       } finally {
         setLoading(false);
       }
@@ -72,10 +74,10 @@ const ChoirAdminPageEnhanced: React.FC = () => {
     setInviteLoading(true);
     try {
       await inviteUser(choirId, email, token);
-      toast.success('Invitation sent successfully!');
+      toast.success(t('choirAdmin.invitationSentSuccessfully'));
       fetchChoirDetails(); // Refresh the data
     } catch (error: any) {
-      const errorMessage = error.message || 'Failed to send invitation';
+      const errorMessage = error.message || t('choirAdmin.failedToInviteMember');
       toast.error(errorMessage);
       throw error; // Re-throw to let the component handle it
     } finally {
@@ -88,10 +90,10 @@ const ChoirAdminPageEnhanced: React.FC = () => {
     
     try {
       await removeMember(choirId, userId, token);
-      toast.success('Member removed successfully');
+      toast.success(t('choirAdmin.memberRemovedSuccessfully'));
       fetchChoirDetails(); // Refresh the data
     } catch (error: any) {
-      toast.error(error.message || 'Failed to remove member');
+      toast.error(error.message || t('choirAdmin.failedToRemoveMember'));
     }
   };
 
@@ -100,10 +102,10 @@ const ChoirAdminPageEnhanced: React.FC = () => {
     
     try {
       await updateMemberRole(choirId, userId, role, token);
-      toast.success('Member role updated successfully');
+      toast.success(t('choirAdmin.roleUpdatedSuccessfully'));
       fetchChoirDetails(); // Refresh the data
     } catch (error: any) {
-      toast.error(error.message || 'Failed to update member role');
+      toast.error(error.message || t('choirAdmin.failedToUpdateRole'));
     }
   };
 
@@ -122,10 +124,10 @@ const ChoirAdminPageEnhanced: React.FC = () => {
       <Layout>
         <div className="admin-container">
           <div className="error-state">
-            <h2>Error loading choir</h2>
+            <h2>{t('choirAdmin.errorLoadingChoirAdmin')}</h2>
             <p>{error}</p>
             <Button onClick={() => window.location.reload()}>
-              Try Again
+              {t('common.tryAgain')}
             </Button>
           </div>
         </div>
@@ -138,10 +140,10 @@ const ChoirAdminPageEnhanced: React.FC = () => {
       <Layout>
         <div className="admin-container">
           <div className="error-state">
-            <h2>Choir not found</h2>
-            <p>The choir you're looking for doesn't exist or you don't have access to it.</p>
+            <h2>{t('choirAdmin.noChoirFound')}</h2>
+            <p>{t('choirAdmin.choirNotFound')}</p>
             <Button onClick={() => navigate('/dashboard')}>
-              Go to Dashboard
+              {t('choirAdmin.backToDashboard')}
             </Button>
           </div>
         </div>
@@ -169,11 +171,11 @@ const ChoirAdminPageEnhanced: React.FC = () => {
                 onClick={() => navigate('/dashboard')}
                 className="back-button"
               >
-                Back
+                {t('choirAdmin.back')}
               </Button>
               <div className="title-content">
                 <h1 className="page-title">{choir.name}</h1>
-                <p className="page-subtitle">Choir Administration</p>
+                <p className="page-subtitle">{t('choirAdmin.choirAdministration')}</p>
               </div>
             </div>
             <div className="header-actions">
@@ -183,7 +185,7 @@ const ChoirAdminPageEnhanced: React.FC = () => {
                 onClick={() => navigate(`/choirs/${choirId}/settings`)}
                 className="settings-button"
               >
-                Settings
+                {t('choirAdmin.settings')}
               </Button>
             </div>
           </div>
@@ -196,7 +198,7 @@ const ChoirAdminPageEnhanced: React.FC = () => {
               </div>
               <div className="stat-content">
                 <span className="stat-number">{stats.totalMembers}</span>
-                <span className="stat-label">Total Members</span>
+                <span className="stat-label">{t('choirAdmin.totalMembers')}</span>
               </div>
             </div>
             <div className="stat-card">
@@ -205,7 +207,7 @@ const ChoirAdminPageEnhanced: React.FC = () => {
               </div>
               <div className="stat-content">
                 <span className="stat-number">{stats.admins}</span>
-                <span className="stat-label">Admins</span>
+                <span className="stat-label">{t('choirAdmin.admins')}</span>
               </div>
             </div>
             <div className="stat-card">
@@ -214,7 +216,7 @@ const ChoirAdminPageEnhanced: React.FC = () => {
               </div>
               <div className="stat-content">
                 <span className="stat-number">{stats.pendingInvitations}</span>
-                <span className="stat-label">Pending Invites</span>
+                <span className="stat-label">{t('choirAdmin.pendingInvites')}</span>
               </div>
             </div>
             <div className="stat-card">
@@ -223,7 +225,7 @@ const ChoirAdminPageEnhanced: React.FC = () => {
               </div>
               <div className="stat-content">
                 <span className="stat-number">{stats.songs}</span>
-                <span className="stat-label">Choir Songs</span>
+                <span className="stat-label">{t('choirAdmin.choirSongs')}</span>
               </div>
             </div>
           </div>
@@ -237,7 +239,7 @@ const ChoirAdminPageEnhanced: React.FC = () => {
             onClick={() => navigate('/songs')}
             className="action-button"
           >
-            Master Songs
+            {t('choirAdmin.masterSongs')}
           </Button>
           <Button
             variant="outlined"
@@ -245,7 +247,7 @@ const ChoirAdminPageEnhanced: React.FC = () => {
             onClick={() => navigate(`/choir/${choirId}/playlist-templates`)}
             className="action-button"
           >
-            Templates
+            {t('choirAdmin.templates')}
           </Button>
           <Button
             variant="outlined"
@@ -253,7 +255,7 @@ const ChoirAdminPageEnhanced: React.FC = () => {
             onClick={() => navigate(`/choir/${choirId}/playlists`)}
             className="action-button"
           >
-            Playlists
+            {t('choirAdmin.playlists')}
           </Button>
         </div>
 
@@ -263,9 +265,9 @@ const ChoirAdminPageEnhanced: React.FC = () => {
             {/* Left Column - Members Management */}
             <div className="content-section">
               <div className="section-header">
-                <h2 className="section-title">Members</h2>
+                <h2 className="section-title">{t('choirAdmin.members')}</h2>
                 <p className="section-subtitle">
-                  Manage choir members and their roles
+                  {t('choirAdmin.manageMembersSubtitle')}
                 </p>
               </div>
               
@@ -286,9 +288,9 @@ const ChoirAdminPageEnhanced: React.FC = () => {
               {(pendingInvitations.length > 0 || sentInvitations.length > 0) && (
                 <div className="section-spacer">
                   <div className="section-header">
-                    <h3 className="section-title">Invitations</h3>
+                    <h3 className="section-title">{t('choirAdmin.invitations')}</h3>
                     <p className="section-subtitle">
-                      Manage choir invitations
+                      {t('choirAdmin.manageInvitationsSubtitle')}
                     </p>
                   </div>
                   <InvitationsAccordion 
@@ -300,9 +302,9 @@ const ChoirAdminPageEnhanced: React.FC = () => {
 
               <div className="section-spacer">
                 <div className="section-header">
-                  <h3 className="section-title">Choir Songs</h3>
+                  <h3 className="section-title">{t('choirAdmin.choirSongs')}</h3>
                   <p className="section-subtitle">
-                    Songs customized for your choir
+                    {t('choirAdmin.choirSongsSubtitle')}
                   </p>
                 </div>
                 <SongVersionsList choirId={choir.id} />

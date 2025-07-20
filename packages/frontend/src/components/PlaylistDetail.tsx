@@ -6,6 +6,7 @@ import { getSongById } from '../services/songService';
 import { deletePlaylist } from '../services/playlistService';
 import { useUser } from '../hooks/useUser';
 import { UserRole } from '../constants/roles';
+import { useTranslation } from '../hooks/useTranslation';
 
 interface PlaylistDetailProps {
   playlist: Playlist;
@@ -13,6 +14,7 @@ interface PlaylistDetailProps {
 }
 
 const PlaylistDetail: React.FC<PlaylistDetailProps> = ({ playlist, onPlaylistDeleted }) => {
+  const { t } = useTranslation();
   const { choirId } = useParams<{ choirId: string }>();
   const [songDetails, setSongDetails] = useState<Record<string, SongDto>>({});
   const { user, token } = useUser();
@@ -63,8 +65,8 @@ const PlaylistDetail: React.FC<PlaylistDetailProps> = ({ playlist, onPlaylistDel
         </div>
         {isAdmin && (
           <div className="level-right">
-            <Link to={`/playlists/${playlist.id}/edit`} className="button is-link">Edit</Link>
-            <button onClick={handleDelete} className="button is-danger ml-2">Delete</button>
+            <Link to={`/playlists/${playlist.id}/edit`} className="button is-link">{t('playlistDetail.edit')}</Link>
+            <button onClick={handleDelete} className="button is-danger ml-2">{t('playlistDetail.delete')}</button>
           </div>
         )}
       </div>
@@ -86,10 +88,10 @@ const PlaylistDetail: React.FC<PlaylistDetailProps> = ({ playlist, onPlaylistDel
                       {songDetails[song.songId].title}
                     </Link>
                   ) : (
-                    'Loading...'
+                    t('playlistDetail.loading')
                   )
                 ) : (
-                  'Unknown song'
+                  t('playlistDetail.unknownSong')
                 )}
               </li>
             ))}

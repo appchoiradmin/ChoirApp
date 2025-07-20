@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { SongDto } from '../../types/song';
 import { getSongsForChoir, searchSongs } from '../../services/songService';
-
+import { useTranslation } from '../../hooks/useTranslation';
 import { useUser } from '../../hooks/useUser';
 
 interface SongVersionsListProps {
@@ -10,6 +10,7 @@ interface SongVersionsListProps {
 }
 
 const SongVersionsList: React.FC<SongVersionsListProps> = ({ choirId }) => {
+  const { t } = useTranslation();
   const { token } = useUser();
   const [songs, setSongs] = useState<SongDto[]>([]);
   const [showMasterList, setShowMasterList] = useState(false);
@@ -41,7 +42,7 @@ const SongVersionsList: React.FC<SongVersionsListProps> = ({ choirId }) => {
   return (
     <div className="card">
       <header className="card-header">
-        <p className="card-header-title">Songs</p>
+        <p className="card-header-title">{t('songs')}</p>
         <div className="card-header-icon">
           <div className="field">
             <input
@@ -52,13 +53,13 @@ const SongVersionsList: React.FC<SongVersionsListProps> = ({ choirId }) => {
               checked={showMasterList}
               onChange={e => setShowMasterList(e.target.checked)}
             />
-            <label htmlFor="switchShowMasterList">Show Master Song List</label>
+            <label htmlFor="switchShowMasterList">{t('showMasterSongList')}</label>
           </div>
         </div>
       </header>
       <div className="card-content">
         {loading ? (
-          <p>Loading songs...</p>
+          <p>{t('loadingSongs')}</p>
         ) : (
           <div className="list">
             {songs.map(song => (

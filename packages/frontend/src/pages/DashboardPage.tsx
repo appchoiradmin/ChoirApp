@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useUser } from '../hooks/useUser';
+import { useTranslation } from '../hooks/useTranslation';
 import { getInvitations, acceptInvitation, rejectInvitation } from '../services/invitationService';
 import { Invitation } from '../types/invitation';
 import { UserRole } from '../constants/roles';
@@ -21,6 +22,7 @@ import './DashboardPage.scss';
 
 const DashboardPage: React.FC = () => {
   const { user, loading, token, refreshToken } = useUser();
+  const { t } = useTranslation();
   const [invitations, setInvitations] = useState<Invitation[]>([]);
 
   useEffect(() => {
@@ -94,23 +96,23 @@ const DashboardPage: React.FC = () => {
   const hasChoirs = totalChoirs > 0;
   const hasCompletedProfile = user.hasCompletedOnboarding;
   const progressSteps = [
-    { label: 'Complete profile setup', completed: hasCompletedProfile },
-    { label: 'Join or create a choir', completed: hasChoirs },
-    { label: 'Add songs to your choir', completed: false }, // This would need real data
+    { label: t('dashboard.progressSteps.completeProfile'), completed: hasCompletedProfile },
+    { label: t('dashboard.progressSteps.joinChoir'), completed: hasChoirs },
+    { label: t('dashboard.progressSteps.addSongs'), completed: false }, // This would need real data
   ];
   const completedSteps = progressSteps.filter(step => step.completed).length;
   const progressPercentage = (completedSteps / progressSteps.length) * 100;
 
   return (
     <Layout 
-      navigation={<Navigation title="Dashboard" showBackButton={false} />}
+      navigation={<Navigation title={t('dashboard.title')} showBackButton={false} />}
     >
       <div className="dashboard-container">
         {/* Welcome Header */}
         <div className="dashboard-header">
           <div className="header-content">
             <div className="user-welcome">
-              <h1 className="dashboard-title">Welcome back, {name}!</h1>
+              <h1 className="dashboard-title">{t('dashboard.welcomeBack', { name })}</h1>
               <p className="dashboard-subtitle">{email}</p>
             </div>
             <div className="header-actions">
@@ -120,7 +122,7 @@ const DashboardPage: React.FC = () => {
                   className="create-action"
                 >
                   <PlusIcon className="button-icon" />
-                  Create Choir
+                  {t('dashboard.createChoir')}
                 </Button>
               </Link>
             </div>
@@ -136,7 +138,7 @@ const DashboardPage: React.FC = () => {
             </div>
             <div className="stat-details">
               <h3 className="stat-number">{totalChoirs}</h3>
-              <p className="stat-label">Total Choirs</p>
+              <p className="stat-label">{t('dashboard.totalChoirs')}</p>
             </div>
           </div>
         </Card>
@@ -148,7 +150,7 @@ const DashboardPage: React.FC = () => {
             </div>
             <div className="stat-details">
               <h3 className="stat-number">{adminOfChoirs.length}</h3>
-              <p className="stat-label">As Admin</p>
+              <p className="stat-label">{t('dashboard.asAdmin')}</p>
             </div>
           </div>
         </Card>
@@ -160,7 +162,7 @@ const DashboardPage: React.FC = () => {
             </div>
             <div className="stat-details">
               <h3 className="stat-number">{pendingInvitations}</h3>
-              <p className="stat-label">Pending Invites</p>
+              <p className="stat-label">{t('dashboard.pendingInvites')}</p>
             </div>
           </div>
         </Card>
@@ -172,7 +174,7 @@ const DashboardPage: React.FC = () => {
             </div>
             <div className="stat-details">
               <h3 className="stat-number">{memberOfChoirs.length}</h3>
-              <p className="stat-label">As Member</p>
+              <p className="stat-label">{t('dashboard.asMember')}</p>
             </div>
           </div>
         </Card>
@@ -182,8 +184,8 @@ const DashboardPage: React.FC = () => {
       {progressPercentage < 100 && (
         <Card className="progress-card">
           <div className="progress-header">
-            <h2 className="section-title">Complete Your Setup</h2>
-            <span className="progress-percentage">{Math.round(progressPercentage)}% Complete</span>
+            <h2 className="section-title">{t('dashboard.completeSetup')}</h2>
+            <span className="progress-percentage">{t('dashboard.percentComplete', { percent: Math.round(progressPercentage) })}</span>
           </div>
           <div className="progress-bar">
             <div 
@@ -208,7 +210,7 @@ const DashboardPage: React.FC = () => {
 
       {/* Quick Actions */}
       <Card className="quick-actions-card">
-        <h2 className="section-title">Quick Actions</h2>
+        <h2 className="section-title">{t('dashboard.quickActionsTitle')}</h2>
         <div className="quick-actions-grid">
           <Link to="/songs">
             <Button 
@@ -217,8 +219,8 @@ const DashboardPage: React.FC = () => {
             >
               <MusicalNoteIcon className="action-icon" />
               <div className="action-content">
-                <span className="action-title">Browse Songs</span>
-                <span className="action-subtitle">Explore master song library</span>
+                <span className="action-title">{t('dashboard.browseSongs')}</span>
+                <span className="action-subtitle">{t('dashboard.browseSongsDesc')}</span>
               </div>
             </Button>
           </Link>
@@ -230,8 +232,8 @@ const DashboardPage: React.FC = () => {
             >
               <PlusIcon className="action-icon" />
               <div className="action-content">
-                <span className="action-title">Create Choir</span>
-                <span className="action-subtitle">Start a new choir</span>
+                <span className="action-title">{t('dashboard.createChoir')}</span>
+                <span className="action-subtitle">{t('dashboard.createPlaylistDesc')}</span>
               </div>
             </Button>
           </Link>
@@ -243,8 +245,8 @@ const DashboardPage: React.FC = () => {
             >
               <MusicalNoteIcon className="action-icon" />
               <div className="action-content">
-                <span className="action-title">Add Song</span>
-                <span className="action-subtitle">Create a new song</span>
+                <span className="action-title">{t('dashboard.addSong')}</span>
+                <span className="action-subtitle">{t('dashboard.browseSongsDesc')}</span>
               </div>
             </Button>
           </Link>

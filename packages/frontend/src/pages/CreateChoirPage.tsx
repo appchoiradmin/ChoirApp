@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { createChoir } from '../services/choirService';
 import { useUser } from '../hooks/useUser';
+import { useTranslation } from '../hooks/useTranslation';
 import { Layout, Navigation } from '../components/ui';
 
 const CreateChoirPage: React.FC = () => {
@@ -10,11 +11,12 @@ const CreateChoirPage: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
   const { user, loading, token, refreshToken } = useUser();
+  const { t } = useTranslation();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!token) {
-      setError('You must be logged in to create a choir.');
+      setError(t('choir.mustBeLoggedIn'));
       return;
     }
     setIsLoading(true);
@@ -28,7 +30,7 @@ const CreateChoirPage: React.FC = () => {
       
       navigate('/dashboard');
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'An unknown error occurred.');
+      setError(err instanceof Error ? err.message : t('choir.unknownError'));
     } finally {
       setIsLoading(false);
     }
@@ -39,7 +41,7 @@ const CreateChoirPage: React.FC = () => {
   };
 
   if (loading) {
-    return <div>Loading...</div>;
+    return <div>{t('common.loading')}...</div>;
   }
 
   if (!user) {
@@ -50,7 +52,7 @@ const CreateChoirPage: React.FC = () => {
   return (
     <Layout>
       <Navigation 
-        title="Create Choir"
+        title={t('choir.createChoirTitle')}
         showBackButton={true}
         onBackClick={handleGoBack}
         showUserProfile={true}
@@ -60,14 +62,14 @@ const CreateChoirPage: React.FC = () => {
           <form onSubmit={handleSubmit}>
             <div className="field">
               <label className="label" htmlFor="choirName">
-                Choir Name
+                {t('choir.choirName')}
               </label>
               <div className="control">
                 <input
                   id="choirName"
                   className={`input ${error ? 'is-danger' : ''}`}
                   type="text"
-                  placeholder="e.g., St. Peter's Church Choir"
+                  placeholder={t('choir.choirNamePlaceholder')}
                   value={choirName}
                   onChange={(e) => setChoirName(e.target.value)}
                   required
@@ -82,7 +84,7 @@ const CreateChoirPage: React.FC = () => {
                   className={`button is-primary ${isLoading ? 'is-loading' : ''}`}
                   disabled={isLoading}
                 >
-                  Create Choir
+                  {t('choir.createChoirButton')}
                 </button>
               </div>
             </div>

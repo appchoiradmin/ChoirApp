@@ -8,12 +8,14 @@ import Navigation from '../components/ui/Navigation';
 import Card from '../components/ui/Card';
 import Button from '../components/ui/Button';
 import { ChevronUpIcon, ChevronDownIcon, XMarkIcon, DocumentTextIcon, PlusIcon } from '@heroicons/react/24/outline';
+import { useTranslation } from '../hooks/useTranslation';
 import './EditPlaylistTemplatePage.scss';
 
 const EditPlaylistTemplatePage: React.FC = () => {
   const { user, token } = useUser();
   const { templateId } = useParams<{ templateId: string }>();
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [sections, setSections] = useState<Partial<PlaylistTemplateSection>[]>([]);
@@ -34,7 +36,7 @@ const EditPlaylistTemplatePage: React.FC = () => {
         })
         .catch((error) => {
           console.error(error);
-          setError('Failed to load template');
+          setError(t('editPlaylistTemplate.failedToLoad'));
           setLoading(false);
         });
     }
@@ -99,7 +101,7 @@ const EditPlaylistTemplatePage: React.FC = () => {
         navigate(`/choir/${user.choirId}/playlist-templates`);
       } catch (error) {
         console.error(error);
-        setError('Failed to update template');
+        setError(t('editPlaylistTemplate.failedToUpdate'));
       } finally {
         setSaving(false);
       }
@@ -120,7 +122,7 @@ const EditPlaylistTemplatePage: React.FC = () => {
     <Layout 
       navigation={
         <Navigation 
-          title="Edit Template" 
+          title={t('editPlaylistTemplate.title')} 
           showBackButton={true} 
           onBackClick={() => navigate(-1)}
         />
@@ -131,7 +133,7 @@ const EditPlaylistTemplatePage: React.FC = () => {
         <div className="edit-template-header">
           <div className="header-content">
             <div className="header-title">
-              <h1 className="page-title">Edit Playlist Template</h1>
+              <h1 className="page-title">{t('editPlaylistTemplate.pageTitle')}</h1>
             </div>
           </div>
         </div>
@@ -149,27 +151,27 @@ const EditPlaylistTemplatePage: React.FC = () => {
 
               {/* Basic Information */}
               <div className="form-section">
-                <h2 className="section-title">Basic Information</h2>
+                <h2 className="section-title">{t('editPlaylistTemplate.basicInformation')}</h2>
                 
                 <div className="form-group">
-                  <label className="form-label">Template Name</label>
+                  <label className="form-label">{t('editPlaylistTemplate.templateName')}</label>
                   <input
                     type="text"
                     value={title}
                     onChange={(e) => setTitle(e.target.value)}
                     className="form-input"
-                    placeholder="Enter template name..."
+                    placeholder={t('editPlaylistTemplate.templateNamePlaceholder')}
                     required
                   />
                 </div>
                 
                 <div className="form-group">
-                  <label className="form-label">Description (Optional)</label>
+                  <label className="form-label">{t('editPlaylistTemplate.description')}</label>
                   <textarea
                     value={description}
                     onChange={(e) => setDescription(e.target.value)}
                     className="form-textarea"
-                    placeholder="Optional description for this template..."
+                    placeholder={t('editPlaylistTemplate.descriptionPlaceholder')}
                     rows={3}
                   />
                 </div>
@@ -178,7 +180,7 @@ const EditPlaylistTemplatePage: React.FC = () => {
               {/* Sections */}
               <div className="form-section">
                 <div className="sections-header">
-                  <h2 className="sections-title">Template Sections</h2>
+                  <h2 className="sections-title">{t('editPlaylistTemplate.templateSections')}</h2>
                   <Button
                     type="button"
                     variant="outlined"
@@ -186,7 +188,7 @@ const EditPlaylistTemplatePage: React.FC = () => {
                     className="add-section-button"
                   >
                     <PlusIcon className="w-4 h-4 mr-2" />
-                    Add Section
+                    {t('editPlaylistTemplate.addSection')}
                   </Button>
                 </div>
                 
@@ -200,7 +202,7 @@ const EditPlaylistTemplatePage: React.FC = () => {
                             value={section.title || ''}
                             onChange={(e) => handleSectionChange(index, e.target.value)}
                             className="form-input"
-                            placeholder={`Section ${index + 1}`}
+                            placeholder={t('editPlaylistTemplate.sectionPlaceholder', { number: index + 1 })}
                             required
                           />
                         </div>
@@ -211,7 +213,7 @@ const EditPlaylistTemplatePage: React.FC = () => {
                             onClick={() => moveSectionUp(index)}
                             disabled={!canMoveUp(index)}
                             className="control-button"
-                            title="Move up"
+                            title={t('editPlaylistTemplate.moveUp')}
                           >
                             <ChevronUpIcon />
                           </button>
@@ -221,7 +223,7 @@ const EditPlaylistTemplatePage: React.FC = () => {
                             onClick={() => moveSectionDown(index)}
                             disabled={!canMoveDown(index)}
                             className="control-button"
-                            title="Move down"
+                            title={t('editPlaylistTemplate.moveDown')}
                           >
                             <ChevronDownIcon />
                           </button>
@@ -231,7 +233,7 @@ const EditPlaylistTemplatePage: React.FC = () => {
                             onClick={() => removeSection(index)}
                             disabled={sections.length === 1}
                             className="control-button danger"
-                            title="Remove section"
+                            title={t('editPlaylistTemplate.removeSection')}
                           >
                             <XMarkIcon />
                           </button>
@@ -244,7 +246,7 @@ const EditPlaylistTemplatePage: React.FC = () => {
                 <div className="sections-help">
                   <p>
                     <DocumentTextIcon className="help-icon" />
-                    Create sections to organize your playlist. Common sections include: Opening, Worship, Offertory, Closing.
+                    {t('editPlaylistTemplate.sectionsHelp')}
                   </p>
                 </div>
               </div>
@@ -257,7 +259,7 @@ const EditPlaylistTemplatePage: React.FC = () => {
                   onClick={() => navigate(-1)}
                   disabled={saving}
                 >
-                  Cancel
+                  {t('editPlaylistTemplate.cancel')}
                 </Button>
                 <Button
                   type="submit"
@@ -265,7 +267,7 @@ const EditPlaylistTemplatePage: React.FC = () => {
                   disabled={saving}
                   className="submit-button"
                 >
-                  {saving ? 'Updating...' : 'Update Template'}
+                  {saving ? t('editPlaylistTemplate.updating') : t('editPlaylistTemplate.updateTemplate')}
                 </Button>
               </div>
             </form>

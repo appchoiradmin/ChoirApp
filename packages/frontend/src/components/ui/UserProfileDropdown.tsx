@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
 import { useUser } from '../../hooks/useUser';
+import { useTranslation } from '../../hooks/useTranslation';
 import { 
   UserCircleIcon, 
   Cog6ToothIcon, 
@@ -17,6 +18,7 @@ interface UserProfileDropdownProps {
 const UserProfileDropdown: React.FC<UserProfileDropdownProps> = ({ className = '' }) => {
   const { user, token, signOut } = useUser();
   const navigate = useNavigate();
+  const { t, changeLanguage, getCurrentLanguage } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const portalRef = useRef<HTMLDivElement>(null);
@@ -77,7 +79,7 @@ const UserProfileDropdown: React.FC<UserProfileDropdownProps> = ({ className = '
         onClick={() => setIsOpen(!isOpen)}
         aria-haspopup="true"
         aria-expanded={isOpen}
-        aria-label="User menu"
+        aria-label={t('navigation.profile')}
       >
         <div className="user-avatar">
           {user.name ? (
@@ -87,7 +89,7 @@ const UserProfileDropdown: React.FC<UserProfileDropdownProps> = ({ className = '
           )}
         </div>
         <div className="user-info">
-          <span className="user-name">{user.name || 'User'}</span>
+          <span className="user-name">{user.name || t('navigation.profile')}</span>
           <span className="user-email">{user.email}</span>
         </div>
         <ChevronDownIcon className={`chevron-icon ${isOpen ? 'rotated' : ''}`} />
@@ -183,7 +185,7 @@ const UserProfileDropdown: React.FC<UserProfileDropdownProps> = ({ className = '
               onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
             >
               <UserCircleIcon style={{ width: '20px', height: '20px', color: '#6b7280' }} />
-              Profile
+              {t('navigation.profile')}
             </button>
 
             <button
@@ -206,8 +208,45 @@ const UserProfileDropdown: React.FC<UserProfileDropdownProps> = ({ className = '
               onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
             >
               <Cog6ToothIcon style={{ width: '20px', height: '20px', color: '#6b7280' }} />
-              Settings
+              {t('navigation.settings')}
             </button>
+
+            {/* Quick Language Switcher */}
+            <div style={{ padding: '8px 20px', borderTop: '1px solid #e2e8f0', borderBottom: '1px solid #e2e8f0' }}>
+              <div style={{ fontSize: '12px', color: '#6b7280', marginBottom: '8px' }}>
+                {t('settings.language')}
+              </div>
+              <div style={{ display: 'flex', gap: '4px' }}>
+                <button
+                  onClick={() => { changeLanguage('en'); setIsOpen(false); }}
+                  style={{
+                    padding: '4px 8px',
+                    border: '1px solid #e2e8f0',
+                    borderRadius: '4px',
+                    background: getCurrentLanguage() === 'en' ? '#0ea5e9' : 'white',
+                    color: getCurrentLanguage() === 'en' ? 'white' : '#374151',
+                    fontSize: '12px',
+                    cursor: 'pointer'
+                  }}
+                >
+                  EN
+                </button>
+                <button
+                  onClick={() => { changeLanguage('es'); setIsOpen(false); }}
+                  style={{
+                    padding: '4px 8px',
+                    border: '1px solid #e2e8f0',
+                    borderRadius: '4px',
+                    background: getCurrentLanguage() === 'es' ? '#0ea5e9' : 'white',
+                    color: getCurrentLanguage() === 'es' ? 'white' : '#374151',
+                    fontSize: '12px',
+                    cursor: 'pointer'
+                  }}
+                >
+                  ES
+                </button>
+              </div>
+            </div>
 
             <div style={{ height: '1px', backgroundColor: '#e2e8f0', margin: '8px 0' }} />
 
@@ -231,7 +270,7 @@ const UserProfileDropdown: React.FC<UserProfileDropdownProps> = ({ className = '
               onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
             >
               <ArrowRightOnRectangleIcon style={{ width: '20px', height: '20px', color: '#dc2626' }} />
-              Sign Out
+              {t('navigation.logout')}
             </button>
           </div>
         </div>,

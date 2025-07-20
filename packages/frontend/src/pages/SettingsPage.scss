@@ -1,0 +1,185 @@
+.settings-container {
+  padding: 0;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.settings-header {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 2rem 1.5rem;
+  border-radius: 0.75rem;
+  margin: 1.5rem;
+  margin-bottom: 2rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+
+  .header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+
+  .settings-welcome {
+    flex: 1;
+  }
+
+  .settings-title {
+    font-size: 2rem;
+    font-weight: 700;
+    margin: 0 0 0.5rem 0;
+    color: white;
+  }
+
+  .settings-subtitle {
+    font-size: 1rem;
+    opacity: 0.9;
+    margin: 0;
+    color: rgba(255, 255, 255, 0.9);
+  }
+}
+
+.settings-content {
+  padding: 0 1.5rem 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.settings-card {
+  background: white;
+  border-radius: 0.75rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e5e7eb;
+  overflow: hidden;
+  transition: all 0.2s ease;
+
+  &:hover {
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    transform: translateY(-1px);
+  }
+
+  .settings-card-header {
+    padding: 1.5rem;
+    border-bottom: 1px solid #f3f4f6;
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+
+    .card-icon-wrapper {
+      flex-shrink: 0;
+      width: 2.5rem;
+      height: 2.5rem;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      border-radius: 0.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .card-icon {
+      width: 1.25rem;
+      height: 1.25rem;
+      color: white;
+    }
+
+    .card-header-content {
+      flex: 1;
+    }
+
+    .card-title {
+      font-size: 1.125rem;
+      font-weight: 600;
+      color: #1f2937;
+      margin: 0 0 0.25rem 0;
+    }
+
+    .card-description {
+      font-size: 0.875rem;
+      color: #6b7280;
+      margin: 0;
+      line-height: 1.4;
+    }
+  }
+
+  .settings-card-content {
+    padding: 1.5rem;
+  }
+}
+
+.coming-soon {
+  text-align: center;
+  padding: 2rem 1rem;
+  color: #9ca3af;
+
+  .coming-soon-text {
+    font-size: 0.875rem;
+    font-style: italic;
+    margin: 0;
+    opacity: 0.8;
+  }
+}
+
+// Mobile responsiveness
+@media (max-width: 768px) {
+  .settings-header {
+    margin: 1rem;
+    padding: 1.5rem 1rem;
+
+    .settings-title {
+      font-size: 1.5rem;
+    }
+
+    .settings-subtitle {
+      font-size: 0.875rem;
+    }
+  }
+
+  .settings-content {
+    padding: 0 1rem 2rem;
+  }
+
+  .settings-card {
+    .settings-card-header {
+      padding: 1rem;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      gap: 0.75rem;
+
+      .card-icon-wrapper {
+        width: 2rem;
+        height: 2rem;
+      }
+
+      .card-icon {
+        width: 1rem;
+        height: 1rem;
+      }
+    }
+
+    .settings-card-content {
+      padding: 1rem;
+    }
+  }
+}
+
+// Mobile-first responsive design
+@media (max-width: 767px) {
+  .settings-page {
+    &__content {
+      gap: 1rem;
+    }
+  }
+
+  .settings-card {
+    &__header {
+      margin-bottom: 1rem;
+    }
+
+    &__title {
+      font-size: 1.125rem;
+    }
+  }
+}

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useUser } from '../hooks/useUser';
+import { useTranslation } from '../hooks/useTranslation';
 import { createPlaylistTemplate, CreatePlaylistTemplatePayload } from '../services/playlistService';
 import { Button, Card, LoadingSpinner } from '../components/ui';
 import Layout from '../components/ui/Layout';
@@ -25,6 +26,7 @@ interface SectionItem {
 const CreatePlaylistTemplatePage: React.FC = () => {
   const { user, token, refreshToken } = useUser();
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [sections, setSections] = useState<SectionItem[]>([
@@ -50,7 +52,7 @@ const CreatePlaylistTemplatePage: React.FC = () => {
 
   const removeSection = (id: string) => {
     if (sections.length === 1) {
-      toast.error('Template must have at least one section');
+      toast.error(t('createPlaylistTemplate.atLeastOneSection'));
       return;
     }
     setSections(prev => prev.filter(section => section.id !== id));
@@ -85,15 +87,15 @@ const CreatePlaylistTemplatePage: React.FC = () => {
     setError(null);
     
     if (!title.trim()) {
-      setError('Template title is required');
-      toast.error('Template title is required');
+      setError(t('createPlaylistTemplate.templateTitleRequired'));
+      toast.error(t('createPlaylistTemplate.templateTitleRequired'));
       return;
     }
     
     const validSections = sections.filter(s => s.title.trim() !== '');
     if (validSections.length === 0) {
-      setError('At least one section with a title is required');
-      toast.error('At least one section with a title is required');
+      setError(t('createPlaylistTemplate.atLeastOneSectionTitle'));
+      toast.error(t('createPlaylistTemplate.atLeastOneSectionTitle'));
       return;
     }
     
@@ -114,15 +116,15 @@ const CreatePlaylistTemplatePage: React.FC = () => {
           sections: validSections.map(s => s.title.trim()),
         };
         await createPlaylistTemplate(payload, token);
-        toast.success('Template created successfully');
+        toast.success(t('createPlaylistTemplate.templateCreated'));
         navigate(`/choir/${user.choirId}/playlist-templates`);
       } catch (err) {
         if (err instanceof Error) {
           setError(err.message);
           toast.error(err.message);
         } else {
-          setError('An unexpected error occurred.');
-          toast.error('An unexpected error occurred.');
+          setError(t('createPlaylistTemplate.unexpectedError'));
+          toast.error(t('createPlaylistTemplate.unexpectedError'));
         }
         console.error(err);
       } finally {
@@ -153,9 +155,9 @@ const CreatePlaylistTemplatePage: React.FC = () => {
                 onClick={() => navigate(-1)}
                 className="back-button"
               >
-                Back
+                {t('common.back')}
               </Button>
-              <h1 className="page-title">Create Playlist Template</h1>
+              <h1 className="page-title">{t('createPlaylistTemplate.title')}</h1>
             </div>
           </div>
         </div>
@@ -171,27 +173,27 @@ const CreatePlaylistTemplatePage: React.FC = () => {
               
               {/* Basic Information */}
               <div className="form-section">
-                <h2 className="section-title">Basic Information</h2>
+                <h2 className="section-title">{t('createPlaylistTemplate.basicInformation')}</h2>
                 
                 <div className="form-group">
-                  <label className="form-label">Template Title *</label>
+                  <label className="form-label">{t('createPlaylistTemplate.templateTitle')} *</label>
                   <input
                     type="text"
                     value={title}
                     onChange={(e) => setTitle(e.target.value)}
                     className="form-input"
-                    placeholder="e.g., Sunday Service, Christmas Special"
+                    placeholder={t('createPlaylistTemplate.templateTitlePlaceholder')}
                     required
                   />
                 </div>
                 
                 <div className="form-group">
-                  <label className="form-label">Description</label>
+                  <label className="form-label">{t('createPlaylistTemplate.description')}</label>
                   <textarea
                     value={description}
                     onChange={(e) => setDescription(e.target.value)}
                     className="form-textarea"
-                    placeholder="Optional description for this template..."
+                    placeholder={t('createPlaylistTemplate.descriptionPlaceholder')}
                     rows={3}
                   />
                 </div>
@@ -200,7 +202,7 @@ const CreatePlaylistTemplatePage: React.FC = () => {
               {/* Sections */}
               <div className="form-section">
                 <div className="sections-header">
-                  <h2 className="section-title">Sections</h2>
+                  <h2 className="section-title">{t('createPlaylistTemplate.sections')}</h2>
                   <Button
                     type="button"
                     variant="ghost"
@@ -208,7 +210,7 @@ const CreatePlaylistTemplatePage: React.FC = () => {
                     onClick={addSection}
                     className="add-section-button"
                   >
-                    Add Section
+                    {t('createPlaylistTemplate.addSection')}
                   </Button>
                 </div>
                 
@@ -225,7 +227,7 @@ const CreatePlaylistTemplatePage: React.FC = () => {
                           value={section.title}
                           onChange={(e) => handleSectionChange(section.id, e.target.value)}
                           className="form-input"
-                          placeholder={`Section ${index + 1}`}
+                          placeholder={t('createPlaylistTemplate.sectionPlaceholder', { number: index + 1 })}
                         />
                       </div>
                       
@@ -235,7 +237,7 @@ const CreatePlaylistTemplatePage: React.FC = () => {
                           onClick={() => moveSectionUp(section.id)}
                           disabled={!canMoveUp(section.id)}
                           className="control-button"
-                          title="Move up"
+                          title={t('createPlaylistTemplate.moveUp')}
                         >
                           <ChevronUpIcon />
                         </button>
@@ -245,7 +247,7 @@ const CreatePlaylistTemplatePage: React.FC = () => {
                           onClick={() => moveSectionDown(section.id)}
                           disabled={!canMoveDown(section.id)}
                           className="control-button"
-                          title="Move down"
+                          title={t('createPlaylistTemplate.moveDown')}
                         >
                           <ChevronDownIcon />
                         </button>
@@ -255,7 +257,7 @@ const CreatePlaylistTemplatePage: React.FC = () => {
                           onClick={() => removeSection(section.id)}
                           disabled={sections.length === 1}
                           className="control-button danger"
-                          title="Remove section"
+                          title={t('createPlaylistTemplate.removeSection')}
                         >
                           <XMarkIcon />
                         </button>
@@ -267,7 +269,7 @@ const CreatePlaylistTemplatePage: React.FC = () => {
                 <div className="sections-help">
                   <p>
                     <DocumentTextIcon className="help-icon" />
-                    Create sections to organize your playlist. Common sections include: Opening, Worship, Offertory, Closing.
+                    {t('createPlaylistTemplate.sectionsHelp')}
                   </p>
                 </div>
               </div>
@@ -280,7 +282,7 @@ const CreatePlaylistTemplatePage: React.FC = () => {
                   onClick={() => navigate(-1)}
                   disabled={loading}
                 >
-                  Cancel
+                  {t('common.cancel')}
                 </Button>
                 <Button
                   type="submit"
@@ -291,10 +293,10 @@ const CreatePlaylistTemplatePage: React.FC = () => {
                   {loading ? (
                     <>
                       <LoadingSpinner size="sm" />
-                      Creating...
+                      {t('createPlaylistTemplate.creating')}
                     </>
                   ) : (
-                    'Create Template'
+                    t('createPlaylistTemplate.createTemplate')
                   )}
                 </Button>
               </div>

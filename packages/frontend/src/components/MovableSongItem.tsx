@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { PlaylistSong, PlaylistSection } from '../types/playlist';
 import { SongDto } from '../types/song';
+import { useTranslation } from '../hooks/useTranslation';
 import styles from './MovableSongItem.module.scss';
 
 interface MovableSongItemProps {
@@ -25,6 +26,7 @@ const MovableSongItem: React.FC<MovableSongItemProps> = ({
 }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   // Get song data using the unified song model
   let title: string | undefined;
@@ -57,27 +59,27 @@ const MovableSongItem: React.FC<MovableSongItemProps> = ({
           href={`/songs/${songId}`}
           onClick={e => handleNavigate(e, songId!)}
           tabIndex={0}
-          aria-label={`View details for ${title}`}
+          aria-label={t('movableSongItem.viewDetails', { title })}
         >
           {title}
         </a>
       ) : (
         <span
           style={{ color: '#b5b5b5', fontStyle: 'italic', padding: '8px 0', width: '100%', textAlign: 'center' }}
-          aria-label="Unknown Song"
+          aria-label={t('movableSongItem.unknownSong')}
         >
-          Unknown Song
+          {t('movableSongItem.unknownSong')}
         </span>
       )}
       <div className={styles['song-actions']}>
         <button className="button is-small" type="button" onClick={openModal}>
-          Move To
+          {t('movableSongItem.moveTo')}
         </button>
         <button
           className="delete is-small ml-2"
           type="button"
           onClick={onRemoveSong}
-          aria-label="Remove song from section"
+          aria-label={t('movableSongItem.removeSong')}
         ></button>
       </div>
 
@@ -88,8 +90,8 @@ const MovableSongItem: React.FC<MovableSongItemProps> = ({
           <div className="bottom-sheet-modal animate-up">
             <div className="bottom-sheet-drag-handle"></div>
             <div className="bottom-sheet-header">
-              <span className="bottom-sheet-title">Move Song To</span>
-              <button className="bottom-sheet-close" aria-label="close" onClick={closeModal}>
+              <span className="bottom-sheet-title">{t('movableSongItem.moveSongTo')}</span>
+              <button className="bottom-sheet-close" aria-label={t('common.close')} onClick={closeModal}>
                 <span aria-hidden="true">&times;</span>
               </button>
             </div>
@@ -108,7 +110,7 @@ const MovableSongItem: React.FC<MovableSongItemProps> = ({
               </ul>
             </div>
             <div className="bottom-sheet-footer">
-              <button className="bottom-sheet-cancel-btn" onClick={closeModal}>Cancel</button>
+              <button className="bottom-sheet-cancel-btn" onClick={closeModal}>{t('common.cancel')}</button>
             </div>
           </div>
 

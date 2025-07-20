@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useUser } from '../hooks/useUser';
+import { useTranslation } from '../hooks/useTranslation';
 import { createPlaylist, getPlaylistTemplatesByChoirId, getPlaylistTemplateById } from '../services/playlistService';
 import { getSongsForChoir, searchSongs } from '../services/songService';
 import { PlaylistTemplate, PlaylistSection, PlaylistSong } from '../types/playlist';
@@ -10,6 +11,7 @@ import styles from './CreatePlaylistPage.module.scss';
 
 const CreatePlaylistPage: React.FC = () => {
   const { user, token } = useUser();
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [title, setTitle] = useState('');
   const [isPublic, setIsPublic] = useState(false);
@@ -106,7 +108,7 @@ const CreatePlaylistPage: React.FC = () => {
     // Only persist if there is at least one song in any section
     const hasSongs = sections.some(section => section.songs.length > 0);
     if (!hasSongs) {
-      alert('Add at least one song before saving the playlist.');
+      alert(t('createPlaylist.addSongValidation'));
       return;
     }
     if (user?.choirId && token) {
@@ -122,10 +124,10 @@ const CreatePlaylistPage: React.FC = () => {
 
   return (
     <div className={styles.pageContainer}>
-      <h1 className={styles.title}>New Playlist</h1>
+      <h1 className={styles.title}>{t('createPlaylist.title')}</h1>
       <form className={styles.form} onSubmit={handleSubmit}>
         <div className={styles.formGroup}>
-          <label className={styles.label}>Title</label>
+          <label className={styles.label}>{t('createPlaylist.formTitle')}</label>
           <input
             className={styles.input}
             type="text"
@@ -134,7 +136,7 @@ const CreatePlaylistPage: React.FC = () => {
           />
         </div>
         <div className={styles.formGroup}>
-          <label className={styles.label}>Date</label>
+          <label className={styles.label}>{t('createPlaylist.formDate')}</label>
           <input
             className={styles.input}
             type="date"
@@ -143,13 +145,13 @@ const CreatePlaylistPage: React.FC = () => {
           />
         </div>
         <div className={styles.formGroup}>
-          <label className={styles.label}>Template</label>
+          <label className={styles.label}>{t('createPlaylist.formTemplate')}</label>
           <div className={styles.select}>
             <select
               value={selectedTemplate?.id || ''}
               onChange={(e) => handleTemplateChange(e.target.value)}
             >
-              <option value="">No Template</option>
+              <option value="">{t('createPlaylist.noTemplate')}</option>
               {templates.map((template) => (
                 <option key={template.id} value={template.id}>
                   {template.title}
@@ -165,19 +167,19 @@ const CreatePlaylistPage: React.FC = () => {
               checked={isPublic}
               onChange={(e) => setIsPublic(e.target.checked)}
             />
-            Public
+            {t('createPlaylist.public')}
           </label>
         </div>
         <div className={styles.formGroup}>
           <button className={styles.button} type="submit">
-            Create
+            {t('createPlaylist.create')}
           </button>
         </div>
       </form>
 
       {selectedTemplate && (
         <div>
-          <h2 className={styles.sectionTitle}>Sections</h2>
+          <h2 className={styles.sectionTitle}>{t('createPlaylist.sections')}</h2>
           {sections.map((section) => (
             <div key={section.id} className={styles.sectionBox}>
               <h3 className={styles.sectionTitle}>{section.title}</h3>
@@ -197,7 +199,7 @@ const CreatePlaylistPage: React.FC = () => {
               <div className={styles.addSongRow}>
                 <div className={styles.select}>
                   <select onChange={(e) => handleAddSongToSection(section.id, e.target.value)}>
-                    <option>Select a song</option>
+                    <option>{t('createPlaylist.selectSong')}</option>
                     {choirSongs.map(song => (
                       <option key={song.songId} value={song.songId}>{song.title}</option>
                     ))}

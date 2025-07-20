@@ -7,6 +7,7 @@ import {
   ExclamationTriangleIcon
 } from '@heroicons/react/24/outline';
 import './InviteMemberEnhanced.scss';
+import { useTranslation } from '../../hooks/useTranslation';
 
 interface InviteMemberEnhancedProps {
   onInviteMember: (email: string) => void;
@@ -17,6 +18,7 @@ const InviteMemberEnhanced: React.FC<InviteMemberEnhancedProps> = ({
   onInviteMember, 
   isLoading = false 
 }) => {
+  const { t } = useTranslation();
   const [email, setEmail] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
@@ -32,12 +34,12 @@ const InviteMemberEnhanced: React.FC<InviteMemberEnhancedProps> = ({
     setSuccess(false);
     
     if (!email.trim()) {
-      setError('Email address is required');
+      setError(t('inviteMemberEnhanced.emailRequired'));
       return;
     }
     
     if (!validateEmail(email)) {
-      setError('Please enter a valid email address');
+      setError(t('inviteMemberEnhanced.emailInvalid'));
       return;
     }
 
@@ -47,7 +49,7 @@ const InviteMemberEnhanced: React.FC<InviteMemberEnhancedProps> = ({
       setSuccess(true);
       setTimeout(() => setSuccess(false), 3000); // Clear success message after 3 seconds
     } catch (err: any) {
-      setError(err.message || 'Failed to send invitation');
+      setError(err.message || t('inviteMemberEnhanced.invitationFailed'));
     }
   };
 
@@ -64,15 +66,15 @@ const InviteMemberEnhanced: React.FC<InviteMemberEnhancedProps> = ({
           <UserPlusIcon />
         </div>
         <div className="invite-title">
-          <h3>Invite New Member</h3>
-          <p>Send an invitation to join your choir</p>
+          <h3>{t('inviteMemberEnhanced.title')}</h3>
+          <p>{t('inviteMemberEnhanced.subtitle')}</p>
         </div>
       </div>
 
       <form onSubmit={handleSubmit} className="invite-form">
         <div className="form-group">
           <label htmlFor="email-input" className="form-label">
-            Email Address
+            {t('inviteMemberEnhanced.emailLabel')}
           </label>
           <div className="input-container">
             <div className="input-icon">
@@ -82,7 +84,7 @@ const InviteMemberEnhanced: React.FC<InviteMemberEnhancedProps> = ({
               id="email-input"
               type="email"
               className={`form-input ${error ? 'error' : ''} ${success ? 'success' : ''}`}
-              placeholder="Enter member's email address"
+              placeholder={t('inviteMemberEnhanced.emailPlaceholder')}
               value={email}
               onChange={handleEmailChange}
               disabled={isLoading}
@@ -100,7 +102,7 @@ const InviteMemberEnhanced: React.FC<InviteMemberEnhancedProps> = ({
           {success && (
             <div className="form-message success">
               <CheckIcon className="message-icon" />
-              <span>Invitation sent successfully!</span>
+              <span>{t('inviteMemberEnhanced.invitationSuccess')}</span>
             </div>
           )}
         </div>
@@ -113,14 +115,13 @@ const InviteMemberEnhanced: React.FC<InviteMemberEnhancedProps> = ({
           leftIcon={<UserPlusIcon />}
           className="invite-button"
         >
-          {isLoading ? 'Sending...' : 'Send Invitation'}
+          {isLoading ? t('inviteMemberEnhanced.sending') : t('inviteMemberEnhanced.sendInvitation')}
         </Button>
       </form>
 
       <div className="invite-help">
         <p>
-          <strong>Note:</strong> The invited user will receive an email with instructions 
-          to join your choir. They'll need to create an account if they don't have one.
+          <strong>{t('inviteMemberEnhanced.noteTitle')}</strong> {t('inviteMemberEnhanced.noteText')}
         </p>
       </div>
     </Card>

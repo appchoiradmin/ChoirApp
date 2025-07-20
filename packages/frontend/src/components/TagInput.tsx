@@ -1,6 +1,7 @@
 import React, { useState, KeyboardEvent, useEffect, useContext } from 'react';
 import { UserContext } from '../contexts/UserContext';
 import { getAllTags } from '../services/songService';
+import { useTranslation } from '../hooks/useTranslation';
 import type { TagDto } from '../types/song';
 
 interface TagInputProps {
@@ -13,6 +14,7 @@ const TagInput: React.FC<TagInputProps> = ({ tags, setTags }) => {
   const [suggestions, setSuggestions] = useState<TagDto[]>([]);
   const userContext = useContext(UserContext);
   const token = userContext?.token;
+  const { t } = useTranslation();
 
   useEffect(() => {
     const fetchTags = async () => {
@@ -71,7 +73,7 @@ const TagInput: React.FC<TagInputProps> = ({ tags, setTags }) => {
           value={inputValue}
           onChange={handleInputChange}
           onKeyDown={handleInputKeyDown}
-          placeholder="Add a tag"
+          placeholder={t('tagInput.placeholder')}
           list="tag-suggestions"
         />
         <datalist id="tag-suggestions">

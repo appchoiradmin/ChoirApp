@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useUser } from '../hooks/useUser';
+import { useTranslation } from '../hooks/useTranslation';
 import { getPlaylistTemplatesByChoirId, deletePlaylistTemplate, setPlaylistTemplateDefault } from '../services/playlistService';
 import { PlaylistTemplate } from '../types/playlist';
 import { Button, Card, LoadingSpinner, Navigation } from '../components/ui';
@@ -34,6 +35,7 @@ const TemplateCard: React.FC<TemplateCardProps> = ({
   onDropdownToggle,
 }) => {
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   const handleCardClick = (e: React.MouseEvent) => {
     if ((e.target as HTMLElement).closest('input, button')) {
@@ -47,7 +49,7 @@ const TemplateCard: React.FC<TemplateCardProps> = ({
       <Card.Header>
         <div className="card-title-container">
           {template.isDefault && (
-            <StarIconSolid className="default-star-icon" title="Default template" />
+            <StarIconSolid className="default-star-icon" title={t('playlistTemplates.defaultTemplate')} />
           )}
           <h3 className="card-title">{template.title}</h3>
         </div>
@@ -75,7 +77,7 @@ const TemplateCard: React.FC<TemplateCardProps> = ({
                   }}
                 >
                   <StarIcon className="icon" />
-                  Set as Default
+                  {t('playlistTemplates.setAsDefault')}
                 </Button>
               )}
               <Button
@@ -87,7 +89,7 @@ const TemplateCard: React.FC<TemplateCardProps> = ({
                 }}
               >
                 <PencilIcon className="icon" />
-                Edit
+                {t('playlistTemplates.edit')}
               </Button>
               <Button
                 variant="ghost"
@@ -98,7 +100,7 @@ const TemplateCard: React.FC<TemplateCardProps> = ({
                 }}
               >
                 <TrashIcon className="icon" />
-                Delete
+                {t('playlistTemplates.delete')}
               </Button>
             </div>
           )}
@@ -110,11 +112,11 @@ const TemplateCard: React.FC<TemplateCardProps> = ({
       <Card.Footer>
         <div className="card-footer-content">
           <span className="section-count">
-            {template.sections.length} section{template.sections.length !== 1 ? 's' : ''}
+            {t('playlistTemplates.sectionCount', { count: template.sections.length })}
           </span>
           {template.isDefault && (
             <span className="default-badge">
-              <StarIconSolid className="badge-icon" /> Default
+              <StarIconSolid className="badge-icon" /> {t('playlistTemplates.default')}
             </span>
           )}
         </div>
@@ -126,6 +128,7 @@ const TemplateCard: React.FC<TemplateCardProps> = ({
 const PlaylistTemplatesPage: React.FC = () => {
   const { choirId } = useParams<{ choirId: string }>();
   const { token, setChoirId } = useUser();
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [templates, setTemplates] = useState<PlaylistTemplate[]>([]);
   const [loading, setLoading] = useState(true);
@@ -143,8 +146,8 @@ const PlaylistTemplatesPage: React.FC = () => {
           const fetchedTemplates = await getPlaylistTemplatesByChoirId(choirId, token);
           setTemplates(fetchedTemplates);
         } catch (err: any) {
-          setError(err.message || 'Failed to fetch playlist templates');
-          toast.error('Failed to fetch playlist templates');
+          setError(err.message || t('playlistTemplates.failedToFetchTemplates'));
+          toast.error(t('playlistTemplates.failedToFetchTemplates'));
         } finally {
           setLoading(false);
         }
@@ -169,13 +172,13 @@ const PlaylistTemplatesPage: React.FC = () => {
     const template = templates.find(t => t.id === templateId);
     if (!template) return;
 
-    if (window.confirm(`Are you sure you want to delete the template "${template.title}"?`)) {
+    if (window.confirm(t('playlistTemplates.deleteConfirmation', { title: template.title }))) {
       try {
         await deletePlaylistTemplate(templateId, token);
         setTemplates(prev => prev.filter(t => t.id !== templateId));
-        toast.success('Template deleted successfully');
+        toast.success(t('playlistTemplates.templateDeleted'));
       } catch (err: any) {
-        toast.error('Failed to delete template');
+        toast.error(t('playlistTemplates.failedToDeleteTemplate'));
       }
     }
   };
@@ -194,9 +197,9 @@ const PlaylistTemplatesPage: React.FC = () => {
 
       // Call API to update the default template
       await setPlaylistTemplateDefault(templateId, true, token);
-      toast.success('Default template updated successfully');
+      toast.success(t('playlistTemplates.defaultTemplateUpdated'));
     } catch (err: any) {
-      toast.error('Failed to set default template');
+      toast.error(t('playlistTemplates.failedToSetDefault'));
       
       // Revert optimistic update on failure
       if (choirId) {
@@ -209,11 +212,11 @@ const PlaylistTemplatesPage: React.FC = () => {
   if (loading) {
     return (
       <Layout
-        navigation={<Navigation title="Playlist Templates" showBackButton={true} />}
+        navigation={<Navigation title={t('playlistTemplates.title')} showBackButton={true} />}
       >
         <div className="templates-container">
           <LoadingSpinner size="lg" />
-          <p className="loading-text">Loading templates...</p>
+          <p className="loading-text">{t('playlistTemplates.loadingTemplates')}</p>
         </div>
       </Layout>
     );
@@ -222,14 +225,14 @@ const PlaylistTemplatesPage: React.FC = () => {
   if (error) {
     return (
       <Layout
-        navigation={<Navigation title="Playlist Templates" showBackButton={true} />}
+        navigation={<Navigation title={t('playlistTemplates.title')} showBackButton={true} />}
       >
         <div className="templates-container">
           <div className="error-state">
-            <h2>Error loading templates</h2>
+            <h2>{t('playlistTemplates.errorLoadingTemplates')}</h2>
             <p>{error}</p>
             <Button onClick={() => window.location.reload()}>
-              Try Again
+              {t('playlistTemplates.tryAgain')}
             </Button>
           </div>
         </div>
@@ -239,7 +242,7 @@ const PlaylistTemplatesPage: React.FC = () => {
 
   return (
     <Layout
-      navigation={<Navigation title="Playlist Templates" showBackButton={true} />}
+      navigation={<Navigation title={t('playlistTemplates.title')} showBackButton={true} />}
     >
       <div className="playlist-templates-page">
         <div className="page-header">
@@ -247,7 +250,7 @@ const PlaylistTemplatesPage: React.FC = () => {
             <div className="stats-container">
               <Card className="stat-card">
                 <p className="stat-value">{templates.length}</p>
-                <p className="stat-label">Templates</p>
+                <p className="stat-label">{t('playlistTemplates.templates')}</p>
               </Card>
             </div>
             
@@ -255,7 +258,7 @@ const PlaylistTemplatesPage: React.FC = () => {
               <MagnifyingGlassIcon className="search-icon" />
               <input
                 type="text"
-                placeholder="Search templates..."
+                placeholder={t('playlistTemplates.searchTemplatesPlaceholder')}
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="search-input"
@@ -268,7 +271,7 @@ const PlaylistTemplatesPage: React.FC = () => {
               onClick={() => navigate('/playlist-templates/new')}
             >
               <PlusIcon className="btn-icon" />
-              New Template
+              {t('playlistTemplates.newTemplate')}
             </Button>
           </div>
         </div>
@@ -276,14 +279,14 @@ const PlaylistTemplatesPage: React.FC = () => {
         {filteredTemplates.length === 0 ? (
           <div className="empty-state">
             <DocumentTextIcon className="empty-icon" />
-            <h3>No templates found</h3>
-            <p>{templates.length > 0 ? 'Try adjusting your search' : 'Create your first template to get started'}</p>
+            <h3>{t('playlistTemplates.noTemplatesFound')}</h3>
+            <p>{templates.length > 0 ? t('playlistTemplates.tryAdjustingSearch') : t('playlistTemplates.createFirstTemplate')}</p>
             <Button
               variant="primary"
               onClick={() => navigate('/playlist-templates/new')}
             >
               <PlusIcon className="btn-icon" />
-              Create Template
+              {t('playlistTemplates.createTemplate')}
             </Button>
           </div>
         ) : (

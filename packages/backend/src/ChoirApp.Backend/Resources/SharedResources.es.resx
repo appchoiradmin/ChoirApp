@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  
+  <!-- Error Messages -->
+  <data name="UserNotAuthenticated" xml:space="preserve">
+    <value>Usuario no autenticado correctamente.</value>
+  </data>
+  <data name="ChoirNotFound" xml:space="preserve">
+    <value>Coro no encontrado.</value>
+  </data>
+  <data name="SongNotFound" xml:space="preserve">
+    <value>Canción no encontrada.</value>
+  </data>
+  <data name="PlaylistNotFound" xml:space="preserve">
+    <value>Lista de reproducción no encontrada.</value>
+  </data>
+  <data name="UnauthorizedAccess" xml:space="preserve">
+    <value>No estás autorizado para realizar esta acción.</value>
+  </data>
+  <data name="ValidationError" xml:space="preserve">
+    <value>Por favor verifica tu entrada e intenta de nuevo.</value>
+  </data>
+  <data name="ServerError" xml:space="preserve">
+    <value>Ocurrió un error interno del servidor. Por favor intenta más tarde.</value>
+  </data>
+  <data name="NetworkError" xml:space="preserve">
+    <value>Error de red. Por favor verifica tu conexión.</value>
+  </data>
+  
+  <!-- Success Messages -->
+  <data name="ChoirCreated" xml:space="preserve">
+    <value>Coro creado exitosamente.</value>
+  </data>
+  <data name="SongAdded" xml:space="preserve">
+    <value>Canción agregada exitosamente.</value>
+  </data>
+  <data name="PlaylistUpdated" xml:space="preserve">
+    <value>Lista de reproducción actualizada exitosamente.</value>
+  </data>
+  <data name="InvitationSent" xml:space="preserve">
+    <value>Invitación enviada exitosamente.</value>
+  </data>
+  
+  <!-- Validation Messages -->
+  <data name="RequiredField" xml:space="preserve">
+    <value>Este campo es requerido.</value>
+  </data>
+  <data name="InvalidEmail" xml:space="preserve">
+    <value>Por favor ingresa una dirección de email válida.</value>
+  </data>
+  <data name="ChoirNameTooShort" xml:space="preserve">
+    <value>El nombre del coro debe tener al menos 3 caracteres.</value>
+  </data>
+  <data name="SongTitleRequired" xml:space="preserve">
+    <value>El título de la canción es requerido.</value>
+  </data>
+</root>

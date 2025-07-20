@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Outlet, useParams, useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { PlaylistProvider } from '../context/PlaylistContext';
 import BottomNavigation from '../components/BottomNavigation';
 import DatePicker from '../components/DatePicker';
@@ -34,6 +35,7 @@ const ChoirDashboardPage: React.FC = () => {
   const { choirId } = useParams<{ choirId: string }>();
   const { user, token } = useUser();
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
     const isAdmin = user?.choirs.some(c => c.id === choirId && c.role === UserRole.ChoirAdmin);
 
@@ -57,12 +59,12 @@ const ChoirDashboardPage: React.FC = () => {
   }, [choirId, token]);
 
   const tabs = [
-    { name: 'Songs', path: `/choir/${choirId}/songs`, icon: <MusicalNoteIcon /> },
-    { name: 'Playlists', path: `/choir/${choirId}/playlists`, icon: <QueueListIcon /> },
+    { name: t('choirDashboard.songs'), path: `/choir/${choirId}/songs`, icon: <MusicalNoteIcon /> },
+    { name: t('choirDashboard.playlists'), path: `/choir/${choirId}/playlists`, icon: <QueueListIcon /> },
   ];
 
   if (isAdmin) {
-    tabs.push({ name: 'Admin', path: `/choir/${choirId}/admin`, icon: <Cog6ToothIcon /> }); // Add Admin as the last tab
+    tabs.push({ name: t('choirDashboard.admin'), path: `/choir/${choirId}/admin`, icon: <Cog6ToothIcon /> }); // Add Admin as the last tab
   }
 
   return (
@@ -70,7 +72,7 @@ const ChoirDashboardPage: React.FC = () => {
       <Layout
         navigation={
           <Navigation 
-            title={loading ? 'Loading...' : choir?.name || 'Choir Dashboard'}
+            title={loading ? t('choirDashboard.loading') : choir?.name || t('choirDashboard.choirDashboard')}
             showBackButton={true} 
             onBackClick={() => navigate('/dashboard')}
           />
@@ -80,7 +82,7 @@ const ChoirDashboardPage: React.FC = () => {
         <div className={styles['choir-dashboard-root']}>
           {/* Shared Date Picker */}
           <div className={styles['date-picker-container']}>
-            <label className={styles.label} htmlFor="playlist-date-picker">Select Date</label>
+            <label className={styles.label} htmlFor="playlist-date-picker">{t('choirDashboard.selectDate')}</label>
             <DatePicker
               selected={selectedDate}
               onChange={date => setSelectedDate(date || getNextSunday())}

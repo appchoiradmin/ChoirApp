@@ -1,4 +1,5 @@
 import React, { useState, useContext } from 'react';
+import { useTranslation } from 'react-i18next';
 import { getNextSunday } from '../utils/getNextSunday';
 import { PlaylistProvider } from '../context/PlaylistContext';
 import PlaylistsPage from './PlaylistsPage';
@@ -11,6 +12,7 @@ const ChoirPlaylistsTab: React.FC = () => {
   const { choirId } = useParams<{ choirId: string }>();
   const { user, loading } = useUser();
   const sharedDateContext = useContext(SharedDateContext);
+  const { t } = useTranslation();
   
   // Local state for when not using shared context (standalone route)
   const [localSelectedDate, setLocalSelectedDate] = useState<Date | null>(getNextSunday());
@@ -25,8 +27,8 @@ const ChoirPlaylistsTab: React.FC = () => {
   if (loading) {
     return (
       <div>
-        <div className="title">Playlists</div>
-        <div>Loading user authentication...</div>
+        <div className="title">{t('choirPlaylistsTab.playlists')}</div>
+        <div>{t('choirPlaylistsTab.loadingUserAuth')}</div>
       </div>
     );
   }
@@ -36,13 +38,13 @@ const ChoirPlaylistsTab: React.FC = () => {
       {/* Only show date picker when not in shared context */}
       {!sharedDateContext && (
         <div className="mb-4" style={{ maxWidth: 280 }}>
-          <label className="label" htmlFor="playlist-date-picker">Select Date</label>
+          <label className="label" htmlFor="playlist-date-picker">{t('choirPlaylistsTab.selectDate')}</label>
           <DatePicker
             selected={selectedDate}
             onChange={date => { if (date) setSelectedDate(date); }}
             className="input"
           />
-          <p className="help">(Changing the date will show playlists for that date.)</p>
+          <p className="help">{t('choirPlaylistsTab.dateHelp')}</p>
         </div>
       )}
       
