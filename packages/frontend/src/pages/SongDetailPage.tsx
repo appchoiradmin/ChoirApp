@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
-import { getSongById, createSongVersion, getSongsForChoir, createSong } from '../services/songService';
-import type { SongDto, CreateSongDto } from '../types/song';
+import { getSongById, createSongVersion, getSongsForChoir, createSong, updateSong, updateSongVisibility } from '../services/songService';
+import type { SongDto, CreateSongDto, UpdateSongDto, UpdateSongVisibilityDto, CreateSongVersionDto } from '../types/song';
 import { SongVisibilityType } from '../types/song';
 import { useUser } from '../hooks/useUser';
 import ChordProViewer from '../components/ChordProViewer';
@@ -28,7 +28,21 @@ const SongDetailPage: React.FC = () => {
   const [title, setTitle] = useState('');
   const [artist, setArtist] = useState('');
   const [chordProContent, setChordProContent] = useState('');
-  const [visibility, setVisibility] = useState<typeof SongVisibilityType.PublicAll>(SongVisibilityType.PublicAll);
+  const [visibility, setVisibility] = useState<SongVisibilityType>(SongVisibilityType.PublicAll);
+  
+  // Edit mode states
+  const [isEditMode, setIsEditMode] = useState<boolean>(false);
+  const [isVersionMode, setIsVersionMode] = useState<boolean>(false);
+  const [editTitle, setEditTitle] = useState('');
+  const [editArtist, setEditArtist] = useState('');
+  const [editContent, setEditContent] = useState('');
+  const [editVisibility, setEditVisibility] = useState<SongVisibilityType>(SongVisibilityType.PublicAll);
+  const [selectedChoirsForVersion, setSelectedChoirsForVersion] = useState<string[]>([]);
+  const [selectedChoirsForEdit, setSelectedChoirsForEdit] = useState<string[]>([]);
+  const [selectedChoirsForCreate, setSelectedChoirsForCreate] = useState<string[]>([]);
+  const [choirFilter, setChoirFilter] = useState<string>('');
+  const [editChoirFilter, setEditChoirFilter] = useState<string>('');
+  const [createChoirFilter, setCreateChoirFilter] = useState<string>('');
 
   useEffect(() => {
     const fetchSong = async () => {
@@ -46,6 +60,12 @@ const SongDetailPage: React.FC = () => {
         const data = await getSongById(songId, user.token);
         console.log('Song data:', data);
         setSong(data);
+        
+        // Initialize edit form with current song data
+        setEditTitle(data.title);
+        setEditArtist(data.artist || '');
+        setEditContent(data.content);
+        setEditVisibility(data.visibility);
       } catch (err) {
         if (err instanceof Error && err.message === 'Song not found') {
           setSong(null);
@@ -85,30 +105,87 @@ const SongDetailPage: React.FC = () => {
   }, [songId, song, user]);
 
   const handleCreateVersion = async () => {
-    if (!songId || !user?.token || !user?.choirId || !selectedChoirId) {
+    if (!songId || !user?.token) {
       return;
     }
 
     setIsProcessing(true);
     try {
-      const newVersion = await createSongVersion(
-        songId,
-        {
-          content: song?.content || '',
-          visibility: SongVisibilityType.PublicChoirs,
-          visibleToChoirs: [selectedChoirId]
-        },
-        user.token
-      );
-
-      navigate(`/songs/${newVersion.songId}/edit`);
+      const versionDto: CreateSongVersionDto = {
+        content: editContent || song?.content || '',
+        visibility: editVisibility,
+        visibleToChoirs: selectedChoirsForVersion
+      };
+      
+      const newVersion = await createSongVersion(songId, versionDto, user.token);
+      navigate(`/songs/${newVersion.songId}`);
     } catch (err) {
       console.error('Error creating song version:', err);
       setError('Failed to create song version');
     } finally {
       setIsProcessing(false);
+      setIsVersionMode(false);
     }
   };
+
+  const handleUpdateSong = async () => {
+    if (!songId || !user?.token) {
+      return;
+    }
+
+    setIsProcessing(true);
+    try {
+      const updateDto: UpdateSongDto = {
+        title: editTitle,
+        artist: editArtist,
+        content: editContent
+      };
+      
+      const updatedSong = await updateSong(songId, updateDto, user.token);
+      
+      // Update visibility if it changed
+      if (editVisibility !== song?.visibility) {
+        const visibilityDto: UpdateSongVisibilityDto = {
+          visibility: editVisibility,
+          visibleToChoirs: editVisibility === SongVisibilityType.PublicChoirs ? selectedChoirsForEdit : undefined
+        };
+        await updateSongVisibility(songId, visibilityDto, user.token);
+      }
+      
+      setSong({ ...updatedSong, visibility: editVisibility });
+      setIsEditMode(false);
+    } catch (err) {
+      console.error('Error updating song:', err);
+      setError('Failed to update song');
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  const handleStartEdit = () => {
+    setIsEditMode(true);
+    setEditTitle(song?.title || '');
+    setEditArtist(song?.artist || '');
+    setEditContent(song?.content || '');
+    setEditVisibility(song?.visibility || SongVisibilityType.PublicAll);
+  };
+
+  const handleStartVersionCreation = () => {
+    setIsVersionMode(true);
+    setEditContent(song?.content || '');
+    setEditVisibility(SongVisibilityType.PublicChoirs);
+    setSelectedChoirsForVersion([]);
+  };
+
+  const handleCancelEdit = () => {
+    setIsEditMode(false);
+    setIsVersionMode(false);
+    setError(null);
+  };
+
+  const isCreator = user && song && user.id === song.creatorId;
+  const canEdit = isCreator;
+  const canCreateVersion = user && song;
 
   const handleCreateSong = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -123,7 +200,8 @@ const SongDetailPage: React.FC = () => {
         title,
         artist,
         content: chordProContent,
-        visibility
+        visibility,
+        visibleToChoirs: visibility === SongVisibilityType.PublicChoirs ? selectedChoirsForCreate : undefined
       };
       const createdSong = await createSong(newSong, user.token);
       navigate(`/songs/${createdSong.songId}`);
@@ -169,13 +247,106 @@ const SongDetailPage: React.FC = () => {
           <select
             id="visibility"
             value={visibility}
-            onChange={(e) => setVisibility(Number(e.target.value) as typeof SongVisibilityType.PublicAll)}
+            onChange={(e) => setVisibility(Number(e.target.value) as SongVisibilityType)}
             className={styles.select}
           >
-            <option value={SongVisibilityType.PublicAll}>Public</option>
             <option value={SongVisibilityType.Private}>Private</option>
+            <option value={SongVisibilityType.PublicAll}>Public to All</option>
+            <option value={SongVisibilityType.PublicChoirs}>Public to Choirs</option>
           </select>
         </div>
+        
+        {/* Choir selection for create form */}
+        {visibility === SongVisibilityType.PublicChoirs && user?.choirs && (
+          <div className={styles.formGroup}>
+            <label className={styles.label}>Share with Choirs ({user.choirs.length} available)</label>
+            
+            {/* Filter input for large choir lists */}
+            {user.choirs.length > 5 && (
+              <div className={styles.filterContainer}>
+                <input
+                  type="text"
+                  placeholder="Filter choirs..."
+                  value={createChoirFilter}
+                  onChange={(e) => setCreateChoirFilter(e.target.value)}
+                  className={styles.filterInput}
+                />
+              </div>
+            )}
+            
+            {/* Selected choirs summary */}
+            {selectedChoirsForCreate.length > 0 && (
+              <div className={styles.selectedSummary}>
+                <span className={styles.selectedCount}>
+                  {selectedChoirsForCreate.length} choir{selectedChoirsForCreate.length !== 1 ? 's' : ''} selected
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setSelectedChoirsForCreate([])}
+                  className={styles.clearSelection}
+                >
+                  Clear all
+                </button>
+              </div>
+            )}
+            
+            <div className={styles.choirCheckboxes}>
+              {user.choirs
+                .filter(choir => 
+                  createChoirFilter === '' || 
+                  choir.name.toLowerCase().includes(createChoirFilter.toLowerCase())
+                )
+                .map((choir) => (
+                  <label key={choir.id} className={styles.checkboxLabel}>
+                    <input
+                      type="checkbox"
+                      checked={selectedChoirsForCreate.includes(choir.id)}
+                      onChange={(e) => {
+                        if (e.target.checked) {
+                          setSelectedChoirsForCreate([...selectedChoirsForCreate, choir.id]);
+                        } else {
+                          setSelectedChoirsForCreate(selectedChoirsForCreate.filter(id => id !== choir.id));
+                        }
+                      }}
+                      className={styles.checkbox}
+                    />
+                    <span className={styles.choirName}>{choir.name}</span>
+                  </label>
+                ))
+              }
+              
+              {/* Show message when filter has no results */}
+              {createChoirFilter && user.choirs.filter(choir => 
+                choir.name.toLowerCase().includes(createChoirFilter.toLowerCase())
+              ).length === 0 && (
+                <div className={styles.noResults}>
+                  No choirs match "{createChoirFilter}"
+                </div>
+              )}
+              
+              {/* Show message when no choirs available */}
+              {user.choirs.length === 0 && (
+                <div className={styles.noChoirs}>
+                  You are not a member of any choirs yet.
+                </div>
+              )}
+            </div>
+            
+            {/* Quick select options for convenience */}
+            {user.choirs.length > 3 && (
+              <div className={styles.quickActions}>
+                <button
+                  type="button"
+                  onClick={() => setSelectedChoirsForCreate(user.choirs.map(c => c.id))}
+                  className={styles.selectAllButton}
+                  disabled={selectedChoirsForCreate.length === user.choirs.length}
+                >
+                  Select All
+                </button>
+              </div>
+            )}
+          </div>
+        )}
 
         <div className={styles.formGroup}>
           <label htmlFor="chordProContent" className={styles.label}>ChordPro Content</label>
@@ -266,63 +437,410 @@ const SongDetailPage: React.FC = () => {
     );
   }
 
+  // Render edit form for current song (creator only)
+  const renderEditForm = () => (
+    <div className={styles.editContainer}>
+      <div className={styles.editForm}>
+        <div className={styles.formGroup}>
+          <label htmlFor="editTitle" className={styles.label}>Title</label>
+          <input
+            id="editTitle"
+            type="text"
+            value={editTitle}
+            onChange={(e) => setEditTitle(e.target.value)}
+            className={styles.input}
+            placeholder="Enter song title"
+          />
+        </div>
+        
+        <div className={styles.formGroup}>
+          <label htmlFor="editArtist" className={styles.label}>Artist</label>
+          <input
+            id="editArtist"
+            type="text"
+            value={editArtist}
+            onChange={(e) => setEditArtist(e.target.value)}
+            className={styles.input}
+            placeholder="Enter artist name"
+          />
+        </div>
+        
+        <div className={styles.formGroup}>
+          <label htmlFor="editVisibility" className={styles.label}>Visibility</label>
+          <select
+            id="editVisibility"
+            value={editVisibility}
+            onChange={(e) => setEditVisibility(Number(e.target.value) as SongVisibilityType)}
+            className={styles.select}
+          >
+            <option value={SongVisibilityType.Private}>Private</option>
+            <option value={SongVisibilityType.PublicAll}>Public to All</option>
+            <option value={SongVisibilityType.PublicChoirs}>Public to Choirs</option>
+          </select>
+        </div>
+        
+        {/* Choir selection for edit form */}
+        {editVisibility === SongVisibilityType.PublicChoirs && user?.choirs && (
+          <div className={styles.formGroup}>
+            <label className={styles.label}>Share with Choirs ({user.choirs.length} available)</label>
+            
+            {/* Filter input for large choir lists */}
+            {user.choirs.length > 5 && (
+              <div className={styles.filterContainer}>
+                <input
+                  type="text"
+                  placeholder="Filter choirs..."
+                  value={editChoirFilter}
+                  onChange={(e) => setEditChoirFilter(e.target.value)}
+                  className={styles.filterInput}
+                />
+              </div>
+            )}
+            
+            {/* Selected choirs summary */}
+            {selectedChoirsForEdit.length > 0 && (
+              <div className={styles.selectedSummary}>
+                <span className={styles.selectedCount}>
+                  {selectedChoirsForEdit.length} choir{selectedChoirsForEdit.length !== 1 ? 's' : ''} selected
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setSelectedChoirsForEdit([])}
+                  className={styles.clearSelection}
+                >
+                  Clear all
+                </button>
+              </div>
+            )}
+            
+            <div className={styles.choirCheckboxes}>
+              {user.choirs
+                .filter(choir => 
+                  editChoirFilter === '' || 
+                  choir.name.toLowerCase().includes(editChoirFilter.toLowerCase())
+                )
+                .map((choir) => (
+                  <label key={choir.id} className={styles.checkboxLabel}>
+                    <input
+                      type="checkbox"
+                      checked={selectedChoirsForEdit.includes(choir.id)}
+                      onChange={(e) => {
+                        if (e.target.checked) {
+                          setSelectedChoirsForEdit([...selectedChoirsForEdit, choir.id]);
+                        } else {
+                          setSelectedChoirsForEdit(selectedChoirsForEdit.filter(id => id !== choir.id));
+                        }
+                      }}
+                      className={styles.checkbox}
+                    />
+                    <span className={styles.choirName}>{choir.name}</span>
+                  </label>
+                ))
+              }
+              
+              {/* Show message when filter has no results */}
+              {editChoirFilter && user.choirs.filter(choir => 
+                choir.name.toLowerCase().includes(editChoirFilter.toLowerCase())
+              ).length === 0 && (
+                <div className={styles.noResults}>
+                  No choirs match "{editChoirFilter}"
+                </div>
+              )}
+              
+              {/* Show message when no choirs available */}
+              {user.choirs.length === 0 && (
+                <div className={styles.noChoirs}>
+                  You are not a member of any choirs yet.
+                </div>
+              )}
+            </div>
+            
+            {/* Quick select options for convenience */}
+            {user.choirs.length > 3 && (
+              <div className={styles.quickActions}>
+                <button
+                  type="button"
+                  onClick={() => setSelectedChoirsForEdit(user.choirs.map(c => c.id))}
+                  className={styles.selectAllButton}
+                  disabled={selectedChoirsForEdit.length === user.choirs.length}
+                >
+                  Select All
+                </button>
+              </div>
+            )}
+          </div>
+        )}
+        
+        <div className={styles.formGroup}>
+          <label htmlFor="editContent" className={styles.label}>ChordPro Content</label>
+          <textarea
+            id="editContent"
+            value={editContent}
+            onChange={(e) => setEditContent(e.target.value)}
+            className={styles.textarea}
+            rows={12}
+            placeholder="Enter ChordPro content..."
+          />
+        </div>
+        
+        <div className={styles.buttonGroup}>
+          <button
+            onClick={handleUpdateSong}
+            disabled={isProcessing}
+            className={`${styles.button} ${styles.primaryButton}`}
+          >
+            {isProcessing ? 'Updating...' : 'Update Song'}
+          </button>
+          <button
+            onClick={handleCancelEdit}
+            disabled={isProcessing}
+            className={`${styles.button} ${styles.secondaryButton}`}
+          >
+            Cancel
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+
+  // Render version creation form
+  const renderVersionForm = () => (
+    <div className={styles.versionContainer}>
+      <div className={styles.versionForm}>
+        <h3 className={styles.versionTitle}>Create New Version</h3>
+        
+        <div className={styles.formGroup}>
+          <label htmlFor="versionVisibility" className={styles.label}>Visibility</label>
+          <select
+            id="versionVisibility"
+            value={editVisibility}
+            onChange={(e) => setEditVisibility(Number(e.target.value) as SongVisibilityType)}
+            className={styles.select}
+          >
+            <option value={SongVisibilityType.Private}>Private</option>
+            <option value={SongVisibilityType.PublicAll}>Public to All</option>
+            <option value={SongVisibilityType.PublicChoirs}>Public to Choirs</option>
+          </select>
+        </div>
+        
+        {editVisibility === SongVisibilityType.PublicChoirs && user?.choirs && (
+          <div className={styles.formGroup}>
+            <label className={styles.label}>Share with Choirs ({user.choirs.length} available)</label>
+            
+            {/* Filter input for large choir lists */}
+            {user.choirs.length > 5 && (
+              <div className={styles.filterContainer}>
+                <input
+                  type="text"
+                  placeholder="Filter choirs..."
+                  value={choirFilter}
+                  onChange={(e) => setChoirFilter(e.target.value)}
+                  className={styles.filterInput}
+                />
+              </div>
+            )}
+            
+            {/* Selected choirs summary */}
+            {selectedChoirsForVersion.length > 0 && (
+              <div className={styles.selectedSummary}>
+                <span className={styles.selectedCount}>
+                  {selectedChoirsForVersion.length} choir{selectedChoirsForVersion.length !== 1 ? 's' : ''} selected
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setSelectedChoirsForVersion([])}
+                  className={styles.clearSelection}
+                >
+                  Clear all
+                </button>
+              </div>
+            )}
+            
+            <div className={styles.choirCheckboxes}>
+              {user.choirs
+                .filter(choir => 
+                  choirFilter === '' || 
+                  choir.name.toLowerCase().includes(choirFilter.toLowerCase())
+                )
+                .map((choir) => (
+                  <label key={choir.id} className={styles.checkboxLabel}>
+                    <input
+                      type="checkbox"
+                      checked={selectedChoirsForVersion.includes(choir.id)}
+                      onChange={(e) => {
+                        if (e.target.checked) {
+                          setSelectedChoirsForVersion([...selectedChoirsForVersion, choir.id]);
+                        } else {
+                          setSelectedChoirsForVersion(selectedChoirsForVersion.filter(id => id !== choir.id));
+                        }
+                      }}
+                      className={styles.checkbox}
+                    />
+                    <span className={styles.choirName}>{choir.name}</span>
+                  </label>
+                ))
+              }
+              
+              {/* Show message when filter has no results */}
+              {choirFilter && user.choirs.filter(choir => 
+                choir.name.toLowerCase().includes(choirFilter.toLowerCase())
+              ).length === 0 && (
+                <div className={styles.noResults}>
+                  No choirs match "{choirFilter}"
+                </div>
+              )}
+              
+              {/* Show message when no choirs available */}
+              {user.choirs.length === 0 && (
+                <div className={styles.noChoirs}>
+                  You are not a member of any choirs yet.
+                </div>
+              )}
+            </div>
+            
+            {/* Quick select options for convenience */}
+            {user.choirs.length > 3 && (
+              <div className={styles.quickActions}>
+                <button
+                  type="button"
+                  onClick={() => setSelectedChoirsForVersion(user.choirs.map(c => c.id))}
+                  className={styles.selectAllButton}
+                  disabled={selectedChoirsForVersion.length === user.choirs.length}
+                >
+                  Select All
+                </button>
+              </div>
+            )}
+          </div>
+        )}
+        
+        <div className={styles.formGroup}>
+          <label htmlFor="versionContent" className={styles.label}>ChordPro Content</label>
+          <textarea
+            id="versionContent"
+            value={editContent}
+            onChange={(e) => setEditContent(e.target.value)}
+            className={styles.textarea}
+            rows={12}
+            placeholder="Modify the content for your version..."
+          />
+        </div>
+        
+        <div className={styles.buttonGroup}>
+          <button
+            onClick={handleCreateVersion}
+            disabled={isProcessing}
+            className={`${styles.button} ${styles.primaryButton}`}
+          >
+            {isProcessing ? 'Creating...' : 'Create Version'}
+          </button>
+          <button
+            onClick={handleCancelEdit}
+            disabled={isProcessing}
+            className={`${styles.button} ${styles.secondaryButton}`}
+          >
+            Cancel
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+
   return (
     <Layout 
       navigation={
         <Navigation 
-          title={song?.title || 'Song Details'} 
+          title={isEditMode ? 'Edit Song' : isVersionMode ? 'Create Version' : song?.title || 'Song Details'} 
           showBackButton={true}
           onBackClick={() => navigate(-1)}
         />
       }
     >
       <div className={styles.container}>
-        <div className={styles.header}>
-          <h1 className={styles.title}>{song?.title}</h1>
-          <p className={styles.artist}>{song?.artist || 'Unknown Artist'}</p>
-          
-          {user?.choirId && !songVersionExists && !isCheckingVersion && (
-            <div className={styles.versionControls}>
-              <select
-                value={selectedChoirId || ''}
-                onChange={(e) => setSelectedChoirId(e.target.value)}
-                disabled={isProcessing}
-              >
-                <option value="">Select a choir</option>
-                {user.choirs.map((choir) => (
-                  <option key={choir.id} value={choir.id}>
-                    {choir.name}
-                  </option>
-                ))}
-              </select>
-              <button
-                onClick={handleCreateVersion}
-                disabled={!selectedChoirId || isProcessing}
-                className={styles.createVersionButton}
-              >
-                {isProcessing ? 'Creating...' : 'Create Version for My Choir'}
-              </button>
+        {isEditMode ? (
+          renderEditForm()
+        ) : isVersionMode ? (
+          renderVersionForm()
+        ) : (
+          <>
+            <div className={styles.header}>
+              <h1 className={styles.title}>{song?.title}</h1>
+              <p className={styles.artist}>{song?.artist || 'Unknown Artist'}</p>
+              
+              {/* Mobile-first action buttons */}
+              <div className={styles.actionButtons}>
+                {canEdit && (
+                  <button
+                    onClick={handleStartEdit}
+                    className={`${styles.actionButton} ${styles.editButton}`}
+                    disabled={isProcessing}
+                  >
+                    Edit Song
+                  </button>
+                )}
+                
+                {canCreateVersion && (
+                  <button
+                    onClick={handleStartVersionCreation}
+                    className={`${styles.actionButton} ${styles.versionButton}`}
+                    disabled={isProcessing}
+                  >
+                    Create Version
+                  </button>
+                )}
+              </div>
+              
+              {/* Legacy version creation UI - keep for backward compatibility */}
+              {user?.choirId && !songVersionExists && !isCheckingVersion && !canEdit && (
+                <div className={styles.legacyVersionControls}>
+                  <select
+                    value={selectedChoirId || ''}
+                    onChange={(e) => setSelectedChoirId(e.target.value)}
+                    disabled={isProcessing}
+                    className={styles.choirSelect}
+                  >
+                    <option value="">Select a choir</option>
+                    {user.choirs.map((choir) => (
+                      <option key={choir.id} value={choir.id}>
+                        {choir.name}
+                      </option>
+                    ))}
+                  </select>
+                  <button
+                    onClick={() => {
+                      if (selectedChoirId) {
+                        setSelectedChoirsForVersion([selectedChoirId]);
+                        handleCreateVersion();
+                      }
+                    }}
+                    disabled={!selectedChoirId || isProcessing}
+                    className={styles.legacyCreateButton}
+                  >
+                    {isProcessing ? 'Creating...' : 'Create Version for My Choir'}
+                  </button>
+                </div>
+              )}
+              
+              {songVersionExists && (
+                <div className={styles.versionExists}>
+                  <p>A version of this song already exists for your choir.</p>
+                </div>
+              )}
             </div>
-          )}
-          
-          {songVersionExists && (
-            <div className={styles.versionExists}>
-              <p>A version of this song already exists for your choir.</p>
+            
+            <div className={styles.tags}>
+              {song?.tags && song.tags.map((tag) => (
+                <span key={tag.tagId} className={styles.tag}>
+                  {tag.tagName}
+                </span>
+              ))}
             </div>
-          )}
-        </div>
-        
-        <div className={styles.tags}>
-          {song?.tags && song.tags.map((tag) => (
-            <span key={tag.tagId} className={styles.tag}>
-              {tag.tagName}
-            </span>
-          ))}
-        </div>
-        
-        <div className={styles.content}>
-          {song && <ChordProViewer source={song.content} />}
-        </div>
+            
+            <div className={styles.content}>
+              {song && <ChordProViewer source={song.content} />}
+            </div>
+          </>
+        )}
       </div>
     </Layout>
   );
