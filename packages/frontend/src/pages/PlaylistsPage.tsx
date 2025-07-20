@@ -32,7 +32,7 @@ const PlaylistHeader: React.FC<{
   duration: string;
   isPrivate?: boolean;
 }> = ({ title, date, totalSongs, totalSections, duration, isPrivate = true }) => {
-  const { t } = useTranslation();
+  const { t, getCurrentLanguage } = useTranslation();
   
   return (
     <div className="playlist-header">
@@ -45,12 +45,15 @@ const PlaylistHeader: React.FC<{
           <div className="playlist-meta">
             <span className="meta-item">
               <CalendarIcon className="meta-icon" />
-              {date.toLocaleDateString(undefined, {
+              {(() => {
+              const dateString = date.toLocaleDateString(getCurrentLanguage(), {
                 weekday: 'long',
                 year: 'numeric',
                 month: 'short',
                 day: 'numeric',
-              })}
+              });
+              return dateString.charAt(0).toUpperCase() + dateString.slice(1);
+            })()}
             </span>
             <span className="meta-item">
               <MusicalNoteIcon className="meta-icon" />
@@ -91,7 +94,7 @@ const PlaylistHeader: React.FC<{
 const PlaylistsPage: React.FC = () => {
   // Use the shared date context
   const { selectedDate } = useContext(SharedDateContext);
-  const { t } = useTranslation();
+  const { t, getCurrentLanguage } = useTranslation();
   const { 
     sections, 
     isInitializing, 
@@ -337,12 +340,15 @@ const PlaylistsPage: React.FC = () => {
         )}
         {/* Header Section */}
         <PlaylistHeader
-          title={selectedDate.toLocaleDateString(undefined, {
-            weekday: 'long',
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric',
-          })}
+          title={(() => {
+            const dateString = selectedDate.toLocaleDateString(getCurrentLanguage(), {
+              weekday: 'long',
+              year: 'numeric',
+              month: 'long',
+              day: 'numeric',
+            });
+            return dateString.charAt(0).toUpperCase() + dateString.slice(1);
+          })()}
           date={selectedDate}
           totalSongs={getTotalSongs()}
           totalSections={sections.length}

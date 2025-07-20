@@ -253,7 +253,10 @@
     "loadingSongVersions": "Cargando versiones de canciones...",
     "failedToLoadSongVersions": "Error al cargar versiones de canciones",
     "somethingWentWrong": "Algo salió mal",
-    "tryAgain": "Intentar de Nuevo"
+    "tryAgain": "Intentar de Nuevo",
+    "searchSongs": "Buscar canciones...",
+    "add": "Agregar",
+    "added": "Agregado"
   },
   "playlistTemplates": {
     "title": "Plantillas de Listas",
