@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef, FC } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { searchSongs } from '../services/songService';
-import { addSongToPlaylist, getPlaylistTemplatesByChoirId, getPlaylistsByChoirId } from '../services/playlistService';
+import { addSongToPlaylist, getPlaylistTemplatesByChoirId } from '../services/playlistService';
 import { useUser } from '../hooks/useUser';
 import { useDisplayedPlaylistSections } from '../hooks/useDisplayedPlaylistSections';
 import { usePlaylistContext } from '../context/PlaylistContext';
@@ -61,7 +61,6 @@ const SongsListPage: FC<SongsListPageProps> = ({ playlistId, refreshPlaylist }) 
   const [showBackToTop, setShowBackToTop] = useState<boolean>(false);
   const [availableTemplates, setAvailableTemplates] = useState<PlaylistTemplate[]>([]);
   const [templateDropdownOpen, setTemplateDropdownOpen] = useState<boolean>(false);
-  const [activePlaylistId, setActivePlaylistId] = useState<string | null>(playlistId || null);
   const [isAddingSongs, setIsAddingSongs] = useState(false);
   const [filters, setFilters] = useState<FilterState>({
     search: '',
@@ -87,9 +86,23 @@ const SongsListPage: FC<SongsListPageProps> = ({ playlistId, refreshPlaylist }) 
 
   // Function to fetch songs already in the current playlist
   const fetchPlaylistSongs = async () => {
-    if (!contextPlaylistId || !token) return;
+    console.log('🚨 DEBUG - fetchPlaylistSongs called with:', { contextPlaylistId, token: token ? 'present' : 'missing' });
+    
+    if (!token) {
+      console.log('🚨 DEBUG - No token, clearing song states');
+      return;
+    }
+    
+    // If no playlist exists (template-only state), clear all song states
+    if (!contextPlaylistId) {
+      console.log('🚨 DEBUG - No playlist ID, clearing song states for template-only view');
+      setPlaylistSongIds(new Set());
+      setSelectedSongs(new Set());
+      return;
+    }
     
     try {
+      console.log('🚨 DEBUG - Fetching playlist songs for playlist:', contextPlaylistId);
       // Import the playlist service to get playlist details
       const { getPlaylistById } = await import('../services/playlistService');
       const playlist = await getPlaylistById(contextPlaylistId, token);
@@ -102,11 +115,16 @@ const SongsListPage: FC<SongsListPageProps> = ({ playlistId, refreshPlaylist }) 
         });
       });
       
+      console.log('🚨 DEBUG - Found songs in playlist:', Array.from(songIds));
       setPlaylistSongIds(songIds);
       // Also update selectedSongs to show "Added" flag immediately
       setSelectedSongs(songIds);
     } catch (error) {
+      console.log('🚨 DEBUG - Error fetching playlist songs:', error);
       setError('Failed to fetch playlist songs.');
+      // Clear states on error
+      setPlaylistSongIds(new Set());
+      setSelectedSongs(new Set());
     }
   };
 
@@ -116,6 +134,24 @@ const SongsListPage: FC<SongsListPageProps> = ({ playlistId, refreshPlaylist }) 
   useEffect(() => {
     fetchPlaylistSongs();
   }, [contextPlaylistId, token]); // Re-fetch when playlist or token changes
+
+  // Handle dynamic date selection - refresh playlist songs and clear selections when PlaylistContext updates
+  useEffect(() => {
+    console.log('🚨 DEBUG - PlaylistContext changed, refreshing playlist songs:', {
+      contextPlaylistId,
+      sectionsCount: sections.length,
+      selectedTemplate: selectedTemplate?.title,
+      isInitializing
+    });
+    
+    // Clear previous selections when context changes (new date selected)
+    setSelectedSongs(new Set());
+    
+    // Refresh playlist songs for the new date/playlist
+    if (!isInitializing) {
+      fetchPlaylistSongs();
+    }
+  }, [sections, selectedTemplate, contextPlaylistId, isInitializing]); // Re-fetch when any PlaylistContext state changes
 
   // Initial fetch for first page of songs
   useEffect(() => {
@@ -308,20 +344,8 @@ const SongsListPage: FC<SongsListPageProps> = ({ playlistId, refreshPlaylist }) 
           const templates = await getPlaylistTemplatesByChoirId(activeChoirId, token);
           setAvailableTemplates(templates);
           
-          // If we don't have a playlistId from props, try to find the most recent playlist
-          if (!playlistId) {
-            const playlists = await getPlaylistsByChoirId(activeChoirId, token);
-            if (playlists && playlists.length > 0) {
-              // Sort by date (newest first) and take the first one
-              const sortedPlaylists = [...playlists].sort((a, b) => {
-                const dateA = new Date(a.date).getTime();
-                const dateB = new Date(b.date).getTime();
-                return dateB - dateA;
-              });
-              
-              setActivePlaylistId(sortedPlaylists[0].id);
-            }
-          }
+          // PlaylistContext now handles playlist selection based on date
+          // No need to manually find playlists here
         } catch (error) {
           setError('Failed to fetch data.');
         } finally {
@@ -360,7 +384,7 @@ const SongsListPage: FC<SongsListPageProps> = ({ playlistId, refreshPlaylist }) 
           const createdPlaylist = await createPlaylistIfNeeded();
           if (createdPlaylist && createdPlaylist.id) {
             targetPlaylistId = createdPlaylist.id;
-            setActivePlaylistId(targetPlaylistId);
+            // Using contextPlaylistId from PlaylistContext instead
             console.log('Debug - Playlist created successfully:', {
               playlistId: targetPlaylistId,
               sections: createdPlaylist.sections?.length || 0

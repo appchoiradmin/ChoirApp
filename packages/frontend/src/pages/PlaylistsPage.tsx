@@ -103,7 +103,18 @@ const PlaylistsPage: React.FC = () => {
   // Fetch song details when sections are loaded
   useEffect(() => {
     const fetchSongDetails = async () => {
-      if (!user?.token || !sections.length) return;
+      console.log('🚨 DEBUG - PlaylistsPage fetching song details:', {
+        sectionsCount: sections.length,
+        selectedDate: selectedDate.toISOString().split('T')[0],
+        isPersisted,
+        playlistId
+      });
+      
+      if (!user?.token || !sections.length) {
+        console.log('🚨 DEBUG - PlaylistsPage: No token or sections, clearing songs');
+        setSongs([]);
+        return;
+      }
       
       const songDetailsMap: Record<string, SongDto> = {};
       const songIds = new Set<string>();
@@ -117,6 +128,8 @@ const PlaylistsPage: React.FC = () => {
         });
       });
 
+      console.log('🚨 DEBUG - PlaylistsPage: Found song IDs to fetch:', Array.from(songIds));
+
       // Fetch details for each unique song
       for (const songId of songIds) {
         try {
@@ -129,10 +142,11 @@ const PlaylistsPage: React.FC = () => {
       }
 
       setSongs(Object.values(songDetailsMap));
+      console.log('🚨 DEBUG - PlaylistsPage: Updated songs state with', Object.values(songDetailsMap).length, 'songs');
     };
     
     fetchSongDetails();
-  }, [sections, user?.token]);
+  }, [sections, user?.token, selectedDate, isPersisted, playlistId]); // Added selectedDate, isPersisted, playlistId to dependencies
 
   // Close dropdown when clicking outside
   useEffect(() => {
