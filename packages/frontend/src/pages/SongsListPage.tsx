@@ -590,16 +590,6 @@ const SongsListPage: FC<SongsListPageProps> = ({ playlistId, refreshPlaylist }) 
                 </button>
               )}
             </div>
-            
-            {user && !isGeneralUser && (
-              <Button 
-                variant="primary"
-                onClick={() => navigate('/songs/create')}
-                leftIcon={<PlusIcon />}
-              >
-                {t('songs.createSong')}
-              </Button>
-            )}
           </div>
         </div>
         
