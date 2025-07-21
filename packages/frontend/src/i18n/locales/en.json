@@ -118,6 +118,10 @@
   },
   "dashboard": {
     "title": "Dashboard",
+    "loading": "Loading your dashboard...",
+    "welcomeTitle": "Welcome to ChoirApp!",
+    "welcomeSubtitle": "Please log in to access your dashboard and manage your choirs.",
+    "goToHomepage": "Go to Homepage",
     "welcomeBack": "Welcome back, {{name}}!",
     "myChoirs": "My Choirs",
     "recentPlaylists": "Recent Playlists",

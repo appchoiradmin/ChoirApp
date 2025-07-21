@@ -58,7 +58,7 @@ const DashboardPage: React.FC = () => {
         <div className="dashboard-container">
           <div className="loading-section">
             <LoadingSpinner size="lg" />
-            <p className="loading-text">Loading your dashboard...</p>
+            <p className="loading-text">{t('dashboard.loading')}</p>
           </div>
         </div>
       </Layout>
@@ -72,11 +72,11 @@ const DashboardPage: React.FC = () => {
           <Card className="welcome-card">
             <div className="welcome-content">
               <MusicalNoteIcon className="welcome-icon" />
-              <h1 className="welcome-title">Welcome to ChoirApp!</h1>
-              <p className="welcome-subtitle">Please log in to access your dashboard and manage your choirs.</p>
+              <h1 className="welcome-title">{t('dashboard.welcomeTitle')}</h1>
+              <p className="welcome-subtitle">{t('dashboard.welcomeSubtitle')}</p>
               <Link to="/">
                 <Button variant="primary" size="lg">
-                  Go to Homepage
+                  {t('dashboard.goToHomepage')}
                 </Button>
               </Link>
             </div>
