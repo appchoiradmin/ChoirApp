@@ -28,15 +28,30 @@ interface FilterState {
   sortOrder: 'asc' | 'desc';
 }
 
-const DEFAULT_SONGS_PER_PAGE = 12;
-
-// Detect if we're on mobile
-const isMobile = window.innerWidth < 768;
-
-// Adjust songs per page for mobile
-const songsPerPage = isMobile ? 6 : DEFAULT_SONGS_PER_PAGE;
+const DEFAULT_SONGS_PER_PAGE = 24;
+const MOBILE_SONGS_PER_PAGE = 16;
 
 const SongsListPage: FC<SongsListPageProps> = ({ playlistId, refreshPlaylist }) => {
+  // Dynamic mobile detection hook
+  const useIsMobile = () => {
+    const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+    
+    useEffect(() => {
+      const handleResize = () => {
+        setIsMobile(window.innerWidth < 768);
+      };
+      
+      window.addEventListener('resize', handleResize);
+      return () => window.removeEventListener('resize', handleResize);
+    }, []);
+    
+    return isMobile;
+  };
+
+  // Use dynamic mobile detection
+  const isMobile = useIsMobile();
+  const songsPerPage = isMobile ? MOBILE_SONGS_PER_PAGE : DEFAULT_SONGS_PER_PAGE;
+
   const [sectionModalOpen, setSectionModalOpen] = useState<boolean>(false);
   const [selectedSongForModal, setSelectedSongForModal] = useState<string | null>(null);
   const navigate = useNavigate();
@@ -349,10 +364,13 @@ const SongsListPage: FC<SongsListPageProps> = ({ playlistId, refreshPlaylist }) 
           
           timeoutId = window.setTimeout(() => {
             loadMoreSongs();
-          }, 300);
+          }, 100); // Reduced delay for more responsive loading
         }
       },
-      { threshold: 0.1 }
+      { 
+        threshold: 0.3, // Trigger earlier for smoother experience
+        rootMargin: '100px' // Start loading before reaching the element
+      }
     );
     
     if (loaderRef.current) {
@@ -370,8 +388,30 @@ const SongsListPage: FC<SongsListPageProps> = ({ playlistId, refreshPlaylist }) 
     if (loading || !hasMore || loadingMore) return;
     
     setLoadingMore(true);
-    await fetchSongs(filters.search, false); // Use consolidated fetch with append mode
-    setLoadingMore(false);
+    
+    try {
+      await fetchSongs(filters.search, false); // Use consolidated fetch with append mode
+      
+      // Smooth scroll adjustment to prevent jarring experience
+      // Only adjust if user is near the bottom
+      const scrollPosition = window.scrollY;
+      const documentHeight = document.documentElement.scrollHeight;
+      const windowHeight = window.innerHeight;
+      
+      if (scrollPosition + windowHeight > documentHeight - 200) {
+        // User is near bottom, scroll up slightly to show new content
+        setTimeout(() => {
+          window.scrollTo({
+            top: scrollPosition - 100,
+            behavior: 'smooth'
+          });
+        }, 100);
+      }
+    } catch (error) {
+      console.error('Error loading more songs:', error);
+    } finally {
+      setLoadingMore(false);
+    }
   };
   
   // Note: Song selection and bulk operations removed in favor of individual modal-based additions
@@ -770,9 +810,25 @@ const SongsListPage: FC<SongsListPageProps> = ({ playlistId, refreshPlaylist }) 
         )}
         
         {/* Infinite scroll loader */}
-        {!loading && hasMore && (
+        {!loading && (
           <div ref={loaderRef} className="songs-page__loader">
-            {loadingMore && <LoadingSpinner size="sm" />}
+            {hasMore ? (
+              loadingMore ? (
+                <div className="songs-page__loading-more">
+                  <LoadingSpinner size="sm" />
+                  <span className="songs-page__loading-text">{t('songs.loadingMore')}</span>
+                </div>
+              ) : (
+                <div className="songs-page__load-trigger">
+                  <span className="songs-page__load-hint">{t('songs.scrollForMore')}</span>
+                </div>
+              )
+            ) : (
+              <div className="songs-page__end-message">
+                <MusicalNoteIcon className="songs-page__end-icon" />
+                <span>{t('songs.allSongsLoaded')}</span>
+              </div>
+            )}
           </div>
         )}
         

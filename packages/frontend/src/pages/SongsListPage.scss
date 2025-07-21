@@ -430,6 +430,69 @@
       }
     }
   }
+
+  // Infinite Scroll Loader Styles
+  &__loader {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 2rem 1rem;
+    margin: 2rem 0;
+    min-height: 80px;
+  }
+
+  &__loading-more {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem;
+    color: $text-muted;
+  }
+
+  &__loading-text {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: $text-muted;
+  }
+
+  &__load-trigger {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    opacity: 0.6;
+    transition: opacity 0.3s ease;
+
+    &:hover {
+      opacity: 1;
+    }
+  }
+
+  &__load-hint {
+    font-size: 0.875rem;
+    color: $text-muted;
+    font-style: italic;
+    text-align: center;
+  }
+
+  &__end-message {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem;
+    color: $text-muted;
+    padding: 1.5rem;
+    background: $background;
+    border-radius: 0.75rem;
+    border: 1px solid $border;
+    text-align: center;
+  }
+
+  &__end-icon {
+    width: 2rem;
+    height: 2rem;
+    color: $primary;
+    opacity: 0.5;
+  }
 }
 
 // Template Selector Styles
