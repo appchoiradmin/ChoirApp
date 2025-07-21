@@ -41,8 +41,14 @@ const HomePage: React.FC = () => {
                 {t('home.getStarted')}
               </Button>
               <Button
-                variant="outlined"
+                variant="ghost"
                 size="lg"
+                onClick={() => {
+                  const featuresSection = document.querySelector('.features-section');
+                  if (featuresSection) {
+                    featuresSection.scrollIntoView({ behavior: 'smooth' });
+                  }
+                }}
                 className="hero-cta-secondary"
               >
                 {t('home.learnMore')}
