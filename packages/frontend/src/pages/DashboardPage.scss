@@ -63,16 +63,31 @@
   }
 }
 
-// Stats Grid
+// Stats Grid - Mobile-First Responsive
 .stats-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-  gap: $spacing-lg;
+  grid-template-columns: 1fr;
+  gap: $spacing-md;
   margin-bottom: $spacing-2xl;
+  width: 100%;
+  max-width: 100%;
   
-  @media (max-width: 640px) {
+  // Mobile: Single column for better readability
+  @media (max-width: 480px) {
+    grid-template-columns: 1fr;
+    gap: $spacing-sm;
+  }
+  
+  // Small tablets: 2 columns if space allows
+  @media (min-width: 481px) and (max-width: 768px) {
     grid-template-columns: repeat(2, 1fr);
     gap: $spacing-md;
+  }
+  
+  // Desktop: Auto-fit with minimum width
+  @media (min-width: 769px) {
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: $spacing-lg;
   }
 }
 
