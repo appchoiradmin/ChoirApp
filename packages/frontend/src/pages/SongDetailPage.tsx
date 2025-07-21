@@ -609,6 +609,7 @@ const SongDetailPage: React.FC = () => {
         
         <div className={styles.formGroup}>
           <label htmlFor="editContent" className={styles.label}>ChordPro Content</label>
+          <ChordProGuide />
           <textarea
             id="editContent"
             value={editContent}
@@ -752,6 +753,7 @@ const SongDetailPage: React.FC = () => {
         
         <div className={styles.formGroup}>
           <label htmlFor="versionContent" className={styles.label}>ChordPro Content</label>
+          <ChordProGuide />
           <textarea
             id="versionContent"
             value={editContent}

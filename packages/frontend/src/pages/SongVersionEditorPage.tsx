@@ -5,6 +5,7 @@ import { getSongById, updateSong } from '../services/songService';
 import { Button, Card, LoadingSpinner } from '../components/ui';
 import Layout from '../components/ui/Layout';
 import ChordProViewer from '../components/ChordProViewer';
+import ChordProGuide from '../components/ChordProGuide';
 import toast from 'react-hot-toast';
 import {
   DocumentTextIcon,
@@ -283,6 +284,8 @@ const SongVersionEditorPage: React.FC = () => {
                 </div>
               </div>
 
+              <ChordProGuide />
+              
               <div className="editor-wrapper">
                 <textarea
                   className="chord-pro-editor"
