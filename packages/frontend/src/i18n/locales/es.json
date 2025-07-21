@@ -460,7 +460,17 @@
     "send": "Enviar",
     "sentInvitations": "Invitaciones Enviadas",
     "promoteToAdmin": "Promover a Administrador",
-    "demoteToMember": "Degradar a Miembro"
+    "demoteToMember": "Degradar a Miembro",
+    "editChoirName": "Editar Nombre del Coro",
+    "choirName": "Nombre del Coro",
+    "choirNamePlaceholder": "Ingresa el nombre del coro",
+    "saveChoirName": "Guardar Nombre",
+    "cancelEdit": "Cancelar",
+    "choirNameUpdated": "¡Nombre del coro actualizado exitosamente!",
+    "failedToUpdateChoirName": "Error al actualizar el nombre del coro. Por favor intenta de nuevo.",
+    "choirNameRequired": "El nombre del coro es requerido",
+    "choirNameTooLong": "El nombre del coro debe tener menos de 100 caracteres",
+    "choirNameExists": "Ya existe un coro con este nombre"
   },
   "createPlaylist": {
     "title": "Nueva Lista de Reproducción",

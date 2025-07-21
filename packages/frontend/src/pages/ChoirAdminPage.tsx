@@ -5,6 +5,7 @@ import {
   inviteUser,
   removeMember,
   updateMemberRole,
+  updateChoir,
 } from '../services/choirService';
 import { getInvitationsByChoir } from '../services/invitationService';
 import { useUser } from '../hooks/useUser';
@@ -28,6 +29,9 @@ const ChoirAdminPage: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [isEditingName, setIsEditingName] = useState(false);
+  const [editedChoirName, setEditedChoirName] = useState('');
+  const [isUpdatingName, setIsUpdatingName] = useState(false);
 
   const fetchChoirDetails = useCallback(async () => {
     if (choirId && token && user) {
@@ -38,6 +42,12 @@ const ChoirAdminPage: React.FC = () => {
         // Check if the current user is an admin of this choir
         const currentUserMembership = details.members.find(member => member.id === user.id);
         const userIsAdmin = currentUserMembership?.role === UserRole.ChoirAdmin;
+        console.log('🔍 DEBUG - User admin status:', {
+          userId: user.id,
+          currentUserMembership,
+          userIsAdmin,
+          choirMembers: details.members
+        });
         setIsAdmin(userIsAdmin);
         
         // Only fetch invitations if user is an admin
@@ -103,6 +113,48 @@ const ChoirAdminPage: React.FC = () => {
     }
   };
 
+  const handleEditChoirName = () => {
+    if (choir) {
+      setEditedChoirName(choir.name);
+      setIsEditingName(true);
+    }
+  };
+
+  const handleCancelEditName = () => {
+    setIsEditingName(false);
+    setEditedChoirName('');
+  };
+
+  const handleSaveChoirName = async () => {
+    if (!choirId || !token || !editedChoirName.trim()) {
+      return;
+    }
+
+    if (editedChoirName.trim().length > 100) {
+      alert(t('choirAdmin.choirNameTooLong'));
+      return;
+    }
+
+    try {
+      setIsUpdatingName(true);
+      await updateChoir(choirId, editedChoirName.trim(), token);
+      setIsEditingName(false);
+      setEditedChoirName('');
+      fetchChoirDetails(); // Refresh to get updated choir name
+      alert(t('choirAdmin.choirNameUpdated'));
+    } catch (error: any) {
+      console.error('Failed to update choir name:', error);
+      const errorMessage = error.message || t('choirAdmin.failedToUpdateChoirName');
+      if (errorMessage.includes('already exists')) {
+        alert(t('choirAdmin.choirNameExists'));
+      } else {
+        alert(errorMessage);
+      }
+    } finally {
+      setIsUpdatingName(false);
+    }
+  };
+
   if (loading) {
     return <LoadingState message={t('choirAdmin.loadingChoirAdmin')} variant="fullscreen" />;
   }
@@ -133,7 +185,99 @@ const ChoirAdminPage: React.FC = () => {
         <div className="level">
           <div className="level-left">
             <div>
-              <h1 className="title is-3 mb-1">{choir.name}</h1>
+              {isEditingName && isAdmin ? (
+                <div className="box" style={{ backgroundColor: '#f8f9fa', border: '1px solid #e9ecef', padding: '1.5rem', marginBottom: '1rem' }}>
+                  <div className="field">
+                    <label className="label is-size-6 has-text-weight-semibold">{t('choirAdmin.choirName')}</label>
+                    <div className="control">
+                      <input
+                        className="input is-medium"
+                        type="text"
+                        value={editedChoirName}
+                        onChange={(e) => setEditedChoirName(e.target.value)}
+                        placeholder={t('choirAdmin.choirNamePlaceholder')}
+                        maxLength={100}
+                        disabled={isUpdatingName}
+                        autoFocus
+                        onKeyPress={(e) => {
+                          if (e.key === 'Enter') {
+                            handleSaveChoirName();
+                          } else if (e.key === 'Escape') {
+                            handleCancelEditName();
+                          }
+                        }}
+                        style={{ fontSize: '1.1rem' }}
+                      />
+                    </div>
+                    <p className="help is-size-7 has-text-grey">
+                      {editedChoirName.length}/100 caracteres
+                    </p>
+                  </div>
+                  <div className="field is-grouped is-grouped-right" style={{ marginTop: '1rem', marginBottom: '0' }}>
+                    <div className="control">
+                      <button
+                        className="button is-light"
+                        onClick={handleCancelEditName}
+                        disabled={isUpdatingName}
+                        style={{ 
+                          display: 'flex !important', 
+                          alignItems: 'center !important', 
+                          justifyContent: 'center !important',
+                          textAlign: 'center',
+                          minWidth: '120px',
+                          padding: '0.5rem 1rem'
+                        }}
+                      >
+                        <i className="fas fa-times" style={{ marginRight: '0.5rem' }}></i>
+                        <span>{t('choirAdmin.cancelEdit')}</span>
+                      </button>
+                    </div>
+                    <div className="control">
+                      <button
+                        className={`button is-primary ${isUpdatingName ? 'is-loading' : ''}`}
+                        onClick={handleSaveChoirName}
+                        disabled={!editedChoirName.trim() || isUpdatingName}
+                        style={{ 
+                          display: 'flex !important', 
+                          alignItems: 'center !important', 
+                          justifyContent: 'center !important',
+                          textAlign: 'center',
+                          minWidth: '160px',
+                          padding: '0.5rem 1rem'
+                        }}
+                      >
+                        <i className="fas fa-check" style={{ marginRight: '0.5rem' }}></i>
+                        <span>{t('choirAdmin.saveChoirName')}</span>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <div className="is-flex is-align-items-center is-justify-content-space-between mb-1">
+                  <h1 className="title is-3 mb-0">{choir.name}</h1>
+                  {isAdmin && (
+                    <button
+                      className="button is-small is-outlined is-primary"
+                      onClick={handleEditChoirName}
+                      title={t('choirAdmin.editChoirName')}
+                      style={{
+                        marginLeft: '1rem',
+                        fontWeight: '500',
+                        display: 'flex !important',
+                        alignItems: 'center !important',
+                        justifyContent: 'center !important',
+                        gap: '0.25rem',
+                        textAlign: 'center',
+                        width: 'auto',
+                        padding: '0.375rem 0.75rem'
+                      }}
+                    >
+                      <i className="fas fa-edit" style={{ marginRight: '0.25rem' }}></i>
+                      <span>Editar</span>
+                    </button>
+                  )}
+                </div>
+              )}
               {isAdmin ? (
                 <>
                   <p className="subtitle is-5 has-text-weight-semibold mb-4">{t('choirAdmin.adminPanel')}</p>

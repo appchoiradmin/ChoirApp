@@ -105,3 +105,28 @@ export const updateMemberRole = async (
     throw new Error('Failed to update member role');
   }
 };
+
+export const updateChoir = async (
+  choirId: string,
+  choirName: string,
+  token: string
+): Promise<void> => {
+  const response = await fetch(`${API_URL}/api/choirs/${choirId}`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({
+      choirId: choirId,
+      dto: {
+        name: choirName
+      }
+    }),
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(errorData.message || 'Failed to update choir');
+  }
+};

@@ -512,7 +512,17 @@
     "send": "Send",
     "sentInvitations": "Sent Invitations",
     "promoteToAdmin": "Promote to Admin",
-    "demoteToMember": "Demote to Member"
+    "demoteToMember": "Demote to Member",
+    "editChoirName": "Edit Choir Name",
+    "choirName": "Choir Name",
+    "choirNamePlaceholder": "Enter choir name",
+    "saveChoirName": "Save Name",
+    "cancelEdit": "Cancel",
+    "choirNameUpdated": "Choir name updated successfully!",
+    "failedToUpdateChoirName": "Failed to update choir name. Please try again.",
+    "choirNameRequired": "Choir name is required",
+    "choirNameTooLong": "Choir name must be less than 100 characters",
+    "choirNameExists": "A choir with this name already exists"
   },
   "createPlaylist": {
     "title": "New Playlist",
