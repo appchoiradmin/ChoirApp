@@ -30,6 +30,16 @@ jobs:
       run: dotnet publish --no-build --configuration Release --output ./publish
       working-directory: ./packages/backend/src/ChoirApp.Backend
     
+    - name: Install Entity Framework Tools
+      run: dotnet tool install --global dotnet-ef --version 8.0.0
+    
+    - name: Run Database Migrations
+      run: dotnet ef database update --startup-project ../ChoirApp.Backend --verbose
+      working-directory: ./packages/backend/src/ChoirApp.Infrastructure
+      env:
+        ASPNETCORE_ENVIRONMENT: Production
+        ConnectionStrings__DefaultConnection: ${{ secrets.AZURE_DATABASE_CONNECTION_STRING }}
+    
     - name: Deploy to Azure App Service
       uses: azure/webapps-deploy@v2
       with:

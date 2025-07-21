@@ -8,7 +8,7 @@ import { useDisplayedPlaylistSections } from '../hooks/useDisplayedPlaylistSecti
 import { usePlaylistContext } from '../context/PlaylistContext';
 import { toast } from 'react-hot-toast';
 import { PlaylistTemplate } from '../types/playlist';
-import { SongDto, SongSearchParams, SongVisibilityType } from '../types/song';
+import { SongDto, SongSearchParams } from '../types/song';
 import { Button, Card, LoadingSpinner, Navigation } from '../components/ui';
 import Layout from '../components/ui/Layout';
 import { MagnifyingGlassIcon, PlusIcon, ChevronUpIcon, ChevronDownIcon, CheckCircleIcon, XMarkIcon, MusicalNoteIcon } from '@heroicons/react/24/outline';
@@ -238,42 +238,65 @@ const SongsListPage: FC<SongsListPageProps> = ({ playlistId, refreshPlaylist }) 
     }
   }, [sections, selectedTemplate, contextPlaylistId, isInitializing]); // Re-fetch when any PlaylistContext state changes
 
-  // Initial fetch for first page of songs
-  useEffect(() => {
-    const fetchInitialSongs = async () => {
-      try {
+  // Consolidated fetch function that handles both initial load and search
+  const fetchSongs = async (searchTerm: string = '', resetPagination: boolean = true) => {
+    try {
+      if (resetPagination) {
         setLoading(true);
-        // Use token from the useUser hook
-        // No need to create a separate variable
-        
-        // Prepare search parameters
-        const searchParams: SongSearchParams = {
-          searchTerm: filters.search || '', // Empty string is now handled by backend
-          skip: 0,
-          take: songsPerPage,
-          visibility: SongVisibilityType.PublicAll
-        };
-        
-        // Add title/artist search if we have a search term
-        if (filters.search) {
-          searchParams.title = filters.search;
-          searchParams.artist = filters.search;
-        }
-        
-        const fetchedSongs = await searchSongs(searchParams, token || '');
+        setPage(0);
+        setSongs([]);
+        setHasMore(true);
+      }
       
-      setSongs(fetchedSongs || []);
+      if (!token) {
+        setError(t('songs.authTokenNotFound'));
+        return;
+      }
+      
+      // Prepare search parameters
+      const searchParams: SongSearchParams = {
+        searchTerm: searchTerm || '', // Use provided search term
+        skip: resetPagination ? 0 : page * songsPerPage,
+        take: songsPerPage
+        // Don't specify visibility - let backend handle visibility logic based on user context
+      };
+      
+      const fetchedSongs = await searchSongs(searchParams, token);
+      
+      if (resetPagination) {
+        setSongs(fetchedSongs || []);
+        setPage(1);
+      } else {
+        // Append for infinite scroll
+        setSongs(prev => {
+          const existingIds = new Set(prev.map(song => song.songId));
+          const newSongs = (fetchedSongs || []).filter(song => !existingIds.has(song.songId));
+          const combined = [...prev, ...newSongs];
+          sortAndProcessSongs(combined);
+          return combined;
+        });
+        setPage(prev => prev + 1);
+      }
+      
       // Sort songs alphabetically and update available letters
-      sortAndProcessSongs(fetchedSongs || []);
-      setHasMore(fetchedSongs.length === songsPerPage);
-      } catch (error) {
-        setError('Failed to load songs. Please try again later.');
-      } finally {
+      if (resetPagination) {
+        sortAndProcessSongs(fetchedSongs || []);
+      }
+      
+      setHasMore((fetchedSongs?.length || 0) === songsPerPage);
+    } catch (error) {
+      console.error('Fetch songs error:', error);
+      setError(t('songs.failedToLoadSongs'));
+    } finally {
+      if (resetPagination) {
         setLoading(false);
       }
-    };
+    }
+  };
 
-    fetchInitialSongs();
+  // Initial fetch effect (search is handled separately by handleSearchChange)
+  useEffect(() => {
+    fetchSongs('', true); // Initial load without search term
     
     // Add scroll event listener for back to top button
     const handleScroll = () => {
@@ -289,7 +312,7 @@ const SongsListPage: FC<SongsListPageProps> = ({ playlistId, refreshPlaylist }) 
     
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
-  }, [token, user?.choirId, songsPerPage]); // Removed filters.search dependency to avoid conflicts
+  }, [token, user?.choirId, songsPerPage]); // Search handled separately by debounced handleSearchChange
 
 
   
@@ -333,47 +356,11 @@ const SongsListPage: FC<SongsListPageProps> = ({ playlistId, refreshPlaylist }) 
   
   // Load more songs for infinite scroll
   const loadMoreSongs = async () => {
-    if (loading || !hasMore) return;
+    if (loading || !hasMore || loadingMore) return;
     
-    try {
-      setLoadingMore(true);
-      
-      // Prepare search parameters
-      const searchParams: SongSearchParams = {
-        searchTerm: filters.search || '', // Empty string is now handled by backend
-        skip: page * songsPerPage,
-        take: songsPerPage,
-        visibility: SongVisibilityType.PublicAll
-      };
-      
-      // Add title/artist search if we have a search term
-      if (filters.search) {
-        searchParams.title = filters.search;
-        searchParams.artist = filters.search;
-      }
-      
-      const moreSongs = await searchSongs(searchParams, token || '');
-      
-      if (moreSongs.length === 0) {
-        setHasMore(false);
-      } else {
-        // Deduplicate songs to prevent duplicate keys
-        setSongs(prev => {
-          const existingIds = new Set(prev.map(song => song.songId));
-          const newSongs = moreSongs.filter(song => !existingIds.has(song.songId));
-          const combined = [...prev, ...newSongs];
-          // Re-sort and process the combined songs
-          sortAndProcessSongs(combined);
-          return combined;
-        });
-        setPage(prev => prev + 1);
-        setHasMore(moreSongs.length === songsPerPage);
-      }
-    } catch (error) {
-      setError(t('songs.failedToLoadSongs'));
-    } finally {
-      setLoadingMore(false);
-    }
+    setLoadingMore(true);
+    await fetchSongs(filters.search, false); // Use consolidated fetch with append mode
+    setLoadingMore(false);
   };
   
   // Note: Song selection and bulk operations removed in favor of individual modal-based additions
@@ -510,63 +497,21 @@ const SongsListPage: FC<SongsListPageProps> = ({ playlistId, refreshPlaylist }) 
     }));
     
     // Debounce the search to avoid too many API calls
-    // Clear any existing timeout
     if (searchTimeoutRef.current) {
       clearTimeout(searchTimeoutRef.current);
     }
     
     // Set a new timeout to trigger search after user stops typing
     searchTimeoutRef.current = setTimeout(() => {
-      // Trigger search with the new value
-      performSearch(newSearchValue);
+      fetchSongs(newSearchValue, true);
     }, 300); // 300ms debounce
-  };
-  
-  // Perform search with given search term
-  const performSearch = async (searchTerm: string) => {
-    try {
-      setLoading(true);
-      setPage(0);
-      setSongs([]);
-      setHasMore(true);
-      
-      if (!token) {
-        setError(t('songs.authTokenNotFound'));
-        return;
-      }
-      
-      // Prepare search parameters
-      const searchParams: SongSearchParams = {
-        searchTerm: searchTerm || '', // Use the provided search term
-        skip: 0,
-        take: songsPerPage,
-        visibility: SongVisibilityType.PublicAll
-      };
-      
-      // Don't add title/artist parameters - let the backend handle the search logic
-      // The backend already searches title, artist, and content based on searchTerm
-      
-      const songsData = await searchSongs(searchParams, token);
-      setSongs(songsData || []);
-      setPage(1);
-      setHasMore((songsData?.length || 0) === songsPerPage);
-    } catch (error) {
-      console.error('Search error:', error);
-      setError(t('songs.failedToSearchSongs'));
-    } finally {
-      setLoading(false);
-    }
   };
 
   // Handle search form submission
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // Clear any pending debounced search
-    if (searchTimeoutRef.current) {
-      clearTimeout(searchTimeoutRef.current);
-    }
-    // Perform search immediately with current search term
-    performSearch(filters.search);
+    // Force immediate search by calling fetchSongs directly
+    fetchSongs(filters.search, true);
   };
   
   return (

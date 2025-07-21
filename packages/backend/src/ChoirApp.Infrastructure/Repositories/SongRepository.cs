@@ -33,6 +33,8 @@ namespace ChoirApp.Infrastructure.Repositories
         public async Task<List<Song>> GetByUserIdAsync(Guid userId)
         {
             return await _context.Songs
+                .Include(s => s.Visibilities)
+                .Include(s => s.Tags)
                 .Where(s => s.CreatorId == userId)
                 .ToListAsync();
         }
@@ -40,6 +42,8 @@ namespace ChoirApp.Infrastructure.Repositories
         public async Task<List<Song>> GetByChoirIdAsync(Guid choirId)
         {
             return await _context.Songs
+                .Include(s => s.Visibilities)
+                .Include(s => s.Tags)
                 .Where(s => s.Visibility == SongVisibilityType.PublicAll ||
                            s.Visibilities.Any(sv => sv.ChoirId == choirId))
                 .ToListAsync();
@@ -48,6 +52,8 @@ namespace ChoirApp.Infrastructure.Repositories
         public async Task<List<Song>> GetAllPublicAsync()
         {
             return await _context.Songs
+                .Include(s => s.Visibilities)
+                .Include(s => s.Tags)
                 .Where(s => s.Visibility == SongVisibilityType.PublicAll)
                 .ToListAsync();
         }
@@ -56,7 +62,11 @@ namespace ChoirApp.Infrastructure.Repositories
         {
             Console.WriteLine($"🔍 Backend SearchAsync called with: searchTerm='{searchTerm}', userId={userId}, choirId={choirId}");
             
-            var query = _context.Songs.AsQueryable();
+            // CRITICAL FIX: Include navigation properties for visibility filtering
+            var query = _context.Songs
+                .Include(s => s.Visibilities) // Required for choir visibility filtering
+                .Include(s => s.Tags)         // Required for complete song data
+                .AsQueryable();
 
             // Apply search filter (case-insensitive)
             if (!string.IsNullOrWhiteSpace(searchTerm))
@@ -103,12 +113,7 @@ namespace ChoirApp.Infrastructure.Repositories
                 query = query.Where(s => s.Visibility == SongVisibilityType.PublicAll);
             }
 
-            var results = await query.ToListAsync();
-            Console.WriteLine($"🔍 Backend SearchAsync returning {results.Count} songs after visibility filtering");
-            foreach (var song in results)
-            {
-                Console.WriteLine($"🔍 Backend result: '{song.Title}' by '{song.Artist}' (visibility: {song.Visibility})");
-            }
+            var results = await query.ToListAsync();           
             return results;
         }
 
