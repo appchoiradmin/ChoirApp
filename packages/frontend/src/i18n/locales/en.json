@@ -23,7 +23,8 @@
     "remove": "Remove",
     "select": "Select",
     "none": "None",
-    "all": "All"
+    "all": "All",
+    "clear": "Clear"
   },
   "navigation": {
     "home": "Home",
@@ -249,6 +250,7 @@
     "tryDifferentKeywords": "Try different keywords or clear your search.",
     "noSongsAvailable": "No songs are available. Try adjusting your filters or adding new songs.",
     "searchSongs": "Search songs...",
+    "clearFilter": "Clear filter",
     "add": "Add",
     "added": "Added",
     "addToSection": "Add to Section",

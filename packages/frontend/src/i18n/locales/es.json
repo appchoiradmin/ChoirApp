@@ -24,7 +24,8 @@
     "select": "Seleccionar",
     "none": "Ninguno",
     "all": "Todos",
-    "selectAll": "Seleccionar Todo"
+    "selectAll": "Seleccionar Todo",
+    "clear": "Limpiar"
   },
   "navigation": {
     "home": "Inicio",
@@ -241,6 +242,7 @@
     "tryAdjustingFilters": "Intenta ajustar tus filtros o términos de búsqueda",
     "clearFilters": "Limpiar Filtros",
     "searchSongsPlaceholder": "Buscar canciones...",
+    "clearFilter": "Limpiar filtro",
     "clearSearch": "Limpiar búsqueda",
     "showFilters": "Mostrar Filtros",
     "hideFilters": "Ocultar Filtros",

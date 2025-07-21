@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, FC } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { searchSongs } from '../services/songService';
 import { addSongToPlaylist } from '../services/playlistService';
 import { useUser } from '../hooks/useUser';
@@ -81,11 +81,32 @@ const SongsListPage: FC<SongsListPageProps> = ({ playlistId, refreshPlaylist }) 
   // Back to top button state
   const [showBackToTop, setShowBackToTop] = useState<boolean>(false);
   const [templateDropdownOpen, setTemplateDropdownOpen] = useState<boolean>(false);
-  const [filters, setFilters] = useState<FilterState>({
-    search: '',
-    sortBy: 'title',
-    sortOrder: 'asc'
-  });
+  
+  // Use URL search parameters for filter persistence
+  const [searchParams, setSearchParams] = useSearchParams();
+  
+  // Get filters from URL or use defaults
+  const filters: FilterState = {
+    search: searchParams.get('search') || '',
+    sortBy: (searchParams.get('sortBy') as 'title' | 'artist' | 'tags') || 'title',
+    sortOrder: (searchParams.get('sortOrder') as 'asc' | 'desc') || 'asc'
+  };
+  
+  // Helper function to update URL search parameters
+  const updateFilters = (newFilters: Partial<FilterState>) => {
+    const updatedParams = new URLSearchParams(searchParams);
+    
+    // Update each filter parameter
+    Object.entries(newFilters).forEach(([key, value]) => {
+      if (value && value.trim() !== '') {
+        updatedParams.set(key, value);
+      } else {
+        updatedParams.delete(key);
+      }
+    });
+    
+    setSearchParams(updatedParams);
+  };
   
   // Search debounce timeout ref
   const searchTimeoutRef = useRef<number | null>(null);
@@ -270,9 +291,9 @@ const SongsListPage: FC<SongsListPageProps> = ({ playlistId, refreshPlaylist }) 
     }
   };
 
-  // Initial fetch effect (search is handled separately by handleSearchChange)
+  // Initial fetch effect with URL-based search term
   useEffect(() => {
-    fetchSongs('', true); // Initial load without search term
+    fetchSongs(filters.search, true); // Initial load with search term from URL
     
     // Add scroll event listener for back to top button
     const handleScroll = () => {
@@ -492,10 +513,9 @@ const SongsListPage: FC<SongsListPageProps> = ({ playlistId, refreshPlaylist }) 
   // Handle search input changes
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newSearchValue = e.target.value;
-    setFilters(prev => ({
-      ...prev,
-      search: newSearchValue
-    }));
+    
+    // Update URL parameters immediately for UI responsiveness
+    updateFilters({ search: newSearchValue });
     
     // Debounce the search to avoid too many API calls
     if (searchTimeoutRef.current) {
@@ -513,6 +533,20 @@ const SongsListPage: FC<SongsListPageProps> = ({ playlistId, refreshPlaylist }) 
     e.preventDefault();
     // Force immediate search by calling fetchSongs directly
     fetchSongs(filters.search, true);
+  };
+
+  // Handle filter reset/clear
+  const handleClearFilters = () => {
+    // Clear all URL parameters to reset filters
+    setSearchParams(new URLSearchParams());
+    
+    // Clear any pending search timeout
+    if (searchTimeoutRef.current) {
+      clearTimeout(searchTimeoutRef.current);
+    }
+    
+    // Fetch songs without any filters
+    fetchSongs('', true);
   };
 
 
@@ -533,15 +567,29 @@ const SongsListPage: FC<SongsListPageProps> = ({ playlistId, refreshPlaylist }) 
           </h1>
           
           <div className="songs-page__actions">
-            <form onSubmit={handleSearchSubmit} className="songs-page__search">
-              <MagnifyingGlassIcon />
-              <input 
-                type="text" 
-                placeholder={t('songs.searchSongs')} 
-                value={filters.search}
-                onChange={handleSearchChange}
-              />
-            </form>
+            <div className="songs-page__search-container">
+              <form onSubmit={handleSearchSubmit} className="songs-page__search">
+                <MagnifyingGlassIcon />
+                <input 
+                  type="text" 
+                  placeholder={t('songs.searchSongs')} 
+                  value={filters.search}
+                  onChange={handleSearchChange}
+                />
+              </form>
+              
+              {/* Clear filter button - only show when there's an active filter */}
+              {filters.search && (
+                <button 
+                  className="songs-page__clear-filter"
+                  onClick={handleClearFilters}
+                  title={t('songs.clearFilter')}
+                  aria-label={t('songs.clearFilter')}
+                >
+                  {t('common.clear')}
+                </button>
+              )}
+            </div>
             
             {user && !isGeneralUser && (
               <Button 
@@ -677,7 +725,12 @@ const SongsListPage: FC<SongsListPageProps> = ({ playlistId, refreshPlaylist }) 
                   <div className="songs-page__song-info">
                     <h3 
                       className="songs-page__song-title songs-page__song-title--clickable"
-                      onClick={() => navigate(`/songs/${song.songId}`)}
+                      onClick={() => {
+                        // Navigate to song detail while preserving current filter parameters
+                        const currentParams = searchParams.toString();
+                        const separator = currentParams ? '?' : '';
+                        navigate(`/songs/${song.songId}${separator}${currentParams}`);
+                      }}
                     >
                       {song.title}
                     </h3>
