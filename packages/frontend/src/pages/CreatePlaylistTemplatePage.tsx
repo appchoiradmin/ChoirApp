@@ -3,11 +3,10 @@ import { useNavigate } from 'react-router-dom';
 import { useUser } from '../hooks/useUser';
 import { useTranslation } from '../hooks/useTranslation';
 import { createPlaylistTemplate, CreatePlaylistTemplatePayload } from '../services/playlistService';
-import { Button, Card, LoadingSpinner } from '../components/ui';
+import { Button, Card, LoadingSpinner, Navigation } from '../components/ui';
 import Layout from '../components/ui/Layout';
 import toast from 'react-hot-toast';
 import {
-  ArrowLeftIcon,
   PlusIcon,
   XMarkIcon,
   DocumentTextIcon,
@@ -144,23 +143,16 @@ const CreatePlaylistTemplatePage: React.FC = () => {
   };
 
   return (
-    <Layout>
+    <Layout 
+      navigation={
+        <Navigation 
+          title={t('createPlaylistTemplate.title')} 
+          showBackButton={true} 
+          onBackClick={() => navigate(-1)}
+        />
+      }
+    >
       <div className="create-template-container">
-        <div className="create-template-header">
-          <div className="header-content">
-            <div className="header-title">
-              <Button
-                variant="ghost"
-                leftIcon={<ArrowLeftIcon />}
-                onClick={() => navigate(-1)}
-                className="back-button"
-              >
-                {t('common.back')}
-              </Button>
-              <h1 className="page-title">{t('createPlaylistTemplate.title')}</h1>
-            </div>
-          </div>
-        </div>
 
         <div className="create-template-content">
           <Card className="template-form-card">

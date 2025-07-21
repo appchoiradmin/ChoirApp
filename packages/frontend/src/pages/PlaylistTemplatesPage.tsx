@@ -264,7 +264,10 @@ const PlaylistTemplatesPage: React.FC = () => {
                 className="search-input"
               />
             </div>
-            
+          </div>
+          
+          {/* Always visible Create Template button */}
+          <div className="create-template-section">
             <Button
               variant="primary"
               className="new-template-btn"
