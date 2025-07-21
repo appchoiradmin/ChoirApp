@@ -549,7 +549,7 @@ const SongsListPage: FC<SongsListPageProps> = ({ playlistId, refreshPlaylist }) 
                   disabled={isPersisted}
                   title={isPersisted ? t('songs.templateLockedAfterFirstSong') : undefined}
                 >
-                  {selectedTemplate ? selectedTemplate.title : (availableTemplates.length > 0 ? availableTemplates[0].title : t('songs.noTemplatesAvailable'))}
+                  {selectedTemplate ? selectedTemplate.title : (availableTemplates.length > 0 ? (availableTemplates.find(t => t.isDefault) || availableTemplates[0]).title : t('songs.noTemplatesAvailable'))}
                   {!isPersisted && (templateDropdownOpen ? <ChevronUpIcon /> : <ChevronDownIcon />)}
                 </button>
                 

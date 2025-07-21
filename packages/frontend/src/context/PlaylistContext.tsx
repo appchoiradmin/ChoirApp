@@ -102,10 +102,11 @@ export const PlaylistProvider = ({
           const templates = await getPlaylistTemplatesByChoirId(choirId, token);
           setAvailableTemplates(templates || []);
 
-          
           if (templates.length > 0) {
-            const defaultTemplate = templates[0];
-
+            // Find the template marked as default, or fall back to the first one
+            const defaultTemplate = templates.find(t => t.isDefault) || templates[0];
+            
+            console.log('🚨 DEBUG - Selected default template:', defaultTemplate.title, 'isDefault:', defaultTemplate.isDefault);
             
             const mappedSections = (defaultTemplate.sections || []).map(section => ({
               id: section.id,
@@ -117,7 +118,6 @@ export const PlaylistProvider = ({
             setSections(mappedSections);
             setSelectedTemplate(defaultTemplate);
           } else {
-
             setSections([]);
             setSelectedTemplate(null);
           }
