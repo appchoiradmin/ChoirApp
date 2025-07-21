@@ -1,0 +1,350 @@
+/* Mobile-First Responsive CSS for ChoirApp */
+/* This file ensures proper mobile responsiveness across all components */
+
+/* Global mobile-first box-sizing and overflow fixes */
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+html {
+  overflow-x: hidden;
+  width: 100%;
+}
+
+body {
+  overflow-x: hidden;
+  width: 100%;
+  max-width: 100vw;
+}
+
+#root {
+  overflow-x: hidden;
+  width: 100%;
+  max-width: 100vw;
+}
+
+/* Container classes for consistent mobile-first layout */
+.mobile-container {
+  width: 100%;
+  max-width: 100vw;
+  padding: 0.5rem;
+  margin: 0 auto;
+  box-sizing: border-box;
+  overflow-x: hidden;
+}
+
+@media (min-width: 768px) {
+  .mobile-container {
+    padding: 1rem;
+    max-width: 1200px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .mobile-container {
+    padding: 2rem;
+    max-width: 1280px;
+  }
+}
+
+/* Fix Bulma components for mobile */
+.container {
+  width: 100% !important;
+  max-width: 100vw !important;
+  padding-left: 0.5rem !important;
+  padding-right: 0.5rem !important;
+  margin: 0 !important;
+  overflow-x: hidden !important;
+}
+
+@media (min-width: 768px) {
+  .container {
+    padding-left: 1rem !important;
+    padding-right: 1rem !important;
+    max-width: 1200px !important;
+    margin: 0 auto !important;
+  }
+}
+
+/* Fix columns for mobile */
+.columns {
+  margin: 0 !important;
+  width: 100% !important;
+  max-width: 100vw !important;
+}
+
+.column {
+  padding: 0.25rem !important;
+  width: 100% !important;
+  max-width: 100% !important;
+}
+
+@media (min-width: 768px) {
+  .column {
+    padding: 0.75rem !important;
+  }
+}
+
+/* Fix cards for mobile */
+.card {
+  width: 100% !important;
+  max-width: 100% !important;
+  margin: 0 0 0.5rem 0 !important;
+  overflow-x: hidden !important;
+}
+
+.card-content {
+  padding: 0.75rem !important;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}
+
+@media (min-width: 768px) {
+  .card {
+    margin: 0 0 1rem 0 !important;
+  }
+  
+  .card-content {
+    padding: 1.5rem !important;
+  }
+}
+
+/* Fix buttons for mobile */
+.button {
+  width: auto !important;
+  max-width: 100% !important;
+  word-wrap: break-word;
+  white-space: normal !important;
+  height: auto !important;
+  min-height: 2.5rem;
+  padding: 0.5rem 0.75rem !important;
+  font-size: 0.875rem !important;
+}
+
+@media (min-width: 768px) {
+  .button {
+    font-size: 1rem !important;
+    padding: 0.75rem 1rem !important;
+  }
+}
+
+/* Fix form elements for mobile */
+.input, .textarea, .select select {
+  width: 100% !important;
+  max-width: 100% !important;
+  font-size: 16px !important; /* Prevents zoom on iOS */
+  box-sizing: border-box !important;
+}
+
+/* Fix tables for mobile */
+.table-container {
+  overflow-x: auto !important;
+  width: 100% !important;
+  max-width: 100vw !important;
+}
+
+.table {
+  width: 100% !important;
+  font-size: 0.875rem !important;
+}
+
+@media (max-width: 768px) {
+  .table {
+    font-size: 0.75rem !important;
+  }
+  
+  .table td, .table th {
+    padding: 0.25rem !important;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+  }
+}
+
+/* Fix navigation for mobile */
+.navbar {
+  width: 100% !important;
+  max-width: 100vw !important;
+  overflow-x: hidden !important;
+}
+
+.navbar-brand, .navbar-item {
+  width: auto !important;
+  max-width: 100% !important;
+  overflow: visible !important;
+}
+
+/* Fix modals for mobile */
+.modal-card {
+  width: 95vw !important;
+  max-width: 95vw !important;
+  margin: 0 auto !important;
+}
+
+@media (min-width: 768px) {
+  .modal-card {
+    width: 90vw !important;
+    max-width: 600px !important;
+  }
+}
+
+/* Fix dropdowns for mobile */
+.dropdown-menu {
+  width: 100% !important;
+  max-width: 100vw !important;
+  left: 0 !important;
+  right: 0 !important;
+}
+
+@media (min-width: 768px) {
+  .dropdown-menu {
+    width: auto !important;
+    max-width: 300px !important;
+    left: auto !important;
+    right: auto !important;
+  }
+}
+
+/* Fix text overflow */
+.title, .subtitle, .heading {
+  word-wrap: break-word !important;
+  overflow-wrap: break-word !important;
+  hyphens: auto !important;
+}
+
+/* Fix images for mobile */
+img {
+  max-width: 100% !important;
+  height: auto !important;
+}
+
+/* Fix pre and code blocks for mobile */
+pre, code {
+  max-width: 100% !important;
+  overflow-x: auto !important;
+  word-wrap: break-word;
+  white-space: pre-wrap !important;
+}
+
+@media (max-width: 768px) {
+  pre, code {
+    font-size: 0.75rem !important;
+    padding: 0.5rem !important;
+  }
+}
+
+/* Fix grid layouts for mobile */
+.grid, .is-grid {
+  display: grid !important;
+  grid-template-columns: 1fr !important;
+  gap: 0.5rem !important;
+  width: 100% !important;
+  max-width: 100% !important;
+}
+
+@media (min-width: 768px) {
+  .grid, .is-grid {
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)) !important;
+    gap: 1rem !important;
+  }
+}
+
+/* Utility classes for mobile responsiveness */
+.mobile-hidden {
+  display: none !important;
+}
+
+@media (min-width: 768px) {
+  .mobile-hidden {
+    display: block !important;
+  }
+}
+
+.desktop-hidden {
+  display: block !important;
+}
+
+@media (min-width: 768px) {
+  .desktop-hidden {
+    display: none !important;
+  }
+}
+
+.mobile-full-width {
+  width: 100% !important;
+  max-width: 100% !important;
+}
+
+.mobile-text-center {
+  text-align: center !important;
+}
+
+@media (min-width: 768px) {
+  .mobile-text-center {
+    text-align: left !important;
+  }
+}
+
+/* Fix specific ChoirApp components */
+.songs-page, .dashboard-page, .choir-admin-page {
+  width: 100% !important;
+  max-width: 100vw !important;
+  overflow-x: hidden !important;
+  padding: 0.5rem !important;
+}
+
+@media (min-width: 768px) {
+  .songs-page, .dashboard-page, .choir-admin-page {
+    padding: 1rem !important;
+  }
+}
+
+/* Fix song cards specifically */
+.song-card, .playlist-card {
+  width: 100% !important;
+  max-width: 100% !important;
+  margin-bottom: 0.5rem !important;
+  overflow: hidden !important;
+}
+
+.song-card-content, .playlist-card-content {
+  padding: 0.75rem !important;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}
+
+/* Fix search and filter components */
+.search-container, .filter-container {
+  width: 100% !important;
+  max-width: 100% !important;
+  margin-bottom: 1rem !important;
+}
+
+.search-input, .filter-select {
+  width: 100% !important;
+  max-width: 100% !important;
+  font-size: 16px !important; /* Prevents zoom on iOS */
+}
+
+/* Fix action buttons */
+.action-buttons {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 0.5rem !important;
+  width: 100% !important;
+}
+
+@media (min-width: 768px) {
+  .action-buttons {
+    flex-direction: row !important;
+    width: auto !important;
+  }
+}
+
+/* Ensure safe areas on mobile devices */
+@supports (padding: max(0px)) {
+  .mobile-safe-area {
+    padding-left: max(0.5rem, env(safe-area-inset-left)) !important;
+    padding-right: max(0.5rem, env(safe-area-inset-right)) !important;
+    padding-bottom: max(0.5rem, env(safe-area-inset-bottom)) !important;
+  }
+}

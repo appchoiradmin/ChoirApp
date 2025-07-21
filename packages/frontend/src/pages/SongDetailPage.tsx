@@ -183,10 +183,8 @@ const SongDetailPage: React.FC = () => {
       }
       
       setSong({ ...updatedSong, visibility: editVisibility });
-      setIsEditMode(false);
-      
-      // Show success message briefly
-      const successMessage = 'Song updated successfully!';
+      setIsEditMode(false);      
+   
       setError(null);
       
     } catch (err) {

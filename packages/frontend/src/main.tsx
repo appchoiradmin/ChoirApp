@@ -9,6 +9,7 @@ import './i18n';
 
 import './theme.scss';
 import './index.css';
+import './styles/mobile-responsive.css';
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

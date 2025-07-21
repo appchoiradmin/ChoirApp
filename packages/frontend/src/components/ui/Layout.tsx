@@ -15,14 +15,14 @@ const Layout: React.FC<LayoutProps> = ({
   className = ''
 }) => {
   return (
-    <div className={`layout-container ${className}`}>
+    <div className={`layout-container mobile-safe-area ${className}`}>
       {navigation && (
         <header className="layout-header">
           {navigation}
         </header>
       )}
       
-      <main className="layout-main">
+      <main className="layout-main mobile-container">
         {children}
       </main>
       
