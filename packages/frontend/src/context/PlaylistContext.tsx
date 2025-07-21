@@ -103,20 +103,36 @@ export const PlaylistProvider = ({
           setAvailableTemplates(templates || []);
 
           if (templates.length > 0) {
-            // Find the template marked as default, or fall back to the first one
-            const defaultTemplate = templates.find(t => t.isDefault) || templates[0];
-            
-            console.log('🚨 DEBUG - Selected default template:', defaultTemplate.title, 'isDefault:', defaultTemplate.isDefault);
-            
-            const mappedSections = (defaultTemplate.sections || []).map(section => ({
-              id: section.id,
-              title: section.title,
-              order: section.order,
-              songs: section.songs || [],
-            }));
+            // Only set default template if no template is currently selected
+            // This preserves user template selections when switching between tabs
+            if (!selectedTemplate) {
+              // Find the template marked as default, or fall back to the first one
+              const defaultTemplate = templates.find(t => t.isDefault) || templates[0];
+              
+              console.log('🚨 DEBUG - No template selected, using default template:', defaultTemplate.title, 'isDefault:', defaultTemplate.isDefault);
+              
+              const mappedSections = (defaultTemplate.sections || []).map(section => ({
+                id: section.id,
+                title: section.title,
+                order: section.order,
+                songs: section.songs || [],
+              }));
 
-            setSections(mappedSections);
-            setSelectedTemplate(defaultTemplate);
+              setSections(mappedSections);
+              setSelectedTemplate(defaultTemplate);
+            } else {
+              // Template already selected by user, preserve it and update sections
+              console.log('🚨 DEBUG - Preserving user-selected template:', selectedTemplate.title);
+              
+              const mappedSections = (selectedTemplate.sections || []).map(section => ({
+                id: section.id,
+                title: section.title,
+                order: section.order,
+                songs: section.songs || [],
+              }));
+              
+              setSections(mappedSections);
+            }
           } else {
             setSections([]);
             setSelectedTemplate(null);
@@ -141,10 +157,15 @@ export const PlaylistProvider = ({
     return () => {};
   }, [choirId, date, token]);
 
-  // Debug: Track when dependencies change
+  // Debug: Track when dependencies change and template state
   useEffect(() => {
-
-  }, [choirId, date, token]);
+    console.log('🚨 DEBUG - PlaylistContext dependencies changed:', {
+      choirId,
+      date: date?.toISOString().split('T')[0] || 'null',
+      hasToken: !!token,
+      selectedTemplate: selectedTemplate?.title || 'None'
+    });
+  }, [choirId, date, token, selectedTemplate]);
 
   // Expose a function to create the playlist only when needed (e.g., on first change)
   const createPlaylistIfNeeded = async () => {

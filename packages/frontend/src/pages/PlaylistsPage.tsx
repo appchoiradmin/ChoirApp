@@ -117,7 +117,8 @@ const PlaylistsPage: React.FC = () => {
     error, 
     playlistId, 
     setSections,
-    isPersisted
+    isPersisted,
+    selectedTemplate
   } = usePlaylistContext();
   const { user } = useUser();
   const navigate = useNavigate();
@@ -149,6 +150,17 @@ const PlaylistsPage: React.FC = () => {
     }
   };
 
+  // Debug template synchronization
+  useEffect(() => {
+    console.log('🚨 DEBUG - PlaylistsPage template sync:', {
+      selectedTemplate: selectedTemplate?.title || 'None',
+      templateId: selectedTemplate?.id || 'None',
+      sectionsCount: sections.length,
+      isPersisted,
+      selectedDate: selectedDate.toISOString().split('T')[0]
+    });
+  }, [selectedTemplate, sections, isPersisted, selectedDate]);
+
   // Fetch song details when sections are loaded
   useEffect(() => {
     const fetchSongDetails = async () => {
@@ -156,7 +168,8 @@ const PlaylistsPage: React.FC = () => {
         sectionsCount: sections.length,
         selectedDate: selectedDate.toISOString().split('T')[0],
         isPersisted,
-        playlistId
+        playlistId,
+        selectedTemplate: selectedTemplate?.title || 'None'
       });
       
       if (!user?.token || !sections.length) {

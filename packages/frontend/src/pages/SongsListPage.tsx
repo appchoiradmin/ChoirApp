@@ -152,6 +152,10 @@ const SongsListPage: FC<SongsListPageProps> = ({ playlistId, refreshPlaylist }) 
 
   // Template selection handler
   const handleTemplateSelection = (template: PlaylistTemplate) => {
+    console.log('🚨 DEBUG - Template selected in songs tab:', template.title, 'ID:', template.id);
+    
+    // Update the selected template in the PlaylistContext
+    // This will automatically synchronize with the playlist tab
     setSelectedTemplate(template);
     setTemplateDropdownOpen(false);
     
@@ -165,7 +169,14 @@ const SongsListPage: FC<SongsListPageProps> = ({ playlistId, refreshPlaylist }) 
         songs: [],
       }));
       setSections(mappedSections);
+      
+      console.log('🚨 DEBUG - Template sections updated:', mappedSections.length, 'sections');
     }
+    
+    // Show success message to user
+    toast.success(`Template "${template.title}" selected successfully!`);
+    
+    console.log('🚨 DEBUG - Template selection complete. This should now be reflected in playlist tab.');
   };
 
 
@@ -513,6 +524,8 @@ const SongsListPage: FC<SongsListPageProps> = ({ playlistId, refreshPlaylist }) 
     // Force immediate search by calling fetchSongs directly
     fetchSongs(filters.search, true);
   };
+
+
   
   return (
     <Layout 

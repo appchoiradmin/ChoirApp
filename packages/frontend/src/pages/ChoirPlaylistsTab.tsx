@@ -1,7 +1,6 @@
 import React, { useState, useContext } from 'react';
 import { useTranslation } from 'react-i18next';
 import { getNextSunday } from '../utils/getNextSunday';
-import { PlaylistProvider } from '../context/PlaylistContext';
 import PlaylistsPage from './PlaylistsPage';
 import { useParams } from 'react-router-dom';
 import { useUser } from '../hooks/useUser';
@@ -48,9 +47,7 @@ const ChoirPlaylistsTab: React.FC = () => {
         </div>
       )}
       
-      <PlaylistProvider choirId={choirId || null} date={selectedDate} token={token}>
-        <PlaylistsPage />
-      </PlaylistProvider>
+      <PlaylistsPage />
     </div>
   );
 };
