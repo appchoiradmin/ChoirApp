@@ -73,13 +73,118 @@
     }
   }
   
-  &__grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  &__content-wrapper {
+    position: relative;
+    display: flex;
     gap: 1rem;
     
-    @media (max-width: 640px) {
+    @media (max-width: 768px) {
+      flex-direction: row; // Keep horizontal layout on mobile for alphabet nav
+      gap: 0.5rem;
+    }
+  }
+  
+  &__alphabet-nav {
+    position: sticky;
+    top: 1rem;
+    height: fit-content;
+    z-index: 10;
+    flex-shrink: 0;
+    
+    @media (max-width: 768px) {
+      position: fixed;
+      right: 8px;
+      top: 50%;
+      transform: translateY(-50%);
+      height: auto;
+      max-height: 70vh;
+    }
+  }
+  
+  &__alphabet-nav-inner {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 16px;
+    padding: 6px 4px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    backdrop-filter: blur(10px);
+    user-select: none;
+    touch-action: none;
+    
+    @media (max-width: 768px) {
+      flex-direction: column; // Keep vertical on mobile
+      padding: 4px 3px;
+      gap: 0.5px;
+      border-radius: 12px;
+      max-height: 70vh;
+      overflow: hidden;
+    }
+  }
+  
+  &__alphabet-letter {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    border: none;
+    background: transparent;
+    color: $primary;
+    font-size: 0.7rem;
+    font-weight: 600;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    
+    &--active {
+      color: $primary;
+      
+      &:hover {
+        background: $primary;
+        color: white;
+        transform: scale(1.1);
+      }
+      
+      &:active {
+        transform: scale(0.95);
+        background: color.adjust($primary, $lightness: -10%);
+      }
+    }
+    
+    &--disabled {
+      color: rgba($primary, 0.3);
+      cursor: default;
+      
+      &:hover {
+        background: transparent;
+        transform: none;
+      }
+    }
+    
+    @media (max-width: 768px) {
+      width: 20px;
+      height: 20px;
+      font-size: 0.65rem;
+      border-radius: 3px;
+      
+      &--active:hover {
+        transform: scale(1.05);
+      }
+    }
+  }
+  
+  &__grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1rem;
+    flex: 1;
+    
+    @media (max-width: 768px) {
       grid-template-columns: 1fr;
+      gap: 0.75rem;
     }
   }
   

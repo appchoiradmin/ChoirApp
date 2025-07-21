@@ -50,11 +50,15 @@ const SongsListPage: FC<SongsListPageProps> = ({ playlistId, refreshPlaylist }) 
   const isGeneralUser = !user?.choirId;
 
   const [songs, setSongs] = useState<SongDto[]>([]);
+  const [sortedSongs, setSortedSongs] = useState<SongDto[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedSongs, setSelectedSongs] = useState<Set<string>>(new Set());
   const [playlistSongIds, setPlaylistSongIds] = useState<Set<string>>(new Set()); // Track songs actually in playlist
-  
+  const [isAddingSongs, setIsAddingSongs] = useState(false);
+  const [availableLetters, setAvailableLetters] = useState<string[]>([]);
+  const [showAlphabetNav, setShowAlphabetNav] = useState(false);
+
   // Infinite scroll state
   const [hasMore, setHasMore] = useState<boolean>(true);
   const [page, setPage] = useState<number>(0);
@@ -64,7 +68,6 @@ const SongsListPage: FC<SongsListPageProps> = ({ playlistId, refreshPlaylist }) 
   // Back to top button state
   const [showBackToTop, setShowBackToTop] = useState<boolean>(false);
   const [templateDropdownOpen, setTemplateDropdownOpen] = useState<boolean>(false);
-  const [isAddingSongs, setIsAddingSongs] = useState(false);
   const [filters, setFilters] = useState<FilterState>({
     search: '',
     sortBy: 'title',
@@ -73,6 +76,68 @@ const SongsListPage: FC<SongsListPageProps> = ({ playlistId, refreshPlaylist }) 
   
   // Search debounce timeout ref
   const searchTimeoutRef = useRef<number | null>(null);
+  
+  // Refs for alphabet navigation
+  const songRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
+  
+  // Function to sort songs alphabetically and extract available letters
+  const sortAndProcessSongs = (songsToProcess: SongDto[]) => {
+    // Sort songs alphabetically by title
+    const sorted = [...songsToProcess].sort((a, b) => 
+      a.title.toLowerCase().localeCompare(b.title.toLowerCase())
+    );
+    
+    setSortedSongs(sorted);
+    
+    // Extract available letters (first letter of each song title)
+    const letters = new Set<string>();
+    sorted.forEach(song => {
+      const firstLetter = song.title.charAt(0).toUpperCase();
+      if (/[A-Z]/.test(firstLetter)) {
+        letters.add(firstLetter);
+      }
+    });
+    
+    const sortedLetters = Array.from(letters).sort();
+    setAvailableLetters(sortedLetters);
+    setShowAlphabetNav(sorted.length > 10); // Show nav if we have more than 10 songs
+  };
+  
+  // All alphabet letters
+  const allLetters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
+  
+  // Function to scroll to first song starting with selected letter
+  const scrollToLetter = (letter: string) => {
+    const targetSong = sortedSongs.find(song => 
+      song.title.charAt(0).toUpperCase() === letter
+    );
+    
+    if (targetSong && songRefs.current[targetSong.songId]) {
+      songRefs.current[targetSong.songId]?.scrollIntoView({
+        behavior: 'smooth',
+        block: 'start'
+      });
+    }
+  };
+  
+  // Handle drag-to-scroll functionality
+  const handleAlphabetDrag = (e: React.TouchEvent | React.MouseEvent) => {
+    const alphabetNav = (e.currentTarget as HTMLElement).closest('.songs-page__alphabet-nav-inner');
+    if (!alphabetNav) return;
+    
+    const rect = alphabetNav.getBoundingClientRect();
+    const clientY = 'touches' in e ? e.touches[0].clientY : e.clientY;
+    const relativeY = clientY - rect.top;
+    const letterHeight = rect.height / allLetters.length;
+    const letterIndex = Math.floor(relativeY / letterHeight);
+    
+    if (letterIndex >= 0 && letterIndex < allLetters.length) {
+      const letter = allLetters[letterIndex];
+      if (availableLetters.includes(letter)) {
+        scrollToLetter(letter);
+      }
+    }
+  };
 
   // Modal handlers
   const openSectionModal = (songId: string) => {
@@ -196,9 +261,11 @@ const SongsListPage: FC<SongsListPageProps> = ({ playlistId, refreshPlaylist }) 
         }
         
         const fetchedSongs = await searchSongs(searchParams, token || '');
-        
-        setSongs(fetchedSongs || []);
-        setHasMore(fetchedSongs.length === songsPerPage);
+      
+      setSongs(fetchedSongs || []);
+      // Sort songs alphabetically and update available letters
+      sortAndProcessSongs(fetchedSongs || []);
+      setHasMore(fetchedSongs.length === songsPerPage);
       } catch (error) {
         setError('Failed to load songs. Please try again later.');
       } finally {
@@ -294,7 +361,10 @@ const SongsListPage: FC<SongsListPageProps> = ({ playlistId, refreshPlaylist }) 
         setSongs(prev => {
           const existingIds = new Set(prev.map(song => song.songId));
           const newSongs = moreSongs.filter(song => !existingIds.has(song.songId));
-          return [...prev, ...newSongs];
+          const combined = [...prev, ...newSongs];
+          // Re-sort and process the combined songs
+          sortAndProcessSongs(combined);
+          return combined;
         });
         setPage(prev => prev + 1);
         setHasMore(moreSongs.length === songsPerPage);
@@ -648,9 +718,48 @@ const SongsListPage: FC<SongsListPageProps> = ({ playlistId, refreshPlaylist }) 
             )}
           </div>
         ) : (
-          <div className="songs-page__grid">
-            {songs.map(song => (
-              <Card key={song.songId} className="songs-page__card">
+          <div className="songs-page__content-wrapper">
+            {/* Alphabet Navigation Bar */}
+            {showAlphabetNav && (
+              <div className="songs-page__alphabet-nav">
+                <div 
+                  className="songs-page__alphabet-nav-inner"
+                  onTouchMove={handleAlphabetDrag}
+                  onMouseMove={(e) => {
+                    if (e.buttons === 1) { // Only when mouse is pressed
+                      handleAlphabetDrag(e);
+                    }
+                  }}
+                >
+                  {allLetters.map(letter => {
+                    const hasLetterSongs = availableLetters.includes(letter);
+                    return (
+                      <button
+                        key={letter}
+                        className={`songs-page__alphabet-letter ${
+                          hasLetterSongs ? 'songs-page__alphabet-letter--active' : 'songs-page__alphabet-letter--disabled'
+                        }`}
+                        onClick={() => hasLetterSongs && scrollToLetter(letter)}
+                        disabled={!hasLetterSongs}
+                        aria-label={`Jump to songs starting with ${letter}`}
+                      >
+                        {letter}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+            
+            <div className="songs-page__grid">
+              {sortedSongs.map(song => (
+                <div 
+                  key={song.songId}
+                  ref={(el: HTMLDivElement | null) => {
+                    songRefs.current[song.songId] = el;
+                  }}
+                >
+                  <Card className="songs-page__card">
                 <div className="songs-page__card-content">
                   <div className="songs-page__song-info">
                     <h3 
@@ -694,9 +803,11 @@ const SongsListPage: FC<SongsListPageProps> = ({ playlistId, refreshPlaylist }) 
                       )}
                     </div>
                   </div>
+                  </div>
+                  </Card>
                 </div>
-              </Card>
-            ))}
+              ))}
+            </div>
           </div>
         )}
         
