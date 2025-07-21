@@ -71,8 +71,6 @@ const SongsListPage: FC<SongsListPageProps> = ({ playlistId, refreshPlaylist }) 
   const [selectedSongs, setSelectedSongs] = useState<Set<string>>(new Set());
   const [playlistSongIds, setPlaylistSongIds] = useState<Set<string>>(new Set()); // Track songs actually in playlist
   const [isAddingSongs, setIsAddingSongs] = useState(false);
-  const [availableLetters, setAvailableLetters] = useState<string[]>([]);
-  const [showAlphabetNav, setShowAlphabetNav] = useState(false);
 
   // Infinite scroll state
   const [hasMore, setHasMore] = useState<boolean>(true);
@@ -92,10 +90,9 @@ const SongsListPage: FC<SongsListPageProps> = ({ playlistId, refreshPlaylist }) 
   // Search debounce timeout ref
   const searchTimeoutRef = useRef<number | null>(null);
   
-  // Refs for alphabet navigation
-  const songRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
+
   
-  // Function to sort songs alphabetically and extract available letters
+  // Function to sort songs alphabetically
   const sortAndProcessSongs = (songsToProcess: SongDto[]) => {
     // Sort songs alphabetically by title
     const sorted = [...songsToProcess].sort((a, b) => 
@@ -103,56 +100,9 @@ const SongsListPage: FC<SongsListPageProps> = ({ playlistId, refreshPlaylist }) 
     );
     
     setSortedSongs(sorted);
-    
-    // Extract available letters (first letter of each song title)
-    const letters = new Set<string>();
-    sorted.forEach(song => {
-      const firstLetter = song.title.charAt(0).toUpperCase();
-      if (/[A-Z]/.test(firstLetter)) {
-        letters.add(firstLetter);
-      }
-    });
-    
-    const sortedLetters = Array.from(letters).sort();
-    setAvailableLetters(sortedLetters);
-    setShowAlphabetNav(sorted.length > 10); // Show nav if we have more than 10 songs
   };
   
-  // All alphabet letters
-  const allLetters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
-  
-  // Function to scroll to first song starting with selected letter
-  const scrollToLetter = (letter: string) => {
-    const targetSong = sortedSongs.find(song => 
-      song.title.charAt(0).toUpperCase() === letter
-    );
-    
-    if (targetSong && songRefs.current[targetSong.songId]) {
-      songRefs.current[targetSong.songId]?.scrollIntoView({
-        behavior: 'smooth',
-        block: 'start'
-      });
-    }
-  };
-  
-  // Handle drag-to-scroll functionality
-  const handleAlphabetDrag = (e: React.TouchEvent | React.MouseEvent) => {
-    const alphabetNav = (e.currentTarget as HTMLElement).closest('.songs-page__alphabet-nav-inner');
-    if (!alphabetNav) return;
-    
-    const rect = alphabetNav.getBoundingClientRect();
-    const clientY = 'touches' in e ? e.touches[0].clientY : e.clientY;
-    const relativeY = clientY - rect.top;
-    const letterHeight = rect.height / allLetters.length;
-    const letterIndex = Math.floor(relativeY / letterHeight);
-    
-    if (letterIndex >= 0 && letterIndex < allLetters.length) {
-      const letter = allLetters[letterIndex];
-      if (availableLetters.includes(letter)) {
-        scrollToLetter(letter);
-      }
-    }
-  };
+
 
   // Modal handlers
   const openSectionModal = (songId: string) => {
@@ -717,46 +667,11 @@ const SongsListPage: FC<SongsListPageProps> = ({ playlistId, refreshPlaylist }) 
           </div>
         ) : (
           <div className="songs-page__content-wrapper">
-            {/* Alphabet Navigation Bar */}
-            {showAlphabetNav && (
-              <div className="songs-page__alphabet-nav">
-                <div 
-                  className="songs-page__alphabet-nav-inner"
-                  onTouchMove={handleAlphabetDrag}
-                  onMouseMove={(e) => {
-                    if (e.buttons === 1) { // Only when mouse is pressed
-                      handleAlphabetDrag(e);
-                    }
-                  }}
-                >
-                  {allLetters.map(letter => {
-                    const hasLetterSongs = availableLetters.includes(letter);
-                    return (
-                      <button
-                        key={letter}
-                        className={`songs-page__alphabet-letter ${
-                          hasLetterSongs ? 'songs-page__alphabet-letter--active' : 'songs-page__alphabet-letter--disabled'
-                        }`}
-                        onClick={() => hasLetterSongs && scrollToLetter(letter)}
-                        disabled={!hasLetterSongs}
-                        aria-label={`Jump to songs starting with ${letter}`}
-                      >
-                        {letter}
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
+
             
             <div className="songs-page__grid">
               {sortedSongs.map(song => (
-                <div 
-                  key={song.songId}
-                  ref={(el: HTMLDivElement | null) => {
-                    songRefs.current[song.songId] = el;
-                  }}
-                >
+                <div key={song.songId}>
                   <Card className="songs-page__card">
                 <div className="songs-page__card-content">
                   <div className="songs-page__song-info">
