@@ -196,12 +196,102 @@
   font-weight: 500;
 }
 
-.content {
-  margin-top: 1.5rem;
-  padding: 1rem;
-  background-color: white;
+// Song Content - PDF/Image-like viewing experience
+.songContentContainer {
+  margin-top: 2rem;
+  background: white;
   border-radius: 0.5rem;
-  border: 1px solid $border;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  position: relative;
+  
+  // Enable horizontal scrolling and zooming like a PDF/image viewer
+  overflow: auto;
+  -webkit-overflow-scrolling: touch; // Smooth scrolling on iOS
+  
+  // Allow pinch-to-zoom on mobile
+  touch-action: pan-x pan-y pinch-zoom;
+  
+  // Full width container
+  width: 100%;
+  max-width: 100vw;
+  
+  // Minimum height for better UX
+  min-height: 60vh;
+  
+  @media (max-width: 768px) {
+    // On mobile, allow full-screen-like experience
+    border-radius: 0;
+    margin-left: -0.5rem;
+    margin-right: -0.5rem;
+    width: calc(100% + 1rem);
+    
+    // Enable all touch gestures for mobile viewing
+    touch-action: manipulation;
+  }
+}
+
+.songContentViewer {
+  padding: 1.5rem;
+  
+  // Allow content to be wider than container (horizontal scroll)
+  min-width: 100%;
+  width: max-content;
+  
+  // Enable text selection and interaction
+  user-select: text;
+  -webkit-user-select: text;
+  
+  @media (max-width: 768px) {
+    padding: 1rem;
+    
+    // On mobile, content can be much wider for horizontal scrolling
+    min-width: 100vw;
+    
+    // Better font size for mobile viewing
+    font-size: 14px;
+    line-height: 1.4;
+  }
+  
+  // ChordPro content styling for better mobile viewing
+  :global {
+    .chordpro-line {
+      white-space: nowrap; // Prevent line wrapping for chord charts
+      margin-bottom: 0.5rem;
+    }
+    
+    .chordpro-chord {
+      font-family: 'Courier New', monospace;
+      font-weight: bold;
+      color: #2563eb;
+      font-size: 0.9em;
+    }
+    
+    .chordpro-lyric {
+      font-family: 'Times New Roman', serif;
+      color: #1f2937;
+    }
+    
+    // Mobile-specific chord chart styling
+    @media (max-width: 768px) {
+      .chordpro-line {
+        font-size: 12px;
+        margin-bottom: 0.3rem;
+      }
+      
+      .chordpro-chord {
+        font-size: 11px;
+      }
+      
+      .chordpro-lyric {
+        font-size: 13px;
+      }
+    }
+  }
+}
+
+// Legacy content class for backward compatibility
+.content {
+  @extend .songContentContainer;
 }
 
 .loading {

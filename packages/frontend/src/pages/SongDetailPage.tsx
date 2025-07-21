@@ -872,8 +872,11 @@ const SongDetailPage: React.FC = () => {
               ))}
             </div>
             
-            <div className={styles.content}>
-              {song && <ChordProViewer source={song.content} />}
+            {/* Song Content - PDF/Image-like viewing experience */}
+            <div className={styles.songContentContainer}>
+              <div className={styles.songContentViewer}>
+                {song && <ChordProViewer source={song.content} />}
+              </div>
             </div>
           </>
         )}
