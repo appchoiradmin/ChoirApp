@@ -317,8 +317,27 @@ namespace ChoirApp.Application.Services
 
         public async Task<Result<IEnumerable<PlaylistTemplate>>> GetPlaylistTemplatesByChoirIdAsync(Guid choirId)
         {
+            // Get all existing templates for this choir
             var templates = await _playlistTemplateRepository.GetByChoirIdAsync(choirId);
-            return Result.Ok(templates.AsEnumerable());
+            var templateList = templates.ToList();
+
+            // Check if a generic template exists for this choir
+            var genericTemplate = templateList.FirstOrDefault(t => 
+                t.Title.Equals("Generic Template", StringComparison.OrdinalIgnoreCase));
+
+            // If no generic template exists, create one
+            if (genericTemplate == null)
+            {
+                var createResult = await CreateGenericTemplateForChoir(choirId);
+                if (createResult.IsSuccess)
+                {
+                    templateList.Add(createResult.Value);
+                }
+                // If creation fails, we continue without the generic template
+                // The user can still use existing templates
+            }
+
+            return Result.Ok<IEnumerable<PlaylistTemplate>>(templateList);
         }
 
         public async Task<Result> UpdatePlaylistTemplateAsync(Guid templateId, UpdatePlaylistTemplateDto templateDto, Guid userId)
@@ -511,6 +530,44 @@ namespace ChoirApp.Application.Services
             await _playlistRepository.UpdatePlaylistSongAsync(songToMove);
             await _playlistRepository.SaveChangesAsync();
             return Result.Ok();
+        }
+
+        private async Task<Result<PlaylistTemplate>> CreateGenericTemplateForChoir(Guid choirId)
+        {
+            // Create the generic template
+            var templateResult = PlaylistTemplate.Create(
+                title: "Generic Template",
+                description: "Default template with one section for songs",
+                choirId: choirId,
+                isDefault: false // Not default, just a fallback
+            );
+
+            if (templateResult.IsFailed)
+                return Result.Fail<PlaylistTemplate>(templateResult.Errors);
+
+            var template = templateResult.Value;
+
+            // Add the template to the repository
+            await _playlistTemplateRepository.AddAsync(template);
+            await _playlistTemplateRepository.SaveChangesAsync();
+
+            // Create one section for the template
+            var sectionResult = PlaylistTemplateSection.Create(
+                templateId: template.TemplateId,
+                title: "Songs",
+                order: 1
+            );
+
+            if (sectionResult.IsFailed)
+                return Result.Ok(template); // Return template even if section creation fails
+
+            var section = sectionResult.Value;
+            await _playlistTemplateRepository.AddTemplateSectionAsync(section);
+            await _playlistTemplateRepository.SaveChangesAsync();
+
+            // Reload the template with its sections
+            var reloadedTemplate = await _playlistTemplateRepository.GetByIdAsync(template.TemplateId);
+            return Result.Ok(reloadedTemplate ?? template);
         }
     }
 }

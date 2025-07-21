@@ -72,9 +72,12 @@ const MovableSongItem: React.FC<MovableSongItemProps> = ({
         </span>
       )}
       <div className={styles['song-actions']}>
-        <button className="button is-small" type="button" onClick={openModal}>
-          {t('movableSongItem.moveTo')}
-        </button>
+        {/* Only show Move To button if there are other sections to move to */}
+        {sections.length > 1 && (
+          <button className="button is-small" type="button" onClick={openModal}>
+            {t('movableSongItem.moveTo')}
+          </button>
+        )}
         <button
           className="delete is-small ml-2"
           type="button"

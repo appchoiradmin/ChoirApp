@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef, FC } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { searchSongs } from '../services/songService';
-import { addSongToPlaylist, getPlaylistTemplatesByChoirId } from '../services/playlistService';
+import { addSongToPlaylist } from '../services/playlistService';
 import { useUser } from '../hooks/useUser';
 import { useTranslation } from '../hooks/useTranslation';
 import { useDisplayedPlaylistSections } from '../hooks/useDisplayedPlaylistSections';
@@ -40,9 +40,11 @@ const SongsListPage: FC<SongsListPageProps> = ({ playlistId, refreshPlaylist }) 
   const [sectionModalOpen, setSectionModalOpen] = useState<boolean>(false);
   const [selectedSongForModal, setSelectedSongForModal] = useState<string | null>(null);
   const navigate = useNavigate();
-  const { sections, selectedTemplate, setSelectedTemplate, choirId, isInitializing, createPlaylistIfNeeded, refreshPlaylist: refreshPlaylistContext, playlistId: contextPlaylistId } = usePlaylistContext();
-  const displayedSections = useDisplayedPlaylistSections(sections, selectedTemplate);
+  const { sections, setSections, selectedTemplate, setSelectedTemplate, availableTemplates, choirId, isInitializing, createPlaylistIfNeeded, refreshPlaylist: refreshPlaylistContext, playlistId: contextPlaylistId, isPersisted } = usePlaylistContext();
   const { t } = useTranslation();
+  
+  // Use sections from PlaylistContext (backend provides generic template automatically)
+  const displayedSections = useDisplayedPlaylistSections(sections, selectedTemplate);
   
   const { token, user } = useUser();
   const isGeneralUser = !user?.choirId;
@@ -61,7 +63,6 @@ const SongsListPage: FC<SongsListPageProps> = ({ playlistId, refreshPlaylist }) 
   
   // Back to top button state
   const [showBackToTop, setShowBackToTop] = useState<boolean>(false);
-  const [availableTemplates, setAvailableTemplates] = useState<PlaylistTemplate[]>([]);
   const [templateDropdownOpen, setTemplateDropdownOpen] = useState<boolean>(false);
   const [isAddingSongs, setIsAddingSongs] = useState(false);
   const [filters, setFilters] = useState<FilterState>({
@@ -83,6 +84,26 @@ const SongsListPage: FC<SongsListPageProps> = ({ playlistId, refreshPlaylist }) 
     setSectionModalOpen(false);
     setSelectedSongForModal(null);
   };
+
+  // Template selection handler
+  const handleTemplateSelection = (template: PlaylistTemplate) => {
+    setSelectedTemplate(template);
+    setTemplateDropdownOpen(false);
+    
+    // Update sections to reflect the newly selected template
+    // Only update if we're not in a persisted playlist (where sections come from actual playlist)
+    if (!isPersisted && template && template.sections) {
+      const mappedSections = template.sections.map(section => ({
+        id: section.id,
+        title: section.title,
+        order: section.order,
+        songs: [],
+      }));
+      setSections(mappedSections);
+    }
+  };
+
+
 
   // Helper function to check if a song is already in the current playlist
   const isSongInPlaylist = (songId: string): boolean => {
@@ -294,31 +315,17 @@ const SongsListPage: FC<SongsListPageProps> = ({ playlistId, refreshPlaylist }) 
       const activeChoirId = user?.choirId || (user?.choirs && user.choirs.length > 0 ? user.choirs[0].id : null);
       
       if (token && activeChoirId) {
-        // Loading state is handled by PlaylistContext
-        try {
-          // Fetch templates
-          const templates = await getPlaylistTemplatesByChoirId(activeChoirId, token);
-          setAvailableTemplates(templates);
-          
-          // PlaylistContext now handles playlist selection based on date
-          // No need to manually find playlists here
-        } catch (error) {
-          setError('Failed to fetch data.');
-        } finally {
-          // Loading state is handled by PlaylistContext
-        }
+        // Template loading and playlist selection is now handled by PlaylistContext
+        // This useEffect can be simplified or removed entirely
       }
     };
     
     fetchData();
   }, [token, user, playlistId]);
 
-  // Handle template selection
-  const handleTemplateSelection = (template: PlaylistTemplate) => {
-    setSelectedTemplate(template);
-    setTemplateDropdownOpen(false);
-  };
+
   
+
   // Handle section selection from modal
   const handleSectionSelect = async (sectionId: string) => {
     if (!selectedSongForModal || !token) {
@@ -524,31 +531,24 @@ const SongsListPage: FC<SongsListPageProps> = ({ playlistId, refreshPlaylist }) 
           </div>
         </div>
         
-        {/* Template selection if in playlist context */}
-        {playlistId && user?.choirId && (
-          <div className="template-selector">
+        {/* Template selection - always visible within a choir */}
+        {choirId && (
+          <div className={`template-selector ${isPersisted ? 'template-selector--disabled' : ''}`}>
             <div className="template-selector__label">
               <span>{t('songs.template')}:</span>
               <div className="template-selector__dropdown">
                 <button 
-                  onClick={() => setTemplateDropdownOpen(!templateDropdownOpen)}
-                  className="template-selector__current"
+                  onClick={() => !isPersisted && setTemplateDropdownOpen(!templateDropdownOpen)}
+                  className={`template-selector__current ${isPersisted ? 'template-selector__current--disabled' : ''}`}
+                  disabled={isPersisted}
+                  title={isPersisted ? t('songs.templateLockedAfterFirstSong') : undefined}
                 >
-                  {selectedTemplate ? selectedTemplate.title : t('songs.none')}
-                  {templateDropdownOpen ? <ChevronUpIcon /> : <ChevronDownIcon />}
+                  {selectedTemplate ? selectedTemplate.title : (availableTemplates.length > 0 ? availableTemplates[0].title : t('songs.noTemplatesAvailable'))}
+                  {!isPersisted && (templateDropdownOpen ? <ChevronUpIcon /> : <ChevronDownIcon />)}
                 </button>
                 
-                {templateDropdownOpen && (
+                {templateDropdownOpen && !isPersisted && (
                   <div className="template-selector__menu">
-                    <div 
-                      className="template-selector__item"
-                      onClick={() => {
-                        setSelectedTemplate(null);
-                        setTemplateDropdownOpen(false);
-                      }}
-                    >
-                      {t('songs.none')}
-                    </div>
                     {availableTemplates.length > 0 ? (
                       availableTemplates.map(template => (
                         <div 
@@ -568,6 +568,26 @@ const SongsListPage: FC<SongsListPageProps> = ({ playlistId, refreshPlaylist }) 
                 )}
               </div>
             </div>
+            
+            {/* Template instructions */}
+            {!isPersisted && (
+              <div className="template-selector__instructions">
+                <p className="template-selector__help-text">
+                  {selectedTemplate ? 
+                    t('songs.templateSelectedInfo') : 
+                    t('songs.templateAlwaysVisible')
+                  }
+                </p>
+              </div>
+            )}
+            
+            {isPersisted && (
+              <div className="template-selector__locked-info">
+                <p className="template-selector__locked-text">
+                  {t('songs.templateLocked')}
+                </p>
+              </div>
+            )}
           </div>
         )}
         

@@ -18,6 +18,7 @@ export interface PlaylistContextType {
   setSections: (sections: PlaylistSection[]) => void;
   selectedTemplate: PlaylistTemplate | null;
   setSelectedTemplate: (template: PlaylistTemplate | null) => void;
+  availableTemplates: PlaylistTemplate[];
   isPersisted: boolean;
   setIsPersisted: (persisted: boolean) => void;
   isInitializing: boolean;
@@ -51,6 +52,7 @@ export const PlaylistProvider = ({
 }) => {
   const [sections, setSections] = useState<PlaylistSection[]>([]);
   const [selectedTemplate, setSelectedTemplate] = useState<PlaylistTemplate | null>(null);
+  const [availableTemplates, setAvailableTemplates] = useState<PlaylistTemplate[]>([]);
   const [isPersisted, setIsPersisted] = useState<boolean>(false);
   const [isInitializing, setIsInitializing] = useState<boolean>(true);
   const [isInitialized, setIsInitialized] = useState<boolean>(false);
@@ -98,6 +100,7 @@ export const PlaylistProvider = ({
           // No playlist exists: just load template for preview
 
           const templates = await getPlaylistTemplatesByChoirId(choirId, token);
+          setAvailableTemplates(templates || []);
 
           
           if (templates.length > 0) {
@@ -179,6 +182,8 @@ export const PlaylistProvider = ({
       setPlaylistId(created.id);
       setIsPersisted(true);
       setSections(created.sections || []); // <-- Use real backend sections
+      // CRITICAL FIX: Preserve selectedTemplate during playlist creation
+      // Don't reset it unless the backend explicitly provides a different one
       return { id: created.id, sections: created.sections || [] };
     } catch (creationError: any) {
       setError(creationError?.message || 'Failed to create playlist');
@@ -208,7 +213,12 @@ export const PlaylistProvider = ({
       if (persisted) {
 
         setSections(persisted.sections || []);
-        setSelectedTemplate(persisted.template || null);
+        // CRITICAL FIX: Only update selectedTemplate if the backend provides one
+        // This prevents losing the template selection when playlist is created
+        if (persisted.template) {
+          setSelectedTemplate(persisted.template);
+        }
+        // If no template from backend, keep the current selectedTemplate
         setPlaylistId(persisted.id);
         setIsPersisted(true);
       } else {
@@ -226,6 +236,7 @@ export const PlaylistProvider = ({
       setSections,
       selectedTemplate,
       setSelectedTemplate,
+      availableTemplates,
       isPersisted,
       setIsPersisted,
       isInitializing,
