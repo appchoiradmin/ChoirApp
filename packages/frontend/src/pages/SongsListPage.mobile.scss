@@ -284,3 +284,36 @@
     }
   }
 }
+
+// Mobile-specific override for back-to-top button to avoid bottom navigation
+.songs-page__back-to-top {
+  @media (max-width: 768px) {
+    bottom: 7rem !important; // Force positioning above bottom navigation
+    z-index: 1001 !important; // Ensure it's above navigation
+    
+    svg {
+      width: 2.25rem !important; // Much larger arrow for mobile
+      height: 2.25rem !important;
+      stroke-width: 2.5 !important; // Thicker stroke for better visibility
+    }
+  }
+  
+  @media (max-width: 1024px) and (min-width: 769px) {
+    bottom: 5.5rem !important; // Tablet spacing
+    
+    svg {
+      width: 2rem !important; // Much larger arrow for tablet
+      height: 2rem !important;
+      stroke-width: 2.5 !important;
+    }
+  }
+  
+  // Desktop - make arrow much larger for better visibility
+  @media (min-width: 1025px) {
+    svg {
+      width: 2.25rem !important;
+      height: 2.25rem !important;
+      stroke-width: 2.5 !important;
+    }
+  }
+}

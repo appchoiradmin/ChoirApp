@@ -375,7 +375,8 @@
     position: fixed;
     bottom: 2rem;
     right: 2rem;
-    background-color: $primary;
+    z-index: 1000;
+    background: $primary;
     color: white;
     border: none;
     border-radius: 50%;
@@ -385,16 +386,48 @@
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-    transition: transform 0.2s ease;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    transition: all 0.3s ease;
     
     &:hover {
+      background: color.adjust($primary, $lightness: -10%);
       transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+    }
+    
+    &:active {
+      transform: translateY(0);
     }
     
     svg {
-      width: 1.5rem;
-      height: 1.5rem;
+      width: 2.25rem; // Much larger arrow for desktop
+      height: 2.25rem;
+      stroke-width: 2.5; // Thicker stroke for better visibility
+    }
+    
+    @media (max-width: 768px) {
+      // Adjust for bottom navigation menu in choir context
+      bottom: 7rem; // Increased to avoid bottom navigation
+      right: 1.5rem;
+      width: 2.75rem;
+      height: 2.75rem;
+      
+      svg {
+        width: 2.25rem; // Much larger arrow for mobile
+        height: 2.25rem;
+        stroke-width: 2.5;
+      }
+    }
+    
+    // Additional spacing for tablet sizes that might have bottom nav
+    @media (max-width: 1024px) and (min-width: 769px) {
+      bottom: 5.5rem;
+      
+      svg {
+        width: 2rem; // Larger arrow for tablet
+        height: 2rem;
+        stroke-width: 2.5;
+      }
     }
   }
 }

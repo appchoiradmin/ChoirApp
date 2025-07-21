@@ -779,7 +779,19 @@ const SongsListPage: FC<SongsListPageProps> = ({ playlistId, refreshPlaylist }) 
         {/* Back to top button */}
         {showBackToTop && (
           <button onClick={scrollToTop} className="songs-page__back-to-top">
-            <ChevronUpIcon />
+            <ChevronUpIcon 
+              style={{ 
+                width: '2rem !important', 
+                height: '2rem !important', 
+                strokeWidth: 2.5,
+                minWidth: '2rem',
+                minHeight: '2rem',
+                maxWidth: '2rem',
+                maxHeight: '2rem'
+              }} 
+              width="32"
+              height="32"
+            />
           </button>
         )}
       </div>
