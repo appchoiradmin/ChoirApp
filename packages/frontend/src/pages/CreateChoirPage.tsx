@@ -3,7 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { createChoir } from '../services/choirService';
 import { useUser } from '../hooks/useUser';
 import { useTranslation } from '../hooks/useTranslation';
-import { Layout, Navigation } from '../components/ui';
+import { Navigation, LoadingState } from '../components/ui';
+import Layout from '../components/ui/Layout';
 
 const CreateChoirPage: React.FC = () => {
   const [choirName, setChoirName] = useState('');
@@ -41,7 +42,7 @@ const CreateChoirPage: React.FC = () => {
   };
 
   if (loading) {
-    return <div>{t('common.loading')}...</div>;
+    return <LoadingState message={t('common.loading')} variant="fullscreen" />;
   }
 
   if (!user) {

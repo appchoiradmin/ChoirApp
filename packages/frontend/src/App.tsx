@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { Routes, Route, useNavigate, useLocation } from 'react-router-dom';
 import { PlaylistProvider } from './context/PlaylistContext';
+import { LoadingState } from './components/ui';
 import { useUser } from './hooks/useUser';
 import HomePage from './pages/HomePage.tsx';
 import OnboardingPage from './pages/OnboardingPage.tsx';
@@ -46,7 +47,7 @@ function App() {
   }, [user, loading, navigate, location.pathname]);
 
   if (loading) {
-    return <div>Loading...</div>; // Or a proper spinner component
+    return <LoadingState variant="fullscreen" />;
   }
 
   return (

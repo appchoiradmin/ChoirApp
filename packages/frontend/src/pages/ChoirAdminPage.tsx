@@ -9,6 +9,7 @@ import {
 import { getInvitationsByChoir } from '../services/invitationService';
 import { useUser } from '../hooks/useUser';
 import { useTranslation } from '../hooks/useTranslation';
+import { LoadingState } from '../components/ui';
 import { ChoirDetails, ChoirRole } from '../types/choir';
 import { Invitation } from '../types/invitation';
 import MembersList from '../components/admin/MembersList';
@@ -103,13 +104,7 @@ const ChoirAdminPage: React.FC = () => {
   };
 
   if (loading) {
-    return (
-      <section className="section">
-        <div className="container">
-          <p>{t('choirAdmin.loadingChoirAdmin')}</p>
-        </div>
-      </section>
-    );
+    return <LoadingState message={t('choirAdmin.loadingChoirAdmin')} variant="fullscreen" />;
   }
 
   if (error) {

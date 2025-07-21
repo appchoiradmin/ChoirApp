@@ -11,7 +11,7 @@ import { PlaylistTemplate, PlaylistSection, PlaylistSong } from '../types/playli
 import { PlaylistProvider } from '../context/PlaylistContext';
 // Removed legacy ChoirSongVersionDto import
 import MovableSongItem from '../components/MovableSongItem';
-import { Button, Card, LoadingSpinner } from '../components/ui';
+import { Button, Card, LoadingSpinner, LoadingState } from '../components/ui';
 import Layout from '../components/ui/Layout';
 import toast from 'react-hot-toast';
 import {
@@ -350,7 +350,7 @@ const EditPlaylistPage: React.FC = () => {
 
 
   if (loading) {
-    return <div>Loading...</div>;
+    return <LoadingState variant="fullscreen" />;
   }
 
   return (
@@ -376,7 +376,7 @@ const EditPlaylistPage: React.FC = () => {
               <div className="playlist-meta">
                 <span className="meta-item">
                   <CalendarDaysIcon className="meta-icon" />
-                  {selectedPlaylist ? getPlaylistDisplayDate(selectedPlaylist) : 'Loading...'}
+                  {selectedPlaylist ? getPlaylistDisplayDate(selectedPlaylist) : t('common.loading')}
                 </span>
                 <span className="meta-item">
                   <MusicalNoteIcon className="meta-icon" />

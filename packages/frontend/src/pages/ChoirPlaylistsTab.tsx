@@ -1,6 +1,7 @@
 import React, { useState, useContext } from 'react';
 import { useTranslation } from 'react-i18next';
 import { getNextSunday } from '../utils/getNextSunday';
+import { LoadingState } from '../components/ui';
 import PlaylistsPage from './PlaylistsPage';
 import { useParams } from 'react-router-dom';
 import { useUser } from '../hooks/useUser';
@@ -27,7 +28,7 @@ const ChoirPlaylistsTab: React.FC = () => {
     return (
       <div>
         <div className="title">{t('choirPlaylistsTab.playlists')}</div>
-        <div>{t('choirPlaylistsTab.loadingUserAuth')}</div>
+        <LoadingState message={t('choirPlaylistsTab.loadingUserAuth')} variant="minimal" />
       </div>
     );
   }

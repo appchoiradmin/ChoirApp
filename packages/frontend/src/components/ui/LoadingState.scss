@@ -1,0 +1,150 @@
+.loading-state {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  
+  &__content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+    text-align: center;
+  }
+  
+  &__text {
+    font-size: 0.875rem;
+    color: hsl(0, 0%, 48%);
+    margin-left: 0.5rem;
+  }
+  
+  &__message {
+    font-size: 0.875rem;
+    color: hsl(0, 0%, 48%);
+    margin: 0;
+    font-weight: 500;
+  }
+
+  // Default variant - centered with padding
+  &--default {
+    padding: 2rem;
+    min-height: 120px;
+    
+    .loading-state__content {
+      gap: 1.5rem;
+    }
+    
+    .loading-state__message {
+      font-size: 1rem;
+    }
+  }
+
+  // Minimal variant - inline display
+  &--minimal {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.5rem 0;
+    
+    .loading-state__text {
+      margin-left: 0.75rem;
+      font-size: 0.875rem;
+    }
+  }
+
+  // Card variant - card-like appearance
+  &--card {
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    padding: 2rem;
+    margin: 1rem;
+    min-height: 150px;
+    
+    .loading-state__content {
+      gap: 1.5rem;
+    }
+    
+    .loading-state__message {
+      font-size: 1rem;
+      color: hsl(0, 0%, 29%);
+    }
+  }
+
+  // Fullscreen variant - covers viewport
+  &--fullscreen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(4px);
+    z-index: 9999;
+    
+    .loading-state__content {
+      gap: 2rem;
+    }
+    
+    .loading-state__message {
+      font-size: 1.125rem;
+      color: hsl(0, 0%, 29%);
+      font-weight: 600;
+    }
+  }
+}
+
+// Dark theme support
+@media (prefers-color-scheme: dark) {
+  .loading-state {
+    &__text,
+    &__message {
+      color: hsl(0, 0%, 71%);
+    }
+    
+    &--card {
+      background: hsl(0, 0%, 14%);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+      
+      .loading-state__message {
+        color: hsl(0, 0%, 86%);
+      }
+    }
+    
+    &--fullscreen {
+      background: rgba(0, 0, 0, 0.8);
+      
+      .loading-state__message {
+        color: hsl(0, 0%, 96%);
+      }
+    }
+  }
+}
+
+// Mobile responsiveness
+@media (max-width: 768px) {
+  .loading-state {
+    &--default,
+    &--card {
+      padding: 1.5rem;
+      margin: 0.5rem;
+      
+      .loading-state__content {
+        gap: 1rem;
+      }
+      
+      .loading-state__message {
+        font-size: 0.875rem;
+      }
+    }
+    
+    &--fullscreen {
+      .loading-state__content {
+        gap: 1.5rem;
+        padding: 1rem;
+      }
+      
+      .loading-state__message {
+        font-size: 1rem;
+      }
+    }
+  }
+}
