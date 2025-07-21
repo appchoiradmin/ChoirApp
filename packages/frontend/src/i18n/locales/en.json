@@ -196,6 +196,21 @@
     "noChoirsDescription": "Create your first choir or wait for an invitation to get started.",
     "createFirstChoir": "Create Your First Choir"
   },
+  "settings": {
+    "title": "Settings",
+    "language": "Language",
+    "selectLanguage": "Select Language",
+    "english": "English",
+    "spanish": "Spanish",
+    "languageChanged": "Language changed successfully",
+    "profile": "Profile",
+    "account": "Account",
+    "preferences": "Preferences",
+    "notifications": "Notifications",
+    "privacy": "Privacy",
+    "viewProfile": "View Profile",
+    "viewProfileDesc": "Update your settings"
+  },
   "songs": {
     "songsTitle": "Songs",
     "song": "Song",
