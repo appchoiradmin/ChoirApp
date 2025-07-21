@@ -9,7 +9,7 @@ import { usePlaylistContext } from '../context/PlaylistContext';
 import { toast } from 'react-hot-toast';
 import { PlaylistTemplate } from '../types/playlist';
 import { SongDto, SongSearchParams } from '../types/song';
-import { Button, Card, LoadingSpinner, Navigation } from '../components/ui';
+import { Button, Card, LoadingSpinner } from '../components/ui';
 import Layout from '../components/ui/Layout';
 import { MagnifyingGlassIcon, PlusIcon, ChevronUpIcon, ChevronDownIcon, CheckCircleIcon, XMarkIcon, MusicalNoteIcon } from '@heroicons/react/24/outline';
 import SectionSelectionModal from '../components/SectionSelectionModal';
@@ -552,19 +552,17 @@ const SongsListPage: FC<SongsListPageProps> = ({ playlistId, refreshPlaylist }) 
 
   
   return (
-    <Layout 
-      navigation={<Navigation title={t('songs.songsLibrary')} showBackButton={true} />}
-    >
+    <Layout>
       <div className="songs-page">
         <div className="songs-page__header">
           <h1 className="songs-page__title">
             {t('songs.songsLibrary')}
-            {filters.search && (
-              <span className="songs-page__search-indicator">
-                - {t('songs.searchingFor')} "{filters.search}" ({songs.length} {t('songs.results')})
-              </span>
-            )}
           </h1>
+          {filters.search && (
+            <div className="songs-page__search-indicator">
+              {t('songs.searchingFor')} "{filters.search}" ({songs.length} {t('songs.results')})
+            </div>
+          )}
           
           <div className="songs-page__actions">
             <div className="songs-page__search-container">
