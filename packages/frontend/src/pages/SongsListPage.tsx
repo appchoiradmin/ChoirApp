@@ -337,26 +337,20 @@ const SongsListPage: FC<SongsListPageProps> = ({ playlistId, refreshPlaylist }) 
       setIsAddingSongs(true);
       
       // Step 1: Ensure playlist exists (create if needed)
-      // Use contextPlaylistId from PlaylistContext which correctly tracks the current date's playlist
-      // If contextPlaylistId exists, use it; otherwise create a new playlist
-      let targetPlaylistId = contextPlaylistId || playlistId; // Use context playlist ID first
+      let targetPlaylistId = contextPlaylistId || playlistId;
+      let actualSections = sections; // Use current sections by default
       
       if (!targetPlaylistId) {
         try {
           const createdPlaylist = await createPlaylistIfNeeded();
           if (createdPlaylist && createdPlaylist.id) {
             targetPlaylistId = createdPlaylist.id;
-            // Using contextPlaylistId from PlaylistContext instead
+            actualSections = createdPlaylist.sections; // Use sections returned from creation
             
-            // CRITICAL: After playlist creation, we need to refresh the context
-            // to get the actual playlist section IDs (not template IDs)
-            await refreshPlaylistContext();
+            console.log('🚨 DEBUG - Playlist created with sections:', actualSections);
             
-            // IMPORTANT: Don't exit early - continue with the song addition using the newly created playlist
-            // The refreshPlaylistContext should have updated the sections with real playlist section IDs
-            
-            // Update the targetPlaylistId for the rest of the function
-            // No need to reopen modal - continue with the song addition
+            // Refresh context in background (don't wait for it)
+            refreshPlaylistContext().catch(console.error);
           } else {
             throw new Error('Failed to create playlist');
           }
@@ -365,52 +359,64 @@ const SongsListPage: FC<SongsListPageProps> = ({ playlistId, refreshPlaylist }) 
           toast.error('Failed to create playlist. Please try again.');
           return;
         }
-      }     
+      }
       
-      // Debug: Check if the sectionId exists in the current displayedSections
-      const sectionExists = displayedSections.find(s => s.id === sectionId);    
+      // Step 2: Map template section ID to actual playlist section ID
+      let actualSectionId = sectionId;
       
-      // CRITICAL FIX: If we don't find the section in displayedSections, it means we're still using template IDs
-      // In this case, we need to find the corresponding section by title in the actual playlist sections
-      if (!sectionExists && sections.length > 0) {      
-        const templateSection = selectedTemplate?.sections?.find(ts => ts.id === sectionId);
-        if (templateSection) {
-          const playlistSection = sections.find(ps => ps.title === templateSection.title);
-          if (playlistSection) {        
-            sectionId = playlistSection.id; // Use the real playlist section ID
+      // If we have actual sections (either from context or from creation), use them for mapping
+      if (actualSections.length > 0) {
+        // Check if the sectionId exists in actualSections
+        const sectionExists = actualSections.find(s => s.id === sectionId);
+        
+        if (!sectionExists) {
+          // This means we're using a template section ID, need to map to actual section ID
+          const templateSection = selectedTemplate?.sections?.find(ts => ts.id === sectionId);
+          if (templateSection) {
+            const playlistSection = actualSections.find(ps => ps.title === templateSection.title);
+            if (playlistSection) {
+              actualSectionId = playlistSection.id;
+              console.log('🚨 DEBUG - Mapped template section ID', sectionId, 'to playlist section ID', actualSectionId);
+            }
           }
         }
       }
       
-      // Step 2: Add the song to the playlist     
+      // Step 3: Add the song to the playlist using the correct section ID
+      console.log('🚨 DEBUG - Adding song to playlist:', {
+        playlistId: targetPlaylistId,
+        songId: selectedSongForModal,
+        sectionId: actualSectionId
+      });
+      
       await addSongToPlaylist(
         targetPlaylistId,
         {
           songId: selectedSongForModal,
-          sectionId: sectionId
+          sectionId: actualSectionId
         },
         token
       );
 
-      // Step 3: Update UI state to show song as selected
+      // Step 4: Update UI state to show song as selected
       setSelectedSongs(prev => new Set([...prev, selectedSongForModal]));
-      setPlaylistSongIds(prev => new Set([...prev, selectedSongForModal])); // Also update playlist songs
+      setPlaylistSongIds(prev => new Set([...prev, selectedSongForModal]));
       
-      // Step 4: Show success message
+      // Step 5: Show success message
       toast.success('Song added to playlist successfully!');
       
-      // Step 5: Close modal
+      // Step 6: Close modal
       closeSectionModal();
       
-      // Step 6: Refresh playlist data
+      // Step 7: Refresh playlist data
       if (refreshPlaylist) {
         refreshPlaylist();
       }
       
-      // Also refresh the playlist context to get updated data
+      // Refresh the playlist context to get updated data
       await refreshPlaylistContext();
       
-      // Step 7: Re-fetch playlist songs to ensure accurate "Added" flags
+      // Re-fetch playlist songs to ensure accurate "Added" flags
       await fetchPlaylistSongs();
       
       console.log('Debug - Playlist context and songs refreshed');
