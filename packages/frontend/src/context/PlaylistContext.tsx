@@ -1,6 +1,8 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { PlaylistSection, PlaylistTemplate } from '../types/playlist';
 import { getPlaylistsByChoirId, getPlaylistTemplatesByChoirId } from '../services/playlistService';
+import { useTranslation } from '../hooks/useTranslation';
+import { getTranslatedTemplate } from '../utils/templateTranslation';
 
 // Utility: get next Sunday (or use your own logic)
 function getNextSunday(date = new Date()) {
@@ -39,6 +41,8 @@ export const usePlaylistContext = () => {
   return ctx;
 };
 
+
+
 export const PlaylistProvider = ({
   children,
   choirId,
@@ -50,6 +54,7 @@ export const PlaylistProvider = ({
   date: Date | null;
   token: string | null;
 }) => {
+  const { t } = useTranslation();
   const [sections, setSections] = useState<PlaylistSection[]>([]);
   const [selectedTemplate, setSelectedTemplate] = useState<PlaylistTemplate | null>(null);
   const [availableTemplates, setAvailableTemplates] = useState<PlaylistTemplate[]>([]);
@@ -100,7 +105,9 @@ export const PlaylistProvider = ({
           // No playlist exists: just load template for preview
 
           const templates = await getPlaylistTemplatesByChoirId(choirId, token);
-          setAvailableTemplates(templates || []);
+          // Translate global templates for display while keeping original data intact
+          const translatedTemplates = (templates || []).map(template => getTranslatedTemplate(template, t));
+          setAvailableTemplates(translatedTemplates);
 
           if (templates.length > 0) {
             // Only set default template if no template is currently selected
@@ -108,10 +115,12 @@ export const PlaylistProvider = ({
             if (!selectedTemplate) {
               // Find the template marked as default, or fall back to the first one
               const defaultTemplate = templates.find(t => t.isDefault) || templates[0];
+              const translatedDefaultTemplate = getTranslatedTemplate(defaultTemplate, t);
               
-              console.log('🚨 DEBUG - No template selected, using default template:', defaultTemplate.title, 'isDefault:', defaultTemplate.isDefault);
+              console.log('🚨 DEBUG - No template selected, using default template:', translatedDefaultTemplate.title, 'isDefault:', defaultTemplate.isDefault);
               
-              const mappedSections = (defaultTemplate.sections || []).map(section => ({
+              // Use translated template sections for proper display
+              const mappedSections = (translatedDefaultTemplate.sections || []).map(section => ({
                 id: section.id,
                 title: section.title,
                 order: section.order,
@@ -119,12 +128,14 @@ export const PlaylistProvider = ({
               }));
 
               setSections(mappedSections);
-              setSelectedTemplate(defaultTemplate);
+              setSelectedTemplate(translatedDefaultTemplate);
             } else {
               // Template already selected by user, preserve it and update sections
-              console.log('🚨 DEBUG - Preserving user-selected template:', selectedTemplate.title);
+              // Make sure to use translated version for consistency
+              const translatedSelectedTemplate = getTranslatedTemplate(selectedTemplate, t);
+              console.log('🚨 DEBUG - Preserving user-selected template:', translatedSelectedTemplate.title);
               
-              const mappedSections = (selectedTemplate.sections || []).map(section => ({
+              const mappedSections = (translatedSelectedTemplate.sections || []).map(section => ({
                 id: section.id,
                 title: section.title,
                 order: section.order,
@@ -132,6 +143,7 @@ export const PlaylistProvider = ({
               }));
               
               setSections(mappedSections);
+              setSelectedTemplate(translatedSelectedTemplate);
             }
           } else {
             setSections([]);
@@ -191,6 +203,13 @@ export const PlaylistProvider = ({
       
       // CRITICAL FIX: Use the exact date passed to the context, don't fallback to getNextSunday
       const playlistDate = date || new Date(); // Use current date if no date provided
+      
+      console.log('🚨 DEBUG - Creating playlist with template:', {
+        templateId: selectedTemplate?.id,
+        templateTitle: selectedTemplate?.title,
+        choirId,
+        date: playlistDate.toISOString()
+      });
       
       const created = await import('../services/playlistService').then(mod => mod.createPlaylist({
         choirId,

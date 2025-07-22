@@ -14,6 +14,8 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     public DbSet<PlaylistSong> PlaylistSongs { get; set; } = null!;
     public DbSet<PlaylistTemplate> PlaylistTemplates { get; set; } = null!;
     public DbSet<PlaylistTemplateSection> PlaylistTemplateSections { get; set; } = null!;
+    public DbSet<GlobalPlaylistTemplate> GlobalPlaylistTemplates { get; set; } = null!;
+    public DbSet<GlobalPlaylistTemplateSection> GlobalPlaylistTemplateSections { get; set; } = null!;
     public DbSet<Tag> Tags { get; set; } = null!;
     public DbSet<SongTag> SongTags { get; set; } = null!;
     public DbSet<PlaylistTag> PlaylistTags { get; set; } = null!;

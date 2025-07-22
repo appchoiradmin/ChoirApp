@@ -146,8 +146,8 @@ const SongsListPage: FC<SongsListPageProps> = ({ playlistId, refreshPlaylist }) 
     setTemplateDropdownOpen(false);
     
     // Update sections to reflect the newly selected template
-    // Only update if we're not in a persisted playlist (where sections come from actual playlist)
-    if (!isPersisted && template && template.sections) {
+    // Always update sections when template is selected (unless playlist is already persisted with songs)
+    if (template && template.sections) {
       const mappedSections = template.sections.map(section => ({
         id: section.id,
         title: section.title,
@@ -156,13 +156,13 @@ const SongsListPage: FC<SongsListPageProps> = ({ playlistId, refreshPlaylist }) 
       }));
       setSections(mappedSections);
       
-      console.log('🚨 DEBUG - Template sections updated:', mappedSections.length, 'sections');
+      console.log('🚨 DEBUG - Template sections updated:', mappedSections.length, 'sections:', mappedSections.map(s => s.title));
     }
     
     // Show success message to user
     toast.success(`Template "${template.title}" selected successfully!`);
     
-    console.log('🚨 DEBUG - Template selection complete. This should now be reflected in playlist tab.');
+    console.log('🚨 DEBUG - Template selection complete. Sections should now be synchronized across tabs.');
   };
 
 
@@ -452,10 +452,48 @@ const SongsListPage: FC<SongsListPageProps> = ({ playlistId, refreshPlaylist }) 
           // This means we're using a template section ID, need to map to actual section ID
           const templateSection = selectedTemplate?.sections?.find(ts => ts.id === sectionId);
           if (templateSection) {
-            const playlistSection = actualSections.find(ps => ps.title === templateSection.title);
+            console.log('🚨 DEBUG - Looking for template section:', {
+              templateSectionId: sectionId,
+              templateSectionTitle: templateSection.title,
+              availablePlaylistSections: actualSections.map(ps => ({ id: ps.id, title: ps.title }))
+            });
+            
+            // For global templates, we need to match by the original translation key
+            // The template section title might be translated (e.g., "Preludio")
+            // But the playlist section title is the raw key (e.g., "prelude")
+            // We need to find the original key from the template section
+            
+            // Try direct title match first (for user templates)
+            let playlistSection = actualSections.find(ps => ps.title === templateSection.title);
+            
+            // If no direct match and this looks like a global template, try key-based matching
+            if (!playlistSection && templateSection.title) {
+              // Check if this is a translated title by looking for common global template section keys
+              const globalSectionKeyMap: Record<string, string> = {
+                'Preludio': 'prelude',
+                'Adoración': 'worship', 
+                'Himno': 'anthem',
+                'Postludio': 'postlude',
+                'Apertura': 'opening',
+                'Comunión': 'communion',
+                'Cierre': 'closing',
+                'Canciones': 'songs',
+                'Himnos': 'hymns',
+                'Salmos': 'psalms'
+              };
+              
+              const originalKey = globalSectionKeyMap[templateSection.title];
+              if (originalKey) {
+                playlistSection = actualSections.find(ps => ps.title === originalKey);
+                console.log('🚨 DEBUG - Mapped translated title', templateSection.title, 'to key', originalKey);
+              }
+            }
+            
             if (playlistSection) {
               actualSectionId = playlistSection.id;
               console.log('🚨 DEBUG - Mapped template section ID', sectionId, 'to playlist section ID', actualSectionId);
+            } else {
+              console.log('🚨 DEBUG - Could not find matching playlist section for template section:', templateSection.title);
             }
           }
         }

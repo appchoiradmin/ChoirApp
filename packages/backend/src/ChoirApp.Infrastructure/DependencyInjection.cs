@@ -31,6 +31,7 @@ public static class DependencyInjection
         services.AddScoped<ISongRepository, SongRepository>();
         services.AddScoped<IPlaylistRepository, PlaylistRepository>();
         services.AddScoped<IPlaylistTemplateRepository, PlaylistTemplateRepository>();
+        services.AddScoped<IGlobalPlaylistTemplateRepository, GlobalPlaylistTemplateRepository>();
         services.AddScoped<IInvitationRepository, InvitationRepository>();
         services.AddScoped<ITagRepository, TagRepository>();
         services.AddScoped<IInvitationPolicy, InvitationPolicy>();

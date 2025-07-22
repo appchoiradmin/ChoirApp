@@ -112,4 +112,13 @@
   <data name="SongTitleRequired" xml:space="preserve">
     <value>Song title is required.</value>
   </data>
+  <data name="GenericTemplateTitle" xml:space="preserve">
+    <value>Generic Template</value>
+  </data>
+  <data name="GenericTemplateDescription" xml:space="preserve">
+    <value>Default template with one section for songs</value>
+  </data>
+  <data name="GenericTemplateSectionTitle" xml:space="preserve">
+    <value>Songs</value>
+  </data>
 </root>

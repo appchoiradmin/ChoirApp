@@ -112,4 +112,13 @@
   <data name="SongTitleRequired" xml:space="preserve">
     <value>El título de la canción es requerido.</value>
   </data>
+  <data name="GenericTemplateTitle" xml:space="preserve">
+    <value>Plantilla Genérica</value>
+  </data>
+  <data name="GenericTemplateDescription" xml:space="preserve">
+    <value>Plantilla predeterminada con una sección para canciones</value>
+  </data>
+  <data name="GenericTemplateSectionTitle" xml:space="preserve">
+    <value>Canciones</value>
+  </data>
 </root>

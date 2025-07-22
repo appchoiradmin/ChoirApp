@@ -17,7 +17,7 @@ namespace ChoirApp.Application.Contracts
 
         Task<Result<PlaylistTemplate>> CreatePlaylistTemplateAsync(CreatePlaylistTemplateDto templateDto, Guid userId);
         Task<Result<PlaylistTemplate>> GetPlaylistTemplateByIdAsync(Guid templateId);
-        Task<Result<IEnumerable<PlaylistTemplate>>> GetPlaylistTemplatesByChoirIdAsync(Guid choirId);
+        Task<Result<IEnumerable<PlaylistTemplate>>> GetPlaylistTemplatesByChoirIdAsync(Guid choirId, string language = "en", string? templateTitle = null, string? templateDescription = null, string? sectionTitle = null);
         Task<Result> UpdatePlaylistTemplateAsync(Guid templateId, UpdatePlaylistTemplateDto templateDto, Guid userId);
         Task<Result> DeletePlaylistTemplateAsync(Guid templateId, Guid userId);
         Task<Result> SetPlaylistTemplateDefaultAsync(Guid templateId, SetTemplateDefaultDto dto, Guid userId);

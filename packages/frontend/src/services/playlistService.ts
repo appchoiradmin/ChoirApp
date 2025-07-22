@@ -200,14 +200,22 @@ export const createPlaylistTemplate = async (
 
 export const getPlaylistTemplatesByChoirId = async (
   choirId: string,
-  token: string
+  token: string,
+  language?: string
 ): Promise<PlaylistTemplate[]> => {
+  const headers: Record<string, string> = {
+    Authorization: `Bearer ${token}`,
+  };
+  
+  // Add Accept-Language header if language is provided
+  if (language) {
+    headers['Accept-Language'] = language;
+  }
+  
   const response = await fetch(
     `${API_URL}/api/choirs/${choirId}/playlist-templates`,
     {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
+      headers,
     }
   );
 

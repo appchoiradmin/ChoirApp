@@ -19,21 +19,27 @@ namespace ChoirApp.Application.Services
         private readonly IChoirRepository _choirRepository;
         private readonly IPlaylistTemplateRepository _playlistTemplateRepository;
         private readonly ISongRepository _songRepository;
+        private readonly IGlobalPlaylistTemplateService _globalTemplateService;
 
         public PlaylistService(
             IPlaylistRepository playlistRepository,
             IChoirRepository choirRepository,
             IPlaylistTemplateRepository playlistTemplateRepository,
-            ISongRepository songRepository)
+            ISongRepository songRepository,
+            IGlobalPlaylistTemplateService globalTemplateService)
         {
             _playlistRepository = playlistRepository;
             _choirRepository = choirRepository;
             _playlistTemplateRepository = playlistTemplateRepository;
             _songRepository = songRepository;
+            _globalTemplateService = globalTemplateService;
         }
 
         public async Task<Result<Playlist>> CreatePlaylistAsync(CreatePlaylistDto playlistDto, Guid userId)
         {
+            Console.WriteLine($"🚨 DEBUG - CreatePlaylistAsync called with template ID: {playlistDto.PlaylistTemplateId}");
+            Console.WriteLine($"🚨 DEBUG - CreatePlaylistAsync DTO: Title={playlistDto.Title}, ChoirId={playlistDto.ChoirId}, Date={playlistDto.Date}");
+            
             var choir = await _choirRepository.GetByIdAsync(playlistDto.ChoirId);
             if (choir == null)
                 return Result.Fail("Choir not found.");
@@ -73,27 +79,48 @@ namespace ChoirApp.Application.Services
             if (playlistDto.PlaylistTemplateId.HasValue)
             {
                 Console.WriteLine($"🚨 DEBUG - Creating playlist with template ID: {playlistDto.PlaylistTemplateId.Value}");
-                var template = await _playlistTemplateRepository.GetByIdWithSectionsAsync(playlistDto.PlaylistTemplateId.Value);
-
-                if (template != null)
+                
+                // First try to find it as a user template
+                var userTemplate = await _playlistTemplateRepository.GetByIdWithSectionsAsync(playlistDto.PlaylistTemplateId.Value);
+                
+                if (userTemplate != null)
                 {
-                    Console.WriteLine($"🚨 DEBUG - Template found: {template.Title} with {template.Sections.Count} sections");
-                    foreach (var sectionTemplate in template.Sections.OrderBy(s => s.Order))
+                    Console.WriteLine($"🚨 DEBUG - User template found: {userTemplate.Title} with {userTemplate.Sections.Count} sections");
+                    foreach (var sectionTemplate in userTemplate.Sections.OrderBy(s => s.Order))
                     {
                         Console.WriteLine($"🚨 DEBUG - Adding section: {sectionTemplate.Title} (Order: {sectionTemplate.Order})");
                         var sectionResult = playlist.AddSection(sectionTemplate.Title);
                         if (sectionResult.IsFailed)
                             return Result.Fail(sectionResult.Errors);
 
-                        // Note: PlaylistTemplateSongs entity has been removed
-                        // Create an empty section without songs
                         var newSection = playlist.Sections.Last();
                         Console.WriteLine($"🚨 DEBUG - Section created with ID: {newSection.SectionId}");
                     }
                 }
                 else
                 {
-                    Console.WriteLine($"🚨 DEBUG - Template NOT FOUND for ID: {playlistDto.PlaylistTemplateId.Value}");
+                    // If not found as user template, try to find it as a global template
+                    var globalTemplateResult = await _globalTemplateService.GetTemplateByIdAsync(playlistDto.PlaylistTemplateId.Value);
+                    if (globalTemplateResult.IsSuccess && globalTemplateResult.Value != null)
+                    {
+                        var globalTemplate = globalTemplateResult.Value;
+                        Console.WriteLine($"🚨 DEBUG - Global template found: {globalTemplate.TitleKey} with {globalTemplate.Sections.Count} sections");
+                        
+                        foreach (var sectionTemplate in globalTemplate.Sections.OrderBy(s => s.Order))
+                        {
+                            Console.WriteLine($"🚨 DEBUG - Adding global section: {sectionTemplate.TitleKey} (Order: {sectionTemplate.Order})");
+                            var sectionResult = playlist.AddSection(sectionTemplate.TitleKey);
+                            if (sectionResult.IsFailed)
+                                return Result.Fail(sectionResult.Errors);
+
+                            var newSection = playlist.Sections.Last();
+                            Console.WriteLine($"🚨 DEBUG - Global section created with ID: {newSection.SectionId}");
+                        }
+                    }
+                    else
+                    {
+                        Console.WriteLine($"🚨 DEBUG - Template NOT FOUND (neither user nor global) for ID: {playlistDto.PlaylistTemplateId.Value}");
+                    }
                 }
             }
             else
@@ -315,27 +342,65 @@ namespace ChoirApp.Application.Services
             return Result.Ok(template);
         }
 
-        public async Task<Result<IEnumerable<PlaylistTemplate>>> GetPlaylistTemplatesByChoirIdAsync(Guid choirId)
+        public async Task<Result<IEnumerable<PlaylistTemplate>>> GetPlaylistTemplatesByChoirIdAsync(Guid choirId, string language = "en", string? templateTitle = null, string? templateDescription = null, string? sectionTitle = null)
         {
-            // Get all existing templates for this choir
-            var templates = await _playlistTemplateRepository.GetByChoirIdAsync(choirId);
-            var templateList = templates.ToList();
+            // Get all existing user templates for this choir
+            var userTemplates = await _playlistTemplateRepository.GetByChoirIdAsync(choirId);
+            var templateList = userTemplates.ToList();
 
-            // Check if a generic template exists for this choir
-            var genericTemplate = templateList.FirstOrDefault(t => 
-                t.Title.Equals("Generic Template", StringComparison.OrdinalIgnoreCase));
-
-            // If no generic template exists, create one
-            if (genericTemplate == null)
+            // Get all active global templates
+            var globalTemplatesResult = await _globalTemplateService.GetAllActiveTemplatesAsync();
+            if (globalTemplatesResult.IsSuccess)
             {
-                var createResult = await CreateGenericTemplateForChoir(choirId);
-                if (createResult.IsSuccess)
+                // Convert global templates to PlaylistTemplate format for compatibility
+                // This ensures the frontend dropdown can display both types seamlessly
+                foreach (var globalTemplate in globalTemplatesResult.Value)
                 {
-                    templateList.Add(createResult.Value);
+                    // Create a virtual PlaylistTemplate that represents the global template
+                    // CRITICAL: Use the original global template ID so the frontend can reference it correctly
+                    var virtualTemplateResult = PlaylistTemplate.Create(
+                        globalTemplate.TitleKey, // Store translation key directly (e.g., "generic", "mass")
+                        choirId,
+                        globalTemplate.DescriptionKey ?? string.Empty,
+                        false // Global templates are never set as default
+                    );
+                    
+                    if (virtualTemplateResult.IsSuccess)
+                    {
+                        var virtualTemplate = virtualTemplateResult.Value;
+                        
+                        // CRITICAL FIX: Override the template ID with the original global template ID
+                        // This ensures the frontend sends the correct ID back to the backend
+                        // Use reflection to set the private TemplateId field
+                        var templateIdField = typeof(PlaylistTemplate).GetField("<TemplateId>k__BackingField", 
+                            System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+                        templateIdField?.SetValue(virtualTemplate, globalTemplate.GlobalTemplateId);
+                        
+                        // Add sections from the global template to the virtual template
+                        // This ensures the frontend receives templates with their sections
+                        foreach (var globalSection in globalTemplate.Sections.OrderBy(s => s.Order))
+                        {
+                            var sectionResult = PlaylistTemplateSection.Create(
+                                globalSection.TitleKey, // Store translation key (e.g., "opening", "worship")
+                                globalTemplate.GlobalTemplateId, // Use the global template ID
+                                globalSection.Order
+                            );
+                            
+                            if (sectionResult.IsSuccess)
+                            {
+                                virtualTemplate.Sections.Add(sectionResult.Value);
+                            }
+                        }
+                        
+                        // Frontend will recognize translation keys like "generic", "mass" and translate them
+                        // User templates will have normal titles like "My Custom Template"
+                        templateList.Add(virtualTemplate);
+                    }
                 }
-                // If creation fails, we continue without the generic template
-                // The user can still use existing templates
             }
+
+            // Global templates ensure there's always at least one template available
+            // No need to create per-choir generic templates anymore
 
             return Result.Ok<IEnumerable<PlaylistTemplate>>(templateList);
         }
@@ -532,42 +597,6 @@ namespace ChoirApp.Application.Services
             return Result.Ok();
         }
 
-        private async Task<Result<PlaylistTemplate>> CreateGenericTemplateForChoir(Guid choirId)
-        {
-            // Create the generic template
-            var templateResult = PlaylistTemplate.Create(
-                title: "Generic Template",
-                description: "Default template with one section for songs",
-                choirId: choirId,
-                isDefault: false // Not default, just a fallback
-            );
 
-            if (templateResult.IsFailed)
-                return Result.Fail<PlaylistTemplate>(templateResult.Errors);
-
-            var template = templateResult.Value;
-
-            // Add the template to the repository
-            await _playlistTemplateRepository.AddAsync(template);
-            await _playlistTemplateRepository.SaveChangesAsync();
-
-            // Create one section for the template
-            var sectionResult = PlaylistTemplateSection.Create(
-                templateId: template.TemplateId,
-                title: "Songs",
-                order: 1
-            );
-
-            if (sectionResult.IsFailed)
-                return Result.Ok(template); // Return template even if section creation fails
-
-            var section = sectionResult.Value;
-            await _playlistTemplateRepository.AddTemplateSectionAsync(section);
-            await _playlistTemplateRepository.SaveChangesAsync();
-
-            // Reload the template with its sections
-            var reloadedTemplate = await _playlistTemplateRepository.GetByIdAsync(template.TemplateId);
-            return Result.Ok(reloadedTemplate ?? template);
-        }
     }
 }

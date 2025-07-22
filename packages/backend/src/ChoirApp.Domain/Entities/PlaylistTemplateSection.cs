@@ -22,6 +22,14 @@ namespace ChoirApp.Domain.Entities
         [Column("order")]
         public int Order { get; private set; }
 
+        [Column("description")]
+        [MaxLength(500)]
+        public string? Description { get; private set; }
+
+        [Column("suggested_song_types")]
+        [MaxLength(500)]
+        public string? SuggestedSongTypes { get; private set; }
+
         [Required]
         [Column("template_id")]
         public Guid TemplateId { get; private set; }
@@ -34,15 +42,17 @@ namespace ChoirApp.Domain.Entities
             Title = string.Empty;
         }
 
-        private PlaylistTemplateSection(string title, Guid templateId, int order)
+        private PlaylistTemplateSection(string title, Guid templateId, int order, string? description = null, string? suggestedSongTypes = null)
         {
             TemplateSectionId = Guid.NewGuid();
             Title = title;
             TemplateId = templateId;
             Order = order;
+            Description = description;
+            SuggestedSongTypes = suggestedSongTypes;
         }
 
-        public static Result<PlaylistTemplateSection> Create(string title, Guid templateId, int order)
+        public static Result<PlaylistTemplateSection> Create(string title, Guid templateId, int order, string? description = null, string? suggestedSongTypes = null)
         {
             if (string.IsNullOrWhiteSpace(title))
             {
@@ -54,7 +64,7 @@ namespace ChoirApp.Domain.Entities
                 return Result.Fail("A section must be associated with a template.");
             }
 
-            var section = new PlaylistTemplateSection(title, templateId, order);
+            var section = new PlaylistTemplateSection(title, templateId, order, description, suggestedSongTypes);
             return Result.Ok(section);
         }
     }

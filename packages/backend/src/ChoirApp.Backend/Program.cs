@@ -3,6 +3,8 @@ using ChoirApp.Infrastructure;
 using FastEndpoints;
 using ChoirApp.Backend.Middleware;
 using ChoirApp.Backend.Extensions;
+using System.Globalization;
+using Microsoft.Extensions.Localization;
 
 var builder = WebApplication.CreateBuilder(new WebApplicationOptions
 {
@@ -19,6 +21,20 @@ builder.Services
     .AddInfrastructureServices(builder.Configuration, builder.Environment);
 
 builder.Services.AddFastEndpoints();
+
+// Add localization services
+builder.Services.AddLocalization(options => options.ResourcesPath = "Resources");
+builder.Services.Configure<RequestLocalizationOptions>(options =>
+{
+    var supportedCultures = new[] { "en", "es" };
+    options.SetDefaultCulture("en")
+           .AddSupportedCultures(supportedCultures)
+           .AddSupportedUICultures(supportedCultures);
+    
+    // Use Accept-Language header to determine culture
+    options.RequestCultureProviders.Clear();
+    options.RequestCultureProviders.Add(new Microsoft.AspNetCore.Localization.AcceptLanguageHeaderRequestCultureProvider());
+});
 
 // Add controller support for OAuth endpoints
 builder.Services.AddControllers();
@@ -61,6 +77,9 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseCors("AllowFrontend");
+
+// Use request localization
+app.UseRequestLocalization();
 
 app.UseRouting();
 

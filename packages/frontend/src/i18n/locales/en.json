@@ -430,7 +430,28 @@
     "failedToDeleteTemplate": "Failed to delete template",
     "defaultTemplateUpdated": "Default template updated successfully",
     "failedToSetDefault": "Failed to set default template",
-    "failedToFetchTemplates": "Failed to fetch playlist templates"
+    "failedToFetchTemplates": "Failed to fetch playlist templates",
+    "globalTemplates": {
+      "generic": "Generic Template",
+      "mass": "Mass Template",
+      "service": "Service Template",
+      "practice": "Practice Template",
+      "concert": "Concert Template",
+      "wedding": "Wedding Template",
+      "funeral": "Funeral Template"
+    },
+    "globalTemplateSections": {
+      "songs": "Songs",
+      "opening": "Opening",
+      "worship": "Worship",
+      "communion": "Communion",
+      "closing": "Closing",
+      "prelude": "Prelude",
+      "postlude": "Postlude",
+      "anthem": "Anthem",
+      "hymns": "Hymns",
+      "psalms": "Psalms"
+    }
   },
   "playlists": {
     "title": "Playlists",
