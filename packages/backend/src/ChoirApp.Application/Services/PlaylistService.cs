@@ -335,11 +335,92 @@ namespace ChoirApp.Application.Services
 
         public async Task<Result<PlaylistTemplate>> GetPlaylistTemplateByIdAsync(Guid templateId)
         {
+            // First, try to find in regular user-created templates
             var template = await _playlistTemplateRepository.GetByIdWithSectionsAsync(templateId);
-            if (template == null)
-                return Result.Fail("Playlist template not found.");
+            if (template != null)
+                return Result.Ok(template);
 
-            return Result.Ok(template);
+            // If not found, check if it's a global template
+            Console.WriteLine($"🚨 DEBUG - Looking for global template with ID: {templateId}");
+            var globalTemplateResult = await _globalTemplateService.GetTemplateByIdAsync(templateId);
+            Console.WriteLine($"🚨 DEBUG - Global template service result: IsSuccess={globalTemplateResult.IsSuccess}");
+            
+            if (globalTemplateResult.IsSuccess)
+            {
+                var globalTemplate = globalTemplateResult.Value;
+                Console.WriteLine($"🚨 DEBUG - Global template value: {(globalTemplate != null ? $"Found - Title={globalTemplate.TitleKey}" : "NULL")}");
+                
+                if (globalTemplate == null)
+                {
+                    Console.WriteLine($"🚨 DEBUG - Global template is null, template not found");
+                    return Result.Fail("Playlist template not found.");
+                }
+                
+                Console.WriteLine($"🚨 DEBUG - About to return global template directly");
+                
+                // Create a virtual PlaylistTemplate-like object for global templates
+                // We can't use PlaylistTemplate.Create() because it requires a valid choir ID
+                // Instead, we'll create the object using reflection to bypass validation
+                var virtualTemplate = (PlaylistTemplate)Activator.CreateInstance(typeof(PlaylistTemplate), true)!;
+                
+                // Set the properties using reflection
+                var templateIdField = typeof(PlaylistTemplate).GetField("<TemplateId>k__BackingField", 
+                    System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+                var titleField = typeof(PlaylistTemplate).GetField("<Title>k__BackingField", 
+                    System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+                var descriptionField = typeof(PlaylistTemplate).GetField("<Description>k__BackingField", 
+                    System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+                var choirIdField = typeof(PlaylistTemplate).GetField("<ChoirId>k__BackingField", 
+                    System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+                var isDefaultField = typeof(PlaylistTemplate).GetField("<IsDefault>k__BackingField", 
+                    System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+                
+                templateIdField?.SetValue(virtualTemplate, globalTemplate.GlobalTemplateId);
+                titleField?.SetValue(virtualTemplate, globalTemplate.TitleKey); // Store translation key
+                descriptionField?.SetValue(virtualTemplate, globalTemplate.DescriptionKey ?? string.Empty);
+                choirIdField?.SetValue(virtualTemplate, Guid.Empty); // Global templates don't belong to a choir
+                isDefaultField?.SetValue(virtualTemplate, false); // Global templates are never default
+                
+                Console.WriteLine($"🚨 DEBUG - Virtual template created with reflection: ID={virtualTemplate.TemplateId}, Title={virtualTemplate.Title}");
+                
+                // Add sections from the global template
+                Console.WriteLine($"🚨 DEBUG - Adding {globalTemplate.Sections.Count} sections to virtual template");
+                foreach (var globalSection in globalTemplate.Sections.OrderBy(s => s.Order))
+                {
+                    Console.WriteLine($"🚨 DEBUG - Creating section: TitleKey={globalSection.TitleKey}, Order={globalSection.Order}");
+                    
+                    // Create section using reflection to bypass validation
+                    var virtualSection = (PlaylistTemplateSection)Activator.CreateInstance(typeof(PlaylistTemplateSection), true)!;
+                    
+                    var sectionIdField = typeof(PlaylistTemplateSection).GetField("<TemplateSectionId>k__BackingField", 
+                        System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+                    var sectionTitleField = typeof(PlaylistTemplateSection).GetField("<Title>k__BackingField", 
+                        System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+                    var sectionOrderField = typeof(PlaylistTemplateSection).GetField("<Order>k__BackingField", 
+                        System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+                    var sectionDescriptionField = typeof(PlaylistTemplateSection).GetField("<Description>k__BackingField", 
+                        System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+                    var sectionTemplateIdField = typeof(PlaylistTemplateSection).GetField("<TemplateId>k__BackingField", 
+                        System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+                    var sectionSuggestedTypesField = typeof(PlaylistTemplateSection).GetField("<SuggestedSongTypes>k__BackingField", 
+                        System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+                    
+                    sectionIdField?.SetValue(virtualSection, Guid.NewGuid());
+                    sectionTitleField?.SetValue(virtualSection, globalSection.TitleKey); // Store translation key
+                    sectionOrderField?.SetValue(virtualSection, globalSection.Order);
+                    sectionDescriptionField?.SetValue(virtualSection, globalSection.DescriptionKey);
+                    sectionTemplateIdField?.SetValue(virtualSection, globalTemplate.GlobalTemplateId);
+                    sectionSuggestedTypesField?.SetValue(virtualSection, globalSection.SuggestedSongTypes);
+                    
+                    virtualTemplate.Sections.Add(virtualSection);
+                    Console.WriteLine($"🚨 DEBUG - Section added successfully: {virtualSection.Title}");
+                }
+                
+                Console.WriteLine($"🚨 DEBUG - Virtual template completed with {virtualTemplate.Sections.Count} sections");
+                return Result.Ok(virtualTemplate);
+            }
+
+            return Result.Fail("Playlist template not found.");
         }
 
         public async Task<Result<IEnumerable<PlaylistTemplate>>> GetPlaylistTemplatesByChoirIdAsync(Guid choirId, string language = "en", string? templateTitle = null, string? templateDescription = null, string? sectionTitle = null)
@@ -350,7 +431,7 @@ namespace ChoirApp.Application.Services
 
             // Get all active global templates
             var globalTemplatesResult = await _globalTemplateService.GetAllActiveTemplatesAsync();
-            if (globalTemplatesResult.IsSuccess)
+            if (globalTemplatesResult.IsSuccess && globalTemplatesResult.Value != null)
             {
                 // Convert global templates to PlaylistTemplate format for compatibility
                 // This ensures the frontend dropdown can display both types seamlessly
