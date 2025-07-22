@@ -148,6 +148,8 @@
     "createPlaylistDesc": "Start a new playlist",
     "manageChoirs": "Manage Choirs",
     "manageChoirsDesc": "View and edit your choirs",
+    "administrator": "Administrator",
+    "member": "Member",
     "viewProfile": "View Profile",
     "viewProfileDesc": "Update your settings"
   },
