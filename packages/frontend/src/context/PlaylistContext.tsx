@@ -31,6 +31,7 @@ export interface PlaylistContextType {
   isPlaylistReady: boolean;
   createPlaylistIfNeeded: () => Promise<{id: string, sections: PlaylistSection[]} | void>;
   refreshPlaylist: () => Promise<void>;
+  deletePlaylist: () => Promise<void>;
 }
 
 const PlaylistContext = createContext<PlaylistContextType | undefined>(undefined);
@@ -232,6 +233,30 @@ export const PlaylistProvider = ({
     }
   };
 
+  // Function to delete the current playlist
+  const deletePlaylist = async () => {
+    if (!playlistId || !token) {
+      throw new Error('No playlist to delete or missing authentication');
+    }
+    
+    try {
+      await import('../services/playlistService').then(mod => mod.deletePlaylist(playlistId, token));
+      
+      // Reset the context state completely to prevent UI corruption
+      setPlaylistId(null);
+      setIsPersisted(false);
+      setSections([]);
+      setError(null);
+      
+      // Force a complete state refresh to ensure UI consistency
+      // This prevents any stale state from causing UI corruption
+      await new Promise(resolve => setTimeout(resolve, 100)); // Small delay to ensure state propagation
+    } catch (deleteError: any) {
+      setError(deleteError?.message || 'Failed to delete playlist');
+      throw deleteError;
+    }
+  };
+
   // Function to refresh playlist data from the backend
   const refreshPlaylist = async () => {
     if (!choirId || !token) return;
@@ -286,7 +311,8 @@ export const PlaylistProvider = ({
       error,
       isPlaylistReady,
       createPlaylistIfNeeded,
-      refreshPlaylist
+      refreshPlaylist,
+      deletePlaylist
     }}>
       {children}
     </PlaylistContext.Provider>

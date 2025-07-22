@@ -1,4 +1,4 @@
-﻿{
+{
   "common": {
     "loading": "Cargando...",
     "error": "Error",
@@ -235,6 +235,7 @@
     "templateAlwaysVisible": "Selecciona una plantilla para organizar tu lista, o elige 'Ninguna' para agregar canciones sin secciones. Se usa la plantilla predeterminada cuando no se hace ninguna selección.",
     "templateSelectedInfo": "Las canciones se organizarán usando las secciones de la plantilla seleccionada.",
     "templateLocked": "La selección de plantilla está bloqueada. La estructura de la lista no se puede cambiar después de agregar canciones.",
+    "deletePlaylistInfo": "¿Quieres empezar de nuevo con una plantilla diferente? Elimina esta lista para desbloquear la selección de plantillas.",
     "noTemplateSelected": "Ninguna plantilla seleccionada",
     "retry": "Reintentar",
     "noSongsFound": "No se encontraron canciones",
@@ -575,6 +576,16 @@
     "playlistCreated": "¡Lista de reproducción creada exitosamente!",
     "failedToCreatePlaylist": "Error al crear la lista de reproducción. Por favor, inténtalo de nuevo."
   },
+  "playlists": {
+    "deletePlaylistButton": "Eliminar Lista",
+    "deletingPlaylist": "Eliminando...",
+    "deletePlaylist": "Eliminar Lista",
+    "confirmDeleteTitle": "Confirmar Eliminación",
+    "confirmDeleteMessage": "¿Estás seguro de que quieres eliminar esta lista de reproducción?",
+    "confirmDelete": "Esta acción no se puede deshacer.",
+    "playlistDeletedSuccessfully": "Lista eliminada exitosamente",
+    "failedToDeletePlaylist": "Error al eliminar la lista"
+  },
   "errors": {
     "generic": "Ocurrió un error. Por favor intenta de nuevo.",
     "networkError": "Error de red. Por favor verifica tu conexión.",
@@ -719,7 +730,11 @@
     "error": "Error: {{message}}",
     "notFound": "Lista de reproducción no encontrada.",
     "failedToFetch": "Error al obtener la lista de reproducción",
-    "deleteConfirm": "¿Estás seguro de que quieres eliminar esta lista de reproducción?",
+    "confirmDelete": "¿Estás seguro de que quieres eliminar esta lista de reproducción?",
+    "confirmDeleteTitle": "Eliminar Lista de Reproducción",
+    "confirmDeleteMessage": "Esta acción no se puede deshacer. Todas las canciones en esta lista serán eliminadas, y podrás seleccionar una plantilla diferente para esta fecha.",
+    "deletePlaylistButton": "Eliminar Lista Actual",
+    "deletingPlaylist": "Eliminando lista de reproducción...",
     "editPlaylist": "Editar Lista",
     "deletePlaylist": "Eliminar Lista",
     "unknownSong": "Canción Desconocida",

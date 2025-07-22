@@ -75,16 +75,16 @@ namespace ChoirApp.Infrastructure.Repositories
             return Task.FromResult(playlist);
         }
 
-        public Task UpdateAsync(Playlist playlist)
+        public async Task UpdateAsync(Playlist playlist)
         {
             _context.Playlists.Update(playlist);
-            return Task.CompletedTask;
+            await _context.SaveChangesAsync();
         }
 
-        public Task DeleteAsync(Playlist playlist)
+        public async Task DeleteAsync(Playlist playlist)
         {
             _context.Playlists.Remove(playlist);
-            return Task.CompletedTask;
+            await _context.SaveChangesAsync();
         }
 
         public async Task SaveChangesAsync()

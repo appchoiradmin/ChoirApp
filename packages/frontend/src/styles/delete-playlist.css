@@ -1,0 +1,107 @@
+/* Delete Playlist Button Styles */
+.delete-playlist-btn {
+  margin-left: 0.75rem;
+  border-color: #dc3545 !important;
+  color: #dc3545 !important;
+  transition: all 0.2s ease;
+}
+
+.delete-playlist-btn:hover:not(:disabled) {
+  background-color: #dc3545 !important;
+  color: white !important;
+  border-color: #dc3545 !important;
+}
+
+.delete-playlist-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Template selector locked content layout */
+.template-selector__locked-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.template-selector__locked-text {
+  margin: 0;
+  flex: 1;
+}
+
+/* Playlist header actions layout */
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* Modal enhancements for delete confirmation */
+.modal-card-body .notification.is-warning.is-light {
+  margin-top: 1rem;
+  margin-bottom: 0;
+}
+
+.modal-card-foot {
+  gap: 0.5rem;
+}
+
+/* Delete Playlist Section Styles */
+.delete-playlist-section {
+  margin: 2rem auto 1rem auto;
+  padding: 1.5rem;
+  background-color: #fff5f5;
+  border: 1px solid #fed7d7;
+  border-radius: 0.75rem;
+  max-width: 600px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.delete-playlist-section__content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  text-align: center;
+}
+
+.delete-playlist-section__text {
+  margin: 0;
+  color: #744210;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  max-width: 400px;
+}
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+  .template-selector__locked-content {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .delete-playlist-btn {
+    margin-left: 0;
+    margin-top: 0.5rem;
+    width: 100%;
+    justify-content: center;
+  }
+  
+  .header-actions {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.5rem;
+  }
+  
+  .delete-playlist-section__content {
+    flex-direction: column;
+    align-items: stretch;
+    text-align: center;
+  }
+  
+  .delete-playlist-section__text {
+    margin-bottom: 0.75rem;
+  }
+}

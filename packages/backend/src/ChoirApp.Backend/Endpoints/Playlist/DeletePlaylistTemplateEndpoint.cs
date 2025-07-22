@@ -23,7 +23,7 @@ namespace ChoirApp.Backend.Endpoints.Playlist
             Verbs("DELETE");
             Routes("/playlist-templates/{Id}");
             AuthSchemes("Bearer");
-            Roles(nameof(UserRole.ChoirAdmin));
+            Roles(nameof(UserRole.ChoirAdmin), nameof(UserRole.ChoirMember));
         }
 
         public override async Task HandleAsync(DeletePlaylistTemplateRequest req, CancellationToken ct)

@@ -19,7 +19,8 @@ import {
   InformationCircleIcon,
   ClockIcon,
   UserGroupIcon,
-  CalendarIcon
+  CalendarIcon,
+  TrashIcon
 } from '@heroicons/react/24/outline';
 import './PlaylistsPage.scss';
 
@@ -31,7 +32,10 @@ const PlaylistHeader: React.FC<{
   totalSections: number;
   duration: string;
   isPrivate?: boolean;
-}> = ({ title, date, totalSongs, totalSections, duration, isPrivate = true }) => {
+  showDeleteButton?: boolean;
+  onDeleteClick?: () => void;
+  isDeleting?: boolean;
+}> = ({ title, date, totalSongs, totalSections, duration, isPrivate = true, showDeleteButton = false, onDeleteClick, isDeleting = false }) => {
   const { t, getCurrentLanguage } = useTranslation();
   
   // Get current language for reactive updates
@@ -88,7 +92,18 @@ const PlaylistHeader: React.FC<{
           </div>
         </div>
         <div className="header-actions">
-          {/* ...existing code for header actions... */}
+          {showDeleteButton && (
+            <Button
+              variant="outlined"
+              size="sm"
+              leftIcon={<TrashIcon />}
+              onClick={onDeleteClick}
+              disabled={isDeleting}
+              className="delete-playlist-btn is-danger"
+            >
+              {isDeleting ? t('playlists.deletingPlaylist') : t('playlists.deletePlaylistButton')}
+            </Button>
+          )}
         </div>
       </div>
       {/* Stats Cards - Mobile Optimized */}
@@ -118,13 +133,16 @@ const PlaylistsPage: React.FC = () => {
     playlistId, 
     setSections,
     isPersisted,
-    selectedTemplate
+    selectedTemplate,
+    deletePlaylist
   } = usePlaylistContext();
   const { user } = useUser();
   const navigate = useNavigate();
   const [songs, setSongs] = useState<SongDto[]>([]);
   const [dropdownOpen, setDropdownOpen] = useState<string | null>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   // Get current language for reactive updates
   const currentLanguage = getCurrentLanguage();
@@ -295,6 +313,35 @@ const PlaylistsPage: React.FC = () => {
     navigate('/songs');
   };
 
+  // Delete playlist handlers
+  const handleDeletePlaylist = async () => {
+    if (!playlistId || !isPersisted) {
+      toast.error(t('playlists.failedToDeletePlaylist'));
+      return;
+    }
+
+    setIsDeleting(true);
+    try {
+      await deletePlaylist();
+      toast.success(t('playlists.playlistDeleted'));
+      setShowDeleteConfirm(false);
+      // The context will automatically reset the state to allow template selection again
+    } catch (error) {
+      console.error('Failed to delete playlist:', error);
+      toast.error(t('playlists.failedToDeletePlaylist'));
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
+  const confirmDeletePlaylist = () => {
+    setShowDeleteConfirm(true);
+  };
+
+  const cancelDeletePlaylist = () => {
+    setShowDeleteConfirm(false);
+  };
+
   const getTotalSongs = () => {
     return sections.reduce((total, section) => total + section.songs.length, 0);
   };
@@ -398,6 +445,9 @@ const PlaylistsPage: React.FC = () => {
           totalSongs={getTotalSongs()}
           totalSections={sections.length}
           duration={getTotalDuration()}
+          showDeleteButton={isPersisted && !!playlistId}
+          onDeleteClick={confirmDeletePlaylist}
+          isDeleting={isDeleting}
         />
 
         {/* Content Section */}
@@ -470,6 +520,48 @@ const PlaylistsPage: React.FC = () => {
           )}
         </div>
       </div>
+
+      {/* Delete Confirmation Modal */}
+      {showDeleteConfirm && (
+        <div className="modal is-active">
+          <div className="modal-background" onClick={cancelDeletePlaylist}></div>
+          <div className="modal-card">
+            <header className="modal-card-head">
+              <p className="modal-card-title">{t('playlists.confirmDeleteTitle')}</p>
+              <button 
+                className="delete" 
+                aria-label="close" 
+                onClick={cancelDeletePlaylist}
+                disabled={isDeleting}
+              ></button>
+            </header>
+            <section className="modal-card-body">
+              <p className="mb-4">{t('playlists.confirmDeleteMessage')}</p>
+              <div className="notification is-warning is-light">
+                <strong>{t('playlists.confirmDelete')}</strong>
+              </div>
+            </section>
+            <footer className="modal-card-foot">
+              <Button
+                variant="outlined"
+                onClick={handleDeletePlaylist}
+                disabled={isDeleting}
+                className="is-danger"
+                leftIcon={<TrashIcon />}
+              >
+                {isDeleting ? t('playlists.deletingPlaylist') : t('playlists.deletePlaylist')}
+              </Button>
+              <Button
+                variant="ghost"
+                onClick={cancelDeletePlaylist}
+                disabled={isDeleting}
+              >
+                {t('common.cancel')}
+              </Button>
+            </footer>
+          </div>
+        </div>
+      )}
     </Layout>
   );
 };

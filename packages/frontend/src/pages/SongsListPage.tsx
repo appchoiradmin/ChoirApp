@@ -11,11 +11,12 @@ import { PlaylistTemplate } from '../types/playlist';
 import { SongDto, SongSearchParams } from '../types/song';
 import { Button, Card, LoadingSpinner } from '../components/ui';
 import Layout from '../components/ui/Layout';
-import { MagnifyingGlassIcon, PlusIcon, ChevronUpIcon, ChevronDownIcon, CheckCircleIcon, XMarkIcon, MusicalNoteIcon } from '@heroicons/react/24/outline';
+import { MagnifyingGlassIcon, PlusIcon, ChevronUpIcon, ChevronDownIcon, CheckCircleIcon, XMarkIcon, MusicalNoteIcon, TrashIcon } from '@heroicons/react/24/outline';
 import SectionSelectionModal from '../components/SectionSelectionModal';
 import './SongsListPage.scss';
 import './SongsListPage.enhanced.scss';
 import './SongsListPage.mobile.scss';
+import '../styles/delete-playlist.css';
 
 interface SongsListPageProps {
   playlistId?: string;
@@ -55,7 +56,7 @@ const SongsListPage: FC<SongsListPageProps> = ({ playlistId, refreshPlaylist }) 
   const [sectionModalOpen, setSectionModalOpen] = useState<boolean>(false);
   const [selectedSongForModal, setSelectedSongForModal] = useState<string | null>(null);
   const navigate = useNavigate();
-  const { sections, setSections, selectedTemplate, setSelectedTemplate, availableTemplates, choirId, isInitializing, createPlaylistIfNeeded, refreshPlaylist: refreshPlaylistContext, playlistId: contextPlaylistId, isPersisted } = usePlaylistContext();
+  const { sections, setSections, selectedTemplate, setSelectedTemplate, availableTemplates, choirId, isInitializing, createPlaylistIfNeeded, refreshPlaylist: refreshPlaylistContext, playlistId: contextPlaylistId, isPersisted, deletePlaylist } = usePlaylistContext();
   const { t } = useTranslation();
   
   // Use sections from PlaylistContext (backend provides generic template automatically)
@@ -81,6 +82,10 @@ const SongsListPage: FC<SongsListPageProps> = ({ playlistId, refreshPlaylist }) 
   // Back to top button state
   const [showBackToTop, setShowBackToTop] = useState<boolean>(false);
   const [templateDropdownOpen, setTemplateDropdownOpen] = useState<boolean>(false);
+  
+  // Delete playlist state
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState<boolean>(false);
+  const [isDeleting, setIsDeleting] = useState<boolean>(false);
   
   // Use URL search parameters for filter persistence
   const [searchParams, setSearchParams] = useSearchParams();
@@ -587,6 +592,36 @@ const SongsListPage: FC<SongsListPageProps> = ({ playlistId, refreshPlaylist }) 
     fetchSongs('', true);
   };
 
+  // Delete playlist handlers
+  const confirmDeletePlaylist = () => {
+    setShowDeleteConfirm(true);
+  };
+
+  const cancelDeletePlaylist = () => {
+    setShowDeleteConfirm(false);
+  };
+
+  const handleDeletePlaylist = async () => {
+    if (!contextPlaylistId) return;
+    
+    setIsDeleting(true);
+    try {
+      // Use the deletePlaylist method from the existing context (no arguments needed)
+      await deletePlaylist();
+      toast.success(t('playlists.playlistDeletedSuccessfully'));
+      setShowDeleteConfirm(false);
+      
+      // Reset UI state after deletion - no need to fetch deleted playlist
+      setPlaylistSongIds(new Set());
+      setSelectedSongs(new Set());
+    } catch (error) {
+      console.error('Error deleting playlist:', error);
+      toast.error(t('playlists.failedToDeletePlaylist'));
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
 
   
   return (
@@ -686,6 +721,27 @@ const SongsListPage: FC<SongsListPageProps> = ({ playlistId, refreshPlaylist }) 
                 </p>
               </div>
             )}
+          </div>
+        )}
+        
+        {/* Delete Playlist Section - Outside template selector blur */}
+        {choirId && isPersisted && contextPlaylistId && (
+          <div className="delete-playlist-section">
+            <div className="delete-playlist-section__content">
+              <p className="delete-playlist-section__text">
+                {t('songs.deletePlaylistInfo')}
+              </p>
+              <Button
+                variant="outlined"
+                size="sm"
+                leftIcon={<TrashIcon />}
+                onClick={confirmDeletePlaylist}
+                disabled={isDeleting}
+                className="delete-playlist-btn is-danger"
+              >
+                {isDeleting ? t('playlists.deletingPlaylist') : t('playlists.deletePlaylistButton')}
+              </Button>
+            </div>
           </div>
         )}
         
@@ -855,6 +911,48 @@ const SongsListPage: FC<SongsListPageProps> = ({ playlistId, refreshPlaylist }) 
         onSelectSection={handleSectionSelect}
         title={t('songs.addToSection')}
       />
+      
+      {/* Delete Confirmation Modal */}
+      {showDeleteConfirm && (
+        <div className="modal is-active">
+          <div className="modal-background" onClick={cancelDeletePlaylist}></div>
+          <div className="modal-card">
+            <header className="modal-card-head">
+              <p className="modal-card-title">{t('playlists.confirmDeleteTitle')}</p>
+              <button 
+                className="delete" 
+                aria-label="close" 
+                onClick={cancelDeletePlaylist}
+                disabled={isDeleting}
+              ></button>
+            </header>
+            <section className="modal-card-body">
+              <p className="mb-4">{t('playlists.confirmDeleteMessage')}</p>
+              <div className="notification is-warning is-light">
+                <strong>{t('playlists.confirmDelete')}</strong>
+              </div>
+            </section>
+            <footer className="modal-card-foot">
+              <Button
+                variant="outlined"
+                onClick={handleDeletePlaylist}
+                disabled={isDeleting}
+                className="is-danger"
+                leftIcon={<TrashIcon />}
+              >
+                {isDeleting ? t('playlists.deletingPlaylist') : t('playlists.deletePlaylist')}
+              </Button>
+              <Button
+                variant="ghost"
+                onClick={cancelDeletePlaylist}
+                disabled={isDeleting}
+              >
+                {t('common.cancel')}
+              </Button>
+            </footer>
+          </div>
+        </div>
+      )}
     </Layout>
   );
 };
