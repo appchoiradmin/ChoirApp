@@ -134,7 +134,8 @@ const PlaylistsPage: React.FC = () => {
     setSections,
     isPersisted,
     selectedTemplate,
-    deletePlaylist
+    deletePlaylist,
+    choirId
   } = usePlaylistContext();
   const { user } = useUser();
   const navigate = useNavigate();
@@ -470,7 +471,7 @@ const PlaylistsPage: React.FC = () => {
                 </Button>
                 <Button 
                   variant="outlined" 
-                  onClick={() => navigate('/playlist-templates')}
+                  onClick={() => navigate(`/choir/${choirId}/playlist-templates`)}
                 >
                   {t('playlists.browseTemplates')}
                 </Button>

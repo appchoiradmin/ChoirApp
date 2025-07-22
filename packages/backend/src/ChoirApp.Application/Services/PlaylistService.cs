@@ -536,8 +536,13 @@ namespace ChoirApp.Application.Services
             
             if (!userChoir.IsAdmin)
                 return Result.Fail("Only choir administrators can delete playlist templates.");
+            
+            // Prevent deletion of default templates
+            if (template.IsDefault)
+                return Result.Fail("Cannot delete the default template. Please set another template as default first.");
 
             await _playlistTemplateRepository.DeleteAsync(template);
+            await _playlistTemplateRepository.SaveChangesAsync();
             return Result.Ok();
         }
 
@@ -566,6 +571,7 @@ namespace ChoirApp.Application.Services
             // Set the default status for this template
             template.SetDefault(dto.IsDefault);
             await _playlistTemplateRepository.UpdateAsync(template);
+            await _playlistTemplateRepository.SaveChangesAsync();
             return Result.Ok();
         }
 

@@ -330,13 +330,13 @@ export const setPlaylistTemplateDefault = async (
   isDefault: boolean,
   token: string
 ): Promise<void> => {
-  const response = await fetch(`${API_URL}/api/playlist-templates/${templateId}/default`, {
+  const response = await fetch(`${API_URL}/api/playlist-templates/${templateId}/set-default`, {
     method: 'PUT',
     headers: {
       'Content-Type': 'application/json',
       Authorization: `Bearer ${token}`,
     },
-    body: JSON.stringify({ isDefault }),
+    body: JSON.stringify({ Dto: { IsDefault: isDefault } }),
   });
 
   if (!response.ok) {

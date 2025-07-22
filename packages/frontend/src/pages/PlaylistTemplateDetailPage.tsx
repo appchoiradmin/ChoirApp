@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useUser } from '../hooks/useUser';
-import { getPlaylistTemplateById, deletePlaylistTemplate } from '../services/playlistService';
+import { getPlaylistTemplateById, deletePlaylistTemplate, setPlaylistTemplateDefault } from '../services/playlistService';
 import { PlaylistTemplate } from '../types/playlist';
 import Layout from '../components/ui/Layout';
 import Navigation from '../components/ui/Navigation';
@@ -46,6 +46,12 @@ const PlaylistTemplateDetailPage: React.FC = () => {
   const handleDelete = async () => {
     if (!template || !templateId || !token) return;
     
+    // Prevent deletion of default templates with user-friendly message
+    if (template.isDefault) {
+      alert(t('playlistTemplateDetail.cannotDeleteDefault'));
+      return;
+    }
+    
     const confirmed = window.confirm(
       t('playlistTemplateDetail.deleteConfirm', { title: template.title })
     );
@@ -54,12 +60,38 @@ const PlaylistTemplateDetailPage: React.FC = () => {
       setDeleting(true);
       try {
         await deletePlaylistTemplate(templateId, token);
-        navigate('/playlist-templates');
+        navigate(`/choir/${template?.choirId}/playlist-templates`);
       } catch (err: any) {
         console.error('Failed to delete template:', err);
-        setError(t('playlistTemplateDetail.failedToDelete'));
+        // Check if it's a default template error from backend
+        const errorMessage = err.response?.data?.errors?.[0]?.message || err.message;
+        if (errorMessage?.includes('default template')) {
+          setError(t('playlistTemplateDetail.cannotDeleteDefault'));
+        } else {
+          setError(t('playlistTemplateDetail.failedToDelete'));
+        }
       } finally {
         setDeleting(false);
+      }
+    }
+  };
+
+  const handleSetDefault = async () => {
+    if (!template || !templateId || !token) return;
+    
+    const confirmed = window.confirm(
+      t('playlistTemplateDetail.setDefaultConfirm', { title: template.title })
+    );
+    
+    if (confirmed) {
+      try {
+        await setPlaylistTemplateDefault(templateId, true, token);
+        // Refresh the template to show updated default status
+        const updatedTemplate = await getPlaylistTemplateById(templateId, token);
+        setTemplate(updatedTemplate);
+      } catch (err: any) {
+        console.error('Failed to set template as default:', err);
+        setError(t('playlistTemplateDetail.failedToSetDefault'));
       }
     }
   };
@@ -140,12 +172,22 @@ const PlaylistTemplateDetailPage: React.FC = () => {
                 >
                   {t('playlistTemplateDetail.editTemplate')}
                 </Button>
+                {!template.isDefault && (
+                  <Button
+                    variant="secondary"
+                    onClick={handleSetDefault}
+                    className="action-button"
+                  >
+                    {t('playlistTemplateDetail.setAsDefault')}
+                  </Button>
+                )}
                 <Button
                   variant="outlined"
                   leftIcon={<TrashIcon />}
                   onClick={handleDelete}
-                  disabled={deleting}
+                  disabled={deleting || template.isDefault}
                   className="action-button"
+                  title={template.isDefault ? t('playlistTemplateDetail.cannotDeleteDefaultTooltip') : undefined}
                 >
                   {deleting ? t('playlistTemplateDetail.deleting') : t('playlistTemplateDetail.deleteTemplate')}
                 </Button>
