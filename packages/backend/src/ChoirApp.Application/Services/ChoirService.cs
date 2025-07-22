@@ -104,7 +104,12 @@ namespace ChoirApp.Application.Services
             }
 
             // Business rule: Only admin can update choir
-            if (choir.AdminUserId != adminId)
+            // Check if user is either the original admin OR has admin privileges in UserChoir relationship
+            var userChoir = await _choirRepository.GetUserChoirAsync(adminId, choirId);
+            var isOriginalAdmin = choir.AdminUserId == adminId;
+            var isChoirAdmin = userChoir != null && userChoir.IsAdmin;
+            
+            if (!isOriginalAdmin && !isChoirAdmin)
             {
                 return Result.Fail("Only the choir admin can update the choir.");
             }
