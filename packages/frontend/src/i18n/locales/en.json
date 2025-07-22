@@ -146,6 +146,8 @@
     "browseSongs": "Browse Songs",
     "browseSongsDesc": "Explore the song library",
     "createPlaylistDesc": "Start a new playlist",
+    "choirsYouManage": "Choirs You Manage",    
+    "choirsYouAreIn": "Choirs You Are In",
     "manageChoirs": "Manage Choirs",
     "manageChoirsDesc": "View and edit your choirs",
     "administrator": "Administrator",
