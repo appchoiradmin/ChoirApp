@@ -126,7 +126,23 @@ export const updateChoir = async (
   });
 
   if (!response.ok) {
-    const errorData = await response.json();
-    throw new Error(errorData.message || 'Failed to update choir');
+    let errorMessage = 'Failed to update choir';
+    try {
+      const errorData = await response.json();
+      // Handle different possible error response formats
+      if (errorData.message) {
+        errorMessage = errorData.message;
+      } else if (errorData.errors && Array.isArray(errorData.errors) && errorData.errors.length > 0) {
+        errorMessage = errorData.errors[0];
+      } else if (errorData.title) {
+        errorMessage = errorData.title;
+      } else if (typeof errorData === 'string') {
+        errorMessage = errorData;
+      }
+    } catch (e) {
+      // If we can't parse the error response, use the status text
+      errorMessage = response.statusText || errorMessage;
+    }
+    throw new Error(errorMessage);
   }
 };
