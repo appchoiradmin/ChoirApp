@@ -6,6 +6,7 @@ import { getPlaylistTemplatesByChoirId, deletePlaylistTemplate, setPlaylistTempl
 import { PlaylistTemplate } from '../types/playlist';
 import { Button, Card, LoadingSpinner, Navigation } from '../components/ui';
 import Layout from '../components/ui/Layout';
+import { getTemplateDisplayTitle, getTemplateDisplayDescription, isGlobalTemplateKey } from '../utils/templateTranslation';
 import toast from 'react-hot-toast';
 import {
   PlusIcon,
@@ -51,7 +52,7 @@ const TemplateCard: React.FC<TemplateCardProps> = ({
           {template.isDefault && (
             <StarIconSolid className="default-star-icon" title={t('playlistTemplates.defaultTemplate')} />
           )}
-          <h3 className="card-title">{template.title}</h3>
+          <h3 className="card-title">{getTemplateDisplayTitle(template, t)}</h3>
         </div>
         <div className="dropdown-container">
           <Button
@@ -67,47 +68,58 @@ const TemplateCard: React.FC<TemplateCardProps> = ({
           </Button>
           {dropdownOpen && (
             <div className="dropdown-menu">
-              {!template.isDefault && (
-                <Button
-                  variant="ghost"
-                  className="dropdown-item"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onSetDefault();
-                  }}
-                >
-                  <StarIcon className="icon" />
-                  {t('playlistTemplates.setAsDefault')}
-                </Button>
+              {/* Only show actions for user-created templates, not global templates */}
+              {!isGlobalTemplateKey(template.title) && (
+                <>
+                  {!template.isDefault && (
+                    <Button
+                      variant="ghost"
+                      className="dropdown-item"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onSetDefault();
+                      }}
+                    >
+                      <StarIcon className="icon" />
+                      {t('playlistTemplates.setAsDefault')}
+                    </Button>
+                  )}
+                  <Button
+                    variant="ghost"
+                    className="dropdown-item"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      navigate(`/playlist-templates/${template.id}/edit`);
+                    }}
+                  >
+                    <PencilIcon className="icon" />
+                    {t('playlistTemplates.edit')}
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    className="dropdown-item danger"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onDelete();
+                    }}
+                  >
+                    <TrashIcon className="icon" />
+                    {t('playlistTemplates.delete')}
+                  </Button>
+                </>
               )}
-              <Button
-                variant="ghost"
-                className="dropdown-item"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  navigate(`/playlist-templates/${template.id}/edit`);
-                }}
-              >
-                <PencilIcon className="icon" />
-                {t('playlistTemplates.edit')}
-              </Button>
-              <Button
-                variant="ghost"
-                className="dropdown-item danger"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onDelete();
-                }}
-              >
-                <TrashIcon className="icon" />
-                {t('playlistTemplates.delete')}
-              </Button>
+              {/* For global templates, show a read-only message */}
+              {isGlobalTemplateKey(template.title) && (
+                <div className="dropdown-item-info">
+                  <span className="info-text">{t('playlistTemplates.globalTemplateReadOnly')}</span>
+                </div>
+              )}
             </div>
           )}
         </div>
       </Card.Header>
       <Card.Content>
-        {template.description && <p className="template-description">{template.description}</p>}
+        {template.description && <p className="template-description">{getTemplateDisplayDescription(template, t)}</p>}
       </Card.Content>
       <Card.Footer>
         <div className="card-footer-content">

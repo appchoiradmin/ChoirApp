@@ -440,6 +440,15 @@
       "wedding": "Wedding Template",
       "funeral": "Funeral Template"
     },
+    "globalTemplateDescriptions": {
+      "generic": "A basic template with one section for songs",
+      "mass": "Traditional Catholic Mass template with liturgical sections",
+      "service": "General worship service template",
+      "practice": "Template for choir practice sessions",
+      "concert": "Template for concert performances",
+      "wedding": "Template for wedding ceremonies",
+      "funeral": "Template for funeral services"
+    },
     "globalTemplateSections": {
       "songs": "Songs",
       "entrance": "Entrance",

@@ -14,6 +14,7 @@ import {
   ExclamationCircleIcon 
 } from '@heroicons/react/24/outline';
 import { useTranslation } from '../hooks/useTranslation';
+import { getTemplateDisplayTitle, getTemplateSectionDisplayTitle, isGlobalTemplateKey } from '../utils/templateTranslation';
 import './PlaylistTemplateDetailPage.scss';
 
 const PlaylistTemplateDetailPage: React.FC = () => {
@@ -121,32 +122,35 @@ const PlaylistTemplateDetailPage: React.FC = () => {
           <div className="header-content">
             <div className="header-info">
               <div className="header-title">
-                <h1 className="page-title">{template.title}</h1>
+                <h1 className="page-title">{getTemplateDisplayTitle(template, t)}</h1>
               </div>
               {template.description && (
                 <p className="template-description">{template.description}</p>
               )}
             </div>
             
-            <div className="header-actions">
-              <Button
-                variant="primary"
-                leftIcon={<PencilIcon />}
-                onClick={() => navigate(`/playlist-templates/${templateId}/edit`)}
-                className="action-button"
-              >
-                {t('playlistTemplateDetail.editTemplate')}
-              </Button>
-              <Button
-                variant="outlined"
-                leftIcon={<TrashIcon />}
-                onClick={handleDelete}
-                disabled={deleting}
-                className="action-button"
-              >
-                {deleting ? t('playlistTemplateDetail.deleting') : t('playlistTemplateDetail.deleteTemplate')}
-              </Button>
-            </div>
+            {/* Only show edit/delete actions for user-created templates, not global templates */}
+            {!isGlobalTemplateKey(template.title) && (
+              <div className="header-actions">
+                <Button
+                  variant="primary"
+                  leftIcon={<PencilIcon />}
+                  onClick={() => navigate(`/playlist-templates/${templateId}/edit`)}
+                  className="action-button"
+                >
+                  {t('playlistTemplateDetail.editTemplate')}
+                </Button>
+                <Button
+                  variant="outlined"
+                  leftIcon={<TrashIcon />}
+                  onClick={handleDelete}
+                  disabled={deleting}
+                  className="action-button"
+                >
+                  {deleting ? t('playlistTemplateDetail.deleting') : t('playlistTemplateDetail.deleteTemplate')}
+                </Button>
+              </div>
+            )}
           </div>
         </div>
         
@@ -177,7 +181,7 @@ const PlaylistTemplateDetailPage: React.FC = () => {
                 .map((section, index) => (
                 <div key={section.id} className="section-card">
                   <div className="section-header">
-                    <h3 className="section-title">{section.title}</h3>
+                    <h3 className="section-title">{getTemplateSectionDisplayTitle(section.title, t)}</h3>
                     <span className="section-order">{t('playlistTemplateDetail.sectionNumber', { number: index + 1 })}</span>
                   </div>
                   

@@ -452,6 +452,9 @@ namespace ChoirApp.Application.Services
             var userChoir = await _choirRepository.GetUserChoirAsync(userId, template.ChoirId);
             if (userChoir == null)
                 return Result.Fail("User is not a member of this choir.");
+            
+            if (!userChoir.IsAdmin)
+                return Result.Fail("Only choir administrators can delete playlist templates.");
 
             await _playlistTemplateRepository.DeleteAsync(template);
             return Result.Ok();

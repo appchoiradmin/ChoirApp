@@ -56,8 +56,15 @@ export const isGlobalTemplateSectionKey = (title: string): boolean => {
  * Gets the display title for a template, translating global templates and leaving user templates as-is
  */
 export const getTemplateDisplayTitle = (template: PlaylistTemplate, t: (key: string) => string): string => {
+  console.log('getTemplateDisplayTitle called with:', template.title);
+  console.log('isGlobalTemplateKey result:', isGlobalTemplateKey(template.title));
+  
   if (isGlobalTemplateKey(template.title)) {
-    return t(`playlistTemplates.globalTemplates.${template.title.toLowerCase()}`);
+    const translationKey = `playlistTemplates.globalTemplates.${template.title.toLowerCase()}`;
+    console.log('Translation key:', translationKey);
+    const translatedText = t(translationKey);
+    console.log('Translated text:', translatedText);
+    return translatedText;
   }
   return template.title; // User templates display as-is
 };
@@ -70,6 +77,19 @@ export const getTemplateSectionDisplayTitle = (sectionTitle: string, t: (key: st
     return t(`playlistTemplates.globalTemplateSections.${sectionTitle.toLowerCase()}`);
   }
   return sectionTitle; // User sections display as-is
+};
+
+/**
+ * Gets the display description for a template, translating global templates and leaving user templates as-is
+ */
+export const getTemplateDisplayDescription = (template: PlaylistTemplate, t: (key: string) => string): string => {
+  if (isGlobalTemplateKey(template.title)) {
+    const translationKey = `playlistTemplates.globalTemplateDescriptions.${template.title.toLowerCase()}`;
+    const translatedText = t(translationKey);
+    // If translation key is not found, fall back to original description
+    return translatedText !== translationKey ? translatedText : (template.description || '');
+  }
+  return template.description || ''; // User templates display as-is
 };
 
 /**

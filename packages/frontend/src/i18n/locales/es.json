@@ -1,4 +1,4 @@
-{
+﻿{
   "common": {
     "loading": "Cargando...",
     "error": "Error",
@@ -475,6 +475,15 @@
       "concert": "Plantilla de Concierto",
       "wedding": "Plantilla de Boda",
       "funeral": "Plantilla de Funeral"
+    },
+    "globalTemplateDescriptions": {
+      "generic": "Una plantilla básica con una sección para canciones",
+      "mass": "Plantilla tradicional de Misa Católica con secciones litúrgicas",
+      "service": "Plantilla general para servicios de adoración",
+      "practice": "Plantilla para sesiones de práctica del coro",
+      "concert": "Plantilla para presentaciones de concierto",
+      "wedding": "Plantilla para ceremonias de boda",
+      "funeral": "Plantilla para servicios funerarios"
     },
     "globalTemplateSections": {
       "songs": "Canciones",
