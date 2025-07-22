@@ -1,5 +1,5 @@
 import React, { useState, useContext } from 'react';
-import { useTranslation } from 'react-i18next';
+import { useTranslation } from '../hooks/useTranslation';
 import { getNextSunday } from '../utils/getNextSunday';
 import { LoadingState } from '../components/ui';
 import PlaylistsPage from './PlaylistsPage';
