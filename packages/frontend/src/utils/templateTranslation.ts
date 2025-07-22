@@ -13,10 +13,23 @@ const GLOBAL_TEMPLATE_KEYS = [
 
 // List of global template section keys that should be translated
 const GLOBAL_TEMPLATE_SECTION_KEYS = [
+  // Generic template sections
   'songs',
+  
+  // Mass template sections (matching our SQL script)
+  'entrance',
+  'penitential', 
+  'gloria',
+  'word',
+  'offertory',
+  'holy',
+  'peace',
+  'communion',
+  'recessional',
+  
+  // Additional common sections for future templates
   'opening',
   'worship',
-  'communion',
   'closing',
   'prelude',
   'postlude',
