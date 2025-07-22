@@ -118,10 +118,7 @@ export const updateChoir = async (
       Authorization: `Bearer ${token}`,
     },
     body: JSON.stringify({
-      choirId: choirId,
-      dto: {
-        name: choirName
-      }
+      name: choirName
     }),
   });
 
