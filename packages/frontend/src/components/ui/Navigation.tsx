@@ -14,7 +14,7 @@ interface NavigationProps {
 }
 
 const Navigation: React.FC<NavigationProps> = ({
-  title = 'ChoirApp',
+  title = 'AppChoir',
   showBackButton = false,
   onBackClick,
   actions,

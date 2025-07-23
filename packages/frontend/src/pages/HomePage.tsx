@@ -25,7 +25,7 @@ const HomePage: React.FC = () => {
         <div className="hero-content">
           <div className="hero-text">
             <h1 className="hero-title">
-              {t('home.title').split('ChoirApp')[0]}<span className="hero-accent">ChoirApp</span>
+              {t('home.title').split('AppChoir')[0]}<span className="hero-accent">AppChoir</span>
             </h1>
             <p className="hero-subtitle">
               {t('home.subtitle')}

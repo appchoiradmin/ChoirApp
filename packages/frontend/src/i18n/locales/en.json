@@ -44,7 +44,7 @@
     "welcome": "Welcome",
     "welcomeBack": "Welcome back",
     "signInRequired": "Please sign in to continue",
-    "signInToAccess": "Sign in to access ChoirApp",
+    "signInToAccess": "Sign in to access AppChoir",
     "signInToManage": "Sign in to manage your choirs and songs",
     "authenticationFailed": "Authentication failed. Please try again.",
     "sessionExpired": "Your session has expired. Please sign in again.",
@@ -57,7 +57,7 @@
     "loading": "Loading..."
   },
   "home": {
-    "title": "Welcome to ChoirApp",
+    "title": "Welcome to AppChoir",
     "subtitle": "The complete solution for managing your choir, songs, and performances",
     "getStarted": "Get Started",
     "learnMore": "Learn More",
@@ -67,7 +67,7 @@
       "smartPlaylists": "Smart Playlists"
     },
     "features": {
-      "title": "Why Choose ChoirApp?",
+      "title": "Why Choose AppChoir?",
       "subtitle": "Everything you need to manage your choir in one beautiful platform",
       "choirManagement": {
         "title": "Choir Management",
@@ -101,13 +101,13 @@
       "uptime": "Uptime"
     },
     "testimonial": {
-      "text": "ChoirApp has revolutionized how we manage our choir. The song library and playlist features are incredible!",
+      "text": "AppChoir has revolutionized how we manage our choir. The song library and playlist features are incredible!",
       "authorName": "Sarah Johnson",
       "authorRole": "Choir Director"
     },
     "cta": {
       "title": "Ready to Transform Your Choir?",
-      "subtitle": "Join thousands of choir directors already using ChoirApp to manage their musical communities",
+      "subtitle": "Join thousands of choir directors already using AppChoir to manage their musical communities",
       "features": {
         "secure": "Secure & Reliable",
         "quickSetup": "Quick Setup",
@@ -120,7 +120,7 @@
   "dashboard": {
     "title": "Dashboard",
     "loading": "Loading your dashboard...",
-    "welcomeTitle": "Welcome to ChoirApp!",
+    "welcomeTitle": "Welcome to AppChoir!",
     "welcomeSubtitle": "Please log in to access your dashboard and manage your choirs.",
     "goToHomepage": "Go to Homepage",
     "welcomeBack": "Welcome back, {{name}}!",
@@ -574,9 +574,9 @@
     "url": "Please enter a valid URL"
   },
   "onboarding": {
-    "welcomeTitle": "Welcome to ChoirApp! 🎵",
+    "welcomeTitle": "Welcome to AppChoir! 🎵",
     "welcomeSubtitle": "Let's get you started with your musical journey",
-    "chooseHowToUse": "Choose how you'd like to use ChoirApp:",
+    "chooseHowToUse": "Choose how you'd like to use AppChoir:",
     "canChangeAnytime": "Don't worry - you can always change this later or be invited to join choirs.",
     "choirAdministrator": "Choir Administrator",
     "leadAndManage": "Lead and manage a choir",

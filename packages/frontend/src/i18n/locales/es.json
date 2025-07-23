@@ -49,7 +49,7 @@
     "success": "¡Éxito!",
     "signInRequired": "Por favor inicia sesión para continuar",
     "authError": "Ocurrió un error de autenticación",
-    "signInToAccess": "Inicia sesión para acceder a ChoirApp",
+    "signInToAccess": "Inicia sesión para acceder a AppChoir",
     "signInToManage": "Inicia sesión para gestionar tus coros y canciones",
     "authenticationFailed": "La autenticación falló. Por favor, inténtalo de nuevo.",
     "sessionExpired": "Tu sesión ha expirado. Por favor, inicia sesión de nuevo.",
@@ -61,7 +61,7 @@
     "authCallback": "Procesando respuesta de autenticación..."
   },
   "home": {
-    "title": "Bienvenido a ChoirApp",
+    "title": "Bienvenido a AppChoir",
     "subtitle": "La solución completa para gestionar tu coro, canciones y actuaciones",
     "getStarted": "Comenzar",
     "learnMore": "Saber Más",
@@ -71,7 +71,7 @@
       "smartPlaylists": "Listas Inteligentes"
     },
     "features": {
-      "title": "¿Por Qué Elegir ChoirApp?",
+      "title": "¿Por Qué Elegir AppChoir?",
       "subtitle": "Todo lo que necesitas para gestionar tu coro en una plataforma hermosa",
       "choirManagement": {
         "title": "Gestión de Coros",
@@ -105,13 +105,13 @@
       "uptime": "Tiempo Activo"
     },
     "testimonial": {
-      "text": "ChoirApp ha revolucionado cómo gestionamos nuestro coro. ¡Las funciones de biblioteca musical y listas son increíbles!",
+      "text": "AppChoir ha revolucionado cómo gestionamos nuestro coro. ¡Las funciones de biblioteca musical y listas son increíbles!",
       "authorName": "Sarah Johnson",
       "authorRole": "Directora de Coro"
     },
     "cta": {
       "title": "¿Listo para Transformar tu Coro?",
-      "subtitle": "Únete a miles de directores de coro que ya usan ChoirApp para gestionar sus comunidades musicales",
+      "subtitle": "Únete a miles de directores de coro que ya usan AppChoir para gestionar sus comunidades musicales",
       "features": {
         "secure": "Seguro y Confiable",
         "quickSetup": "Configuración Rápida",
@@ -124,7 +124,7 @@
   "dashboard": {
     "title": "Panel de Control",
     "loading": "Cargando tu panel de control...",
-    "welcomeTitle": "¡Bienvenido a ChoirApp!",
+    "welcomeTitle": "¡Bienvenido a AppChoir!",
     "welcomeSubtitle": "Por favor inicia sesión para acceder a tu panel de control y gestionar tus coros.",
     "goToHomepage": "Ir a la Página Principal",
     "welcome": "¡Bienvenido de vuelta!",
@@ -603,9 +603,9 @@
     "url": "Por favor ingresa una URL válida"
   },
   "onboarding": {
-    "welcomeTitle": "¡Bienvenido a ChoirApp! 🎵",
+    "welcomeTitle": "¡Bienvenido a AppChoir! 🎵",
     "welcomeSubtitle": "Comencemos tu viaje musical",
-    "chooseHowToUse": "Elige cómo te gustaría usar ChoirApp:",
+    "chooseHowToUse": "Elige cómo te gustaría usar AppChoir:",
     "canChangeAnytime": "No te preocupes - siempre puedes cambiar esto más tarde o ser invitado a unirte a coros.",
     "choirAdministrator": "Administrador de Coro",
     "leadAndManage": "Lidera y gestiona un coro",

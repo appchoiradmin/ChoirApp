@@ -1,4 +1,4 @@
-/* Mobile-First Responsive CSS for ChoirApp */
+/* Mobile-First Responsive CSS for AppChoir */
 /* This file ensures proper mobile responsiveness across all components */
 
 /* Global mobile-first box-sizing and overflow fixes */
@@ -284,7 +284,7 @@ pre, code {
   }
 }
 
-/* Fix specific ChoirApp components */
+/* Fix specific AppChoir components */
 .songs-page, .dashboard-page, .choir-admin-page {
   width: 100% !important;
   max-width: 100vw !important;
