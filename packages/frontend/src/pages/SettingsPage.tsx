@@ -58,7 +58,7 @@ const SettingsPage: React.FC = () => {
               <div className="card-header-content">
                 <h2 className="card-title">{t('settings.profile')}</h2>
                 <p className="card-description">
-                  Update your personal information and preferences
+                  {t('settings.profileDescription')}
                 </p>
               </div>
             </div>
@@ -80,15 +80,25 @@ const SettingsPage: React.FC = () => {
               <div className="card-header-content">
                 <h2 className="card-title">{t('settings.notifications')}</h2>
                 <p className="card-description">
-                  Configure how you receive notifications
+                  {t('settings.notificationsDescription')}
                 </p>
               </div>
             </div>
             <div className="settings-card-content">
-              <div className="coming-soon">
-                <p className="coming-soon-text">
-                  Coming soon...
-                </p>
+              <div className="notification-settings">
+                <div className="notification-info">
+                  <p className="notification-description">
+                    {t('settings.notificationDescription')}
+                  </p>
+                  <ul className="notification-list">
+                    <li>• {t('settings.choirInvitations')}</li>
+                    <li>• {t('settings.importantUpdates')}</li>
+                    <li>• {t('settings.playlistChanges')}</li>
+                  </ul>
+                  <p className="notification-note">
+                    <strong>{t('settings.notificationNote')}</strong>
+                  </p>
+                </div>
               </div>
             </div>
           </Card>

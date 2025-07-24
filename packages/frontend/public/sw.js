@@ -63,23 +63,50 @@ self.addEventListener('sync', (event) => {
   }
 });
 
-// Handle push notifications (for future use)
+// Handle push notifications
 self.addEventListener('push', (event) => {
+  console.log('Push notification received:', event);
+  
   if (event.data) {
     const data = event.data.json();
+    console.log('Push notification data:', data);
+    
     const options = {
-      body: data.body,
-      icon: '/icons/icon-192x192.png',
-      badge: '/icons/icon-72x72.png',
+      body: data.body || 'New notification',
+      icon: data.icon || '/icons/icon-192x192.png',
+      badge: data.badge || '/icons/icon-72x72.png',
       vibrate: [100, 50, 100],
+      requireInteraction: true, // Keep notification visible until user interacts
+      actions: [
+        {
+          action: 'view',
+          title: 'View',
+          icon: '/icons/icon-32x32.png'
+        },
+        {
+          action: 'dismiss',
+          title: 'Dismiss'
+        }
+      ],
       data: {
+        url: data.url || '/',
+        type: data.data?.type || 'general',
         dateOfArrival: Date.now(),
-        primaryKey: data.primaryKey
+        ...data.data
       }
     };
     
     event.waitUntil(
-      self.registration.showNotification(data.title, options)
+      self.registration.showNotification(data.title || 'ChoirApp', options)
+    );
+  } else {
+    // Fallback for push notifications without data
+    event.waitUntil(
+      self.registration.showNotification('ChoirApp', {
+        body: 'You have a new notification',
+        icon: '/icons/icon-192x192.png',
+        badge: '/icons/icon-72x72.png'
+      })
     );
   }
 });

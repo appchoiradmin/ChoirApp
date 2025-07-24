@@ -251,17 +251,18 @@ const DashboardPage: React.FC = () => {
             </Button>
           </Link>
 
-          <Button 
-            variant="outlined" 
-            className="quick-action-button"
-            disabled
-          >
-            <CogIcon className="action-icon" />
-            <div className="action-content">
-              <span className="action-title">Settings</span>
-              <span className="action-subtitle">Manage preferences</span>
-            </div>
-          </Button>
+          <Link to="/settings">
+            <Button 
+              variant="outlined" 
+              className="quick-action-button"
+            >
+              <CogIcon className="action-icon" />
+              <div className="action-content">
+                <span className="action-title">{t('dashboard.settings')}</span>
+                <span className="action-subtitle">{t('dashboard.settingsDesc')}</span>
+              </div>
+            </Button>
+          </Link>
         </div>
       </Card>
 

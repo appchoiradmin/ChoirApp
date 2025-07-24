@@ -156,7 +156,9 @@
     "administrator": "Administrator",
     "member": "Member",
     "viewProfile": "View Profile",
-    "viewProfileDesc": "Update your settings"
+    "viewProfileDesc": "Update your settings",
+    "settings": "Settings",
+    "settingsDesc": "Manage preferences"
   },
   "choir": {
     "title": "Choir",

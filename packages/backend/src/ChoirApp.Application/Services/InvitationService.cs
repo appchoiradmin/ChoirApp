@@ -16,17 +16,20 @@ namespace ChoirApp.Application.Services
         private readonly IUserRepository _userRepository;
         private readonly IInvitationRepository _invitationRepository;
         private readonly IInvitationPolicy _invitationPolicy;
+        private readonly IPushNotificationService _pushNotificationService;
 
         public InvitationService(
             IChoirRepository choirRepository,
             IUserRepository userRepository,
             IInvitationRepository invitationRepository,
-            IInvitationPolicy invitationPolicy)
+            IInvitationPolicy invitationPolicy,
+            IPushNotificationService pushNotificationService)
         {
             _choirRepository = choirRepository;
             _userRepository = userRepository;
             _invitationRepository = invitationRepository;
             _invitationPolicy = invitationPolicy;
+            _pushNotificationService = pushNotificationService;
         }
 
         public async Task<Result> CreateInvitationAsync(InviteUserDto inviteDto, Guid inviterId)
@@ -55,6 +58,10 @@ namespace ChoirApp.Application.Services
 
             await _invitationRepository.AddAsync(invitationResult.Value);
             await _invitationRepository.SaveChangesAsync();
+
+            // Try to send push notification to the invited user
+            await TrySendInvitationNotificationAsync(inviteDto.Email, choir.ChoirName, inviterId);
+
             return Result.Ok();
         }
 
@@ -162,6 +169,35 @@ namespace ChoirApp.Application.Services
                 Status = i.Status.ToString(),
                 SentAt = i.DateSent
             }).ToList();
+        }
+
+        private async Task TrySendInvitationNotificationAsync(string invitedEmail, string choirName, Guid inviterId)
+        {
+            try
+            {
+                // Find the invited user by email
+                var invitedUser = await _userRepository.GetByEmailAsync(invitedEmail);
+                if (invitedUser == null)
+                {
+                    // User doesn't exist yet, can't send push notification
+                    return;
+                }
+
+                // Get the inviter's name
+                var inviter = await _userRepository.GetByIdAsync(inviterId);
+                var inviterName = inviter?.Name ?? "Someone";
+
+                // Send push notification
+                await _pushNotificationService.SendChoirInvitationNotificationAsync(
+                    invitedUser.UserId, 
+                    choirName, 
+                    inviterName);
+            }
+            catch (Exception)
+            {
+                // Don't fail the invitation creation if push notification fails
+                // This is a best-effort attempt
+            }
         }
     }
 }

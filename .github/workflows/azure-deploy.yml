@@ -47,3 +47,7 @@ jobs:
         slot-name: 'production'
         publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
         package: ./packages/backend/src/ChoirApp.Backend/publish
+      env:
+        PushNotifications__VapidSubject: ${{ secrets.PUSH_NOTIFICATIONS__VAPID_SUBJECT }}
+        PushNotifications__VapidPublicKey: ${{ secrets.PUSH_NOTIFICATIONS__VAPID_PUBLIC_KEY }}
+        PushNotifications__VapidPrivateKey: ${{ secrets.PUSH_NOTIFICATIONS__VAPID_PRIVATE_KEY }}

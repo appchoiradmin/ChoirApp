@@ -21,6 +21,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     public DbSet<PlaylistTag> PlaylistTags { get; set; } = null!;
     public DbSet<UserChoir> UserChoirs { get; set; } = null!;
     public DbSet<ChoirInvitation> ChoirInvitations { get; set; } = null!;
+    public DbSet<PushSubscription> PushSubscriptions { get; set; } = null!;
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

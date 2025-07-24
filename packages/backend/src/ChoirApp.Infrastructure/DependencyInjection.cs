@@ -35,6 +35,8 @@ public static class DependencyInjection
         services.AddScoped<IInvitationRepository, InvitationRepository>();
         services.AddScoped<ITagRepository, TagRepository>();
         services.AddScoped<IInvitationPolicy, InvitationPolicy>();
+        services.AddScoped<IPushSubscriptionRepository, PushSubscriptionRepository>();
+        services.AddScoped<IPushNotificationProvider, WebPushNotificationProvider>();
 
         return services;
     }   

@@ -151,12 +151,19 @@
     "spanish": "Español",
     "languageChanged": "Idioma cambiado exitosamente",
     "profile": "Perfil",
+    "profileDescription": "Actualiza tu información personal y preferencias",
     "account": "Cuenta",
     "preferences": "Preferencias",
     "notifications": "Notificaciones",
+    "notificationsDescription": "Configura cómo recibes notificaciones",
     "privacy": "Privacidad",
     "viewProfile": "Ver Perfil",
-    "viewProfileDesc": "Actualizar tu configuración"
+    "viewProfileDesc": "Actualizar tu configuración",
+    "notificationDescription": "Las notificaciones push se habilitan automáticamente cuando permites notificaciones en tu navegador. Recibirás notificaciones para:",
+    "choirInvitations": "Invitaciones de coro",
+    "importantUpdates": "Actualizaciones importantes del coro",
+    "playlistChanges": "Cambios en listas de reproducción",
+    "notificationNote": "Nota: Para gestionar las notificaciones, usa la configuración de notificaciones de tu navegador."
   },
   "choir": {
     "title": "Coro",
