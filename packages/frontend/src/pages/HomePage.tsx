@@ -24,6 +24,19 @@ const HomePage: React.FC = () => {
       <section className="hero-section">
         <div className="hero-content">
           <div className="hero-text">
+            <div className="hero-brand" style={{ textAlign: 'center', marginBottom: '1.5rem' }}>
+              <img 
+                src="/icons/icon-128x128.png" 
+                alt="ChoirApp" 
+                className="hero-brand-icon"
+                style={{ 
+                  width: '80px', 
+                  height: '80px',
+                  filter: 'drop-shadow(0 4px 8px rgba(0, 0, 0, 0.1))',
+                  animation: 'fadeInUp 0.8s ease-out'
+                }}
+              />
+            </div>
             <h1 className="hero-title">
               {t('home.title').split('AppChoir')[0]}<span className="hero-accent">AppChoir</span>
             </h1>

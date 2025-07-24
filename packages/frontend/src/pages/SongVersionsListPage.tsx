@@ -693,7 +693,17 @@ const SongVersionsListPage: React.FC = () => {
           </div>
         ) : (
           <div className="empty-state">
-            <DocumentTextIcon className="empty-icon" />
+            <img 
+              src="/icons/icon-96x96.png" 
+              alt="ChoirApp" 
+              className="empty-icon"
+              style={{ 
+                width: '64px', 
+                height: '64px',
+                opacity: 0.6,
+                filter: 'grayscale(0.3)'
+              }}
+            />
             <h2 className="empty-title">{t('songs.noSongsFoundTitle')}</h2>
             <p className="empty-message">
               {filters.search || filters.selectedTags.length > 0 

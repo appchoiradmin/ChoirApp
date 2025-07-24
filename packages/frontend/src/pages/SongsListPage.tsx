@@ -777,7 +777,16 @@ const SongsListPage: FC<SongsListPageProps> = ({ playlistId, refreshPlaylist }) 
         ) : songs.length === 0 ? (
           <div className="songs-page__empty">
             <div className="songs-page__empty-icon">
-              <MusicalNoteIcon />
+              <img 
+                src="/icons/icon-96x96.png" 
+                alt="ChoirApp" 
+                style={{ 
+                  width: '64px', 
+                  height: '64px',
+                  opacity: 0.6,
+                  filter: 'grayscale(0.3)'
+                }}
+              />
             </div>
             <h3 className="songs-page__empty-title">{t('songs.noSongsFound')}</h3>
             <p className="songs-page__empty-message">

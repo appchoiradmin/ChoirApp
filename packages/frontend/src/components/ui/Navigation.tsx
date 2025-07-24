@@ -45,9 +45,15 @@ const Navigation: React.FC<NavigationProps> = ({
             </button>
           )}
           
-          <span className="navbar-item has-text-white is-size-5 has-text-weight-bold">
-            {title}
-          </span>
+          <div className="navbar-item has-text-white is-size-5 has-text-weight-bold" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <img 
+              src="/icons/icon-32x32.png" 
+              alt="ChoirApp" 
+              className="navbar-logo"
+              style={{ width: '24px', height: '24px' }}
+            />
+            <span>{title}</span>
+          </div>
           
           {/* Custom actions */}
           {actions && (
