@@ -215,9 +215,11 @@ namespace ChoirApp.Application.Services
                 return Result.Fail("Choir not found.");
             }
 
-            if (choir.AdminUserId != createdBy)
+            // Check if the user has admin privileges for this choir
+            var userChoir = await _choirRepository.GetUserChoirAsync(createdBy, createDto.ChoirId);
+            if (userChoir == null || !userChoir.IsAdmin)
             {
-                return Result.Fail("Only the choir admin can create shareable invitations.");
+                return Result.Fail("Only choir admins can create shareable invitations.");
             }
 
             // Set fixed 24-hour expiration for all shareable invitations
