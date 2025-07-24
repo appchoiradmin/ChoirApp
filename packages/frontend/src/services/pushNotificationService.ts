@@ -166,12 +166,12 @@ class PushNotificationService {
 
     // Show a local notification for testing
     const registration = await navigator.serviceWorker.ready;
-    await registration.showNotification('ChoirApp Test', {
+    await registration.showNotification('AppChoir Test', {
       body: 'Push notifications are working!',
       icon: '/icons/icon-192x192.png',
       badge: '/icons/icon-72x72.png',
       vibrate: [100, 50, 100]
-    });
+    } as NotificationOptions & { vibrate?: number[] });
   }
 }
 

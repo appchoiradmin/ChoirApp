@@ -97,12 +97,12 @@ self.addEventListener('push', (event) => {
     };
     
     event.waitUntil(
-      self.registration.showNotification(data.title || 'ChoirApp', options)
+      self.registration.showNotification(data.title || 'AppChoir', options)
     );
   } else {
     // Fallback for push notifications without data
     event.waitUntil(
-      self.registration.showNotification('ChoirApp', {
+      self.registration.showNotification('AppChoir', {
         body: 'You have a new notification',
         icon: '/icons/icon-192x192.png',
         badge: '/icons/icon-72x72.png'
