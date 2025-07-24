@@ -24,8 +24,9 @@ import PlaylistTemplateDetailPage from './pages/PlaylistTemplateDetailPage.tsx';
 import EditPlaylistTemplatePage from './pages/EditPlaylistTemplatePage.tsx';
 import ChoirDashboardPage from './pages/ChoirDashboardPage.tsx';
 import SettingsPage from './pages/SettingsPage.tsx';
+import InviteLinkPage from './pages/InviteLinkPage.tsx';
 
-const PUBLIC_ROUTES = ['/', '/auth/callback', '/auth/error'];
+const PUBLIC_ROUTES = ['/', '/auth/callback', '/auth/error', '/invite'];
 
 function App() {
   const { user, loading } = useUser();
@@ -82,6 +83,7 @@ function App() {
       <Route path="/playlist-templates/:templateId" element={<PlaylistTemplateDetailPage />} />
       <Route path="/playlist-templates/:templateId/edit" element={<EditPlaylistTemplatePage />} />
       <Route path="/settings" element={<SettingsPage />} />
+      <Route path="/invite/:token" element={<InviteLinkPage />} />
     </Routes>
   );
 }

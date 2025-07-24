@@ -65,6 +65,34 @@ namespace ChoirApp.Application.Services
             return Result.Ok();
         }
 
+        public async Task<Result<string>> CreateShareableInvitationAsync(Guid choirId, Guid inviterId)
+        {
+            var choir = await _choirRepository.GetByIdAsync(choirId);
+            if (choir == null)
+            {
+                return Result.Fail("Choir not found.");
+            }
+
+            if (choir.AdminUserId != inviterId)
+            {
+                return Result.Fail("Only the choir admin can create shareable invitations.");
+            }
+
+            // Create a shareable invitation using a special email format to identify it as shareable
+            var shareableEmail = "SHAREABLE_INVITE@choirapp.local";
+            
+            var invitationResult = ChoirInvitation.Create(choirId, shareableEmail);
+            if (invitationResult.IsFailed)
+            {
+                return Result.Fail(invitationResult.Errors);
+            }
+
+            await _invitationRepository.AddAsync(invitationResult.Value);
+            await _invitationRepository.SaveChangesAsync();
+
+            return Result.Ok(invitationResult.Value.InvitationToken);
+        }
+
         public async Task<Result> AcceptInvitationAsync(AcceptInvitationDto acceptInvitationDto, Guid userId)
         {
             var invitation = await _invitationRepository.GetByTokenAsync(acceptInvitationDto.InvitationToken);
@@ -132,6 +160,62 @@ namespace ChoirApp.Application.Services
 
             await _invitationRepository.UpdateAsync(invitation);
             await _invitationRepository.SaveChangesAsync();
+            return Result.Ok();
+        }
+
+        public async Task<Result> AcceptShareableInvitationAsync(string invitationToken, Guid userId)
+        {
+            var invitation = await _invitationRepository.GetByTokenAsync(invitationToken);
+
+            if (invitation == null || invitation.Status != InvitationStatus.Pending)
+            {
+                return Result.Fail("Invalid or expired invitation token.");
+            }
+
+            // Check if this is a shareable invitation
+            if (invitation.Email != "SHAREABLE_INVITE@choirapp.local")
+            {
+                return Result.Fail("This is not a shareable invitation. Please use the regular invitation acceptance process.");
+            }
+
+            // Check if invitation has expired (24 hours)
+            var expirationTime = invitation.DateSent.AddHours(24);
+            if (DateTimeOffset.UtcNow > expirationTime)
+            {
+                return Result.Fail("This invitation link has expired. Please ask the choir admin for a new link.");
+            }
+
+            var user = await _userRepository.GetByIdAsync(userId);
+            if (user == null)
+            {
+                return Result.Fail("User not found.");
+            }
+
+            var choir = await _choirRepository.GetByIdWithMembersAsync(invitation.ChoirId);
+            if (choir == null)
+            {
+                return Result.Fail("Choir not found.");
+            }
+
+            // Check if user is already a member
+            if (choir.UserChoirs.Any(uc => uc.UserId == userId))
+            {
+                return Result.Fail("You are already a member of this choir.");
+            }
+
+            var addMemberResult = choir.AddMember(user);
+            if (addMemberResult.IsFailed)
+            {
+                return addMemberResult;
+            }
+
+            // Mark invitation as accepted
+            invitation.Accept();
+
+            await _choirRepository.UpdateAsync(choir);
+            await _invitationRepository.UpdateAsync(invitation);
+            await _invitationRepository.SaveChangesAsync();
+
             return Result.Ok();
         }
 

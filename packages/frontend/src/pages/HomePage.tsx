@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Button, Card } from '../components/ui';
 import { 
   MusicalNoteIcon, 
@@ -18,6 +18,34 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '';
 const HomePage: React.FC = () => {
   const { t } = useTranslation();
   
+  // Store invitation token in sessionStorage if present in URL
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const inviteTokenFromUrl = urlParams.get('inviteToken');
+    
+    if (inviteTokenFromUrl) {
+      console.log('🏠 HomePage - Storing invite token in sessionStorage:', inviteTokenFromUrl);
+      sessionStorage.setItem('inviteToken', inviteTokenFromUrl);
+    }
+  }, []);
+  
+  // Check for invitation token from URL or sessionStorage
+  const getInvitationAwareSignInUrl = () => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const inviteTokenFromUrl = urlParams.get('inviteToken');
+    const inviteTokenFromSession = sessionStorage.getItem('inviteToken');
+    const inviteToken = inviteTokenFromUrl || inviteTokenFromSession;
+    
+    console.log('🏠 HomePage - URL invite token:', inviteTokenFromUrl);
+    console.log('🏠 HomePage - Session invite token:', inviteTokenFromSession);
+    console.log('🏠 HomePage - Using invite token:', inviteToken);
+    
+    if (inviteToken) {
+      return `${API_BASE_URL}/api/auth/signin-google?inviteToken=${encodeURIComponent(inviteToken)}`;
+    }
+    return `${API_BASE_URL}/api/auth/signin-google`;
+  };
+  
   return (
     <div className="homepage">
       {/* Hero Section */}
@@ -34,7 +62,7 @@ const HomePage: React.FC = () => {
               <Button
                 variant="primary"
                 size="lg"
-                onClick={() => window.location.href = `${API_BASE_URL}/api/auth/signin-google`}
+                onClick={() => window.location.href = getInvitationAwareSignInUrl()}
                 className="hero-cta-primary"
               >
                 <MusicalNoteIcon className="button-icon" />
@@ -241,7 +269,7 @@ const HomePage: React.FC = () => {
           <Button
             variant="primary"
             size="xl"
-            onClick={() => window.location.href = `${API_BASE_URL}/api/auth/signin-google`}
+            onClick={() => window.location.href = getInvitationAwareSignInUrl()}
             className="cta-button"
           >
             <MusicalNoteIcon className="button-icon" />

@@ -1,0 +1,217 @@
+.invite-link-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 80vh;
+  padding: 2rem 1rem;
+
+  .invite-card {
+    max-width: 500px;
+    width: 100%;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    border-radius: 1rem;
+    overflow: hidden;
+    border: none;
+
+    &.success-card {
+      border-top: 4px solid #10b981;
+    }
+
+    &.error-card {
+      border-top: 4px solid #ef4444;
+    }
+
+    .card-header {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 2rem 1.5rem 1.5rem;
+
+      .header-content {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+
+        .choir-icon {
+          width: 3rem;
+          height: 3rem;
+          flex-shrink: 0;
+        }
+
+        .header-text {
+          flex: 1;
+
+          .choir-name {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin: 0 0 0.25rem 0;
+            line-height: 1.2;
+          }
+
+          .invite-subtitle {
+            font-size: 1rem;
+            opacity: 0.9;
+            margin: 0;
+          }
+        }
+      }
+    }
+
+    .card-content {
+      padding: 2rem 1.5rem;
+
+      .invite-info {
+        margin-bottom: 2rem;
+
+        .invite-description {
+          font-size: 1.1rem;
+          line-height: 1.6;
+          color: #374151;
+          margin-bottom: 1.5rem;
+        }
+
+        .expiry-notice {
+          background: #fef3c7;
+          border: 1px solid #fbbf24;
+          border-radius: 0.5rem;
+          padding: 0.75rem 1rem;
+
+          .expiry-text {
+            color: #92400e;
+            font-size: 0.875rem;
+            font-weight: 500;
+            margin: 0;
+          }
+        }
+      }
+
+      .error-message {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        background: #fef2f2;
+        border: 1px solid #fecaca;
+        border-radius: 0.5rem;
+        padding: 0.75rem 1rem;
+        margin-bottom: 1.5rem;
+        color: #dc2626;
+        font-size: 0.875rem;
+
+        .error-icon-small {
+          width: 1rem;
+          height: 1rem;
+          flex-shrink: 0;
+        }
+      }
+
+      .action-buttons {
+        .accept-button,
+        .signup-button {
+          width: 100%;
+          justify-content: center;
+          font-weight: 600;
+          padding: 0.875rem 1.5rem;
+        }
+
+        .auth-actions {
+          text-align: center;
+
+          .auth-message {
+            color: #6b7280;
+            margin-bottom: 1rem;
+            font-size: 0.95rem;
+          }
+        }
+      }
+    }
+
+    // Success and Error states
+    .success-content,
+    .error-content {
+      text-align: center;
+      padding: 1rem 0;
+
+      .success-icon,
+      .error-icon {
+        width: 4rem;
+        height: 4rem;
+        margin: 0 auto 1.5rem;
+      }
+
+      .success-icon {
+        color: #10b981;
+      }
+
+      .error-icon {
+        color: #ef4444;
+      }
+
+      .success-title,
+      .error-title {
+        font-size: 1.5rem;
+        font-weight: 700;
+        margin-bottom: 1rem;
+        color: #111827;
+      }
+
+      .success-message,
+      .error-message {
+        color: #6b7280;
+        line-height: 1.6;
+        margin-bottom: 1.5rem;
+      }
+    }
+  }
+
+  // Mobile responsiveness
+  @media (max-width: 768px) {
+    padding: 1rem 0.5rem;
+    min-height: 70vh;
+
+    .invite-card {
+      .card-header {
+        padding: 1.5rem 1rem 1rem;
+
+        .header-content {
+          .choir-icon {
+            width: 2.5rem;
+            height: 2.5rem;
+          }
+
+          .header-text {
+            .choir-name {
+              font-size: 1.25rem;
+            }
+
+            .invite-subtitle {
+              font-size: 0.875rem;
+            }
+          }
+        }
+      }
+
+      .card-content {
+        padding: 1.5rem 1rem;
+
+        .invite-info {
+          .invite-description {
+            font-size: 1rem;
+          }
+        }
+      }
+
+      .success-content,
+      .error-content {
+        .success-icon,
+        .error-icon {
+          width: 3rem;
+          height: 3rem;
+        }
+
+        .success-title,
+        .error-title {
+          font-size: 1.25rem;
+        }
+      }
+    }
+  }
+}

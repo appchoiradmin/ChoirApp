@@ -54,7 +54,8 @@
     "welcomeBackUser": "Welcome back! Redirecting...",
     "success": "Success!",
     "authenticationError": "Authentication Error",
-    "loading": "Loading..."
+    "loading": "Loading...",
+    "redirectingToInvitation": "Redirecting to your choir invitation..."
   },
   "home": {
     "title": "Welcome to AppChoir",
@@ -847,5 +848,19 @@
   "sentInvitations": "Sent Invitations",
   "promoteToAdmin": "Promote to Admin",
   "demoteToMember": "Demote to Member",
-  "removeMember": "Remove Member"
+  "removeMember": "Remove Member",
+  "shareableInvite": {
+    "title": "Shareable Invitation Link",
+    "description": "Generate a link that anyone can use to join your choir. The link expires after 24 hours for security.",
+    "generateLink": "Generate Invitation Link",
+    "generating": "Generating...",
+    "copy": "Copy",
+    "copied": "Copied!",
+    "linkReady": "Invitation Link Ready!",
+    "shareWithMembers": "Share this link with potential choir members",
+    "expiryInfo": "This link expires in 24 hours",
+    "generateNew": "Generate New Link",
+    "generateError": "Failed to generate invitation link",
+    "copyError": "Failed to copy link to clipboard"
+  }
 }
