@@ -906,5 +906,8 @@
     "alreadyMember": "Ya eres miembro de este coro",
     "expired": "Esta invitación ha expirado o ha sido desactivada",
     "acceptError": "Error al aceptar la invitación"
+  },
+  "shareableInvitation": {
+    "expiresIn24Hours": "Los enlaces de invitación expiran automáticamente después de 24 horas."
   }
 }

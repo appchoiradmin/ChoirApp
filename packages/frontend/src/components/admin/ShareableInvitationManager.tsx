@@ -5,6 +5,7 @@ import {
   ShareableInvitation 
 } from '../../services/shareableInvitationService';
 import { useUser } from '../../hooks/useUser';
+import { useTranslation } from '../../hooks/useTranslation';
 import './ShareableInvitationManager.scss';
 
 interface ShareableInvitationManagerProps {
@@ -13,12 +14,12 @@ interface ShareableInvitationManagerProps {
 
 const ShareableInvitationManager: React.FC<ShareableInvitationManagerProps> = ({ choirId }) => {
   const { token } = useUser();
+  const { t } = useTranslation();
   const [invitations, setInvitations] = useState<ShareableInvitation[]>([]);
   const [loading, setLoading] = useState(false);
   const [creating, setCreating] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showCreateForm, setShowCreateForm] = useState(false);
-  const [expiryDays, setExpiryDays] = useState<number | ''>('');
   const [maxUses, setMaxUses] = useState<number | ''>('');
 
   const fetchInvitations = async () => {
@@ -47,22 +48,13 @@ const ShareableInvitationManager: React.FC<ShareableInvitationManagerProps> = ({
       setCreating(true);
       setError(null);
 
-      let expiryDate: string | undefined;
-      if (expiryDays && expiryDays > 0) {
-        const expiry = new Date();
-        expiry.setDate(expiry.getDate() + expiryDays);
-        expiryDate = expiry.toISOString();
-      }
-
       const newInvitation = await createShareableInvitation({
         choirId,
-        expiryDate,
         maxUses: maxUses && maxUses > 0 ? maxUses : undefined,
       }, token);
 
       setInvitations(prev => [newInvitation, ...prev]);
       setShowCreateForm(false);
-      setExpiryDays('');
       setMaxUses('');
     } catch (err: any) {
       setError(err.message || 'Failed to create shareable invitation');
@@ -137,22 +129,8 @@ const ShareableInvitationManager: React.FC<ShareableInvitationManagerProps> = ({
         <div className="box create-form">
           <h4 className="title is-6">Crear Nuevo Enlace de Invitación</h4>
           
-          <div className="field">
-            <label className="label">Expira en (días)</label>
-            <div className="control">
-              <input
-                className="input"
-                type="number"
-                placeholder="Opcional - dejar vacío para sin expiración"
-                value={expiryDays}
-                onChange={(e) => setExpiryDays(e.target.value ? parseInt(e.target.value) : '')}
-                min="1"
-                max="365"
-              />
-            </div>
-            <p className="help">Dejar vacío para un enlace sin fecha de expiración</p>
-          </div>
-
+          <p className="help mb-4">{t('shareableInvitation.expiresIn24Hours')}</p>
+          
           <div className="field">
             <label className="label">Máximo de usos</label>
             <div className="control">

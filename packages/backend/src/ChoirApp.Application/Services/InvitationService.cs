@@ -48,6 +48,14 @@ namespace ChoirApp.Application.Services
                 return Result.Fail("Only the choir admin can send invitations.");
             }
 
+            // Prevent creation of fake invitation records that might be used for shareable invitations
+            if (inviteDto.Email.Contains("@choirapp.local") || 
+                inviteDto.Email.StartsWith("SHAREABLE_") || 
+                inviteDto.Email.Contains("_INVITE@"))
+            {
+                return Result.Fail("Invalid email address format. Please use a valid email address.");
+            }
+
             if (!await _invitationPolicy.CanBeCreated(inviteDto.ChoirId, inviteDto.Email))
             {
                 return Result.Fail("An invitation has already been sent to this email address.");
@@ -148,7 +156,19 @@ namespace ChoirApp.Application.Services
 
             var invitations = await _invitationRepository.GetPendingByEmailAsync(user.Email);
 
-            return invitations.Select(i => new InvitationDto
+            // Filter out any fake invitation entries that might have been created for shareable invitations
+            // These should never appear in the regular invitation list
+            var validInvitations = invitations.Where(i => 
+                !string.IsNullOrEmpty(i.Email) && 
+                !i.Email.Contains("@choirapp.local") && 
+                !i.Email.StartsWith("SHAREABLE_") &&
+                !i.Email.Contains("_INVITE@") &&
+                new System.ComponentModel.DataAnnotations.EmailAddressAttribute().IsValid(i.Email)
+            ).ToList();
+
+            Console.WriteLine($"🔍 GetInvitationsAsync - Filtered {invitations.Count - validInvitations.Count} fake invitation entries for user {userId}");
+
+            return validInvitations.Select(i => new InvitationDto
             {
                 InvitationToken = i.InvitationToken,
                 ChoirId = i.ChoirId,
@@ -163,7 +183,19 @@ namespace ChoirApp.Application.Services
         {
             var invitations = await _invitationRepository.GetByChoirIdAsync(choirId);
 
-            return invitations.Select(i => new InvitationDto
+            // Filter out any fake invitation entries that might have been created for shareable invitations
+            // These should never appear in the regular invitation list
+            var validInvitations = invitations.Where(i => 
+                !string.IsNullOrEmpty(i.Email) && 
+                !i.Email.Contains("@choirapp.local") && 
+                !i.Email.StartsWith("SHAREABLE_") &&
+                !i.Email.Contains("_INVITE@") &&
+                new System.ComponentModel.DataAnnotations.EmailAddressAttribute().IsValid(i.Email)
+            ).ToList();
+
+            Console.WriteLine($"🔍 GetInvitationsByChoirAsync - Filtered {invitations.Count - validInvitations.Count} fake invitation entries for choir {choirId}");
+
+            return validInvitations.Select(i => new InvitationDto
             {
                 InvitationToken = i.InvitationToken,
                 ChoirId = i.ChoirId,
@@ -188,11 +220,9 @@ namespace ChoirApp.Application.Services
                 return Result.Fail("Only the choir admin can create shareable invitations.");
             }
 
-            DateTimeOffset? expiryDate = null;
-            if (createDto.ExpiryDate.HasValue)
-            {
-                expiryDate = new DateTimeOffset(createDto.ExpiryDate.Value);
-            }
+            // Set fixed 24-hour expiration for all shareable invitations
+            var expiryDate = DateTimeOffset.UtcNow.AddHours(24);
+            Console.WriteLine($"🔧 CreateShareableInvitation - Setting 24-hour expiry: {expiryDate}");
 
             var invitationResult = ShareableChoirInvitation.Create(createDto.ChoirId, createdBy, expiryDate, createDto.MaxUses);
             if (invitationResult.IsFailed)

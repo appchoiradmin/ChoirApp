@@ -873,5 +873,8 @@
     "alreadyMember": "You are already a member of this choir",
     "expired": "This invitation has expired or has been deactivated",
     "acceptError": "Error accepting invitation"
+  },
+  "shareableInvitation": {
+    "expiresIn24Hours": "Invitation links automatically expire after 24 hours."
   }
 }
