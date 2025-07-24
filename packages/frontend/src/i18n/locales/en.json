@@ -775,6 +775,13 @@
     "selectDate": "Select Date",
     "dateHelp": "(Changing the date will show playlists for that date.)"
   },
+  "pwa": {
+    "installTitle": "Install AppChoir",
+    "installDescription": "Get quick access and work offline by installing the app on your device.",
+    "installButton": "Install App",
+    "installing": "Installing...",
+    "dismissInstall": "Dismiss install prompt"
+  },
   "chordProGuide": {
     "toggleShow": "Show ChordPro Guide",
     "toggleHide": "Hide ChordPro Guide",

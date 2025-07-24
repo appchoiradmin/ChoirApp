@@ -1,5 +1,5 @@
 import React from 'react';
-import { Button, Card } from '../components/ui';
+import { Button, Card, FloatingInstallButton } from '../components/ui';
 import { 
   MusicalNoteIcon, 
   UserGroupIcon, 
@@ -253,6 +253,9 @@ const HomePage: React.FC = () => {
           </p>
         </div>
       </section>
+      
+      {/* PWA Install Button - only shows on mobile when installable */}
+      <FloatingInstallButton />
     </div>
   );
 };

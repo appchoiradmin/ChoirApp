@@ -808,6 +808,13 @@
     "selectDate": "Seleccionar Fecha",
     "dateHelp": "(Cambiar la fecha mostrará las listas de reproducción para esa fecha.)"
   },
+  "pwa": {
+    "installTitle": "Instalar AppChoir",
+    "installDescription": "Obtén acceso rápido y trabaja sin conexión instalando la aplicación en tu dispositivo.",
+    "installButton": "Instalar App",
+    "installing": "Instalando...",
+    "dismissInstall": "Descartar instalación"
+  },
   "chordProGuide": {
     "toggleShow": "Mostrar Guía ChordPro",
     "toggleHide": "Ocultar Guía ChordPro",

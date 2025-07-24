@@ -5,3 +5,4 @@ export { default as Layout } from './Layout';
 export { default as LoadingSpinner } from './LoadingSpinner';
 export { default as LoadingState } from './LoadingState';
 export { default as UserProfileDropdown } from './UserProfileDropdown';
+export { FloatingInstallButton } from './FloatingInstallButton';
