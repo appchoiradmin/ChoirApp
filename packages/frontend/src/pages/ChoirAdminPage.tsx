@@ -16,7 +16,6 @@ import { Invitation } from '../types/invitation';
 import MembersList from '../components/admin/MembersList';
 import InviteMember from '../components/admin/InviteMember';
 import InvitationsAccordion from '../components/admin/InvitationsAccordion';
-import ShareableInviteLink from '../components/admin/ShareableInviteLink';
 import { UserRole } from '../constants/roles';
 
 const ChoirAdminPage: React.FC = () => {
@@ -314,9 +313,6 @@ const ChoirAdminPage: React.FC = () => {
                   pendingInvitations={pendingInvitations} 
                   sentInvitations={sentInvitations} 
                 />
-                <div className="mt-5">
-                  <ShareableInviteLink choirId={choirId!} token={token!} />
-                </div>
               </section>
             )}
           </div>

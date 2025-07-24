@@ -20,30 +20,14 @@ public class AuthController : ControllerBase
 
     [HttpGet("signin-google")]
     [AllowAnonymous]
-    public IActionResult SignInGoogle([FromQuery] string? inviteToken = null)
+    public IActionResult SignInGoogle()
     {
-        _logger.LogInformation("🔵 SignInGoogle called with invite token: {InviteToken}", inviteToken ?? "none");
+        _logger.LogInformation("Initiating Google OAuth signin");
         
         var properties = new AuthenticationProperties
         {
             RedirectUri = "/api/auth/signin-success"
         };
-
-        // Store the invitation token in the OAuth state to preserve it through the flow
-        if (!string.IsNullOrEmpty(inviteToken))
-        {
-            properties.Items["inviteToken"] = inviteToken;
-            _logger.LogInformation("🔵 Stored invite token in OAuth properties: {InviteToken}", inviteToken);
-            _logger.LogInformation("🔵 OAuth properties items count: {Count}", properties.Items.Count);
-            foreach (var item in properties.Items)
-            {
-                _logger.LogInformation("🔵 OAuth property: {Key} = {Value}", item.Key, item.Value);
-            }
-        }
-        else
-        {
-            _logger.LogInformation("🔵 No invite token provided, proceeding with normal OAuth");
-        }
 
         return Challenge(properties, GoogleDefaults.AuthenticationScheme);
     }
@@ -108,40 +92,6 @@ public class AuthController : ControllerBase
             return Redirect($"{frontendUrl}/auth/error?message={Uri.EscapeDataString("Failed to create authentication token")}");
         }
 
-        // Check if there's a pending invitation token from the OAuth flow
-        _logger.LogInformation("🔴 SignInSuccess - Checking for OAuth properties");
-        _logger.LogInformation("🔴 SignInSuccess - Properties is null: {IsNull}", authenticateResult.Properties == null);
-        
-        if (authenticateResult.Properties?.Items != null)
-        {
-            _logger.LogInformation("🔴 SignInSuccess - OAuth properties items count: {Count}", authenticateResult.Properties.Items.Count);
-            foreach (var item in authenticateResult.Properties.Items)
-            {
-                _logger.LogInformation("🔴 SignInSuccess - OAuth property: {Key} = {Value}", item.Key, item.Value);
-            }
-        }
-        else
-        {
-            _logger.LogInformation("🔴 SignInSuccess - No OAuth properties items found");
-        }
-        
-        var inviteToken = authenticateResult.Properties?.Items.TryGetValue("inviteToken", out var inviteTokenValue) == true ? inviteTokenValue : null;
-        _logger.LogInformation("🔴 SignInSuccess - Extracted invite token: {InviteToken}", inviteToken ?? "null");
-        
-        if (!string.IsNullOrEmpty(inviteToken))
-        {
-            _logger.LogInformation("🔴 Found invitation token from OAuth flow: {InviteToken}", inviteToken);
-            // Include isNewUser parameter for proper frontend handling
-            var isNewUserParam = user.IsNewUser() ? "&isNewUser=true" : "";
-            var inviteRedirectUrl = $"{frontendUrl}/auth/callback?token={token}&inviteToken={Uri.EscapeDataString(inviteToken)}{isNewUserParam}";
-            _logger.LogInformation("🔴 Redirecting to: {Url}", inviteRedirectUrl);
-            return Redirect(inviteRedirectUrl);
-        }
-        else
-        {
-            _logger.LogInformation("🔴 No invitation token found, proceeding with normal flow");
-        }
-        
         // Check if this is a new user and redirect accordingly
         var redirectUrl = user.IsNewUser()
             ? $"{frontendUrl}/auth/callback?isNewUser=true&token={token}"

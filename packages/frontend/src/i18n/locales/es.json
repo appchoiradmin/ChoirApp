@@ -880,19 +880,5 @@
   "sentInvitations": "Invitaciones Enviadas",
   "promoteToAdmin": "Promover a Administrador",
   "demoteToMember": "Degradar a Miembro",
-  "removeMember": "Eliminar Miembro",
-  "shareableInvite": {
-    "title": "Enlace de Invitación Compartible",
-    "description": "Genera un enlace que cualquiera puede usar para unirse a tu coro. El enlace expira después de 24 horas por seguridad.",
-    "generateLink": "Generar Enlace de Invitación",
-    "generating": "Generando...",
-    "copy": "Copiar",
-    "copied": "¡Copiado!",
-    "linkReady": "¡Enlace de Invitación Listo!",
-    "shareWithMembers": "Comparte este enlace con posibles miembros del coro",
-    "expiryInfo": "Este enlace expira en 24 horas",
-    "generateNew": "Generar Nuevo Enlace",
-    "generateError": "Error al generar enlace de invitación",
-    "copyError": "Error al copiar enlace al portapapeles"
-  }
+  "removeMember": "Eliminar Miembro"
 }

@@ -38,40 +38,15 @@ const AuthCallbackPage: React.FC = () => {
     if (!loading && user) {
       setStatus('success');
       const isNewUser = searchParams.get('isNewUser') === 'true';
-      // Check for invitation token from URL parameter (sent by backend) or sessionStorage (fallback)
-      const urlInviteToken = searchParams.get('inviteToken');
-      const sessionInviteToken = sessionStorage.getItem('pendingInviteToken');
-      const pendingInviteToken = urlInviteToken || sessionInviteToken;
+      setMessage(isNewUser ? t('auth.welcomeNewUser') : t('auth.welcomeBackUser'));
       
-      console.log('🟢 AuthCallback - URL invite token:', urlInviteToken);
-      console.log('🟢 AuthCallback - Session invite token:', sessionInviteToken);
-      console.log('🟢 AuthCallback - Using invite token:', pendingInviteToken);
-      console.log('🟢 AuthCallback - Is new user:', isNewUser);
-      console.log('🟢 AuthCallback - Full URL:', window.location.href);
-      
-      if (pendingInviteToken) {
-        // Clear the pending invite token from sessionStorage if it exists
-        if (sessionInviteToken) {
-          sessionStorage.removeItem('pendingInviteToken');
+      setTimeout(() => {
+        if (isNewUser) {
+          navigate('/onboarding', { replace: true });
+        } else {
+          navigate('/dashboard', { replace: true });
         }
-        console.log('🟢 AuthCallback - Redirecting to invitation page with token:', pendingInviteToken);
-        setMessage(t('auth.redirectingToInvitation'));
-        setTimeout(() => {
-          navigate(`/invite/${pendingInviteToken}`, { replace: true });
-        }, 1500);
-      } else {
-        console.log('🟢 AuthCallback - No invitation token, proceeding with normal flow');
-        setMessage(isNewUser ? t('auth.welcomeNewUser') : t('auth.welcomeBackUser'));
-        setTimeout(() => {
-          if (isNewUser) {
-            console.log('🟢 AuthCallback - Redirecting new user to onboarding');
-            navigate('/onboarding', { replace: true });
-          } else {
-            console.log('🟢 AuthCallback - Redirecting existing user to dashboard');
-            navigate('/dashboard', { replace: true });
-          }
-        }, 1500);
-      }
+      }, 1500);
     }
   }, [user, loading, navigate, searchParams]);
 
