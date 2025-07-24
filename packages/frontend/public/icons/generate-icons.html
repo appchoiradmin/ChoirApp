@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>ChoirApp Icon Generator</title>
+    <style>
+        .disabled { opacity: 0.5; pointer-events: none; }
+        .status { margin: 10px 0; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <h2>ChoirApp Icon Generator</h2>
+    <div id="status" class="status">Loading image...</div>
+    <canvas id="canvas" width="512" height="512" style="border: 1px solid #ccc;"></canvas>
+    <br><br>
+    <div id="buttons" class="disabled">
+        <button onclick="downloadIcon(16)">Download 16x16</button>
+        <button onclick="downloadIcon(32)">Download 32x32</button>
+        <button onclick="downloadIcon(72)">Download 72x72</button>
+        <button onclick="downloadIcon(96)">Download 96x96</button>
+        <button onclick="downloadIcon(128)">Download 128x128</button>
+        <button onclick="downloadIcon(144)">Download 144x144</button>
+        <button onclick="downloadIcon(152)">Download 152x152</button>
+        <button onclick="downloadIcon(192)">Download 192x192</button>
+        <button onclick="downloadIcon(384)">Download 384x384</button>
+        <button onclick="downloadIcon(512)">Download 512x512</button>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        const statusDiv = document.getElementById('status');
+        const buttonsDiv = document.getElementById('buttons');
+        let imageLoaded = false;
+        let sourceImage = null;
+
+        function loadAndDrawIcon() {
+            // Clear canvas
+            ctx.clearRect(0, 0, 512, 512);
+            
+            // Load and draw the appchoir.png image
+            const img = new Image();
+            img.onload = function() {
+                // Draw the image to fill the entire canvas
+                ctx.drawImage(img, 0, 0, 512, 512);
+                
+                // Store the loaded image and enable buttons
+                sourceImage = img;
+                imageLoaded = true;
+                statusDiv.textContent = 'Image loaded! Click any button to download:';
+                statusDiv.style.color = 'green';
+                buttonsDiv.classList.remove('disabled');
+            };
+            img.onerror = function() {
+                statusDiv.textContent = 'Error: Could not load appchoir.png. Make sure the file exists in this directory.';
+                statusDiv.style.color = 'red';
+            };
+            img.src = 'appchoir.png';
+        }
+
+        function downloadIcon(size) {
+            if (!imageLoaded || !sourceImage) {
+                alert('Image not loaded yet. Please wait.');
+                return;
+            }
+            
+            // Create a new canvas for the specific size
+            const tempCanvas = document.createElement('canvas');
+            tempCanvas.width = size;
+            tempCanvas.height = size;
+            const tempCtx = tempCanvas.getContext('2d');
+            
+            // Draw the source image at the new size (high quality scaling)
+            tempCtx.imageSmoothingEnabled = true;
+            tempCtx.imageSmoothingQuality = 'high';
+            tempCtx.drawImage(sourceImage, 0, 0, size, size);
+            
+            // Download
+            const link = document.createElement('a');
+            link.download = `icon-${size}x${size}.png`;
+            link.href = tempCanvas.toDataURL('image/png');
+            link.click();
+            
+            // Update status
+            statusDiv.textContent = `Downloaded icon-${size}x${size}.png successfully!`;
+            statusDiv.style.color = 'blue';
+        }
+
+        // Load the image when page loads
+        loadAndDrawIcon();
+    </script>
+</body>
+</html>
