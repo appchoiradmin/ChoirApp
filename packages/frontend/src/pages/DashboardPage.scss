@@ -397,6 +397,13 @@
         font-weight: $font-weight-semibold;
         color: $color-neutral-900;
         margin: 0 0 $spacing-xs 0;
+        
+        // Enhanced visibility for mobile devices
+        @media (max-width: 768px) {
+          color: #000000; // Pure black for maximum contrast on mobile
+          font-weight: $font-weight-bold; // Bolder weight for better visibility
+          font-size: $font-size-xl; // Slightly larger on mobile
+        }
       }
       
       .choir-role {
