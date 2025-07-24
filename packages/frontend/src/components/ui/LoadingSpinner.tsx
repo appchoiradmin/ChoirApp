@@ -34,8 +34,8 @@ const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
         colorClasses[color],
         className
       )}
-      animate={{ rotate: 360 }}
-      transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+      animate={{ scale: [1, 1.2, 1] }}
+      transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
       style={{ width: pixelSizes[size], height: pixelSizes[size] }}
     >
       <img
