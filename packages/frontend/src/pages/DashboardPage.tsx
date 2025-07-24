@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { useUser } from '../hooks/useUser';
 import { useTranslation } from '../hooks/useTranslation';
 import { getInvitations, acceptInvitation, rejectInvitation } from '../services/invitationService';
+import { getMySongs } from '../services/songService';
 import { Invitation } from '../types/invitation';
 import { UserRole } from '../constants/roles';
 import InvitationsList from '../components/InvitationsList';
@@ -24,10 +25,12 @@ const DashboardPage: React.FC = () => {
   const { user, loading, token, refreshToken } = useUser();
   const { t } = useTranslation();
   const [invitations, setInvitations] = useState<Invitation[]>([]);
+  const [userSongsCount, setUserSongsCount] = useState<number>(0);
 
   useEffect(() => {
     if (user && token) {
       getInvitations(token).then(setInvitations);
+      getMySongs(token).then(songs => setUserSongsCount(songs.length));
     }
   }, [user, token]);
 
@@ -92,13 +95,14 @@ const DashboardPage: React.FC = () => {
   const totalChoirs = choirs.length;
   const pendingInvitations = invitations.length;
 
-  // Progress calculation (example logic)
+  // Progress calculation
   const hasChoirs = totalChoirs > 0;
   const hasCompletedProfile = user.hasCompletedOnboarding;
+  const hasSongs = userSongsCount > 0;
   const progressSteps = [
     { label: t('dashboard.progressSteps.completeProfile'), completed: hasCompletedProfile },
     { label: t('dashboard.progressSteps.joinChoir'), completed: hasChoirs },
-    { label: t('dashboard.progressSteps.addSongs'), completed: false }, // This would need real data
+    { label: t('dashboard.progressSteps.addSongs'), completed: hasSongs },
   ];
   const completedSteps = progressSteps.filter(step => step.completed).length;
   const progressPercentage = (completedSteps / progressSteps.length) * 100;
