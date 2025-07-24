@@ -1,6 +1,6 @@
 {
-  "name": "ChoirApp - Choir Management Platform",
-  "short_name": "ChoirApp",
+  "name": "AppChoir - Choir Management Platform",
+  "short_name": "AppChoir",
   "description": "A digital tool for church choirs to manage songs and create playlists for events like services or practices",
   "start_url": "/",
   "display": "standalone",
