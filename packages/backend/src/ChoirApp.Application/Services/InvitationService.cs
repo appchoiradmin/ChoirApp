@@ -362,7 +362,13 @@ namespace ChoirApp.Application.Services
         {
             var invitations = await _shareableInvitationRepository.GetByChoirIdAsync(choirId);
 
-            return invitations.Select(i => new ShareableInvitationDto
+            // Filter out expired and inactive invitations to prevent them from appearing in the UI
+            var activeInvitations = invitations.Where(i => 
+                i.IsActive && 
+                (!i.ExpiryDate.HasValue || i.ExpiryDate.Value > DateTimeOffset.UtcNow)
+            );
+
+            return activeInvitations.Select(i => new ShareableInvitationDto
             {
                 InvitationId = i.InvitationId,
                 ChoirId = i.ChoirId,
