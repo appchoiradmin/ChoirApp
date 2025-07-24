@@ -40,8 +40,25 @@ export const createShareableInvitation = async (
   });
 
   if (!response.ok) {
-    const errorData = await response.json();
-    throw new Error(errorData.message || 'Failed to create shareable invitation');
+    let errorMessage = 'Failed to create shareable invitation';
+    
+    try {
+      const errorData = await response.json();
+      errorMessage = errorData.message || errorData.title || errorMessage;
+    } catch (jsonError) {
+      // Response doesn't contain JSON, use status-based error message
+      if (response.status === 401) {
+        errorMessage = 'You are not authorized to create invitations for this choir';
+      } else if (response.status === 403) {
+        errorMessage = 'You do not have permission to create invitations';
+      } else if (response.status === 400) {
+        errorMessage = 'Invalid request data';
+      } else {
+        errorMessage = `Server error: ${response.status} ${response.statusText}`;
+      }
+    }
+    
+    throw new Error(errorMessage);
   }
 
   return response.json();
@@ -75,8 +92,25 @@ export const acceptShareableInvitation = async (
   });
 
   if (!response.ok) {
-    const errorData = await response.json();
-    throw new Error(errorData.message || 'Failed to accept invitation');
+    let errorMessage = 'Failed to accept invitation';
+    
+    try {
+      const errorData = await response.json();
+      errorMessage = errorData.message || errorData.title || errorMessage;
+    } catch (jsonError) {
+      // Response doesn't contain JSON, use status-based error message
+      if (response.status === 401) {
+        errorMessage = 'You are not authorized to accept this invitation';
+      } else if (response.status === 404) {
+        errorMessage = 'Invitation not found or has expired';
+      } else if (response.status === 400) {
+        errorMessage = 'Invalid invitation data';
+      } else {
+        errorMessage = `Server error: ${response.status} ${response.statusText}`;
+      }
+    }
+    
+    throw new Error(errorMessage);
   }
 };
 
