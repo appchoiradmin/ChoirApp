@@ -3,6 +3,7 @@ import { createRoot } from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';
 import App from './App';
 import { UserProvider } from './contexts/UserContext.tsx';
+import './utils/cacheManager'; // Make cache manager available globally
 
 // Initialize i18n
 import './i18n';
