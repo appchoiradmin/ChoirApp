@@ -1,23 +1,56 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { UserGroupIcon, MusicalNoteIcon, ArrowRightIcon, CheckIcon, SparklesIcon } from '@heroicons/react/24/outline';
 import { completeOnboarding } from '../services/userService';
+import { acceptShareableInvitation } from '../services/shareableInvitationService';
 import { Button, Card, Layout } from '../components/ui';
 import { useTranslation } from '../hooks/useTranslation';
+import { useUser } from '../hooks/useUser';
 import './OnboardingPage.scss';
 
 const OnboardingPage: React.FC = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const { user, refetchUser } = useUser();
   const [selectedUserType, setSelectedUserType] = useState<'admin' | 'general' | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [inviteToken, setInviteToken] = useState<string | null>(null);
+
+  useEffect(() => {
+    // Check for invitation token from sessionStorage
+    const storedInviteToken = sessionStorage.getItem('inviteToken');
+    if (storedInviteToken) {
+      setInviteToken(storedInviteToken);
+      console.log('🟢 OnboardingPage - Found invite token:', storedInviteToken);
+    }
+  }, []);
 
   const handleCompleteOnboarding = async (userType: 'admin' | 'general') => {
     setIsLoading(true);
     try {
       await completeOnboarding(userType);
 
+      // Handle invitation acceptance if there's an invitation token
+      if (inviteToken && user?.token) {
+        try {
+          console.log('🟢 OnboardingPage - Accepting invitation after onboarding:', inviteToken);
+          await acceptShareableInvitation({ invitationToken: inviteToken }, user.token);
+          sessionStorage.removeItem('inviteToken');
+          
+          // Refresh user data to show the new choir in dashboard
+          await refetchUser();
+          
+          console.log('🟢 OnboardingPage - Invitation accepted, redirecting to dashboard');
+          navigate('/dashboard');
+          return;
+        } catch (inviteError: any) {
+          console.error('🔴 OnboardingPage - Failed to accept invitation:', inviteError);
+          // Continue with normal flow even if invitation fails
+        }
+      }
+
+      // Normal onboarding flow
       if (userType === 'admin') {
         navigate('/create-choir');
       } else {

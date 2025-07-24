@@ -5,18 +5,33 @@ import { useTranslation } from '../hooks/useTranslation';
 import { motion } from 'framer-motion';
 import { MusicalNoteIcon, CheckIcon, ExclamationTriangleIcon } from '@heroicons/react/24/outline';
 import { Layout } from '../components/ui';
+import { acceptShareableInvitation } from '../services/shareableInvitationService';
 
 const AuthCallbackPage: React.FC = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-  const { setToken, user, loading } = useUser();
+  const { setToken, user, loading, refetchUser } = useUser();
   const { t } = useTranslation();
   const [status, setStatus] = useState<'loading' | 'success' | 'error'>('loading');
   const [message, setMessage] = useState(t('auth.authenticating'));
+  const [hasProcessed, setHasProcessed] = useState(false);
 
   useEffect(() => {
     const token = searchParams.get('token');
     const error = searchParams.get('error');
+    const inviteTokenFromUrl = searchParams.get('inviteToken');
+    const inviteTokenFromSession = sessionStorage.getItem('inviteToken');
+    const inviteToken = inviteTokenFromUrl || inviteTokenFromSession;
+
+    console.log('🟢 AuthCallback - URL invite token:', inviteTokenFromUrl);
+    console.log('🟢 AuthCallback - Session invite token:', inviteTokenFromSession);
+    console.log('🟢 AuthCallback - Using invite token:', inviteToken);
+
+    // Store invitation token for later use if present
+    if (inviteToken) {
+      sessionStorage.setItem('inviteToken', inviteToken);
+      console.log('🟢 AuthCallback - Stored invite token in session:', inviteToken);
+    }
 
     if (error) {
       setStatus('error');
@@ -32,23 +47,79 @@ const AuthCallbackPage: React.FC = () => {
       setMessage(t('auth.noTokenReceived'));
       setTimeout(() => navigate(`/auth/error?message=${encodeURIComponent(t('auth.noTokenReceived'))}`), 2000);
     }
-  }, [searchParams, navigate, setToken]);
+  }, [searchParams, navigate, setToken, t]);
 
   useEffect(() => {
-    if (!loading && user) {
+    if (!loading && user && !hasProcessed) {
+      setHasProcessed(true); // Prevent multiple executions
       setStatus('success');
       const isNewUser = searchParams.get('isNewUser') === 'true';
+      const inviteToken = sessionStorage.getItem('inviteToken');
+      
       setMessage(isNewUser ? t('auth.welcomeNewUser') : t('auth.welcomeBackUser'));
       
-      setTimeout(() => {
+      setTimeout(async () => {
+        // Handle invitation acceptance for existing users
+        if (!isNewUser && inviteToken && user.token) {
+          try {
+            console.log('🟢 AuthCallback - Accepting invitation for existing user:', inviteToken);
+            await acceptShareableInvitation({ invitationToken: inviteToken }, user.token);
+            sessionStorage.removeItem('inviteToken');
+            
+            // Refresh user data to show the new choir in dashboard
+            await refetchUser();
+            
+            console.log('🟢 AuthCallback - Invitation accepted, redirecting to dashboard');
+            navigate('/dashboard', { replace: true });
+            return;
+          } catch (error: any) {
+            console.error('🔴 AuthCallback - Failed to accept invitation:', error);
+            // Continue to normal flow even if invitation fails
+          }
+        }
+        
+        // Normal flow
         if (isNewUser) {
+          // If new user has an invitation token, skip onboarding and accept invitation directly
+          if (inviteToken && user.token) {
+            try {
+              console.log('🟢 AuthCallback - New user with invitation token, skipping onboarding and accepting invitation:', inviteToken);
+              console.log('🟢 AuthCallback - User token available:', !!user.token);
+              console.log('🟢 AuthCallback - About to call acceptShareableInvitation API...');
+              
+              const result = await acceptShareableInvitation({ invitationToken: inviteToken }, user.token);
+              console.log('🟢 AuthCallback - API call result:', result);
+              
+              sessionStorage.removeItem('inviteToken');
+              console.log('🟢 AuthCallback - Removed invitation token from session storage');
+              
+              // Refresh user data to show the new choir in dashboard
+              console.log('🟢 AuthCallback - About to refresh user data...');
+              await refetchUser();
+              console.log('🟢 AuthCallback - User data refreshed');
+              
+              console.log('🟢 AuthCallback - Invitation accepted for new user, redirecting to dashboard');
+              navigate('/dashboard', { replace: true });
+              return;
+            } catch (error: any) {
+              console.error('🔴 AuthCallback - Failed to accept invitation for new user:', error);
+              console.error('🔴 AuthCallback - Error details:', error.response?.data || error.message);
+              // Fall back to onboarding if invitation fails
+              console.log('🟡 AuthCallback - Falling back to onboarding due to invitation error');
+              navigate('/onboarding', { replace: true });
+              return;
+            }
+          }
+          
+          // For new users without invitation token, go through normal onboarding
+          console.log('🟢 AuthCallback - New user without invitation, redirecting to onboarding');
           navigate('/onboarding', { replace: true });
         } else {
           navigate('/dashboard', { replace: true });
         }
       }, 1500);
     }
-  }, [user, loading, navigate, searchParams]);
+  }, [user, loading, navigate, searchParams, t, hasProcessed]);
 
   const renderStatusIcon = () => {
     switch (status) {

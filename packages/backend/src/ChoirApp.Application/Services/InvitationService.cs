@@ -15,6 +15,7 @@ namespace ChoirApp.Application.Services
         private readonly IChoirRepository _choirRepository;
         private readonly IUserRepository _userRepository;
         private readonly IInvitationRepository _invitationRepository;
+        private readonly IShareableInvitationRepository _shareableInvitationRepository;
         private readonly IInvitationPolicy _invitationPolicy;
         private readonly IPushNotificationService _pushNotificationService;
 
@@ -22,12 +23,14 @@ namespace ChoirApp.Application.Services
             IChoirRepository choirRepository,
             IUserRepository userRepository,
             IInvitationRepository invitationRepository,
+            IShareableInvitationRepository shareableInvitationRepository,
             IInvitationPolicy invitationPolicy,
             IPushNotificationService pushNotificationService)
         {
             _choirRepository = choirRepository;
             _userRepository = userRepository;
             _invitationRepository = invitationRepository;
+            _shareableInvitationRepository = shareableInvitationRepository;
             _invitationPolicy = invitationPolicy;
             _pushNotificationService = pushNotificationService;
         }
@@ -169,6 +172,203 @@ namespace ChoirApp.Application.Services
                 Status = i.Status.ToString(),
                 SentAt = i.DateSent
             }).ToList();
+        }
+
+        // Shareable invitation methods
+        public async Task<Result<ShareableInvitationDto>> CreateShareableInvitationAsync(CreateShareableInvitationDto createDto, Guid createdBy)
+        {
+            var choir = await _choirRepository.GetByIdAsync(createDto.ChoirId);
+            if (choir == null)
+            {
+                return Result.Fail("Choir not found.");
+            }
+
+            if (choir.AdminUserId != createdBy)
+            {
+                return Result.Fail("Only the choir admin can create shareable invitations.");
+            }
+
+            DateTimeOffset? expiryDate = null;
+            if (createDto.ExpiryDate.HasValue)
+            {
+                expiryDate = new DateTimeOffset(createDto.ExpiryDate.Value);
+            }
+
+            var invitationResult = ShareableChoirInvitation.Create(createDto.ChoirId, createdBy, expiryDate, createDto.MaxUses);
+            if (invitationResult.IsFailed)
+            {
+                return Result.Fail(invitationResult.Errors);
+            }
+
+            await _shareableInvitationRepository.AddAsync(invitationResult.Value);
+            await _shareableInvitationRepository.SaveChangesAsync();
+
+            var dto = new ShareableInvitationDto
+            {
+                InvitationId = invitationResult.Value.InvitationId,
+                ChoirId = invitationResult.Value.ChoirId,
+                InvitationToken = invitationResult.Value.InvitationToken,
+                CreatedBy = invitationResult.Value.CreatedBy,
+                DateCreated = invitationResult.Value.DateCreated,
+                ExpiryDate = invitationResult.Value.ExpiryDate,
+                IsActive = invitationResult.Value.IsActive,
+                MaxUses = invitationResult.Value.MaxUses,
+                CurrentUses = invitationResult.Value.CurrentUses,
+                InvitationUrl = $"/invite/{invitationResult.Value.InvitationToken}"
+            };
+
+            return Result.Ok(dto);
+        }
+
+        public async Task<Result> AcceptShareableInvitationAsync(AcceptShareableInvitationDto acceptDto, Guid userId)
+        {
+            var invitation = await _shareableInvitationRepository.GetByTokenAsync(acceptDto.InvitationToken);
+            if (invitation == null)
+            {
+                return Result.Fail("Invalid invitation token.");
+            }
+
+            var canBeUsedResult = invitation.CanBeUsed();
+            if (canBeUsedResult.IsFailed)
+            {
+                return Result.Fail(canBeUsedResult.Errors);
+            }
+
+            var user = await _userRepository.GetByIdAsync(userId);
+            if (user == null)
+            {
+                return Result.Fail("User not found.");
+            }
+
+            var choir = await _choirRepository.GetByIdWithMembersAsync(invitation.ChoirId);
+            if (choir == null)
+            {
+                return Result.Fail("Choir not found.");
+            }
+
+            // Debug logging
+            Console.WriteLine($"🔍 AcceptShareableInvitation - Checking membership for User {userId} in Choir {choir.ChoirId}");
+            Console.WriteLine($"🔍 AcceptShareableInvitation - Choir has {choir.UserChoirs?.Count ?? 0} members");
+            
+            // Check if user is already a member - multiple approaches for safety
+            var existingMembership = choir.UserChoirs?.FirstOrDefault(uc => uc.UserId == userId);
+            if (existingMembership != null)
+            {
+                Console.WriteLine($"🟡 AcceptShareableInvitation - User {userId} is already a member of choir {choir.ChoirId}");
+                return Result.Ok(); // Return success instead of error - user is already in the choir, which is the desired outcome
+            }
+            
+            // Double-check with direct database query as additional safety
+            var directMembershipCheck = await _choirRepository.GetUserChoirAsync(userId, choir.ChoirId);
+            if (directMembershipCheck != null)
+            {
+                Console.WriteLine($"🟡 AcceptShareableInvitation - Direct DB check confirms user {userId} is already a member of choir {choir.ChoirId}");
+                return Result.Ok(); // Return success instead of error
+            }
+            
+            Console.WriteLine($"🟢 AcceptShareableInvitation - User {userId} is not a member, proceeding to add to choir {choir.ChoirId}");
+
+            // Add user to choir
+            var addMemberResult = choir.AddMember(user, false);
+            if (addMemberResult.IsFailed)
+            {
+                return Result.Fail(addMemberResult.Errors);
+            }
+
+            // Increment invitation usage
+            invitation.IncrementUse();
+
+            try
+            {
+                await _choirRepository.UpdateAsync(choir);
+                await _shareableInvitationRepository.UpdateAsync(invitation);
+                await _shareableInvitationRepository.SaveChangesAsync();
+                
+                Console.WriteLine($"🟢 AcceptShareableInvitation - Successfully added user {userId} to choir {choir.ChoirId}");
+                return Result.Ok();
+            }
+            catch (Exception ex) when (ex.Message.Contains("duplicate key value violates unique constraint \"PK_UserChoirs\"") || 
+                                      (ex.InnerException?.Message?.Contains("duplicate key value violates unique constraint \"PK_UserChoirs\"") == true))
+            {
+                // Handle duplicate key error - user is already a member, which is the desired outcome
+                Console.WriteLine($"🟡 AcceptShareableInvitation - Duplicate key error caught, user {userId} is already a member of choir {choir.ChoirId}");
+                return Result.Ok(); // Return success since the user is already in the choir
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"🔴 AcceptShareableInvitation - Unexpected error: {ex.Message}");
+                return Result.Fail($"Failed to accept invitation: {ex.Message}");
+            }
+        }
+
+        public async Task<Result<ShareableInvitationDto>> GetShareableInvitationByTokenAsync(string token)
+        {
+            var invitation = await _shareableInvitationRepository.GetByTokenAsync(token);
+            if (invitation == null)
+            {
+                return Result.Fail("Invitation not found.");
+            }
+
+            var dto = new ShareableInvitationDto
+            {
+                InvitationId = invitation.InvitationId,
+                ChoirId = invitation.ChoirId,
+                InvitationToken = invitation.InvitationToken,
+                CreatedBy = invitation.CreatedBy,
+                DateCreated = invitation.DateCreated,
+                ExpiryDate = invitation.ExpiryDate,
+                IsActive = invitation.IsActive,
+                MaxUses = invitation.MaxUses,
+                CurrentUses = invitation.CurrentUses,
+                InvitationUrl = $"/invite/{invitation.InvitationToken}"
+            };
+
+            return Result.Ok(dto);
+        }
+
+        public async Task<List<ShareableInvitationDto>> GetShareableInvitationsByChoirAsync(Guid choirId)
+        {
+            var invitations = await _shareableInvitationRepository.GetByChoirIdAsync(choirId);
+
+            return invitations.Select(i => new ShareableInvitationDto
+            {
+                InvitationId = i.InvitationId,
+                ChoirId = i.ChoirId,
+                InvitationToken = i.InvitationToken,
+                CreatedBy = i.CreatedBy,
+                DateCreated = i.DateCreated,
+                ExpiryDate = i.ExpiryDate,
+                IsActive = i.IsActive,
+                MaxUses = i.MaxUses,
+                CurrentUses = i.CurrentUses,
+                InvitationUrl = $"/invite/{i.InvitationToken}"
+            }).ToList();
+        }
+
+        public async Task<Result> DeactivateShareableInvitationAsync(Guid invitationId, Guid userId)
+        {
+            var invitation = await _shareableInvitationRepository.GetByIdAsync(invitationId);
+            if (invitation == null)
+            {
+                return Result.Fail("Invitation not found.");
+            }
+
+            var choir = await _choirRepository.GetByIdAsync(invitation.ChoirId);
+            if (choir == null)
+            {
+                return Result.Fail("Choir not found.");
+            }
+
+            if (choir.AdminUserId != userId)
+            {
+                return Result.Fail("Only the choir admin can deactivate invitations.");
+            }
+
+            invitation.Deactivate();
+            await _shareableInvitationRepository.UpdateAsync(invitation);
+            await _shareableInvitationRepository.SaveChangesAsync();
+
+            return Result.Ok();
         }
 
         private async Task TrySendInvitationNotificationAsync(string invitedEmail, string choirName, Guid inviterId)

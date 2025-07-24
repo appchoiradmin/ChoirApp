@@ -887,5 +887,24 @@
   "sentInvitations": "Invitaciones Enviadas",
   "promoteToAdmin": "Promover a Administrador",
   "demoteToMember": "Degradar a Miembro",
-  "removeMember": "Eliminar Miembro"
+  "removeMember": "Eliminar Miembro",
+  "invitation": {
+    "title": "¡Estás Invitado!",
+    "subtitle": "Te han invitado a unirte a",
+    "loading": "Cargando invitación...",
+    "invalidLink": "Enlace de invitación inválido",
+    "notFound": "Invitación no encontrada",
+    "notFoundMessage": "Esta invitación no existe o ha expirado",
+    "backToHome": "Volver al Inicio",
+    "linkExpiresOn": "El link de invitación expira el",
+    "welcomeUser": "Hola {name}, ¿te gustaría unirte a este coro?",
+    "joinChoir": "Unirme al Coro",
+    "noThanks": "No, Gracias",
+    "signInToJoin": "Para unirte a este coro, necesitas iniciar sesión o crear una cuenta.",
+    "signInWithGoogle": "Iniciar Sesión con Google",
+    "signInNote": "Al iniciar sesión, automáticamente te unirás a este coro.",
+    "alreadyMember": "Ya eres miembro de este coro",
+    "expired": "Esta invitación ha expirado o ha sido desactivada",
+    "acceptError": "Error al aceptar la invitación"
+  }
 }

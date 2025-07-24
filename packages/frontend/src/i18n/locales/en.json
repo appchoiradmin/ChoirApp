@@ -854,5 +854,24 @@
   "sentInvitations": "Sent Invitations",
   "promoteToAdmin": "Promote to Admin",
   "demoteToMember": "Demote to Member",
-  "removeMember": "Remove Member"
+  "removeMember": "Remove Member",
+  "invitation": {
+    "title": "You're Invited!",
+    "subtitle": "You have been invited to join",
+    "loading": "Loading invitation...",
+    "invalidLink": "Invalid invitation link",
+    "notFound": "Invitation not found",
+    "notFoundMessage": "This invitation does not exist or has expired",
+    "backToHome": "Back to Home",
+    "linkExpiresOn": "The invitation link expires on",
+    "welcomeUser": "Hello {name}, would you like to join this choir?",
+    "joinChoir": "Join Choir",
+    "noThanks": "No, Thanks",
+    "signInToJoin": "To join this choir, you need to sign in or create an account.",
+    "signInWithGoogle": "Sign In with Google",
+    "signInNote": "By signing in, you will automatically join this choir.",
+    "alreadyMember": "You are already a member of this choir",
+    "expired": "This invitation has expired or has been deactivated",
+    "acceptError": "Error accepting invitation"
+  }
 }

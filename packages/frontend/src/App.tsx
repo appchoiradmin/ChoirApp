@@ -24,8 +24,9 @@ import PlaylistTemplateDetailPage from './pages/PlaylistTemplateDetailPage.tsx';
 import EditPlaylistTemplatePage from './pages/EditPlaylistTemplatePage.tsx';
 import ChoirDashboardPage from './pages/ChoirDashboardPage.tsx';
 import SettingsPage from './pages/SettingsPage.tsx';
+import InviteLinkPage from './pages/InviteLinkPage.tsx';
 
-const PUBLIC_ROUTES = ['/', '/auth/callback', '/auth/error'];
+const PUBLIC_ROUTES = ['/', '/auth/callback', '/auth/error', '/invite'];
 
 function App() {
   const { user, loading } = useUser();
@@ -53,6 +54,7 @@ function App() {
   return (
     <Routes>
       <Route path="/" element={<HomePage />} />
+      <Route path="/invite/:token" element={<InviteLinkPage />} />
       <Route path="/onboarding" element={<OnboardingPage />} />
       <Route path="/create-choir" element={<CreateChoirPage />} />
       <Route path="/dashboard" element={<DashboardPage />} />
