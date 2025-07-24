@@ -162,7 +162,6 @@ const ShareableInvitationManager: React.FC<ShareableInvitationManagerProps> = ({
                 className="button"
                 onClick={() => {
                   setShowCreateForm(false);
-                  setExpiryDays('');
                   setMaxUses('');
                   setError(null);
                 }}
