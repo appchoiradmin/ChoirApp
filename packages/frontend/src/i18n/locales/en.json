@@ -135,6 +135,10 @@
     "asAdmin": "As Admin",
     "asMember": "As Member",
     "pendingInvites": "Pending Invites",
+    "clickToViewChoirs": "Click to view choirs",
+    "clickToViewAdminChoirs": "Click to view choirs you manage",
+    "clickToViewMemberChoirs": "Click to view choirs you're in",
+    "clickToViewInvitations": "Click to view pending invitations",
     "completeSetup": "Complete Your Setup",
     "percentComplete": "{{percent}}% Complete",
     "progressSteps": {

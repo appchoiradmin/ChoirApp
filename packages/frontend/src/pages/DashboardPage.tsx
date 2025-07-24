@@ -26,6 +26,12 @@ const DashboardPage: React.FC = () => {
   const { t } = useTranslation();
   const [invitations, setInvitations] = useState<Invitation[]>([]);
   const [userSongsCount, setUserSongsCount] = useState<number>(0);
+  
+  // Refs for smooth scrolling
+  const choirsSectionRef = React.useRef<HTMLDivElement>(null);
+  const adminChoirsRef = React.useRef<HTMLDivElement>(null);
+  const memberChoirsRef = React.useRef<HTMLDivElement>(null);
+  const invitationsRef = React.useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (user && token) {
@@ -107,6 +113,42 @@ const DashboardPage: React.FC = () => {
   const completedSteps = progressSteps.filter(step => step.completed).length;
   const progressPercentage = (completedSteps / progressSteps.length) * 100;
 
+  // Smooth scroll helper function
+  const scrollToSection = (ref: React.RefObject<HTMLDivElement | null>) => {
+    ref.current?.scrollIntoView({ 
+      behavior: 'smooth', 
+      block: 'start',
+      inline: 'nearest'
+    });
+  };
+
+  // Click handlers for stat cards
+  const handleTotalChoirsClick = () => {
+    scrollToSection(choirsSectionRef);
+  };
+
+  const handleAdminChoirsClick = () => {
+    if (adminOfChoirs.length > 0) {
+      scrollToSection(adminChoirsRef);
+    } else {
+      scrollToSection(choirsSectionRef);
+    }
+  };
+
+  const handleMemberChoirsClick = () => {
+    if (memberOfChoirs.length > 0) {
+      scrollToSection(memberChoirsRef);
+    } else {
+      scrollToSection(choirsSectionRef);
+    }
+  };
+
+  const handlePendingInvitesClick = () => {
+    if (pendingInvitations > 0) {
+      scrollToSection(invitationsRef);
+    }
+  };
+
   return (
     <Layout 
       navigation={<Navigation title={t('dashboard.title')} showBackButton={false} />}
@@ -135,7 +177,14 @@ const DashboardPage: React.FC = () => {
 
       {/* Stats Overview */}
       <div className="stats-grid">
-        <Card className="stat-card">
+        <Card 
+          className="stat-card clickable" 
+          onClick={handleTotalChoirsClick}
+          role="button"
+          tabIndex={0}
+          onKeyDown={(e: React.KeyboardEvent) => e.key === 'Enter' && handleTotalChoirsClick()}
+          aria-label={t('dashboard.totalChoirs') + ' - ' + t('dashboard.clickToViewChoirs')}
+        >
           <div className="stat-content">
             <div className="stat-icon-wrapper primary">
               <UserGroupIcon className="stat-icon" />
@@ -147,7 +196,14 @@ const DashboardPage: React.FC = () => {
           </div>
         </Card>
 
-        <Card className="stat-card">
+        <Card 
+          className="stat-card clickable" 
+          onClick={handleAdminChoirsClick}
+          role="button"
+          tabIndex={0}
+          onKeyDown={(e: React.KeyboardEvent) => e.key === 'Enter' && handleAdminChoirsClick()}
+          aria-label={t('dashboard.asAdmin') + ' - ' + t('dashboard.clickToViewAdminChoirs')}
+        >
           <div className="stat-content">
             <div className="stat-icon-wrapper secondary">
               <MusicalNoteIcon className="stat-icon" />
@@ -159,7 +215,14 @@ const DashboardPage: React.FC = () => {
           </div>
         </Card>
 
-        <Card className="stat-card">
+        <Card 
+          className={`stat-card ${pendingInvitations > 0 ? 'clickable' : ''}`}
+          onClick={pendingInvitations > 0 ? handlePendingInvitesClick : undefined}
+          role={pendingInvitations > 0 ? "button" : undefined}
+          tabIndex={pendingInvitations > 0 ? 0 : undefined}
+          onKeyDown={pendingInvitations > 0 ? (e: React.KeyboardEvent) => e.key === 'Enter' && handlePendingInvitesClick() : undefined}
+          aria-label={pendingInvitations > 0 ? t('dashboard.pendingInvites') + ' - ' + t('dashboard.clickToViewInvitations') : t('dashboard.pendingInvites')}
+        >
           <div className="stat-content">
             <div className="stat-icon-wrapper accent">
               <ClockIcon className="stat-icon" />
@@ -171,7 +234,14 @@ const DashboardPage: React.FC = () => {
           </div>
         </Card>
 
-        <Card className="stat-card">
+        <Card 
+          className="stat-card clickable" 
+          onClick={handleMemberChoirsClick}
+          role="button"
+          tabIndex={0}
+          onKeyDown={(e: React.KeyboardEvent) => e.key === 'Enter' && handleMemberChoirsClick()}
+          aria-label={t('dashboard.asMember') + ' - ' + t('dashboard.clickToViewMemberChoirs')}
+        >
           <div className="stat-content">
             <div className="stat-icon-wrapper success">
               <StarIcon className="stat-icon" />
@@ -271,9 +341,9 @@ const DashboardPage: React.FC = () => {
       </Card>
 
       {/* Choirs Section */}
-      <div className="choirs-section">
+      <div className="choirs-section" ref={choirsSectionRef}>
         {adminOfChoirs.length > 0 && (
-          <Card className="choirs-card">
+          <Card className="choirs-card" ref={adminChoirsRef}>
             <h2 className="section-title">{t('dashboard.choirsYouManage')}</h2>
             <div className="choirs-grid">
               {adminOfChoirs.map(choir => (
@@ -303,7 +373,7 @@ const DashboardPage: React.FC = () => {
         )}
 
         {memberOfChoirs.length > 0 && (
-          <Card className="choirs-card">
+          <Card className="choirs-card" ref={memberChoirsRef}>
             <h2 className="section-title">{t('dashboard.choirsYouAreIn')}</h2>
             <div className="choirs-grid">
               {memberOfChoirs.map(choir => (
@@ -356,7 +426,7 @@ const DashboardPage: React.FC = () => {
 
       {/* Invitations Section */}
       {pendingInvitations > 0 && (
-        <Card className="invitations-card">
+        <Card className="invitations-card" ref={invitationsRef}>
           <h2 className="section-title">
             Pending Invitations 
             <span className="invitation-count">({pendingInvitations})</span>
