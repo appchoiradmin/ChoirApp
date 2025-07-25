@@ -8,8 +8,8 @@ namespace ChoirApp.Application.Contracts
 {
     public interface ISongService
     {
-        Task<Result<SongDto>> CreateSongAsync(string title, string? artist, string content, Guid creatorId, Domain.Entities.SongVisibilityType visibility, List<Guid>? visibleToChoirs = null);
-        Task<Result<SongDto>> CreateSongVersionAsync(Guid baseSongId, string content, Guid creatorId, Domain.Entities.SongVisibilityType visibility, List<Guid>? visibleToChoirs = null);
+        Task<Result<SongDto>> CreateSongAsync(string title, string? artist, string content, Guid creatorId, Domain.Entities.SongVisibilityType visibility);
+        Task<Result<SongDto>> CreateSongVersionAsync(Guid baseSongId, string content, Guid creatorId, Domain.Entities.SongVisibilityType visibility);
         Task<Result<SongDto>> GetSongByIdAsync(Guid songId);
         Task<Result<List<SongDto>>> GetSongsByUserIdAsync(Guid userId);
         Task<Result<List<SongDto>>> GetSongsByChoirIdAsync(Guid choirId);
