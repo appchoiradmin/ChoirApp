@@ -7,7 +7,6 @@ import { useTranslation } from '../hooks/useTranslation';
 import { useDisplayedPlaylistSections } from '../hooks/useDisplayedPlaylistSections';
 import { usePlaylistContext } from '../context/PlaylistContext';
 import { toast } from 'react-hot-toast';
-import { logInfo, logEvent } from '../services/appInsights';
 import { PlaylistTemplate } from '../types/playlist';
 import { SongDto, SongSearchParams } from '../types/song';
 import { Button, Card, LoadingSpinner } from '../components/ui';
@@ -264,28 +263,11 @@ const SongsListPage: FC<SongsListPageProps> = ({ playlistId, refreshPlaylist }) 
         // Don't specify visibility - let backend handle visibility logic based on user context
       };
       
-      logInfo('Search API Call', {
-        searchParams: searchParams,
-        isMobile: isMobile,
-        searchTerm: searchTerm
-      });
+      console.log('🔍 Fetching songs with params:', searchParams, 'isMobile:', isMobile);
       
       const fetchedSongs = await searchSongs(searchParams, token);
       
-      logEvent('Search_Results_Received', {
-        searchTerm: searchTerm,
-        resultsCount: fetchedSongs?.length || 0,
-        isMobile: isMobile,
-        hasResults: (fetchedSongs?.length || 0) > 0
-      });
-      
-      // Show search results on mobile via toast (development only)
-      if (isMobile && searchTerm && searchTerm.length > 2 && import.meta.env.DEV) {
-        toast(`🎵 Found ${fetchedSongs?.length || 0} songs for "${searchTerm}"`, { 
-          duration: 3000,
-          icon: fetchedSongs?.length ? '✅' : '❌'
-        });
-      }
+      console.log('🔍 Received songs:', fetchedSongs?.length || 0, 'songs');
       
       if (resetPagination) {
         setSongs(fetchedSongs || []);
@@ -579,17 +561,10 @@ const SongsListPage: FC<SongsListPageProps> = ({ playlistId, refreshPlaylist }) 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newSearchValue = e.target.value;
     
-    // Log search input changes to Application Insights for production debugging
-    logEvent('Search_Input_Changed', {
-      searchTerm: newSearchValue,
-      isMobile: isMobile,
-      searchLength: newSearchValue.length
-    });
+    console.log('🔍 Search input changed:', newSearchValue, 'isMobile:', isMobile);
     
-    // Show debug info on mobile via toast (development only)
-    if (isMobile && newSearchValue.length > 2 && import.meta.env.DEV) {
-      toast(`🔍 Searching: "${newSearchValue}" (Mobile: ${isMobile})`, { duration: 2000 });
-    }
+    // Update URL parameters immediately for UI responsiveness
+    updateFilters({ search: newSearchValue });
     
     // Debounce the search to avoid too many API calls
     if (searchTimeoutRef.current) {
