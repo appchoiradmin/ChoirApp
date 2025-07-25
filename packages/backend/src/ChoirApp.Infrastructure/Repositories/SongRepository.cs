@@ -45,7 +45,7 @@ namespace ChoirApp.Infrastructure.Repositories
                 .Include(s => s.Visibilities)
                 .Include(s => s.Tags)
                 .Where(s => s.Visibility == SongVisibilityType.PublicAll ||
-                           s.Visibilities.Any(sv => sv.ChoirId == choirId))
+                           (s.Visibility == SongVisibilityType.PublicChoirs && s.Visibilities.Any(sv => sv.ChoirId == choirId)))
                 .ToListAsync();
         }
 
@@ -93,7 +93,7 @@ namespace ChoirApp.Infrastructure.Repositories
                 // User in choir context: show public + user's songs + choir-visible songs
                 query = query.Where(s => s.Visibility == SongVisibilityType.PublicAll ||
                                         s.CreatorId == userId.Value ||
-                                        s.Visibilities.Any(sv => sv.ChoirId == choirId.Value));
+                                        (s.Visibility == SongVisibilityType.PublicChoirs && s.Visibilities.Any(sv => sv.ChoirId == choirId.Value)));
             }
             else if (userId.HasValue)
             {
@@ -105,7 +105,7 @@ namespace ChoirApp.Infrastructure.Repositories
             {
                 // Choir context: show public + choir-visible songs
                 query = query.Where(s => s.Visibility == SongVisibilityType.PublicAll ||
-                                        s.Visibilities.Any(sv => sv.ChoirId == choirId.Value));
+                                        (s.Visibility == SongVisibilityType.PublicChoirs && s.Visibilities.Any(sv => sv.ChoirId == choirId.Value)));
             }
             else
             {
