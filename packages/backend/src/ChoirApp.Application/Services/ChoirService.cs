@@ -161,10 +161,11 @@ namespace ChoirApp.Application.Services
                 return Result.Fail("Choir not found.");
             }
 
-            // Business rule: Only admin can update member roles
-            if (choir.AdminUserId != adminId)
+            // Business rule: Only choir admins can update member roles
+            var adminMember = choir.UserChoirs.FirstOrDefault(uc => uc.UserId == adminId);
+            if (adminMember == null || !adminMember.IsAdmin)
             {
-                return Result.Fail("Only the choir admin can update member roles.");
+                return Result.Fail("Only choir admins can update member roles.");
             }
 
             // Business rule: Valid role required
