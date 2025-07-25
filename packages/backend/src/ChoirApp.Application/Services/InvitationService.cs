@@ -37,15 +37,17 @@ namespace ChoirApp.Application.Services
 
         public async Task<Result> CreateInvitationAsync(InviteUserDto inviteDto, Guid inviterId)
         {
-            var choir = await _choirRepository.GetByIdAsync(inviteDto.ChoirId);
+            var choir = await _choirRepository.GetByIdWithMembersAsync(inviteDto.ChoirId);
             if (choir == null)
             {
                 return Result.Fail("Choir not found.");
             }
 
-            if (choir.AdminUserId != inviterId)
+            // Business rule: Only choir admins can send invitations
+            var inviterMember = choir.UserChoirs.FirstOrDefault(uc => uc.UserId == inviterId);
+            if (inviterMember == null || !inviterMember.IsAdmin)
             {
-                return Result.Fail("Only the choir admin can send invitations.");
+                return Result.Fail("Only choir admins can send invitations.");
             }
 
             // Prevent creation of fake invitation records that might be used for shareable invitations
@@ -391,15 +393,17 @@ namespace ChoirApp.Application.Services
                 return Result.Fail("Invitation not found.");
             }
 
-            var choir = await _choirRepository.GetByIdAsync(invitation.ChoirId);
+            var choir = await _choirRepository.GetByIdWithMembersAsync(invitation.ChoirId);
             if (choir == null)
             {
                 return Result.Fail("Choir not found.");
             }
 
-            if (choir.AdminUserId != userId)
+            // Business rule: Only choir admins can deactivate invitations
+            var userMember = choir.UserChoirs.FirstOrDefault(uc => uc.UserId == userId);
+            if (userMember == null || !userMember.IsAdmin)
             {
-                return Result.Fail("Only the choir admin can deactivate invitations.");
+                return Result.Fail("Only choir admins can deactivate invitations.");
             }
 
             invitation.Deactivate();
