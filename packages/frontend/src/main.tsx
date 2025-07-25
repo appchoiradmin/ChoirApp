@@ -4,6 +4,7 @@ import { BrowserRouter } from 'react-router-dom';
 import App from './App';
 import { UserProvider } from './contexts/UserContext.tsx';
 import './utils/cacheManager'; // Make cache manager available globally
+import './services/appInsights'; // Initialize Application Insights for production logging
 
 // Initialize i18n
 import './i18n';
