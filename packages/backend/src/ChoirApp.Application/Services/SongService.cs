@@ -2,6 +2,7 @@ using ChoirApp.Application.Contracts;
 using ChoirApp.Application.Dtos;
 using ChoirApp.Domain.Entities;
 using FluentResults;
+using System.Linq;
 
 namespace ChoirApp.Application.Services
 {
@@ -21,7 +22,7 @@ namespace ChoirApp.Application.Services
             _tagRepository = tagRepository;
         }
 
-        public async Task<Result<SongDto>> CreateSongAsync(string title, string? artist, string content, Guid creatorId, Domain.Entities.SongVisibilityType visibility)
+        public async Task<Result<SongDto>> CreateSongAsync(string title, string? artist, string content, Guid creatorId, Domain.Entities.SongVisibilityType visibility, List<Guid>? visibleToChoirs = null)
         {
             // Business rule: Creator must exist
             var user = await _userRepository.GetByIdAsync(creatorId);
@@ -39,12 +40,27 @@ namespace ChoirApp.Application.Services
 
             var song = songResult.Value;
             await _songRepository.AddAsync(song);
+            
+            // If PublicChoirs visibility and choir IDs provided, create SongVisibility records
+            if (visibility == Domain.Entities.SongVisibilityType.PublicChoirs && visibleToChoirs != null && visibleToChoirs.Any())
+            {
+                foreach (var choirId in visibleToChoirs)
+                {
+                    var addVisibilityResult = await AddSongVisibilityToChoirAsync(song.SongId, choirId, creatorId);
+                    if (addVisibilityResult.IsFailed)
+                    {
+                        // Log the error but don't fail the entire operation
+                        Console.WriteLine($"Warning: Failed to add song visibility to choir {choirId}: {string.Join(", ", addVisibilityResult.Errors.Select(e => e.Message))}");
+                    }
+                }
+            }
+            
             await _songRepository.SaveChangesAsync();
 
             return Result.Ok(MapToSongDto(song));
         }
 
-        public async Task<Result<SongDto>> CreateSongVersionAsync(Guid baseSongId, string content, Guid creatorId, Domain.Entities.SongVisibilityType visibility)
+        public async Task<Result<SongDto>> CreateSongVersionAsync(Guid baseSongId, string content, Guid creatorId, Domain.Entities.SongVisibilityType visibility, List<Guid>? visibleToChoirs = null)
         {
             // Business rule: Base song must exist
             var baseSong = await _songRepository.GetByIdAsync(baseSongId);
@@ -69,6 +85,21 @@ namespace ChoirApp.Application.Services
 
             var version = versionResult.Value;
             await _songRepository.AddAsync(version);
+            
+            // If PublicChoirs visibility and choir IDs provided, create SongVisibility records
+            if (visibility == Domain.Entities.SongVisibilityType.PublicChoirs && visibleToChoirs != null && visibleToChoirs.Any())
+            {
+                foreach (var choirId in visibleToChoirs)
+                {
+                    var addVisibilityResult = await AddSongVisibilityToChoirAsync(version.SongId, choirId, creatorId);
+                    if (addVisibilityResult.IsFailed)
+                    {
+                        // Log the error but don't fail the entire operation
+                        Console.WriteLine($"Warning: Failed to add song version visibility to choir {choirId}: {string.Join(", ", addVisibilityResult.Errors.Select(e => e.Message))}");
+                    }
+                }
+            }
+            
             await _songRepository.SaveChangesAsync();
 
             return Result.Ok(MapToSongDto(version));
