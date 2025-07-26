@@ -10,5 +10,6 @@ namespace ChoirApp.Backend.Endpoints.Songs.Requests
         public string Content { get; set; } = string.Empty;
         public SongVisibilityType Visibility { get; set; } = SongVisibilityType.Private;
         public List<Guid>? VisibleToChoirs { get; set; }
+        public List<string>? Tags { get; set; }
     }
 }

@@ -14,5 +14,10 @@ namespace ChoirApp.Application.Contracts
         Task UpdateAsync(Tag tag);
         Task DeleteAsync(Tag tag);
         Task SaveChangesAsync();
+        Task<SongTag?> GetSongTagAsync(Guid songId, Guid tagId);
+        Task<List<SongTag>> GetSongTagsAsync(Guid songId);
+        Task AddSongTagAsync(SongTag songTag);
+        Task RemoveSongTagAsync(SongTag songTag);
+        Task<List<Tag>> SearchTagsAsync(string query, int maxResults = 10);
     }
 }

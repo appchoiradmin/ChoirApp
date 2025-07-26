@@ -123,6 +123,32 @@ export const getAllTags = async (token: string): Promise<TagDto[]> => {
   return await response.json();
 };
 
+/**
+ * Get tag suggestions based on a query
+ * @param query Search query for tags
+ * @param maxResults Maximum number of results to return
+ * @param token Authentication token
+ * @returns Array of matching tags
+ */
+export const getTagSuggestions = async (query: string = '', maxResults: number = 10, token: string): Promise<TagDto[]> => {
+  const queryParams = new URLSearchParams();
+  if (query) queryParams.append('query', query);
+  queryParams.append('maxResults', maxResults.toString());
+
+  const response = await fetch(`${API_BASE_URL}/api/tags/suggestions?${queryParams}`, {
+    method: 'GET',
+    headers: {
+      'Authorization': `Bearer ${token}`
+    }
+  });
+
+  if (!response.ok) {
+    throw new Error(`Failed to fetch tag suggestions: ${response.statusText}`);
+  }
+
+  return await response.json();
+};
+
 export const searchSongs = async (params: SongSearchParams, token: string): Promise<SongDto[]> => {
   // Build query string from params
   const queryParams = new URLSearchParams();

@@ -7,6 +7,7 @@ import { useUser } from '../hooks/useUser';
 import { useTranslation } from '../hooks/useTranslation';
 import ChordProViewer from '../components/ChordProViewer';
 import ChordProGuide from '../components/ChordProGuide';
+import TagInput from '../components/TagInput';
 import styles from './SongDetailPage.module.scss';
 import Layout from '../components/ui/Layout';
 import Navigation from '../components/ui/Navigation';
@@ -31,6 +32,7 @@ const SongDetailPage: React.FC = () => {
   const [artist, setArtist] = useState('');
   const [chordProContent, setChordProContent] = useState('');
   const [visibility, setVisibility] = useState<SongVisibilityType>(SongVisibilityType.PublicAll);
+  const [tags, setTags] = useState<string[]>([]);
   
   // Edit mode states
   const [isEditMode, setIsEditMode] = useState<boolean>(false);
@@ -42,6 +44,8 @@ const SongDetailPage: React.FC = () => {
   const [selectedChoirsForVersion, setSelectedChoirsForVersion] = useState<string[]>([]);
   const [selectedChoirsForEdit, setSelectedChoirsForEdit] = useState<string[]>([]);
   const [selectedChoirsForCreate, setSelectedChoirsForCreate] = useState<string[]>([]);
+  const [editTags, setEditTags] = useState<string[]>([]);
+  const [versionTags, setVersionTags] = useState<string[]>([]);
   const [choirFilter, setChoirFilter] = useState<string>('');
   const [editChoirFilter, setEditChoirFilter] = useState<string>('');
   const [createChoirFilter, setCreateChoirFilter] = useState<string>('');
@@ -116,7 +120,8 @@ const SongDetailPage: React.FC = () => {
       const versionDto: CreateSongVersionDto = {
         content: editContent || song?.content || '',
         visibility: editVisibility,
-        visibleToChoirs: selectedChoirsForVersion
+        visibleToChoirs: selectedChoirsForVersion,
+        tags: versionTags.length > 0 ? versionTags : undefined
       };
       
       const newVersion = await createSongVersion(songId, versionDto, user.token);
@@ -142,7 +147,8 @@ const SongDetailPage: React.FC = () => {
       const updateDto: UpdateSongDto = {
         title: editTitle,
         artist: editArtist,
-        content: editContent
+        content: editContent,
+        tags: editTags.length > 0 ? editTags : undefined
       };
       
       let updatedSong;
@@ -202,6 +208,8 @@ const SongDetailPage: React.FC = () => {
     setEditArtist(song?.artist || '');
     setEditContent(song?.content || '');
     setEditVisibility(song?.visibility || SongVisibilityType.PublicAll);
+    // Load existing tags into edit mode
+    setEditTags(song?.tags?.map(tag => tag.tagName) || []);
   };
 
   const handleStartVersionCreation = () => {
@@ -209,6 +217,8 @@ const SongDetailPage: React.FC = () => {
     setEditContent(song?.content || '');
     setEditVisibility(SongVisibilityType.PublicChoirs);
     setSelectedChoirsForVersion([]);
+    // Load existing tags into version mode
+    setVersionTags(song?.tags?.map(tag => tag.tagName) || []);
   };
 
   const handleCancelEdit = () => {
@@ -235,7 +245,8 @@ const SongDetailPage: React.FC = () => {
         artist,
         content: chordProContent,
         visibility,
-        visibleToChoirs: visibility === SongVisibilityType.PublicChoirs ? selectedChoirsForCreate : undefined
+        visibleToChoirs: visibility === SongVisibilityType.PublicChoirs ? selectedChoirsForCreate : undefined,
+        tags: tags.length > 0 ? tags : undefined
       };
       const createdSong = await createSong(newSong, user.token);
       navigate(`/songs/${createdSong.songId}`);
@@ -381,6 +392,11 @@ const SongDetailPage: React.FC = () => {
             )}
           </div>
         )}
+
+        <div className={styles.formGroup}>
+          <label className={styles.label}>{t('songs.tags')}</label>
+          <TagInput tags={tags} setTags={setTags} />
+        </div>
 
         <div className={styles.formGroup}>
           <label htmlFor="chordProContent" className={styles.label}>{t('songs.chordProContent')}</label>
@@ -606,6 +622,14 @@ const SongDetailPage: React.FC = () => {
         )}
         
         <div className={styles.formGroup}>
+          <label className={styles.label}>{t('songs.tags')}</label>
+          <TagInput
+            tags={editTags}
+            setTags={setEditTags}
+          />
+        </div>
+        
+        <div className={styles.formGroup}>
           <label htmlFor="editContent" className={styles.label}>ChordPro Content</label>
           <ChordProGuide />
           <textarea
@@ -748,6 +772,14 @@ const SongDetailPage: React.FC = () => {
             )}
           </div>
         )}
+        
+        <div className={styles.formGroup}>
+          <label className={styles.label}>{t('songs.tags')}</label>
+          <TagInput
+            tags={versionTags}
+            setTags={setVersionTags}
+          />
+        </div>
         
         <div className={styles.formGroup}>
           <label htmlFor="versionContent" className={styles.label}>ChordPro Content</label>

@@ -59,6 +59,7 @@ export interface CreateSongVersionDto {
   content: string;
   visibility: SongVisibilityType;
   visibleToChoirs?: string[]; // Choir IDs
+  tags?: string[]; // Tag names
 }
 
 /**
@@ -68,6 +69,7 @@ export interface UpdateSongDto {
   title?: string;
   artist?: string;
   content?: string;
+  tags?: string[]; // Tag names
 }
 
 /**

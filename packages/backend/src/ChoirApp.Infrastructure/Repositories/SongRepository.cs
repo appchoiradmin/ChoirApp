@@ -27,6 +27,7 @@ namespace ChoirApp.Infrastructure.Repositories
         {
             return await _context.Songs
                 .Include(s => s.Tags)
+                    .ThenInclude(st => st.Tag)
                 .FirstOrDefaultAsync(s => s.SongId == songId);
         }
 

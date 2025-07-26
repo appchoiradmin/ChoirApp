@@ -43,7 +43,8 @@ namespace ChoirApp.Backend.Endpoints.Songs
                 req.Title,
                 req.Artist,
                 req.Content,
-                userId);
+                userId,
+                req.Tags);
 
             if (result.IsFailed)
             {
