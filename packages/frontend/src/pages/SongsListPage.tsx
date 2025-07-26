@@ -255,7 +255,7 @@ const SongsListPage: FC<SongsListPageProps> = ({ playlistId, refreshPlaylist }) 
   }, [sections, selectedTemplate, contextPlaylistId, isInitializing]); // Re-fetch when any PlaylistContext state changes
 
   // Consolidated fetch function that handles both initial load and search
-  const fetchSongs = async (searchTerm: string = '', resetPagination: boolean = true) => {
+  const fetchSongs = async (searchTerm: string = '', resetPagination: boolean = true, explicitTags?: string[]) => {
     try {
       if (resetPagination) {
         setLoading(true);
@@ -269,20 +269,34 @@ const SongsListPage: FC<SongsListPageProps> = ({ playlistId, refreshPlaylist }) 
         return;
       }
       
+      // Use explicit tags if provided, otherwise get current tags from URL parameters
+      const currentTags = explicitTags !== undefined ? explicitTags : (searchParams.getAll('tags') || []);
+      
+      // DEBUG: Log what we're about to send to the API
+      console.log('🔍 fetchSongs DEBUG:', {
+        searchTerm: searchTerm || '',
+        explicitTags,
+        currentTags,
+        urlTags: searchParams.getAll('tags'),
+        resetPagination
+      });
+      
       // Prepare search parameters
-      const searchParams: SongSearchParams = {
+      const apiSearchParams: SongSearchParams = {
         searchTerm: searchTerm || '', // Use provided search term
         skip: resetPagination ? 0 : page * songsPerPage,
         take: songsPerPage,
         // Include userId and choirId for proper filtering
         userId: user?.id,
         choirId: choirId || undefined,
-        // Include selected tags for filtering
-        tags: filters.tags.length > 0 ? filters.tags : undefined
+        // Include selected tags for filtering - use explicit tags or current URL tags
+        tags: currentTags.length > 0 ? currentTags : undefined
         // Don't specify visibility - let backend handle visibility logic based on user context
       };
       
-      const fetchedSongs = await searchSongs(searchParams, token);
+      console.log('🚀 API Request Parameters:', apiSearchParams);
+      
+      const fetchedSongs = await searchSongs(apiSearchParams, token);
       
       if (resetPagination) {
         setSongs(fetchedSongs || []);
@@ -576,6 +590,13 @@ const SongsListPage: FC<SongsListPageProps> = ({ playlistId, refreshPlaylist }) 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newSearchValue = e.target.value;
     
+    console.log('🔤 handleSearchChange DEBUG:', {
+      newSearchValue: `"${newSearchValue}"`,
+      isEmpty: newSearchValue === '',
+      currentUrlTags: searchParams.getAll('tags'),
+      filtersState: filters
+    });
+    
     // Update URL parameters immediately for UI responsiveness
     updateFilters({ search: newSearchValue });
     
@@ -586,7 +607,14 @@ const SongsListPage: FC<SongsListPageProps> = ({ playlistId, refreshPlaylist }) 
     
     // Set a new timeout to trigger search after user stops typing
     searchTimeoutRef.current = setTimeout(() => {
-      fetchSongs(newSearchValue, true);
+      // Get current tags from URL parameters to preserve them during search
+      const currentTags = searchParams.getAll('tags') || [];
+      console.log('⏰ handleSearchChange timeout executing:', {
+        newSearchValue: `"${newSearchValue}"`,
+        currentTags,
+        aboutToCallFetchSongs: true
+      });
+      fetchSongs(newSearchValue, true, currentTags);
     }, 300); // 300ms debounce
   };
 
@@ -607,8 +635,8 @@ const SongsListPage: FC<SongsListPageProps> = ({ playlistId, refreshPlaylist }) 
       clearTimeout(searchTimeoutRef.current);
     }
     
-    // Fetch songs without any filters
-    fetchSongs('', true);
+    // Fetch songs without any filters - explicitly pass empty tags array
+    fetchSongs('', true, []);
   };
 
   // Handle tag filter changes

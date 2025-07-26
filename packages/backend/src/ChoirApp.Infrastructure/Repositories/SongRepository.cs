@@ -94,6 +94,7 @@ namespace ChoirApp.Infrastructure.Repositories
             var results = await _context.Songs
                 .Include(s => s.Visibilities)
                 .Include(s => s.Tags)
+                    .ThenInclude(st => st.Tag)  // CRITICAL: Include the actual Tag entity within SongTag
                 .Where(s => s.Visibility == SongVisibilityType.PublicAll ||
                            (s.Visibility == SongVisibilityType.PublicChoirs && s.Visibilities.Any(sv => sv.ChoirId == choirId)))
                 .ToListAsync();
@@ -130,7 +131,8 @@ namespace ChoirApp.Infrastructure.Repositories
             // CRITICAL FIX: Include navigation properties for visibility filtering
             var query = _context.Songs
                 .Include(s => s.Visibilities) // Required for choir visibility filtering
-                .Include(s => s.Tags)         // Required for complete song data
+                .Include(s => s.Tags)
+                    .ThenInclude(st => st.Tag)  // CRITICAL: Include the actual Tag entity within SongTag
                 .AsQueryable();
 
             // Apply search filter (case-insensitive)

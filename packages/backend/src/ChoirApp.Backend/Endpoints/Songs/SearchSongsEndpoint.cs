@@ -30,6 +30,7 @@ namespace ChoirApp.Backend.Endpoints.Songs
         public override async Task HandleAsync(Requests.SearchSongsRequest req, CancellationToken ct)
         {
             Console.WriteLine($"🔍 Backend SearchSongsEndpoint called with: searchTerm='{req.SearchTerm}', title='{req.Title}', choirId='{req.ChoirId}', userId='{req.UserId}'");
+            Console.WriteLine($"🏷️ Backend request tags: {(req.Tags == null ? "NULL" : $"[{string.Join(", ", req.Tags)}] (count: {req.Tags.Count})")}");
             
             // Use title as search term if provided, otherwise use SearchTerm
             string searchTerm = !string.IsNullOrEmpty(req.Title) ? req.Title : req.SearchTerm;
@@ -59,7 +60,37 @@ namespace ChoirApp.Backend.Endpoints.Songs
             
             if (req.Tags != null && req.Tags.Any())
             {
+                Console.WriteLine($"🏷️ Backend applying tag filter: [{string.Join(", ", req.Tags)}]");
+                Console.WriteLine($"🏷️ Backend songs before tag filtering: {songs.Count}");
+                
+                // Debug: Show all songs and their tags
+                foreach (var song in songs.Take(5)) // Limit to first 5 for readability
+                {
+                    var songTags = song.Tags?.Select(t => t.TagName).ToList() ?? new List<string>();
+                    Console.WriteLine($"🏷️ Backend song '{song.Title}' has tags: [{string.Join(", ", songTags)}]");
+                    
+                    // Debug: Show detailed tag information
+                    if (song.Tags != null && song.Tags.Any())
+                    {
+                        foreach (var tag in song.Tags)
+                        {
+                            Console.WriteLine($"🏷️   - Tag: '{tag.TagName}' (ID: {tag.TagId})");
+                        }
+                    }
+                    else
+                    {
+                        Console.WriteLine($"🏷️   - Song has NO TAGS in database");
+                    }
+                }
+                
                 songs = songs.Where(s => s.Tags != null && s.Tags.Any(t => req.Tags.Contains(t.TagName, StringComparer.OrdinalIgnoreCase))).ToList();
+                
+                Console.WriteLine($"🏷️ Backend songs after tag filtering: {songs.Count}");
+                foreach (var song in songs)
+                {
+                    var songTags = song.Tags?.Select(t => t.TagName).ToList() ?? new List<string>();
+                    Console.WriteLine($"🏷️ Backend filtered song '{song.Title}' has tags: [{string.Join(", ", songTags)}]");
+                }
             }
             
             if (req.Visibility.HasValue)
