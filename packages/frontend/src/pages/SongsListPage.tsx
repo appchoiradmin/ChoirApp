@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, FC } from 'react';
+import React, { useState, useEffect, useRef, FC, useMemo } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { searchSongs } from '../services/songService';
 import { addSongToPlaylist } from '../services/playlistService';
@@ -228,6 +228,7 @@ const SongsListPage: FC<SongsListPageProps> = ({ playlistId, refreshPlaylist }) 
       });
       
 
+
       setPlaylistSongIds(songIds);
       // Also update selectedSongs to show "Added" flag immediately
       setSelectedSongs(songIds);
@@ -259,12 +260,10 @@ const SongsListPage: FC<SongsListPageProps> = ({ playlistId, refreshPlaylist }) 
     }
   }, [sections, selectedTemplate, contextPlaylistId, isInitializing]); // Re-fetch when any PlaylistContext state changes
 
-  // Force re-render when playlist songs change to trigger reordering
-  useEffect(() => {
-    // This effect doesn't need to do anything - it just ensures the component re-renders
-    // when playlistSongIds changes, which will cause getReorderedSongs to be called
-    // with the updated playlist state
-  }, [playlistSongIds]);
+  // Memoize the reordered songs to prevent unnecessary recalculations
+  const reorderedSongs = useMemo(() => {
+    return getReorderedSongs(songs);
+  }, [songs, playlistSongIds]);
 
   // Consolidated fetch function that handles both initial load and search
   const fetchSongs = async (searchTerm: string = '', resetPagination: boolean = true, explicitTags?: string[]) => {
@@ -904,7 +903,7 @@ const SongsListPage: FC<SongsListPageProps> = ({ playlistId, refreshPlaylist }) 
 
             
             <div className="songs-page__grid">
-              {getReorderedSongs(songs).map((song: SongDto) => (
+              {reorderedSongs.map((song: SongDto) => (
                 <div key={song.songId}>
                   <Card className="songs-page__card">
                 <div className="songs-page__card-content">
