@@ -348,7 +348,6 @@
     "accepted": "Accepted",
     "rejected": "Rejected",
     "pendingInvitations": "Pending Invitations",
-    "filterByTags": "Filter by Tags",
     "showTagFilter": "Show tag filter",
     "hideTagFilter": "Hide tag filter",
     "selectedTags": "Selected Tags",
@@ -450,8 +449,6 @@
     "choirRequired": "Choir selection is required",
     "public": "Public",
     "choirOnly": "Choir Only",
-    "addTag": "Add Tag",
-    "removeTag": "Remove Tag",
     "chordProPlaceholder": "Enter ChordPro content here...",
     "preview": "Preview"
   },

@@ -448,8 +448,6 @@
     "choirRequired": "Se requiere seleccionar un coro",
     "public": "Público",
     "choirOnly": "Solo Coro",
-    "addTag": "Agregar Etiqueta",
-    "removeTag": "Quitar Etiqueta",
     "chordProPlaceholder": "Ingresa el contenido ChordPro aquí...",
     "preview": "Vista Previa"
   },
