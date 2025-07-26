@@ -349,8 +349,23 @@ const SongsListPage: FC<SongsListPageProps> = ({ playlistId, refreshPlaylist }) 
     return () => window.removeEventListener('scroll', handleScroll);
   }, [token, user?.choirId, songsPerPage]); // Search handled separately by debounced handleSearchChange
 
+  // Separate effect to watch for tag changes and trigger automatic refetch
+  useEffect(() => {
+    const currentTags = searchParams.getAll('tags');
+    const currentSearch = searchParams.get('search') || '';
+    
+    // Only refetch if we have a token and this isn't the initial load
+    // (initial load is handled by the main useEffect above)
+    if (token && (currentTags.length > 0 || currentSearch)) {
+      // Use a small delay to avoid conflicts with the main useEffect
+      const timeoutId = setTimeout(() => {
+        fetchSongs(currentSearch, true);
+      }, 50);
+      
+      return () => clearTimeout(timeoutId);
+    }
+  }, [searchParams, token]); // Watch for changes in URL search parameters
 
-  
   // Handle back to top button click
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
