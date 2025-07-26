@@ -347,7 +347,7 @@ const SongsListPage: FC<SongsListPageProps> = ({ playlistId, refreshPlaylist }) 
     
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
-  }, [token, user?.choirId, songsPerPage, filters.search, filters.tags]); // Include filters.tags to auto-refresh when tags change
+  }, [token, user?.choirId, songsPerPage]); // Search handled separately by debounced handleSearchChange
 
 
   
