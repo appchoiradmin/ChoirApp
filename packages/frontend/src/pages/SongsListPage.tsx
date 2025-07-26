@@ -263,11 +263,7 @@ const SongsListPage: FC<SongsListPageProps> = ({ playlistId, refreshPlaylist }) 
         // Don't specify visibility - let backend handle visibility logic based on user context
       };
       
-      console.log('🔍 Fetching songs with params:', searchParams, 'isMobile:', isMobile);
-      
       const fetchedSongs = await searchSongs(searchParams, token);
-      
-      console.log('🔍 Received songs:', fetchedSongs?.length || 0, 'songs');
       
       if (resetPagination) {
         setSongs(fetchedSongs || []);
@@ -561,8 +557,6 @@ const SongsListPage: FC<SongsListPageProps> = ({ playlistId, refreshPlaylist }) 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newSearchValue = e.target.value;
     
-    console.log('🔍 Search input changed:', newSearchValue, 'isMobile:', isMobile);
-    
     // Update URL parameters immediately for UI responsiveness
     updateFilters({ search: newSearchValue });
     
@@ -573,7 +567,6 @@ const SongsListPage: FC<SongsListPageProps> = ({ playlistId, refreshPlaylist }) 
     
     // Set a new timeout to trigger search after user stops typing
     searchTimeoutRef.current = setTimeout(() => {
-      console.log('🔍 Triggering debounced search for:', newSearchValue);
       fetchSongs(newSearchValue, true);
     }, 300); // 300ms debounce
   };

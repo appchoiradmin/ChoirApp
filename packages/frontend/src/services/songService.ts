@@ -146,10 +146,7 @@ export const searchSongs = async (params: SongSearchParams, token: string): Prom
 
   const response = await fetch(`${API_BASE_URL}/api/songs/search?${queryParams.toString()}`, {
     headers: {
-      'Authorization': `Bearer ${token}`,
-      'Cache-Control': 'no-cache, no-store, must-revalidate',
-      'Pragma': 'no-cache',
-      'Expires': '0'
+      'Authorization': `Bearer ${token}`
     }
   });
 
