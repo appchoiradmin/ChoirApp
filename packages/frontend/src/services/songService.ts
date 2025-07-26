@@ -133,7 +133,7 @@ export const searchSongs = async (params: SongSearchParams, token: string): Prom
   if (params.title) queryParams.append('title', params.title);
   if (params.artist) queryParams.append('artist', params.artist);
   if (params.content) queryParams.append('content', params.content);
-  if (params.creatorId) queryParams.append('creatorId', params.creatorId);
+  if (params.userId) queryParams.append('userId', params.userId);
   if (params.choirId) queryParams.append('choirId', params.choirId);
   if (params.visibility !== undefined) queryParams.append('visibility', params.visibility.toString());
   if (params.skip !== undefined) queryParams.append('skip', params.skip.toString());

@@ -35,7 +35,7 @@ namespace ChoirApp.Backend.Endpoints.Songs
             string searchTerm = !string.IsNullOrEmpty(req.Title) ? req.Title : req.SearchTerm;
             
             // Get base results using existing method
-            var result = await _songService.SearchSongsAsync(searchTerm, req.UserId ?? req.CreatorId, req.ChoirId);
+            var result = await _songService.SearchSongsAsync(searchTerm, req.UserId, req.ChoirId);
 
             if (result.IsFailed)
             {

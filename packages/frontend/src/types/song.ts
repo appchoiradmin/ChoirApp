@@ -95,7 +95,6 @@ export interface SongSearchParams {
   artist?: string;
   content?: string;
   tags?: string[];
-  creatorId?: string;
   userId?: string;
   choirId?: string;
   visibility?: SongVisibilityType;
