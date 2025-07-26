@@ -30,6 +30,8 @@ namespace ChoirApp.Backend.Endpoints.Songs
 
         public override async Task HandleAsync(CancellationToken ct)
         {
+            Console.WriteLine($"🔍 Backend GetMySongsEndpoint called");
+            
             // Get current user ID from JWT token
             var currentUserIdClaim = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
             if (!Guid.TryParse(currentUserIdClaim, out var currentUserId))

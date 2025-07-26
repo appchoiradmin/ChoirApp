@@ -34,6 +34,7 @@ namespace ChoirApp.Backend.Endpoints.Songs
         public override async Task HandleAsync(CancellationToken ct)
         {
             var choirId = Route<Guid>("choirId");
+            Console.WriteLine($"🔍 Backend GetSongsByChoirEndpoint called with choirId: {choirId}");
             
             // Verify the current user has permission to view this choir's songs
             var userIdClaim = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;

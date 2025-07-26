@@ -259,7 +259,10 @@ const SongsListPage: FC<SongsListPageProps> = ({ playlistId, refreshPlaylist }) 
       const searchParams: SongSearchParams = {
         searchTerm: searchTerm || '', // Use provided search term
         skip: resetPagination ? 0 : page * songsPerPage,
-        take: songsPerPage
+        take: songsPerPage,
+        // Include userId and choirId for proper filtering
+        userId: user?.id,
+        choirId: choirId || undefined
         // Don't specify visibility - let backend handle visibility logic based on user context
       };
       

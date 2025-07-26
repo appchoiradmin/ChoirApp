@@ -21,13 +21,19 @@ namespace ChoirApp.Application.Services
             _tagRepository = tagRepository;
         }
 
-        public async Task<Result<SongDto>> CreateSongAsync(string title, string? artist, string content, Guid creatorId, Domain.Entities.SongVisibilityType visibility)
+        public async Task<Result<SongDto>> CreateSongAsync(string title, string? artist, string content, Guid creatorId, Domain.Entities.SongVisibilityType visibility, List<Guid>? visibleToChoirs = null)
         {
             // Business rule: Creator must exist
             var user = await _userRepository.GetByIdAsync(creatorId);
             if (user == null)
             {
                 return Result.Fail("User not found.");
+            }
+
+            // Business rule: If visibility is PublicChoirs, visibleToChoirs must be provided
+            if (visibility == Domain.Entities.SongVisibilityType.PublicChoirs && (visibleToChoirs == null || !visibleToChoirs.Any()))
+            {
+                return Result.Fail("When visibility is PublicChoirs, at least one choir must be specified.");
             }
 
             // Create song using domain logic
@@ -39,12 +45,28 @@ namespace ChoirApp.Application.Services
 
             var song = songResult.Value;
             await _songRepository.AddAsync(song);
+
+            // Create SongVisibility records for PublicChoirs visibility
+            if (visibility == Domain.Entities.SongVisibilityType.PublicChoirs && visibleToChoirs != null)
+            {
+                foreach (var choirId in visibleToChoirs)
+                {
+                    var songVisibility = new SongVisibility
+                    {
+                        VisibilityId = Guid.NewGuid(),
+                        SongId = song.SongId,
+                        ChoirId = choirId
+                    };
+                    song.Visibilities.Add(songVisibility);
+                }
+            }
+
             await _songRepository.SaveChangesAsync();
 
             return Result.Ok(MapToSongDto(song));
         }
 
-        public async Task<Result<SongDto>> CreateSongVersionAsync(Guid baseSongId, string content, Guid creatorId, Domain.Entities.SongVisibilityType visibility)
+        public async Task<Result<SongDto>> CreateSongVersionAsync(Guid baseSongId, string content, Guid creatorId, Domain.Entities.SongVisibilityType visibility, List<Guid>? visibleToChoirs = null)
         {
             // Business rule: Base song must exist
             var baseSong = await _songRepository.GetByIdAsync(baseSongId);
@@ -60,6 +82,12 @@ namespace ChoirApp.Application.Services
                 return Result.Fail("User not found.");
             }
 
+            // Business rule: If visibility is PublicChoirs, visibleToChoirs must be provided
+            if (visibility == Domain.Entities.SongVisibilityType.PublicChoirs && (visibleToChoirs == null || !visibleToChoirs.Any()))
+            {
+                return Result.Fail("When visibility is PublicChoirs, at least one choir must be specified.");
+            }
+
             // Create version using domain logic
             var versionResult = Song.CreateVersion(baseSong, content, creatorId, visibility);
             if (versionResult.IsFailed)
@@ -69,6 +97,22 @@ namespace ChoirApp.Application.Services
 
             var version = versionResult.Value;
             await _songRepository.AddAsync(version);
+
+            // Create SongVisibility records for PublicChoirs visibility
+            if (visibility == Domain.Entities.SongVisibilityType.PublicChoirs && visibleToChoirs != null)
+            {
+                foreach (var choirId in visibleToChoirs)
+                {
+                    var songVisibility = new SongVisibility
+                    {
+                        VisibilityId = Guid.NewGuid(),
+                        SongId = version.SongId,
+                        ChoirId = choirId
+                    };
+                    version.Visibilities.Add(songVisibility);
+                }
+            }
+
             await _songRepository.SaveChangesAsync();
 
             return Result.Ok(MapToSongDto(version));

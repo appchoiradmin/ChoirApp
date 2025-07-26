@@ -41,12 +41,76 @@ namespace ChoirApp.Infrastructure.Repositories
 
         public async Task<List<Song>> GetByChoirIdAsync(Guid choirId)
         {
-            return await _context.Songs
+            Console.WriteLine($"🔍 Backend GetByChoirIdAsync called with choirId: {choirId}");
+            
+            // Debug: Let's see what songs exist before filtering
+            var allSongsDebug = await _context.Songs
+                .Include(s => s.Visibilities)
+                .Select(s => new { s.Title, s.Visibility, s.SongId, VisibilitiesCount = s.Visibilities.Count, Visibilities = s.Visibilities.Select(v => v.ChoirId).ToList() })
+                .ToListAsync();
+            Console.WriteLine($"🔍 Backend GetByChoirIdAsync total songs before filtering: {allSongsDebug.Count}");
+            foreach (var songDebug in allSongsDebug)
+            {
+                Console.WriteLine($"🔍 Backend GetByChoirIdAsync song: '{songDebug.Title}' (visibility: {songDebug.Visibility}, visibilities: [{string.Join(", ", songDebug.Visibilities)}])");
+            }
+            
+            var publicSongs = await _context.Songs
+                .Include(s => s.Visibilities)
+                .Include(s => s.Tags)
+                .Where(s => s.Visibility == SongVisibilityType.PublicAll)
+                .ToListAsync();
+            Console.WriteLine($"🔍 Backend GetByChoirIdAsync public songs: {publicSongs.Count}");
+            foreach (var publicSong in publicSongs)
+            {
+                Console.WriteLine($"🔍 Backend GetByChoirIdAsync public song: '{publicSong.Title}' (visibility: {publicSong.Visibility}, visibilities count: {publicSong.Visibilities?.Count ?? 0})");
+                if (publicSong.Visibilities != null)
+                {
+                    foreach (var vis in publicSong.Visibilities)
+                    {
+                        Console.WriteLine($"🔍 Backend GetByChoirIdAsync   - visible to choir: {vis.ChoirId}");
+                    }
+                }
+            }
+            
+            var publicChoirsSongs = await _context.Songs
+                .Include(s => s.Visibilities)
+                .Include(s => s.Tags)
+                .Where(s => s.Visibility == SongVisibilityType.PublicChoirs && s.Visibilities.Any(sv => sv.ChoirId == choirId))
+                .ToListAsync();
+            Console.WriteLine($"🔍 Backend GetByChoirIdAsync public choirs songs: {publicChoirsSongs.Count}");
+            foreach (var publicChoirsSong in publicChoirsSongs)
+            {
+                Console.WriteLine($"🔍 Backend GetByChoirIdAsync public choirs song: '{publicChoirsSong.Title}' (visibility: {publicChoirsSong.Visibility}, visibilities count: {publicChoirsSong.Visibilities?.Count ?? 0})");
+                if (publicChoirsSong.Visibilities != null)
+                {
+                    foreach (var vis in publicChoirsSong.Visibilities)
+                    {
+                        Console.WriteLine($"🔍 Backend GetByChoirIdAsync   - visible to choir: {vis.ChoirId}");
+                    }
+                }
+            }
+            
+            var results = await _context.Songs
                 .Include(s => s.Visibilities)
                 .Include(s => s.Tags)
                 .Where(s => s.Visibility == SongVisibilityType.PublicAll ||
-                           s.Visibilities.Any(sv => sv.ChoirId == choirId))
+                           (s.Visibility == SongVisibilityType.PublicChoirs && s.Visibilities.Any(sv => sv.ChoirId == choirId)))
                 .ToListAsync();
+                
+            Console.WriteLine($"🔍 Backend GetByChoirIdAsync results: {results.Count} songs found");
+            foreach (var result in results)
+            {
+                Console.WriteLine($"🔍 Backend GetByChoirIdAsync found song: '{result.Title}' (visibility: {result.Visibility}, visibilities count: {result.Visibilities?.Count ?? 0})");
+                if (result.Visibilities != null)
+                {
+                    foreach (var vis in result.Visibilities)
+                    {
+                        Console.WriteLine($"🔍 Backend GetByChoirIdAsync   - visible to choir: {vis.ChoirId}");
+                    }
+                }
+            }
+            
+            return results;
         }
 
         public async Task<List<Song>> GetAllPublicAsync()
@@ -87,13 +151,25 @@ namespace ChoirApp.Infrastructure.Repositories
                 }
             }
 
+            // Debug: Let's see what songs exist before visibility filtering
+            var allSongsDebug = await _context.Songs
+                .Include(s => s.Visibilities)
+                .Select(s => new { s.Title, s.Visibility, s.SongId, VisibilitiesCount = s.Visibilities.Count, Visibilities = s.Visibilities.Select(v => v.ChoirId).ToList() })
+                .ToListAsync();
+            Console.WriteLine($"🔍 Backend total songs before filtering: {allSongsDebug.Count}");
+            foreach (var songDebug in allSongsDebug)
+            {
+                Console.WriteLine($"🔍 Backend song: '{songDebug.Title}' (visibility: {songDebug.Visibility}, visibilities: [{string.Join(", ", songDebug.Visibilities)}])");
+            }
+            Console.WriteLine($"🔍 Backend filtering for choirId: {choirId}");
+            
             // Apply visibility filters
             if (userId.HasValue && choirId.HasValue)
             {
                 // User in choir context: show public + user's songs + choir-visible songs
                 query = query.Where(s => s.Visibility == SongVisibilityType.PublicAll ||
                                         s.CreatorId == userId.Value ||
-                                        s.Visibilities.Any(sv => sv.ChoirId == choirId.Value));
+                                        (s.Visibility == SongVisibilityType.PublicChoirs && s.Visibilities.Any(sv => sv.ChoirId == choirId.Value)));
             }
             else if (userId.HasValue)
             {
@@ -105,7 +181,7 @@ namespace ChoirApp.Infrastructure.Repositories
             {
                 // Choir context: show public + choir-visible songs
                 query = query.Where(s => s.Visibility == SongVisibilityType.PublicAll ||
-                                        s.Visibilities.Any(sv => sv.ChoirId == choirId.Value));
+                                        (s.Visibility == SongVisibilityType.PublicChoirs && s.Visibilities.Any(sv => sv.ChoirId == choirId.Value)));
             }
             else
             {
@@ -113,7 +189,22 @@ namespace ChoirApp.Infrastructure.Repositories
                 query = query.Where(s => s.Visibility == SongVisibilityType.PublicAll);
             }
 
-            var results = await query.ToListAsync();           
+            var results = await query.ToListAsync();
+            
+            // Debug: Log the filtering results
+            Console.WriteLine($"🔍 Backend SearchAsync results: {results.Count} songs found");
+            foreach (var result in results)
+            {
+                Console.WriteLine($"🔍 Backend found song: '{result.Title}' (visibility: {result.Visibility}, visibilities count: {result.Visibilities?.Count ?? 0})");
+                if (result.Visibilities != null)
+                {
+                    foreach (var vis in result.Visibilities)
+                    {
+                        Console.WriteLine($"🔍 Backend   - visible to choir: {vis.ChoirId}");
+                    }
+                }
+            }
+            
             return results;
         }
 

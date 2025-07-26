@@ -29,6 +29,8 @@ namespace ChoirApp.Backend.Endpoints.Songs
 
         public override async Task HandleAsync(Requests.SearchSongsRequest req, CancellationToken ct)
         {
+            Console.WriteLine($"🔍 Backend SearchSongsEndpoint called with: searchTerm='{req.SearchTerm}', title='{req.Title}', choirId='{req.ChoirId}', userId='{req.UserId}'");
+            
             // Use title as search term if provided, otherwise use SearchTerm
             string searchTerm = !string.IsNullOrEmpty(req.Title) ? req.Title : req.SearchTerm;
             

@@ -90,12 +90,13 @@ export interface SongTagDto {
  * Parameters for searching songs
  */
 export interface SongSearchParams {
-  searchTerm?: string; // Required by backend SearchSongsAsync method
+  searchTerm?: string;
   title?: string;
   artist?: string;
   content?: string;
   tags?: string[];
   creatorId?: string;
+  userId?: string;
   choirId?: string;
   visibility?: SongVisibilityType;
   skip?: number;
