@@ -24,7 +24,8 @@
     "select": "Select",
     "none": "None",
     "all": "All",
-    "clear": "Clear"
+    "clear": "Clear",
+    "selectAll": "Select All"
   },
   "navigation": {
     "home": "Home",
@@ -34,7 +35,8 @@
     "choirs": "Choirs",
     "profile": "Profile",
     "settings": "Settings",
-    "logout": "Logout"
+    "logout": "Logout",
+    "backButton": "Back"
   },
   "auth": {
     "signIn": "Sign In",
@@ -54,7 +56,13 @@
     "welcomeBackUser": "Welcome back! Redirecting...",
     "success": "Success!",
     "authenticationError": "Authentication Error",
-    "loading": "Loading..."
+    "loading": "Loading...",
+    "authError": "Authentication error occurred",
+    "redirecting": "Redirecting...",
+    "processingAuth": "Processing authentication...",
+    "authSuccess": "Authentication successful!",
+    "authComplete": "Authentication complete",
+    "authCallback": "Processing authentication response..."
   },
   "home": {
     "title": "Welcome to AppChoir",
@@ -162,7 +170,18 @@
     "viewProfile": "View Profile",
     "viewProfileDesc": "Update your settings",
     "settings": "Settings",
-    "settingsDesc": "Manage preferences"
+    "settingsDesc": "Manage preferences",
+    "welcome": "Welcome back!",
+    "quickStats": "Quick Stats",
+    "totalSongs": "Total Songs",
+    "totalPlaylists": "Total Playlists",
+    "recentActivity": "Recent Activity",
+    "browseLibrary": "Browse Library",
+    "gettingStarted": "Getting Started",
+    "step1": "Step 1: Create your first choir",
+    "step2": "Step 2: Add songs to your library",
+    "step3": "Step 3: Create your first playlist",
+    "progress": "Progress: {{completed}} of {{total}} steps completed"
   },
   "choir": {
     "title": "Choir",
@@ -199,7 +218,14 @@
     "notifications": "Notifications",
     "privacy": "Privacy",
     "viewProfile": "View Profile",
-    "viewProfileDesc": "Update your settings"
+    "viewProfileDesc": "Update your settings",
+    "profileDescription": "Update your personal information and preferences",
+    "notificationsDescription": "Configure how you receive notifications",
+    "notificationDescription": "Push notifications are automatically enabled when you allow notifications in your browser. You will receive notifications for:",
+    "choirInvitations": "Choir invitations",
+    "importantUpdates": "Important choir updates",
+    "playlistChanges": "Playlist changes",
+    "notificationNote": "Note: To manage notifications, use your browser's notification settings."
   },
   "songs": {
     "songsTitle": "Songs",
@@ -228,7 +254,6 @@
     "templateInstructions": "Templates help organize your playlist into sections. Choose a template or select 'None' to add songs freely.",
     "templateAlwaysVisible": "Select a template to organize your playlist, or choose 'None' to add songs without sections. Default template is used when no selection is made.",
     "templateSelectedInfo": "Songs will be organized using the selected template's sections.",
-    "templateLocked": "Template selection is locked. The playlist structure cannot be changed after adding songs.",
     "noTemplateSelected": "No template selected",
     "retry": "Retry",
     "noSongsFound": "No songs found",
@@ -333,7 +358,6 @@
     "songsAvailable_plural": "{{count}} songs available",
     "newSong": "New Song",
     "deselectAll": "Deselect All",
-    "searchSongs": "Search songs...",
     "sortBy": "Sort by",
     "sortByTitle": "Title",
     "sortByArtist": "Artist",
@@ -353,7 +377,6 @@
     "bulkDelete": "Delete Selected",
     "noSongsSelected": "No songs selected",
     "view": "View",
-    "delete": "Delete",
     "createdAt": "Created",
     "tags": "Tags",
     "noTagsAssigned": "No tags assigned",
@@ -387,7 +410,35 @@
     "exportSuccess_plural": "{{count}} song versions exported successfully",
     "exportError": "Failed to export song versions",
     "deleteConfirmation": "Are you sure you want to delete {{count}} song version(s)?",
-    "deleteSuccess": "{{count}} song version(s) deleted successfully"
+    "deleteSuccess": "{{count}} song version(s) deleted successfully",
+    "noTemplatesAvailable": "No templates available",
+    "tryAdjustingFilters": "Try adjusting your filters or search terms",
+    "noSongsInLibrary": "No songs in your library",
+    "getStartedWithSongs": "Get started by adding your first song",
+    "addFirstSong": "Add First Song",
+    "errorLoadingSongs": "Error loading songs",
+    "failedToDeleteSongs": "Failed to delete songs",
+    "backToSongs": "Back to Songs",
+    "songVersions": "Song Versions",
+    "originalVersion": "Original Version",
+    "choirVersion": "Choir Version",
+    "createNewVersion": "Create New Version",
+    "editVersion": "Edit Version",
+    "deleteVersion": "Delete Version",
+    "saveVersion": "Save Version",
+    "versionSaved": "Version saved successfully",
+    "versionDeleted": "Version deleted successfully",
+    "errorSavingVersion": "Error saving version",
+    "errorDeletingVersion": "Error deleting version",
+    "choirSpecificVersion": "Choir Specific Version",
+    "selectChoir": "Select Choir",
+    "choirRequired": "Choir selection is required",
+    "public": "Public",
+    "choirOnly": "Choir Only",
+    "addTag": "Add Tag",
+    "removeTag": "Remove Tag",
+    "chordProPlaceholder": "Enter ChordPro content here...",
+    "preview": "Preview"
   },
   "playlistTemplates": {
     "title": "Playlist Templates",
@@ -494,7 +545,41 @@
     "browseTemplates": "Browse Templates",
     "untitledSection": "Untitled Section",
     "noSongsInSection": "No songs in this section yet.",
-    "sectionAddInstructions": "To add songs, go to the <b>Songs</b> tab and add them to your playlist."
+    "sectionAddInstructions": "To add songs, go to the <b>Songs</b> tab and add them to your playlist.",
+    "noSongsInPlaylist": "No Songs in Playlist",
+    "emptyPlaylistMessage": "This playlist doesn't have any songs yet. Start building your playlist by adding songs to sections.",
+    "song": "song",
+    "songs": "songs",
+    "duration": "Duration",
+    "saving": "Saving...",
+    "globalTemplates": {
+      "generic": "Generic Template",
+      "mass": "Mass Template",
+      "service": "Service Template",
+      "practice": "Practice Template",
+      "concert": "Concert Template",
+      "wedding": "Wedding Template",
+      "funeral": "Funeral Template"
+    },
+    "globalTemplateSections": {
+      "songs": "Songs",
+      "opening": "Opening",
+      "worship": "Worship",
+      "communion": "Communion",
+      "closing": "Closing",
+      "prelude": "Prelude",
+      "postlude": "Postlude",
+      "anthem": "Anthem",
+      "hymns": "Hymns",
+      "psalms": "Psalms"
+    },
+    "deletePlaylistButton": "Delete Playlist",
+    "deletingPlaylist": "Deleting...",
+    "confirmDeleteTitle": "Confirm Deletion",
+    "confirmDeleteMessage": "Are you sure you want to delete this playlist?",
+    "confirmDelete": "This action cannot be undone.",
+    "playlistDeletedSuccessfully": "Playlist deleted successfully",
+    "failedToDeletePlaylist": "Failed to delete playlist"
   },
   "choirAdmin": {
     "title": "Choir Admin",
@@ -546,7 +631,8 @@
     "failedToUpdateChoirName": "Failed to update choir name. Please try again.",
     "choirNameRequired": "Choir name is required",
     "choirNameTooLong": "Choir name must be less than 100 characters",
-    "choirNameExists": "A choir with this name already exists"
+    "choirNameExists": "A choir with this name already exists",
+    "failedToFetchChoirDetails": "Failed to fetch choir details."
   },
   "createPlaylist": {
     "title": "New Playlist",
@@ -712,7 +798,11 @@
     "deletePlaylist": "Delete Playlist",
     "unknownSong": "Unknown Song",
     "edit": "Edit",
-    "delete": "Delete"
+    "delete": "Delete",
+    "confirmDeleteTitle": "Confirm Deletion",
+    "confirmDeleteMessage": "This action cannot be undone. All songs in this playlist will be removed, and you can select a different template for this date.",
+    "deletePlaylistButton": "Delete Current Playlist",
+    "deletingPlaylist": "Deleting playlist..."
   },
   "playlistTemplateDetail": {
     "title": "Template Details",
@@ -852,13 +942,6 @@
   "chordProViewer": {
     "noContent": "No song content to display."
   },
-  "inviteNewMember": "Invite New Member",
-  "enterEmailAddress": "Enter email address",
-  "send": "Send",
-  "sentInvitations": "Sent Invitations",
-  "promoteToAdmin": "Promote to Admin",
-  "demoteToMember": "Demote to Member",
-  "removeMember": "Remove Member",
   "invitation": {
     "title": "You're Invited!",
     "subtitle": "You have been invited to join",

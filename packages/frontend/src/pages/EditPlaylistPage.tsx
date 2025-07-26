@@ -412,15 +412,15 @@ const EditPlaylistPage: React.FC = () => {
           <div className="header-stats">
             <div className="stat-card">
               <span className="stat-number">{sections.length}</span>
-              <span className="stat-label">Sections</span>
+              <span className="stat-label">{t('playlists.sections')}</span>
             </div>
             <div className="stat-card">
               <span className="stat-number">{getTotalSongs()}</span>
-              <span className="stat-label">Total Songs</span>
+              <span className="stat-label">{t('playlists.totalSongs')}</span>
             </div>
             <div className="stat-card">
               <span className="stat-number">{getTotalDuration()}</span>
-              <span className="stat-label">Duration</span>
+              <span className="stat-label">{t('playlists.duration')}</span>
             </div>
             <div className="stat-card">
               <span className="stat-number">{selectedTemplate ? '1' : '0'}</span>
@@ -476,9 +476,9 @@ const EditPlaylistPage: React.FC = () => {
           {sections.length === 0 ? (
             <div className="empty-state">
               <MusicalNoteIcon className="empty-icon" />
-              <h2 className="empty-title">No Songs in Playlist</h2>
+              <h2 className="empty-title">{t('playlists.noSongsInPlaylist')}</h2>
               <p className="empty-message">
-                This playlist doesn't have any songs yet. Start building your playlist by adding songs to sections.
+                {t('playlists.emptyPlaylistMessage')}
               </p>
               <div className="empty-actions">
                 <Button 
@@ -487,7 +487,7 @@ const EditPlaylistPage: React.FC = () => {
                   onClick={handleAddSongs}
                   className="empty-cta"
                 >
-                  Add Songs
+                  {t('playlists.addSongs')}
                 </Button>
               </div>
             </div>
@@ -505,12 +505,12 @@ const EditPlaylistPage: React.FC = () => {
                           <h3 className="section-title">{section.title}</h3>
                           <div className="section-meta">
                             <span className="song-count">
-                              {section.songs?.length || 0} song{(section.songs?.length || 0) !== 1 ? 's' : ''}
+                              {section.songs?.length || 0} {(section.songs?.length || 0) === 1 ? t('playlists.song') : t('playlists.songs')}
                             </span>
                             {saving && (
                               <span className="saving-indicator">
                                 <LoadingSpinner size="sm" />
-                                Saving...
+                                {t('playlists.saving')}
                               </span>
                             )}
                           </div>
@@ -532,14 +532,14 @@ const EditPlaylistPage: React.FC = () => {
                           </div>
                         ) : (
                           <div className="section-empty">
-                            <p className="empty-text">No songs in this section yet.</p>
+                            <p className="empty-text">{t('playlists.noSongsInSection')}</p>
                             <Button 
                               variant="ghost" 
                               size="sm"
                               leftIcon={<PlusIcon />}
                               onClick={handleAddSongs}
                             >
-                              Add Songs
+                              {t('playlists.addSongs')}
                             </Button>
                           </div>
                         )}
