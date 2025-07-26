@@ -42,8 +42,7 @@ namespace ChoirApp.Backend.Endpoints.Songs
                 baseSongId,
                 req.Content,
                 userId,
-                (Domain.Entities.SongVisibilityType)req.Visibility,
-                req.VisibleToChoirs);
+                (Domain.Entities.SongVisibilityType)req.Visibility);
 
             if (result.IsFailed)
             {
