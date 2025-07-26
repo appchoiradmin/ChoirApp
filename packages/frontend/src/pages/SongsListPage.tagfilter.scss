@@ -1,0 +1,43 @@
+// TagFilter integration styles for SongsListPage
+.songs-page {
+  &__tag-filter {
+    margin-bottom: 1rem;
+    
+    // Ensure consistent spacing with other page elements
+    @media (max-width: 767px) {
+      margin-bottom: 0.75rem;
+    }
+  }
+  
+  // Update search indicator to include tag information
+  &__search-indicator {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    
+    // Style for active tag indicators
+    .tag-indicator {
+      display: inline-flex;
+      align-items: center;
+      background: #3b82f6;
+      color: white;
+      font-size: 0.75rem;
+      font-weight: 500;
+      padding: 0.25rem 0.5rem;
+      border-radius: 12px;
+      gap: 0.25rem;
+      
+      &__label {
+        opacity: 0.8;
+      }
+      
+      &__count {
+        background: rgba(255, 255, 255, 0.2);
+        padding: 0.125rem 0.375rem;
+        border-radius: 8px;
+        font-weight: 600;
+      }
+    }
+  }
+}

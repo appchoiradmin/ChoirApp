@@ -1,0 +1,385 @@
+// Modern TagFilter Component Styles - Mobile-First Design
+.tag-filter-modern {
+  margin-bottom: 1rem;
+  
+  // Selected tags section - always visible when tags are selected
+  &__selected {
+    margin-bottom: 0.75rem;
+    
+    @media (max-width: 767px) {
+      margin-bottom: 0.625rem;
+    }
+  }
+  
+  &__selected-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    align-items: center;
+    
+    @media (max-width: 767px) {
+      gap: 0.375rem;
+    }
+  }
+  
+  &__clear-all {
+    background: none;
+    border: 1px solid #d1d5db;
+    color: #6b7280;
+    font-size: 0.75rem;
+    font-weight: 500;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    
+    // Mobile-friendly tap target
+    min-height: 32px;
+    min-width: 44px;
+    
+    &:hover {
+      background: #f9fafb;
+      border-color: #9ca3af;
+      color: #374151;
+    }
+    
+    &:focus {
+      outline: 2px solid #3b82f6;
+      outline-offset: 2px;
+    }
+  }
+  
+  // Search container
+  &__search-container {
+    position: relative;
+    margin-bottom: 0.75rem;
+    
+    @media (max-width: 767px) {
+      margin-bottom: 0.625rem;
+    }
+  }
+  
+  &__search {
+    position: relative;
+    display: flex;
+    align-items: center;
+  }
+  
+  &__search-icon {
+    position: absolute;
+    left: 0.75rem;
+    width: 1.25rem;
+    height: 1.25rem;
+    color: #9ca3af;
+    stroke-width: 2;
+    z-index: 1;
+  }
+  
+  &__search-input {
+    width: 100%;
+    padding: 0.75rem 0.75rem 0.75rem 2.75rem;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    font-size: 0.875rem;
+    background: #ffffff;
+    transition: all 0.15s ease;
+    
+    // Mobile optimization
+    @media (max-width: 767px) {
+      padding: 0.625rem 0.625rem 0.625rem 2.5rem;
+      font-size: 16px; // Prevents zoom on iOS
+    }
+    
+    &::placeholder {
+      color: #9ca3af;
+    }
+    
+    &:focus {
+      outline: none;
+      border-color: #3b82f6;
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    }
+  }
+  
+  &__search-loading {
+    position: absolute;
+    right: 0.75rem;
+    display: flex;
+    align-items: center;
+  }
+  
+  &__spinner {
+    width: 1rem;
+    height: 1rem;
+    border: 2px solid #e5e7eb;
+    border-top: 2px solid #3b82f6;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+  }
+  
+  // Suggestions dropdown
+  &__suggestions {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: #ffffff;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    z-index: 50;
+    max-height: 200px;
+    overflow-y: auto;
+    
+    // Mobile optimization
+    @media (max-width: 767px) {
+      max-height: 150px;
+    }
+  }
+  
+  &__suggestions-list {
+    padding: 0.25rem;
+  }
+  
+  &__suggestion {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    width: 100%;
+    padding: 0.5rem 0.75rem;
+    border: none;
+    background: none;
+    text-align: left;
+    font-size: 0.875rem;
+    color: #374151;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: all 0.15s ease;
+    
+    // Mobile-friendly tap target
+    min-height: 44px;
+    
+    &:hover {
+      background: #f3f4f6;
+    }
+    
+    &:focus {
+      outline: none;
+      background: #e0e7ff;
+    }
+  }
+  
+  &__suggestion-icon {
+    width: 1rem;
+    height: 1rem;
+    color: #6b7280;
+    stroke-width: 2;
+    flex-shrink: 0;
+  }
+  
+  &__error {
+    padding: 1rem;
+    text-align: center;
+    
+    p {
+      color: #dc2626;
+      font-size: 0.875rem;
+      margin: 0;
+    }
+  }
+  
+  &__no-results {
+    padding: 1rem;
+    text-align: center;
+    color: #6b7280;
+    font-size: 0.875rem;
+    font-style: italic;
+  }
+  
+  // Popular tags section
+  &__popular {
+    margin-top: 0.5rem;
+  }
+  
+  &__popular-label {
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: #6b7280;
+    margin-bottom: 0.5rem;
+    text-transform: uppercase;
+    letter-spacing: 0.025em;
+  }
+  
+  &__popular-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    
+    @media (max-width: 767px) {
+      gap: 0.375rem;
+    }
+  }
+  
+  // Tag buttons (unified styles for all tag types)
+  &__tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    font-size: 0.75rem;
+    font-weight: 500;
+    padding: 0.375rem 0.75rem;
+    border-radius: 16px;
+    border: none;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    
+    // Mobile-friendly tap target
+    min-height: 32px;
+    
+    &:focus {
+      outline: 2px solid #3b82f6;
+      outline-offset: 2px;
+    }
+    
+    // Selected tag style (with remove functionality)
+    &--selected {
+      background: #3b82f6;
+      color: white;
+      
+      &:hover {
+        background: #2563eb;
+        transform: translateY(-1px);
+        box-shadow: 0 2px 4px rgba(59, 130, 246, 0.3);
+      }
+      
+      &:active {
+        transform: translateY(0);
+      }
+    }
+    
+    // Popular tag style (for quick selection)
+    &--popular {
+      background: #f3f4f6;
+      color: #374151;
+      border: 1px solid #d1d5db;
+      
+      &:hover {
+        background: #e5e7eb;
+        border-color: #9ca3af;
+        transform: translateY(-1px);
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      }
+      
+      &:active {
+        transform: translateY(0);
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+      }
+    }
+  }
+  
+  &__tag-icon {
+    width: 0.875rem;
+    height: 0.875rem;
+    stroke-width: 2;
+    flex-shrink: 0;
+  }
+  
+  &__tag-remove {
+    width: 0.875rem;
+    height: 0.875rem;
+    stroke-width: 2.5;
+    margin-left: 0.125rem;
+    flex-shrink: 0;
+    
+    &:hover {
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 50%;
+    }
+  }
+}
+
+// Spinner animation
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+// Dark mode support
+@media (prefers-color-scheme: dark) {
+  .tag-filter-modern {
+    &__search-input {
+      background: #1f2937;
+      border-color: #374151;
+      color: #f9fafb;
+      
+      &::placeholder {
+        color: #9ca3af;
+      }
+      
+      &:focus {
+        border-color: #3b82f6;
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+      }
+    }
+    
+    &__search-icon {
+      color: #6b7280;
+    }
+    
+    &__suggestions {
+      background: #1f2937;
+      border-color: #374151;
+    }
+    
+    &__suggestion {
+      color: #f9fafb;
+      
+      &:hover {
+        background: #374151;
+      }
+      
+      &:focus {
+        background: #1e40af;
+      }
+    }
+    
+    &__suggestion-icon {
+      color: #9ca3af;
+    }
+    
+    &__popular-label {
+      color: #9ca3af;
+    }
+    
+    &__clear-all {
+      border-color: #4b5563;
+      color: #9ca3af;
+      
+      &:hover {
+        background: #374151;
+        border-color: #6b7280;
+        color: #d1d5db;
+      }
+    }
+    
+    &__tag--popular {
+      background: #374151;
+      color: #d1d5db;
+      border-color: #4b5563;
+      
+      &:hover {
+        background: #4b5563;
+        border-color: #6b7280;
+      }
+    }
+    
+    &__no-results {
+      color: #9ca3af;
+    }
+    
+    &__spinner {
+      border-color: #4b5563;
+      border-top-color: #3b82f6;
+    }
+  }
+}

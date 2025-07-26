@@ -12,11 +12,13 @@ import { SongDto, SongSearchParams } from '../types/song';
 import { Button, Card, LoadingSpinner } from '../components/ui';
 import Layout from '../components/ui/Layout';
 import Navigation from '../components/ui/Navigation';
+import TagFilter from '../components/ui/TagFilter';
 import { MagnifyingGlassIcon, PlusIcon, ChevronUpIcon, ChevronDownIcon, CheckCircleIcon, XMarkIcon, MusicalNoteIcon, TrashIcon } from '@heroicons/react/24/outline';
 import SectionSelectionModal from '../components/SectionSelectionModal';
 import './SongsListPage.scss';
 import './SongsListPage.enhanced.scss';
 import './SongsListPage.mobile.scss';
+import './SongsListPage.tagfilter.scss';
 import '../styles/delete-playlist.css';
 
 interface SongsListPageProps {
@@ -28,6 +30,7 @@ interface FilterState {
   search: string;
   sortBy: 'title' | 'artist' | 'tags';
   sortOrder: 'asc' | 'desc';
+  tags: string[];
 }
 
 const DEFAULT_SONGS_PER_PAGE = 24;
@@ -95,7 +98,8 @@ const SongsListPage: FC<SongsListPageProps> = ({ playlistId, refreshPlaylist }) 
   const filters: FilterState = {
     search: searchParams.get('search') || '',
     sortBy: (searchParams.get('sortBy') as 'title' | 'artist' | 'tags') || 'title',
-    sortOrder: (searchParams.get('sortOrder') as 'asc' | 'desc') || 'asc'
+    sortOrder: (searchParams.get('sortOrder') as 'asc' | 'desc') || 'asc',
+    tags: searchParams.getAll('tags') || []
   };
   
   // Helper function to update URL search parameters
@@ -104,9 +108,18 @@ const SongsListPage: FC<SongsListPageProps> = ({ playlistId, refreshPlaylist }) 
     
     // Update each filter parameter
     Object.entries(newFilters).forEach(([key, value]) => {
-      if (value && value.trim() !== '') {
+      if (key === 'tags' && Array.isArray(value)) {
+        // Handle tags array - remove all existing tags first
+        updatedParams.delete('tags');
+        // Add each tag as a separate parameter
+        value.forEach(tag => {
+          if (tag && tag.trim() !== '') {
+            updatedParams.append('tags', tag);
+          }
+        });
+      } else if (value && typeof value === 'string' && value.trim() !== '') {
         updatedParams.set(key, value);
-      } else {
+      } else if (!value || (typeof value === 'string' && value.trim() === '')) {
         updatedParams.delete(key);
       }
     });
@@ -263,7 +276,9 @@ const SongsListPage: FC<SongsListPageProps> = ({ playlistId, refreshPlaylist }) 
         take: songsPerPage,
         // Include userId and choirId for proper filtering
         userId: user?.id,
-        choirId: choirId || undefined
+        choirId: choirId || undefined,
+        // Include selected tags for filtering
+        tags: filters.tags.length > 0 ? filters.tags : undefined
         // Don't specify visibility - let backend handle visibility logic based on user context
       };
       
@@ -596,6 +611,15 @@ const SongsListPage: FC<SongsListPageProps> = ({ playlistId, refreshPlaylist }) 
     fetchSongs('', true);
   };
 
+  // Handle tag filter changes
+  const handleTagsChange = (newTags: string[]) => {
+    // Update URL parameters with new tags
+    updateFilters({ tags: newTags });
+    
+    // Trigger search with current search term and new tags
+    fetchSongs(filters.search, true);
+  };
+
   // Delete playlist handlers
   const confirmDeletePlaylist = () => {
     setShowDeleteConfirm(true);
@@ -635,9 +659,20 @@ const SongsListPage: FC<SongsListPageProps> = ({ playlistId, refreshPlaylist }) 
           <h1 className="songs-page__title">
             {t('songs.songsLibrary')}
           </h1>
-          {filters.search && (
+          {(filters.search || filters.tags.length > 0) && (
             <div className="songs-page__search-indicator">
-              {t('songs.searchingFor')} "{filters.search}" ({songs.length} {t('songs.results')})
+              {filters.search && (
+                <span>
+                  {t('songs.searchingFor')} "{filters.search}"
+                </span>
+              )}
+              {filters.tags.length > 0 && (
+                <div className="tag-indicator">
+                  <span className="tag-indicator__label">{t('songs.filterByTags')}:</span>
+                  <span className="tag-indicator__count">{filters.tags.length}</span>
+                </div>
+              )}
+              <span>({songs.length} {t('songs.results')})</span>
             </div>
           )}
           
@@ -654,7 +689,7 @@ const SongsListPage: FC<SongsListPageProps> = ({ playlistId, refreshPlaylist }) 
               </form>
               
               {/* Clear filter button - only show when there's an active filter */}
-              {filters.search && (
+              {(filters.search || filters.tags.length > 0) && (
                 <button 
                   className="songs-page__clear-filter"
                   onClick={handleClearFilters}
@@ -666,6 +701,13 @@ const SongsListPage: FC<SongsListPageProps> = ({ playlistId, refreshPlaylist }) 
               )}
             </div>
           </div>
+          
+          {/* Tag Filter Component */}
+          <TagFilter
+            selectedTags={filters.tags}
+            onTagsChange={handleTagsChange}
+            className="songs-page__tag-filter"
+          />
         </div>
         
         {/* Template selection - always visible within a choir */}
