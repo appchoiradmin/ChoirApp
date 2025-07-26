@@ -70,7 +70,6 @@ const SongsListPage: FC<SongsListPageProps> = ({ playlistId, refreshPlaylist }) 
   const isGeneralUser = !user?.choirId;
 
   const [songs, setSongs] = useState<SongDto[]>([]);
-  const [sortedSongs, setSortedSongs] = useState<SongDto[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedSongs, setSelectedSongs] = useState<Set<string>>(new Set());
@@ -132,14 +131,20 @@ const SongsListPage: FC<SongsListPageProps> = ({ playlistId, refreshPlaylist }) 
   
 
   
-  // Function to sort songs alphabetically
-  const sortAndProcessSongs = (songsToProcess: SongDto[]) => {
-    // Sort songs alphabetically by title
-    const sorted = [...songsToProcess].sort((a, b) => 
+  // Function to reorder songs - playlist songs at top, then remaining songs in original order
+  const getReorderedSongs = (songsToProcess: SongDto[]): SongDto[] => {
+    // Separate songs that are in playlist vs not in playlist
+    const playlistSongs = songsToProcess.filter(song => playlistSongIds.has(song.songId));
+    const nonPlaylistSongs = songsToProcess.filter(song => !playlistSongIds.has(song.songId));
+    
+    // Sort playlist songs alphabetically for consistent display
+    const sortedPlaylistSongs = [...playlistSongs].sort((a, b) => 
       a.title.toLowerCase().localeCompare(b.title.toLowerCase())
     );
     
-    setSortedSongs(sorted);
+    // Keep non-playlist songs in their original order (as received from API)
+    // Return playlist songs first, then non-playlist songs
+    return [...sortedPlaylistSongs, ...nonPlaylistSongs];
   };
   
 
@@ -254,6 +259,13 @@ const SongsListPage: FC<SongsListPageProps> = ({ playlistId, refreshPlaylist }) 
     }
   }, [sections, selectedTemplate, contextPlaylistId, isInitializing]); // Re-fetch when any PlaylistContext state changes
 
+  // Force re-render when playlist songs change to trigger reordering
+  useEffect(() => {
+    // This effect doesn't need to do anything - it just ensures the component re-renders
+    // when playlistSongIds changes, which will cause getReorderedSongs to be called
+    // with the updated playlist state
+  }, [playlistSongIds]);
+
   // Consolidated fetch function that handles both initial load and search
   const fetchSongs = async (searchTerm: string = '', resetPagination: boolean = true, explicitTags?: string[]) => {
     try {
@@ -307,15 +319,9 @@ const SongsListPage: FC<SongsListPageProps> = ({ playlistId, refreshPlaylist }) 
           const existingIds = new Set(prev.map(song => song.songId));
           const newSongs = (fetchedSongs || []).filter(song => !existingIds.has(song.songId));
           const combined = [...prev, ...newSongs];
-          sortAndProcessSongs(combined);
           return combined;
         });
         setPage(prev => prev + 1);
-      }
-      
-      // Sort songs alphabetically and update available letters
-      if (resetPagination) {
-        sortAndProcessSongs(fetchedSongs || []);
       }
       
       setHasMore((fetchedSongs?.length || 0) === songsPerPage);
@@ -898,7 +904,7 @@ const SongsListPage: FC<SongsListPageProps> = ({ playlistId, refreshPlaylist }) 
 
             
             <div className="songs-page__grid">
-              {sortedSongs.map(song => (
+              {getReorderedSongs(songs).map((song: SongDto) => (
                 <div key={song.songId}>
                   <Card className="songs-page__card">
                 <div className="songs-page__card-content">
@@ -920,7 +926,7 @@ const SongsListPage: FC<SongsListPageProps> = ({ playlistId, refreshPlaylist }) 
                     
                     {song.tags && song.tags.length > 0 && (
                       <div className="songs-page__song-tags">
-                        {song.tags.map(tag => (
+                        {song.tags.map((tag: any) => (
                           <span key={tag.tagId} className="songs-page__song-tag">
                             {tag.tagName}
                           </span>
