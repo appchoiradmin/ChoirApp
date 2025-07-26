@@ -11,6 +11,7 @@ import { PlaylistTemplate } from '../types/playlist';
 import { SongDto, SongSearchParams } from '../types/song';
 import { Button, Card, LoadingSpinner } from '../components/ui';
 import Layout from '../components/ui/Layout';
+import Navigation from '../components/ui/Navigation';
 import { MagnifyingGlassIcon, PlusIcon, ChevronUpIcon, ChevronDownIcon, CheckCircleIcon, XMarkIcon, MusicalNoteIcon, TrashIcon } from '@heroicons/react/24/outline';
 import SectionSelectionModal from '../components/SectionSelectionModal';
 import './SongsListPage.scss';
@@ -628,7 +629,7 @@ const SongsListPage: FC<SongsListPageProps> = ({ playlistId, refreshPlaylist }) 
 
   
   return (
-    <Layout>
+    <Layout navigation={!choirId ? <Navigation title={t('songs.songsLibrary')} showBackButton={true} /> : undefined}>
       <div className="songs-page">
         <div className="songs-page__header">
           <h1 className="songs-page__title">
