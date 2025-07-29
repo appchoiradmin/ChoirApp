@@ -56,12 +56,110 @@ public class SheetMusicTranscriptionService : ISheetMusicTranscriptionService
 
         try
         {
-            // For now, use a simplified approach - we'll need to investigate the correct API usage
-            // TODO: Implement proper image handling with Mscc.GenerativeAI package
-            _logger.LogWarning("Image processing not yet fully implemented with Gemini Vision API. Using mock content for {fileName}", fileName);
+            _logger.LogInformation("Converting image {fileName} to ChordPro format using Gemini Vision API", fileName);
             
-            // Fallback to mock implementation until we can fix the API usage
-            return await GetMockChordProContentAsync(fileName);
+            // Create the prompt for ChordPro conversion
+            var prompt = @"You are a music transcription expert. Analyze this sheet music image and convert it to ChordPro format.
+
+=== CRITICAL CHORDPRO FORMAT RULES ===
+
+1. INLINE CHORD PLACEMENT:
+   - Chords go IMMEDIATELY before the syllable: [C]A-[F]ma-[G]zing [C]grace
+   - NEVER create separate chord lines above lyrics
+   - Each chord [CHORD] must be directly attached to its syllable
+
+2. CHORD NOTATION:
+   - Keep solfege notation as-is: RE, LA, MI, SOL, SI, FA, DO
+   - Use brackets: [RE], [LA], [MI], [SOL], [SI], [FA], [DO]
+   - Mixed case chords: [mim], [lam], [sim] for minor chords
+   - Complex chords: [RE7], [LA7], [DO#m], [SOL#m]
+
+3. SONG STRUCTURE:
+   - Start with: {title: Song Title}
+   - Add: {artist: Artist Name}
+   - Optional: {key: Key}
+   - Sections: {start_of_verse}, {end_of_verse}, {start_of_chorus}, {end_of_chorus}
+
+4. CHORD PLACEMENT PRINCIPLES:
+   - Chords appear inline with lyrics: [C]Amazing [G]grace [Am]how [F]sweet
+   - Multiple chords per line: [G]Holy [C]holy [Am]holy [F]Lord [G]God
+   - Mixed notation styles: [RE], [mim], [DO7], [LA#], [Bb], [Cm]
+   - Punctuation stays with lyrics: [G]grace, [C]how [F]sweet!
+
+5. WRONG FORMAT (NEVER DO THIS):
+   C    G    Am   F
+   Amazing grace how sweet
+   
+   This separates chords from lyrics - FORBIDDEN!
+
+6. VISUAL ANALYSIS - CRITICAL:
+   - ONLY place chords where they actually appear above lyrics in the image
+   - DO NOT put chords on every syllable - only where you see them
+   - Look at the horizontal alignment of each chord with the syllable below it
+   - If no chord appears above a syllable, don't add one
+   - Some lyrics may have no chords at all
+
+7. SPACING AND FLOW:
+   - Maintain natural word spacing
+   - Use hyphens for syllable breaks when chords split words
+   - Keep punctuation with lyrics: [G]grace, [C]how [F]sweet
+
+=== VISUAL ANALYSIS INSTRUCTIONS ===
+
+Step 1: CAREFULLY examine the sheet music image
+Step 2: Identify where chords appear ABOVE the lyrics
+Step 3: Note the exact syllable each chord is positioned over
+Step 4: Create ChordPro format placing [CHORD] only before syllables that have chords above them
+
+GENERAL PRINCIPLES:
+- Look at the horizontal alignment of each chord with the text below it
+- Place [CHORD] immediately before the syllable that has a chord above it
+- If multiple chords appear above one word, place each chord before its corresponding syllable
+- If no chord appears above a section of lyrics, don't add any chords there
+- Some songs may have sparse chord placement, others may be chord-heavy
+- Respect the original spacing and rhythm indicated by the chord positions
+
+Return ONLY the ChordPro formatted text, no additional explanation.";
+
+            // Create the request with the image
+            var request = new GenerateContentRequest(prompt);
+            
+            // Convert stream to byte array for the API
+            using var memoryStream = new MemoryStream();
+            await imageStream.CopyToAsync(memoryStream);
+            var imageBytes = memoryStream.ToArray();
+            var mimeType = GetMimeType(fileName);
+            
+            // Create a temporary file for the image data
+            var tempFilePath = Path.GetTempFileName();
+            var tempFileWithExtension = Path.ChangeExtension(tempFilePath, Path.GetExtension(fileName));
+            
+            try
+            {
+                // Write the image bytes to the temporary file
+                await File.WriteAllBytesAsync(tempFileWithExtension, imageBytes);
+                
+                // Add the image file to the request
+                await request.AddMedia(tempFileWithExtension);
+            }
+            finally
+            {
+                // Clean up temporary files
+                if (File.Exists(tempFilePath)) File.Delete(tempFilePath);
+                if (File.Exists(tempFileWithExtension)) File.Delete(tempFileWithExtension);
+            }
+            
+            // Generate the ChordPro content
+            var response = await _geminiModel.GenerateContent(request);
+            
+            if (string.IsNullOrEmpty(response?.Text))
+            {
+                _logger.LogWarning("Gemini Vision API returned empty response for {fileName}", fileName);
+                return Result.Fail("No content generated from the image. Please ensure the image contains readable sheet music.");
+            }
+            
+            _logger.LogInformation("Successfully converted image {fileName} to ChordPro format. Generated {length} characters.", fileName, response.Text.Length);
+            return Result.Ok(response.Text);
         }
         catch (Exception ex)
         {
