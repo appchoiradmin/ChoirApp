@@ -354,22 +354,40 @@ const SongsListPage: FC<SongsListPageProps> = ({ playlistId, refreshPlaylist }) 
     return () => window.removeEventListener('scroll', handleScroll);
   }, [token, user?.choirId, songsPerPage]); // Search handled separately by debounced handleSearchChange
 
-  // Separate effect to watch for tag changes and trigger automatic refetch
+  // Use a ref to track previous search parameters to avoid infinite loops
+  const prevSearchParamsRef = useRef<string>('');
+  
+  // Separate effect to watch for filter changes (including tags) and trigger automatic refetch
   useEffect(() => {
     const currentTags = searchParams.getAll('tags');
     const currentSearch = searchParams.get('search') || '';
     
-    // Only refetch if we have a token and this isn't the initial load
-    // (initial load is handled by the main useEffect above)
-    if (token && (currentTags.length > 0 || currentSearch)) {
+    // Create a string representation of current search params for comparison
+    const currentParamsString = `search:${currentSearch}|tags:${currentTags.sort().join(',')}`;
+    
+    // Only refetch if search parameters actually changed and we have a token
+    if (token && prevSearchParamsRef.current !== '' && prevSearchParamsRef.current !== currentParamsString) {
+      console.log('🏷️ Search parameters changed, refetching songs:', {
+        tags: currentTags,
+        search: currentSearch,
+        previousParams: prevSearchParamsRef.current,
+        currentParams: currentParamsString
+      });
+      
       // Use a small delay to avoid conflicts with the main useEffect
       const timeoutId = setTimeout(() => {
         fetchSongs(currentSearch, true);
       }, 50);
       
+      // Update the ref with current params
+      prevSearchParamsRef.current = currentParamsString;
+      
       return () => clearTimeout(timeoutId);
+    } else {
+      // Update the ref on first run or when token becomes available
+      prevSearchParamsRef.current = currentParamsString;
     }
-  }, [searchParams, token]); // Watch for changes in URL search parameters
+  }, [searchParams, token]); // Only watch for changes in URL search parameters and token
 
   // Handle back to top button click
   const scrollToTop = () => {
