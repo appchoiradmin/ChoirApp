@@ -39,8 +39,7 @@ public static class DependencyInjection
         services.AddScoped<IPushSubscriptionRepository, PushSubscriptionRepository>();
         services.AddScoped<IPushNotificationProvider, WebPushNotificationProvider>();
         
-        // OCR Service for image-to-ChordPro parsing (using Google Vision API)
-        services.AddScoped<IOcrService, OcrService>();
+        services.AddScoped<ISheetMusicTranscriptionService, SheetMusicTranscriptionService>();
 
         return services;
     }   

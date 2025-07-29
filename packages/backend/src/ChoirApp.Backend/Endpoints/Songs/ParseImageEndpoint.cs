@@ -12,12 +12,12 @@ namespace ChoirApp.Backend.Endpoints.Songs
 {
     public class ParseImageEndpoint : Endpoint<ParseImageRequest, ParseImageResponse>
     {
-        private readonly IOcrService _ocrService;
+        private readonly ISheetMusicTranscriptionService _transcriptionService;
         private readonly ILogger<ParseImageEndpoint> _logger;
 
-        public ParseImageEndpoint(IOcrService ocrService, ILogger<ParseImageEndpoint> logger)
+        public ParseImageEndpoint(ISheetMusicTranscriptionService transcriptionService, ILogger<ParseImageEndpoint> logger)
         {
-            _ocrService = ocrService;
+            _transcriptionService = transcriptionService;
             _logger = logger;
         }
 
@@ -47,14 +47,14 @@ namespace ChoirApp.Backend.Endpoints.Songs
                     return;
                 }
 
-                // Validate file type
-                var allowedTypes = new[] { "image/jpeg", "image/jpg", "image/png", "image/gif", "application/pdf" };
+                // Validate file type - only images for optimal OCR results
+                var allowedTypes = new[] { "image/jpeg", "image/jpg", "image/png", "image/gif" };
                 if (!allowedTypes.Contains(file.ContentType?.ToLower()))
                 {
                     ValidationFailures.Add(new()
                     {
                         PropertyName = nameof(req.File),
-                        ErrorMessage = "Only image files (JPEG, PNG, GIF) and PDF files are supported"
+                        ErrorMessage = "Only image files (JPEG, PNG, GIF) are supported. For best OCR results, upload clear photos of sheet music."
                     });
                     await SendErrorsAsync(400, ct);
                     return;
@@ -78,11 +78,11 @@ namespace ChoirApp.Backend.Endpoints.Songs
 
                 // Process the image
                 using var stream = file.OpenReadStream();
-                var result = await _ocrService.ParseImageToChordProAsync(stream, file.FileName);
+                var result = await _transcriptionService.ConvertImageToChordProAsync(stream, file.FileName);
 
                 if (result.IsFailed)
                 {
-                    _logger.LogError("OCR processing failed: {Errors}", string.Join(", ", result.Errors));
+                    _logger.LogError("Sheet music transcription failed: {Errors}", string.Join(", ", result.Errors));
                     ValidationFailures.Add(new()
                     {
                         PropertyName = "processing",

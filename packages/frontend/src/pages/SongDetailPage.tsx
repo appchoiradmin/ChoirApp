@@ -242,9 +242,9 @@ const SongDetailPage: React.FC = () => {
     }
 
     // Validate file type
-    const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'application/pdf'];
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/gif'];
     if (!allowedTypes.includes(file.type)) {
-      setUploadError('Please upload a JPEG, PNG, GIF, or PDF file');
+      setUploadError('Please upload a JPEG, PNG, or GIF image file for best OCR results');
       return;
     }
 
@@ -475,9 +475,9 @@ const SongDetailPage: React.FC = () => {
           {/* File Upload Section */}
           <div className={styles.fileUploadSection}>
             <div className={styles.fileUploadHeader}>
-              <h4 className={styles.fileUploadTitle}>Upload Image or PDF</h4>
+              <h4 className={styles.fileUploadTitle}>Upload Sheet Music Image</h4>
               <p className={styles.fileUploadDescription}>
-                Upload a photo or PDF of sheet music to automatically convert it to ChordPro format
+                Upload a clear photo of sheet music to automatically convert it to ChordPro format using OCR
               </p>
             </div>
             
@@ -485,7 +485,7 @@ const SongDetailPage: React.FC = () => {
               <input
                 type="file"
                 id="fileUpload"
-                accept="image/jpeg,image/png,image/gif,application/pdf"
+                accept="image/jpeg,image/png,image/gif"
                 onChange={(e) => {
                   const file = e.target.files?.[0];
                   if (file) {
@@ -511,7 +511,7 @@ const SongDetailPage: React.FC = () => {
               </label>
               
               <div className={styles.fileUploadHint}>
-                Supports JPEG, PNG, GIF, PDF • Max 10MB
+                Supports JPEG, PNG, GIF • Max 10MB • Use clear, high-contrast images for best results
               </div>
             </div>
             
