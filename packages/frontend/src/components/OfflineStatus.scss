@@ -1,0 +1,236 @@
+// OfflineStatus.scss - Styles for PWA offline status indicators
+
+.offline-status {
+  padding: 0.5rem 1rem;
+  border-radius: 0.375rem;
+  font-size: 0.875rem;
+  transition: all 0.2s ease;
+  border: 1px solid transparent;
+
+  .status-indicator {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+
+    .status-icon {
+      font-size: 1rem;
+    }
+
+    .status-text {
+      font-weight: 500;
+    }
+  }
+
+  .status-details {
+    margin-top: 0.75rem;
+    padding-top: 0.75rem;
+    border-top: 1px solid rgba(0, 0, 0, 0.1);
+    font-size: 0.8rem;
+
+    .cached-playlists {
+      margin-bottom: 0.5rem;
+
+      h4 {
+        margin: 0 0 0.5rem 0;
+        font-size: 0.85rem;
+        font-weight: 600;
+      }
+
+      ul {
+        margin: 0;
+        padding: 0;
+        list-style: none;
+
+        li {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          padding: 0.25rem 0;
+          border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+
+          &:last-child {
+            border-bottom: none;
+          }
+
+          .playlist-id {
+            font-family: monospace;
+            font-size: 0.75rem;
+            opacity: 0.7;
+          }
+
+          .song-count {
+            font-weight: 500;
+          }
+
+          .cache-time {
+            font-size: 0.7rem;
+            opacity: 0.6;
+          }
+        }
+      }
+    }
+
+    .storage-info {
+      margin-bottom: 0.5rem;
+      
+      p {
+        margin: 0;
+        opacity: 0.8;
+      }
+    }
+
+    .pwa-info {
+      p {
+        margin: 0;
+        opacity: 0.8;
+      }
+    }
+  }
+
+  // Status variants
+  &.status-online {
+    background-color: #e6f7ff;
+    border-color: #91d5ff;
+    color: #0050b3;
+  }
+
+  &.status-online-cached {
+    background-color: #f6ffed;
+    border-color: #b7eb8f;
+    color: #389e0d;
+  }
+
+  &.status-offline {
+    background-color: #fff2e8;
+    border-color: #ffbb96;
+    color: #d4380d;
+  }
+
+  &.status-offline-cached {
+    background-color: #f0f5ff;
+    border-color: #adc6ff;
+    color: #1d39c4;
+  }
+}
+
+// Compact version for navigation bars
+.offline-status-compact {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.25rem;
+  font-size: 0.8rem;
+  background-color: rgba(0, 0, 0, 0.05);
+  cursor: help;
+
+  .compact-icon {
+    font-size: 0.9rem;
+  }
+
+  .compact-count {
+    background-color: #52c41a;
+    color: white;
+    font-size: 0.7rem;
+    padding: 0.1rem 0.3rem;
+    border-radius: 0.75rem;
+    min-width: 1.2rem;
+    text-align: center;
+    line-height: 1;
+  }
+
+  &:hover {
+    background-color: rgba(0, 0, 0, 0.1);
+  }
+}
+
+// Playlist-specific offline indicator
+.playlist-offline-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.25rem 0.5rem;
+  background-color: #f0f5ff;
+  border: 1px solid #adc6ff;
+  border-radius: 0.25rem;
+  font-size: 0.8rem;
+  color: #1d39c4;
+
+  .offline-icon {
+    font-size: 0.9rem;
+  }
+
+  .offline-text {
+    font-weight: 500;
+  }
+}
+
+// Mobile responsiveness
+@media (max-width: 768px) {
+  .offline-status {
+    padding: 0.375rem 0.75rem;
+    font-size: 0.8rem;
+
+    .status-details {
+      font-size: 0.75rem;
+
+      .cached-playlists ul li {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.25rem;
+
+        .playlist-id,
+        .song-count,
+        .cache-time {
+          font-size: 0.7rem;
+        }
+      }
+    }
+  }
+
+  .offline-status-compact {
+    padding: 0.2rem 0.4rem;
+    font-size: 0.75rem;
+
+    .compact-count {
+      font-size: 0.65rem;
+      min-width: 1rem;
+    }
+  }
+
+  .playlist-offline-status {
+    padding: 0.2rem 0.4rem;
+    font-size: 0.75rem;
+  }
+}
+
+// Animation for status changes
+@keyframes statusChange {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.offline-status.status-changed {
+  animation: statusChange 0.3s ease;
+}
+
+// Pulse animation for caching in progress
+@keyframes cachingPulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.6;
+  }
+}
+
+.offline-status.caching-in-progress .status-icon {
+  animation: cachingPulse 1.5s infinite;
+}

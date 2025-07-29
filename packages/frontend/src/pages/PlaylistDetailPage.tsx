@@ -6,6 +6,8 @@ import { getSongsForChoir } from '../services/songService';
 import { Playlist } from '../types/playlist';
 import { SongDto } from '../types/song';
 import { useTranslation } from '../hooks/useTranslation';
+import { PlaylistOfflineStatus, OfflineStatusCompact } from '../components/OfflineStatus';
+import SimpleOfflineTest from '../components/SimpleOfflineTest';
 
 const PlaylistDetailPage: React.FC = () => {
   const { playlistId } = useParams<{ playlistId: string }>();
@@ -64,9 +66,16 @@ const PlaylistDetailPage: React.FC = () => {
 
   return (
     <div className="container">
-      <div className="is-flex is-justify-content-space-between is-align-items-center">
-        <h1 className="title">{playlist.title}</h1>
+      <div className="is-flex is-justify-content-space-between is-align-items-center mb-3">
         <div>
+          <h1 className="title">{playlist.title}</h1>
+          {playlistId && <PlaylistOfflineStatus playlistId={playlistId} />}
+        </div>
+        <div className="is-flex is-align-items-center">
+          <SimpleOfflineTest />
+          <div style={{ marginLeft: '1rem' }}>
+            <OfflineStatusCompact className="mr-3" />
+          </div>
           <Link to={`/playlists/${playlistId}/edit`} className="button is-primary mr-2">
             {t('playlistDetail.editPlaylist')}
           </Link>
