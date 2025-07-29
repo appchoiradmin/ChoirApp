@@ -1,5 +1,5 @@
 @use 'sass:color';
-@use '../styles/variables' as *;
+@use '../styles/_variables' as *;
 
 .container {
   padding: 2rem 0.5rem;
@@ -654,4 +654,178 @@
     background: color.adjust($background, $lightness: -3%);
     border-color: color.adjust($border, $lightness: -10%);
   }
+}
+
+// File Upload Styles - Mobile First
+.fileUploadSection {
+  margin: 1rem 0;
+  padding: 1rem;
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  border: 2px dashed $border;
+  border-radius: 0.75rem;
+  transition: all 0.3s ease;
+  
+  &:hover {
+    border-color: $primary;
+    background: linear-gradient(135deg, #f1f3f4 0%, #e2e6ea 100%);
+  }
+  
+  // Desktop enhancement
+  @media (min-width: 769px) {
+    margin: 1.5rem 0;
+    padding: 1.5rem;
+  }
+}
+
+.fileUploadHeader {
+  text-align: center;
+  margin-bottom: 1rem;
+}
+
+.fileUploadTitle {
+  font-family: $family-primary;
+  font-size: $size-6;
+  color: $primary;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  
+  // Desktop enhancement
+  @media (min-width: 769px) {
+    font-size: $size-5;
+  }
+}
+
+.fileUploadDescription {
+  font-family: $family-secondary;
+  color: $text-light;
+  font-size: $size-7;
+  margin: 0;
+  line-height: 1.4;
+  
+  // Desktop enhancement
+  @media (min-width: 769px) {
+    font-size: $size-6;
+  }
+}
+
+.fileUploadArea {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.fileInput {
+  display: none;
+}
+
+.fileUploadButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.875rem 1.25rem;
+  background: $primary;
+  color: white;
+  border: none;
+  border-radius: 0.5rem;
+  font-family: $family-primary;
+  font-weight: 600;
+  font-size: $size-6;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-decoration: none;
+  min-height: 44px; // Touch target size for mobile
+  min-width: 120px;
+  
+  &:hover:not(.uploading) {
+    background: color.adjust($primary, $lightness: -10%);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba($primary, 0.3);
+  }
+  
+  &:active {
+    transform: translateY(0);
+  }
+  
+  &.uploading {
+    background: $text-muted;
+    cursor: not-allowed;
+    opacity: 0.7;
+  }
+  
+  // Desktop enhancement
+  @media (min-width: 769px) {
+    padding: 0.75rem 1.5rem;
+  }
+}
+
+.uploadIcon,
+.uploadingIcon {
+  font-size: 1.2em;
+}
+
+.fileUploadHint {
+  font-family: $family-secondary;
+  color: $text-light;
+  font-size: $size-7;
+  text-align: center;
+  line-height: 1.3;
+}
+
+.uploadError {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  background: #fee;
+  border: 1px solid #fcc;
+  border-radius: 0.5rem;
+  color: #c33;
+  font-family: $family-secondary;
+  font-size: $size-6;
+  margin-top: 1rem;
+  line-height: 1.4;
+}
+
+.errorIcon {
+  font-size: 1.1em;
+  flex-shrink: 0;
+  margin-top: 0.1rem;
+}
+
+.uploadProgress {
+  width: 100%;
+  margin-top: 1rem;
+}
+
+.progressBar {
+  width: 100%;
+  height: 0.5rem;
+  background: #e9ecef;
+  border-radius: 0.25rem;
+  overflow: hidden;
+  margin-bottom: 0.5rem;
+}
+
+.progressFill {
+  height: 100%;
+  background: linear-gradient(90deg, $primary 0%, color.adjust($primary, $lightness: 10%) 100%);
+  border-radius: 0.25rem;
+  animation: progressAnimation 2s ease-in-out infinite;
+}
+
+@keyframes progressAnimation {
+  0% { width: 0%; }
+  50% { width: 70%; }
+  100% { width: 100%; }
+}
+
+.progressText {
+  font-family: $family-secondary;
+  color: $text-light;
+  font-size: $size-6;
+  text-align: center;
+  margin: 0;
+  line-height: 1.3;
 }

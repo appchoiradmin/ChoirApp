@@ -34,6 +34,10 @@ const SongDetailPage: React.FC = () => {
   const [visibility, setVisibility] = useState<SongVisibilityType>(SongVisibilityType.PublicAll);
   const [tags, setTags] = useState<string[]>([]);
   
+  // File upload state
+  const [isUploadingFile, setIsUploadingFile] = useState<boolean>(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
+  
   // Edit mode states
   const [isEditMode, setIsEditMode] = useState<boolean>(false);
   const [isVersionMode, setIsVersionMode] = useState<boolean>(false);
@@ -231,6 +235,72 @@ const SongDetailPage: React.FC = () => {
   const canEdit = isCreator;
   const canCreateVersion = user && song;
 
+  const handleFileUpload = async (file: File) => {
+    if (!user?.token) {
+      setUploadError('You must be logged in to upload files');
+      return;
+    }
+
+    // Validate file type
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'application/pdf'];
+    if (!allowedTypes.includes(file.type)) {
+      setUploadError('Please upload a JPEG, PNG, GIF, or PDF file');
+      return;
+    }
+
+    // Validate file size (10MB max)
+    const maxSize = 10 * 1024 * 1024; // 10MB in bytes
+    if (file.size > maxSize) {
+      setUploadError('File size must be less than 10MB');
+      return;
+    }
+
+    setIsUploadingFile(true);
+    setUploadError(null);
+
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+
+      const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5014';
+      const response = await fetch(`${API_BASE_URL}/api/songs/parse-image`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${user.token}`
+        },
+        body: formData
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Upload failed: ${errorText}`);
+      }
+
+      const result = await response.json();
+      
+      // Auto-populate form fields with parsed content
+      if (result.chordProContent) {
+        setChordProContent(result.chordProContent);
+      }
+      
+      // If title was extracted, suggest it (but don't overwrite existing title)
+      if (result.title && !title) {
+        setTitle(result.title);
+      }
+      
+      // If artist was extracted, suggest it (but don't overwrite existing artist)
+      if (result.artist && !artist) {
+        setArtist(result.artist);
+      }
+
+    } catch (err) {
+      console.error('Error uploading file:', err);
+      setUploadError(err instanceof Error ? err.message : 'Failed to process image');
+    } finally {
+      setIsUploadingFile(false);
+    }
+  };
+
   const handleCreateSong = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user?.token) {
@@ -401,6 +471,67 @@ const SongDetailPage: React.FC = () => {
         <div className={styles.formGroup}>
           <label htmlFor="chordProContent" className={styles.label}>{t('songs.chordProContent')}</label>
           <ChordProGuide />
+          
+          {/* File Upload Section */}
+          <div className={styles.fileUploadSection}>
+            <div className={styles.fileUploadHeader}>
+              <h4 className={styles.fileUploadTitle}>Upload Image or PDF</h4>
+              <p className={styles.fileUploadDescription}>
+                Upload a photo or PDF of sheet music to automatically convert it to ChordPro format
+              </p>
+            </div>
+            
+            <div className={styles.fileUploadArea}>
+              <input
+                type="file"
+                id="fileUpload"
+                accept="image/jpeg,image/png,image/gif,application/pdf"
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) {
+                    handleFileUpload(file);
+                  }
+                }}
+                className={styles.fileInput}
+                disabled={isUploadingFile}
+              />
+              
+              <label htmlFor="fileUpload" className={`${styles.fileUploadButton} ${isUploadingFile ? styles.uploading : ''}`}>
+                {isUploadingFile ? (
+                  <>
+                    <span className={styles.uploadingIcon}>⏳</span>
+                    Processing...
+                  </>
+                ) : (
+                  <>
+                    <span className={styles.uploadIcon}>📁</span>
+                    Choose File
+                  </>
+                )}
+              </label>
+              
+              <div className={styles.fileUploadHint}>
+                Supports JPEG, PNG, GIF, PDF • Max 10MB
+              </div>
+            </div>
+            
+            {uploadError && (
+              <div className={styles.uploadError}>
+                <span className={styles.errorIcon}>⚠️</span>
+                {uploadError}
+              </div>
+            )}
+            
+            {isUploadingFile && (
+              <div className={styles.uploadProgress}>
+                <div className={styles.progressBar}>
+                  <div className={styles.progressFill}></div>
+                </div>
+                <p className={styles.progressText}>Converting image to ChordPro format...</p>
+              </div>
+            )}
+          </div>
+          
           <textarea
             id="chordProContent"
             value={chordProContent}
