@@ -15,17 +15,26 @@ namespace ChoirApp.Application.Services
         private readonly IUserRepository _userRepository;
         private readonly IChoirUniquenessChecker _choirUniquenessChecker;
         private readonly IUserService _userService;
+        private readonly IPlaylistRepository _playlistRepository;
+        private readonly IPlaylistTemplateRepository _playlistTemplateRepository;
+        private readonly IInvitationRepository _invitationRepository;
 
         public ChoirService(
             IChoirRepository choirRepository,
             IUserRepository userRepository,
             IChoirUniquenessChecker choirUniquenessChecker,
-            IUserService userService)
+            IUserService userService,
+            IPlaylistRepository playlistRepository,
+            IPlaylistTemplateRepository playlistTemplateRepository,
+            IInvitationRepository invitationRepository)
         {
             _choirRepository = choirRepository;
             _userRepository = userRepository;
             _choirUniquenessChecker = choirUniquenessChecker;
             _userService = userService;
+            _playlistRepository = playlistRepository;
+            _playlistTemplateRepository = playlistTemplateRepository;
+            _invitationRepository = invitationRepository;
         }
 
         public async Task<Result<Choir>> CreateChoirAsync(CreateChoirDto choirDto, Guid adminId)
@@ -148,8 +157,43 @@ namespace ChoirApp.Application.Services
                 return Result.Fail("Only the choir admin can delete the choir.");
             }
 
+            // Step 1: Delete all playlists associated with the choir
+            var playlists = await _playlistRepository.GetByChoirIdAsync(choirId);
+            foreach (var playlist in playlists)
+            {
+                await _playlistRepository.DeleteAsync(playlist);
+            }
+            await _playlistRepository.SaveChangesAsync();
+
+            // Step 2: Delete all playlist templates associated with the choir
+            var playlistTemplates = await _playlistTemplateRepository.GetByChoirIdAsync(choirId);
+            foreach (var template in playlistTemplates)
+            {
+                await _playlistTemplateRepository.DeleteAsync(template);
+            }
+            await _playlistTemplateRepository.SaveChangesAsync();
+
+            // Step 3: Delete all invitations associated with the choir
+            var invitations = await _invitationRepository.GetByChoirIdAsync(choirId);
+            foreach (var invitation in invitations)
+            {
+                await _invitationRepository.DeleteAsync(invitation);
+            }
+            await _invitationRepository.SaveChangesAsync();
+
+            // Step 4: Remove all choir memberships (UserChoir records)
+            // This is handled by getting the choir with members and clearing the collection
+            var choirWithMembers = await _choirRepository.GetByIdWithMembersAsync(choirId);
+            if (choirWithMembers != null)
+            {
+                choirWithMembers.UserChoirs.Clear();
+                await _choirRepository.SaveChangesAsync();
+            }
+
+            // Step 5: Finally, delete the choir itself
             await _choirRepository.DeleteAsync(choir);
             await _choirRepository.SaveChangesAsync();
+            
             return Result.Ok();
         }
 

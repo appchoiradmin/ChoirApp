@@ -3,14 +3,12 @@ import { useTranslation } from '../hooks/useTranslation';
 import { getToday } from '../utils/getToday';
 import { LoadingState } from '../components/ui';
 import PlaylistsPage from './PlaylistsPage';
-import { useParams } from 'react-router-dom';
 import { useUser } from '../hooks/useUser';
 import DatePicker from '../components/DatePicker';
 import { SharedDateContext } from './ChoirDashboardPage';
 
 const ChoirPlaylistsTab: React.FC = () => {
-  const { choirId } = useParams<{ choirId: string }>();
-  const { user, loading } = useUser();
+  const { loading } = useUser();
   const sharedDateContext = useContext(SharedDateContext);
   const { t } = useTranslation();
   
@@ -20,8 +18,6 @@ const ChoirPlaylistsTab: React.FC = () => {
   // Use shared date if available, otherwise use local state
   const selectedDate = sharedDateContext?.selectedDate ?? localSelectedDate;
   const setSelectedDate = sharedDateContext?.setSelectedDate ?? setLocalSelectedDate;
-  
-  const token = user?.token || null;
 
   // Don't render the PlaylistProvider until user authentication is complete
   if (loading) {

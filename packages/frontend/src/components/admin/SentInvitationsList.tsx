@@ -24,7 +24,7 @@ const SentInvitationsList: React.FC<SentInvitationsListProps> = ({ invitations }
   };
 
   if (invitations.length === 0) {
-    return <p>{t('noInvitationsSentYet')}</p>;
+    return <p>{t('choirAdmin.noInvitationsSentYet')}</p>;
   }
 
   const groupedInvitations = invitations.reduce((acc, invitation) => {

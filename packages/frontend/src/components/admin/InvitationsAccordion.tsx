@@ -20,11 +20,11 @@ const InvitationsAccordion: React.FC<InvitationsAccordionProps> = ({
   const getTranslatedStatus = (status: string) => {
     switch (status.toLowerCase()) {
       case 'pending':
-        return t('pending');
+        return t('choirAdmin.pending');
       case 'accepted':
-        return t('accepted');
+        return t('choirAdmin.accepted');
       case 'rejected':
-        return t('rejected');
+        return t('choirAdmin.rejected');
       default:
         return status;
     }
@@ -118,7 +118,7 @@ const InvitationsAccordion: React.FC<InvitationsAccordionProps> = ({
             onClick={() => toggleSection('pending')}
           >
             <h3 className="accordion-title">
-              {t('pendingInvitations')}
+              {t('choirAdmin.pendingInvitations')}
               <span className="tag is-warning is-light ml-2">{pendingInvitations.length}</span>
             </h3>
             <span className="icon">
@@ -131,7 +131,7 @@ const InvitationsAccordion: React.FC<InvitationsAccordionProps> = ({
               {pendingInvitations.length > 0 ? (
                 renderInvitationGroup(pendingGrouped)
               ) : (
-                <p className="has-text-grey">{t('noPendingInvitations')}</p>
+                <p className="has-text-grey">{t('choirAdmin.noPendingInvitations')}</p>
               )}
             </div>
           )}
@@ -146,7 +146,7 @@ const InvitationsAccordion: React.FC<InvitationsAccordionProps> = ({
             onClick={() => toggleSection('sent')}
           >
             <h3 className="accordion-title">
-              {t('sentInvitations')}
+              {t('choirAdmin.sentInvitations')}
               <span className="tag is-light ml-2">{sentInvitations.length}</span>
             </h3>
             <span className="icon">
@@ -159,7 +159,7 @@ const InvitationsAccordion: React.FC<InvitationsAccordionProps> = ({
               {sentInvitations.length > 0 ? (
                 renderInvitationGroup(sentGrouped)
               ) : (
-                <p className="has-text-grey">{t('noSentInvitations')}</p>
+                <p className="has-text-grey">{t('choirAdmin.noSentInvitations')}</p>
               )}
             </div>
           )}
@@ -167,7 +167,7 @@ const InvitationsAccordion: React.FC<InvitationsAccordionProps> = ({
       )}
 
       {pendingInvitations.length === 0 && sentInvitations.length === 0 && (
-        <p className="has-text-grey">{t('noInvitationsSentYet')}</p>
+        <p className="has-text-grey">{t('choirAdmin.noInvitationsSentYet')}</p>
       )}
     </div>
   );

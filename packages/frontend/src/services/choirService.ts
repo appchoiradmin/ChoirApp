@@ -117,32 +117,69 @@ export const updateChoir = async (
       'Content-Type': 'application/json',
       Authorization: `Bearer ${token}`,
     },
-    body: JSON.stringify({
-      ChoirId: choirId,
-      Dto: {
-        Name: choirName
-      }
-    }),
+    body: JSON.stringify({ name: choirName }),
   });
 
   if (!response.ok) {
+    const errorText = await response.text();
     let errorMessage = 'Failed to update choir';
+    
     try {
-      const errorData = await response.json();
-      // Handle different possible error response formats
-      if (errorData.message) {
+      const errorData = JSON.parse(errorText);
+      if (errorData.errors && Array.isArray(errorData.errors)) {
+        errorMessage = errorData.errors.join(', ');
+      } else if (errorData.message) {
         errorMessage = errorData.message;
-      } else if (errorData.errors && Array.isArray(errorData.errors) && errorData.errors.length > 0) {
-        errorMessage = errorData.errors[0];
       } else if (errorData.title) {
         errorMessage = errorData.title;
-      } else if (typeof errorData === 'string') {
-        errorMessage = errorData;
       }
-    } catch (e) {
-      // If we can't parse the error response, use the status text
-      errorMessage = response.statusText || errorMessage;
+    } catch {
+      // If parsing fails, use the raw text or default message
+      errorMessage = errorText || errorMessage;
     }
+    
+    throw new Error(errorMessage);
+  }
+
+  // Check if there's a response body
+  const contentType = response.headers.get('content-type');
+  if (contentType && contentType.includes('application/json')) {
+    return response.json();
+  }
+  
+  // If no JSON response, return void
+  return;
+};
+
+export const deleteChoir = async (
+  choirId: string,
+  token: string
+): Promise<void> => {
+  const response = await fetch(`${API_URL}/api/choirs/${choirId}`, {
+    method: 'DELETE',
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    let errorMessage = 'Failed to delete choir';
+    
+    try {
+      const errorData = JSON.parse(errorText);
+      if (errorData.errors && Array.isArray(errorData.errors)) {
+        errorMessage = errorData.errors.join(', ');
+      } else if (errorData.message) {
+        errorMessage = errorData.message;
+      } else if (errorData.title) {
+        errorMessage = errorData.title;
+      }
+    } catch {
+      // If parsing fails, use the raw text or default message
+      errorMessage = errorText || errorMessage;
+    }
+    
     throw new Error(errorMessage);
   }
 };

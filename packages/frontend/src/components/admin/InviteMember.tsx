@@ -21,7 +21,7 @@ const InviteMember: React.FC<InviteMemberProps> = ({ onInviteMember }) => {
   return (
     <div className="invite-member-card card">
       <header className="card-header">
-        <p className="card-header-title">{t('inviteNewMember')}</p>
+        <p className="card-header-title">{t('choirAdmin.inviteNewMember')}</p>
       </header>
       <div className="card-content">
         <form onSubmit={handleSubmit} className="invite-form">
@@ -30,20 +30,20 @@ const InviteMember: React.FC<InviteMemberProps> = ({ onInviteMember }) => {
               <input
                 className="input"
                 type="email"
-                placeholder={t('enterEmailAddress')}
+                placeholder={t('choirAdmin.enterEmailAddress')}
                 value={email}
                 onChange={e => setEmail(e.target.value)}
                 required
-                aria-label={t('emailAddress')}
+                aria-label={t('choirAdmin.enterEmailAddress')}
               />
             </div>
             <div className="control send-button-container">
               <button 
                 className="button is-primary send-button" 
                 type="submit"
-                aria-label={t('sendInvitation')}
+                aria-label={t('choirAdmin.send')}
               >
-                {t('send')}
+                {t('choirAdmin.send')}
               </button>
             </div>
           </div>
