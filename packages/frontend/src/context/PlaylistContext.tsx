@@ -4,12 +4,9 @@ import { getPlaylistsByChoirId, getPlaylistTemplatesByChoirId } from '../service
 import { useTranslation } from '../hooks/useTranslation';
 import { getTranslatedTemplate } from '../utils/templateTranslation';
 
-// Utility: get next Sunday (or use your own logic)
-function getNextSunday(date = new Date()) {
+// Utility: get today's date with time set to 00:00:00
+function getToday(date = new Date()) {
   const d = new Date(date);
-  const day = d.getDay();
-  const diff = (7 - day) % 7;
-  d.setDate(d.getDate() + diff);
   d.setHours(0, 0, 0, 0);
   return d;
 }
@@ -85,10 +82,10 @@ export const PlaylistProvider = ({
       setIsInitializing(true);
       setIsInitialized(false);
       try {
-        // 1. Try to fetch persisted playlists for choir
-        const playlists = await getPlaylistsByChoirId(choirId, token);
+        // 1. Try to fetch persisted playlists for choir with cache-busting on initial load
+        const playlists = await getPlaylistsByChoirId(choirId, token, true);
         // Find playlist for the requested date (or next Sunday)
-        const targetDate = date || getNextSunday();
+        const targetDate = date || getToday();
         const targetDateStr = targetDate.toISOString().split('T')[0]; // YYYY-MM-DD
 
         // Find playlist for the exact target date only
@@ -262,10 +259,10 @@ export const PlaylistProvider = ({
     if (!choirId || !token) return;
     try {
 
-      const playlists = await getPlaylistsByChoirId(choirId, token);
+      const playlists = await getPlaylistsByChoirId(choirId, token, true); // Force fresh data on refresh
 
       
-      const targetDate = date || getNextSunday();
+      const targetDate = date || getToday();
       const targetDateStr = targetDate.toISOString().split('T')[0];
 
       

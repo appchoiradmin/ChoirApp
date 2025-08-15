@@ -1,7 +1,7 @@
-const CACHE_NAME = 'choirapp-v1.5';
-const STATIC_CACHE = 'choirapp-static-v1.5';
-const DYNAMIC_CACHE = 'choirapp-dynamic-v1.5';
-const PLAYLIST_SONGS_CACHE = 'choirapp-playlist-songs-v1.5';
+const CACHE_NAME = 'choirapp-v1.6';
+const STATIC_CACHE = 'choirapp-static-v1.6';
+const DYNAMIC_CACHE = 'choirapp-dynamic-v1.6';
+const PLAYLIST_SONGS_CACHE = 'choirapp-playlist-songs-v1.6';
 
 // Static resources that rarely change
 const staticAssets = [
@@ -267,33 +267,39 @@ self.addEventListener('notificationclick', (event) => {
   );
 });
 
+// Handle messages from the main thread (e.g., SKIP_WAITING for force updates)
+self.addEventListener('message', (event) => {
+  console.log('Service Worker received message:', event.data);
+  
+  if (event.data && event.data.type === 'SKIP_WAITING') {
+    console.log('🔄 Force activating new service worker for cache fix');
+    self.skipWaiting();
+  }
+});
+
 // ===== PLAYLIST SONG PRE-CACHING FUNCTIONALITY =====
 
-// Handle playlist detail requests with poor connection handling
+// Handle playlist detail requests with network-first for fresh data
 async function handlePlaylistRequest(request, playlistId) {
   console.log('🎵 Handling playlist request:', playlistId);
   
-  // Get cached version first
-  const cachedResponse = await caches.match(request);
+  // CRITICAL FIX: Use network-first strategy to get fresh playlist data
+  // Check for cache-busting parameter to force fresh data
+  const url = new URL(request.url);
+  const bustCache = url.searchParams.has('_t');
   
-  // For poor connections: serve cache immediately if available, update in background
-  if (cachedResponse) {
-    console.log('⚡ Serving cached playlist immediately:', playlistId);
-    
-    // Update cache in background (stale-while-revalidate pattern)
-    updatePlaylistInBackground(request, playlistId);
-    
-    return cachedResponse;
+  if (bustCache) {
+    console.log('🔄 Cache-busting requested for playlist:', playlistId);
   }
   
-  // No cache available, try network with timeout
+  // Try network first for fresh data (especially important for live performance scenarios)
   try {
-    const networkResponse = await fetchWithTimeout(request, 5000); // 5 second timeout
+    const networkResponse = await fetchWithTimeout(request, 3000); // Shorter timeout for responsiveness
     
     if (networkResponse.ok) {
       const playlistData = await networkResponse.clone().json();
       
-      // Cache the playlist response
+      // Cache the fresh playlist response
       const cache = await caches.open(DYNAMIC_CACHE);
       cache.put(request, networkResponse.clone());
       
@@ -307,44 +313,42 @@ async function handlePlaylistRequest(request, playlistId) {
     throw new Error('Network response not ok');
     
   } catch (error) {
-    console.log('❌ Playlist network request failed/timeout:', error.message);
+    console.log('⚠️ Network failed, falling back to cache:', error.message);
     
-    // Final fallback to cache (in case we missed it above)
-    const fallbackCache = await caches.match(request);
-    if (fallbackCache) {
-      console.log('📱 Serving cached playlist (fallback):', playlistId);
-      return fallbackCache;
+    // Fallback to cache only if network fails
+    const cachedResponse = await caches.match(request);
+    if (cachedResponse) {
+      console.log('📱 Serving cached playlist (network failed):', playlistId);
+      return cachedResponse;
     }
-    
-    throw new Error('Playlist not available - no network or cache');
   }
+  
+  // If we reach here, both network and cache failed
+  throw new Error('Playlist not available - no network or cache');
 }
 
-// Handle song detail requests with cache-first and timeout for poor connections
+// Handle song detail requests with network-first for fresh data
 async function handleSongRequest(request, songId) {
   console.log('🎵 Handling song request:', songId);
   
-  // Always check cache first for instant loading
-  const playlistCache = await caches.open(PLAYLIST_SONGS_CACHE);
-  const dynamicCache = await caches.open(DYNAMIC_CACHE);
+  // CRITICAL FIX: Use network-first strategy to get fresh song data
+  // Check for cache-busting parameter to force fresh data
+  const url = new URL(request.url);
+  const bustCache = url.searchParams.has('_t');
   
-  const cachedSong = await playlistCache.match(request) || await dynamicCache.match(request);
-  
-  if (cachedSong) {
-    console.log('⚡ Serving cached song instantly:', songId);
-    
-    // Update in background if network is available (stale-while-revalidate)
-    updateSongInBackground(request, songId);
-    
-    return cachedSong;
+  if (bustCache) {
+    console.log('🔄 Cache-busting requested for song:', songId);
   }
   
-  // No cache available, try network with timeout
+  // Try network first for fresh data
   try {
     const networkResponse = await fetchWithTimeout(request, 3000); // 3 second timeout for songs
     
     if (networkResponse.ok) {
       // Cache in both locations for future use
+      const playlistCache = await caches.open(PLAYLIST_SONGS_CACHE);
+      const dynamicCache = await caches.open(DYNAMIC_CACHE);
+      
       dynamicCache.put(request, networkResponse.clone());
       
       console.log('🌐 Served fresh song from network:', songId);
@@ -354,17 +358,22 @@ async function handleSongRequest(request, songId) {
     throw new Error('Network response not ok');
     
   } catch (error) {
-    console.log('❌ Song network request failed/timeout:', error.message);
+    console.log('⚠️ Network failed, falling back to cache:', error.message);
     
-    // Final check for any cached version
-    const finalCache = await playlistCache.match(request) || await dynamicCache.match(request);
-    if (finalCache) {
-      console.log('📱 Serving stale cached song (network timeout):', songId);
-      return finalCache;
+    // Fallback to cache only if network fails
+    const playlistCache = await caches.open(PLAYLIST_SONGS_CACHE);
+    const dynamicCache = await caches.open(DYNAMIC_CACHE);
+    
+    const cachedSong = await playlistCache.match(request) || await dynamicCache.match(request);
+    
+    if (cachedSong) {
+      console.log('📱 Serving cached song (network failed):', songId);
+      return cachedSong;
     }
-    
-    throw new Error('Song not available - no network or cache');
   }
+  
+  // If we reach here, both network and cache failed
+  throw new Error('Song not available - no network or cache');
 }
 
 // Pre-cache all songs in a playlist for offline access
@@ -519,28 +528,25 @@ async function updateSongInBackground(request, songId) {
   }
 }
 
-// Handle choir playlists request (PlaylistsPage) with cache-first
+// Handle choir playlists request (PlaylistsPage) with network-first for fresh data
 async function handleChoirPlaylistsRequest(request, choirId) {
   console.log('📋 Handling choir playlists request:', choirId);
   
-  // Check cache first for instant loading
-  const cachedResponse = await caches.match(request);
+  // CRITICAL FIX: Use network-first strategy to get fresh playlist data
+  // Check for cache-busting parameter to force fresh data
+  const url = new URL(request.url);
+  const bustCache = url.searchParams.has('_t');
   
-  if (cachedResponse) {
-    console.log('⚡ Serving cached choir playlists instantly:', choirId);
-    
-    // Update in background (stale-while-revalidate)
-    updateChoirPlaylistsInBackground(request, choirId);
-    
-    return cachedResponse;
+  if (bustCache) {
+    console.log('🔄 Cache-busting requested, forcing network fetch:', choirId);
   }
   
-  // No cache available, try network with timeout
+  // Try network first for fresh data (especially important for live performance scenarios)
   try {
-    const networkResponse = await fetchWithTimeout(request, 5000);
+    const networkResponse = await fetchWithTimeout(request, 3000); // Shorter timeout for responsiveness
     
     if (networkResponse.ok) {
-      // Cache the response
+      // Cache the fresh response
       const cache = await caches.open(DYNAMIC_CACHE);
       cache.put(request, networkResponse.clone());
       
@@ -551,41 +557,39 @@ async function handleChoirPlaylistsRequest(request, choirId) {
     throw new Error('Network response not ok');
     
   } catch (error) {
-    console.log('❌ Choir playlists network request failed/timeout:', error.message);
+    console.log('⚠️ Network failed, falling back to cache:', error.message);
     
-    // Final fallback to cache
-    const fallbackCache = await caches.match(request);
-    if (fallbackCache) {
-      console.log('📱 Serving stale cached choir playlists:', choirId);
-      return fallbackCache;
+    // Fallback to cache only if network fails
+    const cachedResponse = await caches.match(request);
+    if (cachedResponse) {
+      console.log('📱 Serving cached choir playlists (network failed):', choirId);
+      return cachedResponse;
     }
-    
-    throw new Error('Choir playlists not available - no network or cache');
   }
+  
+  // If we reach here, both network and cache failed
+  throw new Error('Choir playlists not available - no network or cache');
 }
 
-// Handle choir songs request (PlaylistsPage) with cache-first
+// Handle choir songs request (PlaylistsPage) with network-first for fresh data
 async function handleChoirSongsRequest(request, choirId) {
   console.log('🎵 Handling choir songs request:', choirId);
   
-  // Check cache first for instant loading
-  const cachedResponse = await caches.match(request);
+  // CRITICAL FIX: Use network-first strategy to get fresh song data
+  // Check for cache-busting parameter to force fresh data
+  const url = new URL(request.url);
+  const bustCache = url.searchParams.has('_t');
   
-  if (cachedResponse) {
-    console.log('⚡ Serving cached choir songs instantly:', choirId);
-    
-    // Update in background (stale-while-revalidate)
-    updateChoirSongsInBackground(request, choirId);
-    
-    return cachedResponse;
+  if (bustCache) {
+    console.log('🔄 Cache-busting requested for choir songs:', choirId);
   }
   
-  // No cache available, try network with timeout
+  // Try network first for fresh data (especially important for live performance scenarios)
   try {
-    const networkResponse = await fetchWithTimeout(request, 5000);
+    const networkResponse = await fetchWithTimeout(request, 3000); // Shorter timeout for responsiveness
     
     if (networkResponse.ok) {
-      // Cache the response
+      // Cache the fresh response
       const cache = await caches.open(DYNAMIC_CACHE);
       cache.put(request, networkResponse.clone());
       
@@ -596,17 +600,18 @@ async function handleChoirSongsRequest(request, choirId) {
     throw new Error('Network response not ok');
     
   } catch (error) {
-    console.log('❌ Choir songs network request failed/timeout:', error.message);
+    console.log('⚠️ Network failed, falling back to cache:', error.message);
     
-    // Final fallback to cache
-    const fallbackCache = await caches.match(request);
-    if (fallbackCache) {
-      console.log('📱 Serving stale cached choir songs:', choirId);
-      return fallbackCache;
+    // Fallback to cache only if network fails
+    const cachedResponse = await caches.match(request);
+    if (cachedResponse) {
+      console.log('📱 Serving cached choir songs (network failed):', choirId);
+      return cachedResponse;
     }
-    
-    throw new Error('Choir songs not available - no network or cache');
   }
+  
+  // If we reach here, both network and cache failed
+  throw new Error('Choir songs not available - no network or cache');
 }
 
 // Update choir playlists in background
@@ -660,3 +665,11 @@ async function cleanupPlaylistCache() {
     console.log('❌ Error during cache cleanup:', error);
   }
 }
+
+// Message listener for force update functionality
+self.addEventListener('message', (event) => {
+  if (event.data && event.data.type === 'SKIP_WAITING') {
+    console.log('🔄 Received SKIP_WAITING message, activating new service worker');
+    self.skipWaiting();
+  }
+});

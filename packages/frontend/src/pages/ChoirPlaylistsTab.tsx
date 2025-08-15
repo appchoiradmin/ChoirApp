@@ -1,6 +1,6 @@
 import React, { useState, useContext } from 'react';
 import { useTranslation } from '../hooks/useTranslation';
-import { getNextSunday } from '../utils/getNextSunday';
+import { getToday } from '../utils/getToday';
 import { LoadingState } from '../components/ui';
 import PlaylistsPage from './PlaylistsPage';
 import { useParams } from 'react-router-dom';
@@ -15,7 +15,7 @@ const ChoirPlaylistsTab: React.FC = () => {
   const { t } = useTranslation();
   
   // Local state for when not using shared context (standalone route)
-  const [localSelectedDate, setLocalSelectedDate] = useState<Date | null>(getNextSunday());
+  const [localSelectedDate, setLocalSelectedDate] = useState<Date | null>(getToday());
   
   // Use shared date if available, otherwise use local state
   const selectedDate = sharedDateContext?.selectedDate ?? localSelectedDate;

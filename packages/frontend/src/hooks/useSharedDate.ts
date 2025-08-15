@@ -1,6 +1,6 @@
 import { useContext } from 'react';
 import { SharedDateContext } from '../pages/ChoirDashboardPage';
-import { getNextSunday } from '../utils/getNextSunday';
+import { getToday } from '../utils/getToday';
 
 export const useSharedDate = () => {
   const context = useContext(SharedDateContext);
@@ -9,7 +9,7 @@ export const useSharedDate = () => {
   // return a default date of next Sunday
   if (!context) {
     return {
-      selectedDate: getNextSunday(),
+      selectedDate: getToday(),
       setSelectedDate: () => {
         // No-op when not in context
         console.warn('setSelectedDate called outside of SharedDateContext');

@@ -7,7 +7,7 @@ import DatePicker from '../components/DatePicker';
 import { Layout, Navigation } from '../components/ui';
 import { useUser } from '../hooks/useUser';
 import { getChoirDetails } from '../services/choirService';
-import { getNextSunday } from '../utils/getNextSunday';
+import { getToday } from '../utils/getToday';
 import { ChoirDetails } from '../types/choir';
 import { UserRole } from '../constants/roles';
 import { 
@@ -23,12 +23,12 @@ export const SharedDateContext = React.createContext<{
   selectedDate: Date;
   setSelectedDate: (date: Date) => void;
 }>({
-  selectedDate: getNextSunday(),
+  selectedDate: getToday(),
   setSelectedDate: () => {}
 });
 
 const ChoirDashboardPage: React.FC = () => {
-  const [selectedDate, setSelectedDate] = useState<Date>(getNextSunday());
+  const [selectedDate, setSelectedDate] = useState<Date>(getToday());
   const [choir, setChoir] = useState<ChoirDetails | null>(null);
   const [loading, setLoading] = useState(true);
   
@@ -85,7 +85,7 @@ const ChoirDashboardPage: React.FC = () => {
             <label className={styles.label} htmlFor="playlist-date-picker">{t('choirDashboard.selectDate')}</label>
             <DatePicker
               selected={selectedDate}
-              onChange={date => setSelectedDate(date || getNextSunday())}
+              onChange={date => setSelectedDate(date || getToday())}
               className={styles.input}
             />
           </div>

@@ -41,11 +41,22 @@ export const createPlaylist = async (
 
 export const getPlaylistsByChoirId = async (
   choirId: string,
-  token: string
+  token: string,
+  bustCache: boolean = false
 ): Promise<Playlist[]> => {
-  const response = await fetch(`${API_URL}/api/choirs/${choirId}/playlists`, {
+  // Add cache-busting parameter to force fresh data when needed
+  const url = new URL(`${API_URL}/api/choirs/${choirId}/playlists`);
+  if (bustCache) {
+    url.searchParams.append('_t', Date.now().toString());
+  }
+  
+  const response = await fetch(url.toString(), {
     headers: {
       Authorization: `Bearer ${token}`,
+      // Add cache-control headers to prevent browser caching
+      'Cache-Control': 'no-cache, no-store, must-revalidate',
+      'Pragma': 'no-cache',
+      'Expires': '0'
     },
   });
 
@@ -58,11 +69,22 @@ export const getPlaylistsByChoirId = async (
 
 export const getPlaylistById = async (
   playlistId: string,
-  token: string
+  token: string,
+  bustCache: boolean = false
 ): Promise<Playlist> => {
-  const response = await fetch(`${API_URL}/api/playlists/${playlistId}`, {
+  // Add cache-busting parameter to force fresh data when needed
+  const url = new URL(`${API_URL}/api/playlists/${playlistId}`);
+  if (bustCache) {
+    url.searchParams.append('_t', Date.now().toString());
+  }
+  
+  const response = await fetch(url.toString(), {
     headers: {
       Authorization: `Bearer ${token}`,
+      // Add cache-control headers to prevent browser caching
+      'Cache-Control': 'no-cache, no-store, must-revalidate',
+      'Pragma': 'no-cache',
+      'Expires': '0'
     },
   });
 
