@@ -907,7 +907,7 @@ const SongDetailPage: React.FC = () => {
             {/* Song Content - PDF/Image-like viewing experience */}
             <div className={styles.songContentContainer}>
               <div className={styles.songContentViewer}>
-                {song && <ChordProViewer source={song.content} />}
+                <ChordProViewer source={song?.content || ''} />
               </div>
             </div>
           </>

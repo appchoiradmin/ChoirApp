@@ -26,7 +26,7 @@ namespace ChoirApp.Backend.Endpoints.Songs
         public override void Configure()
         {
             Verbs("GET");
-            Routes("/songs/choir/{choirId}");
+            Routes("/api/songs/choir/{choirId}");
             AuthSchemes("Bearer");
             Roles(nameof(UserRole.ChoirAdmin), nameof(UserRole.ChoirMember));
         }

@@ -12,11 +12,20 @@ namespace ChoirApp.Application.Services
         private readonly IUserRepository _userRepository;
         private readonly ITagRepository _tagRepository;
         private static readonly ConcurrentDictionary<Guid, (Song Data, DateTime CachedAt)> _songCache = new();
+        private static readonly ConcurrentDictionary<Guid, (List<Song> Data, DateTime CachedAt)> _choirSongsCache = new();
         private static readonly TimeSpan CacheExpiry = TimeSpan.FromMinutes(10);
 
         private static void InvalidateSongCache(Guid songId)
         {
             _songCache.TryRemove(songId, out _);
+        }
+
+        private static void InvalidateChoirSongsCache(Guid choirId)
+        {
+            if (_choirSongsCache.TryRemove(choirId, out _))
+            {
+                Console.WriteLine($"🗑️ Invalidated choir songs cache for choir {choirId}");
+            }
         }
 
         public SongService(
@@ -85,6 +94,15 @@ namespace ChoirApp.Application.Services
 
             await _songRepository.SaveChangesAsync();
 
+            // Invalidate choir songs cache for affected choirs
+            if (visibility == Domain.Entities.SongVisibilityType.PublicChoirs && visibleToChoirs != null)
+            {
+                foreach (var choirId in visibleToChoirs)
+                {
+                    InvalidateChoirSongsCache(choirId);
+                }
+            }
+
             return Result.Ok(MapToSongDto(song));
         }
 
@@ -151,6 +169,15 @@ namespace ChoirApp.Application.Services
 
             await _songRepository.SaveChangesAsync();
 
+            // Invalidate choir songs cache for affected choirs
+            if (visibility == Domain.Entities.SongVisibilityType.PublicChoirs && visibleToChoirs != null)
+            {
+                foreach (var choirId in visibleToChoirs)
+                {
+                    InvalidateChoirSongsCache(choirId);
+                }
+            }
+
             return Result.Ok(MapToSongDto(version));
         }
 
@@ -190,7 +217,29 @@ namespace ChoirApp.Application.Services
 
         public async Task<Result<List<SongDto>>> GetSongsByChoirIdAsync(Guid choirId)
         {
+            // Check cache first
+            if (_choirSongsCache.TryGetValue(choirId, out var cached))
+            {
+                if (DateTime.UtcNow - cached.CachedAt < CacheExpiry)
+                {
+                    Console.WriteLine($"🎼 Choir songs cache HIT for choir {choirId} ({cached.Data.Count} songs)");
+                    return Result.Ok(cached.Data.Select(MapToSongDto).ToList());
+                }
+                else
+                {
+                    Console.WriteLine($"🕒 Choir songs cache EXPIRED for choir {choirId}");
+                    _choirSongsCache.TryRemove(choirId, out _);
+                }
+            }
+
+            // Cache miss - fetch from database
+            Console.WriteLine($"💾 Choir songs cache MISS for choir {choirId} - querying database");
             var songs = await _songRepository.GetByChoirIdAsync(choirId);
+            
+            // Cache the result
+            _choirSongsCache.TryAdd(choirId, (songs, DateTime.UtcNow));
+            Console.WriteLine($"📦 Cached {songs.Count} songs for choir {choirId}");
+            
             return Result.Ok(songs.Select(MapToSongDto).ToList());
         }
 
@@ -225,6 +274,15 @@ namespace ChoirApp.Application.Services
 
             // Invalidate cache after update
             InvalidateSongCache(songId);
+            
+            // Invalidate choir songs cache for all choirs that can see this song
+            if (song.Visibility == Domain.Entities.SongVisibilityType.PublicChoirs)
+            {
+                foreach (var visibility in song.Visibilities)
+                {
+                    InvalidateChoirSongsCache(visibility.ChoirId);
+                }
+            }
 
             // Handle tags if provided - replace all existing tags
             if (tags != null)
@@ -269,6 +327,15 @@ namespace ChoirApp.Application.Services
             
             // Invalidate cache after visibility update
             InvalidateSongCache(songId);
+            
+            // Invalidate choir songs cache for all choirs that might be affected
+            if (song.Visibility == Domain.Entities.SongVisibilityType.PublicChoirs)
+            {
+                foreach (var songVisibility in song.Visibilities)
+                {
+                    InvalidateChoirSongsCache(songVisibility.ChoirId);
+                }
+            }
             
             return Result.Ok();
         }

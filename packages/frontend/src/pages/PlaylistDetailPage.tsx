@@ -2,9 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useUser } from '../hooks/useUser';
 import { getPlaylistById, deletePlaylist } from '../services/playlistService';
-import { getSongsForChoir } from '../services/songService';
 import { Playlist } from '../types/playlist';
-import { SongDto } from '../types/song';
 import { useTranslation } from '../hooks/useTranslation';
 import { PlaylistOfflineStatus, OfflineStatusCompact } from '../components/OfflineStatus';
 import SimpleOfflineTest from '../components/SimpleOfflineTest';
@@ -14,7 +12,6 @@ const PlaylistDetailPage: React.FC = () => {
   const { token } = useUser();
   const { t } = useTranslation();
   const [playlist, setPlaylist] = useState<Playlist | null>(null);
-  const [songs, setSongs] = useState<SongDto[]>([]);
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -25,10 +22,6 @@ const PlaylistDetailPage: React.FC = () => {
         try {
           const fetchedPlaylist = await getPlaylistById(playlistId, token);
           setPlaylist(fetchedPlaylist);
-          if (fetchedPlaylist) {
-            const fetchedSongs = await getSongsForChoir(fetchedPlaylist.choirId, token);
-            setSongs(fetchedSongs);
-          }
         } catch (err: any) {
           setError(err.message || t('playlistDetail.failedToFetch'));
         } finally {
@@ -88,8 +81,8 @@ const PlaylistDetailPage: React.FC = () => {
         <div key={section.id} className="mb-4">
           <h2 className="subtitle">{section.title}</h2>
           {section.songs.map((song) => {
-            // Find the song in our songs array using the unified model
-            const songData = songs.find(s => s.songId === song.songId);
+            // Use the embedded song data directly from the playlist response
+            const songData = song.song;
             
             return (
               <div key={song.id} className="box">

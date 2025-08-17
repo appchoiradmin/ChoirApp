@@ -1,68 +1,93 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { useTranslation } from '../hooks/useTranslation';
+import { globalChordProCache, ParsedLine, Segment } from '../utils/chordProCache';
 import './ChordProViewer.css';
 
 interface ChordProViewerProps {
   source: string;
 }
 
-interface Segment {
-  chord: string | null;
-  lyric: string;
-}
-
-interface ParsedLine {
-  type: 'lyrics' | 'directive';
-  segments?: Segment[];
-  directive?: string;
-  value?: string;
-}
-
 const ChordProViewer: React.FC<ChordProViewerProps> = ({ source }) => {
   const { t } = useTranslation();
-  const parseChordPro = (text: string): ParsedLine[] => {
-    if (!text) return [];
-    const lines = text.split('\n');
-
-    return lines.map(line => {
-      if (line.trim().startsWith('{')) {
-        const match = line.match(/\{(.*?):(.*)\}/);
-        if (match) {
-          const [, directive, value] = match;
-          const trimmedDirective = directive.trim().toLowerCase();
-          if (trimmedDirective === 'c' || trimmedDirective === 'comment') {
-            return { type: 'directive', directive: 'comment', value: value.trim() };
-          }
-          if (trimmedDirective === 't' || trimmedDirective === 'title') {
-            return { type: 'directive', directive: 'title', value: value.trim() };
-          }
-        }
-      }
-
-      const parts = line.split(/(\[[^\]]+\])/g).filter(p => p);
-      if (parts.length === 0) {
-        return { type: 'lyrics', segments: [{ chord: null, lyric: '' }] };
-      }
-
-      const segments: Segment[] = [];
-      for (let i = 0; i < parts.length; i++) {
-        const part = parts[i];
-        if (part.startsWith('[')) {
-          const chord = part.substring(1, part.length - 1);
-          const lyric = (parts[i + 1] && !parts[i + 1].startsWith('[')) ? parts[i + 1] : '';
-          segments.push({ chord, lyric });
-          if (lyric) {
-            i++;
-          }
-        } else {
-          segments.push({ chord: null, lyric: part });
-        }
-      }
-      return { type: 'lyrics', segments };
+  
+  // Generate unique instance ID to track component lifecycle
+  const instanceId = useMemo(() => Math.random().toString(36).substr(2, 9), []);
+  
+  // Add render tracking to verify cache effectiveness
+  console.log('🎵 ChordPro: Component render', { 
+    instanceId,
+    sourceLength: source?.length || 0,
+    timestamp: new Date().toISOString()
+  });
+  
+  // Use global cache to share parsed content between component instances
+  const parsedSong = useMemo(() => {
+    // Check global cache first
+    const cached = globalChordProCache.get(source);
+    if (cached) {
+      console.log('🎵 ChordPro: Using cached content (cache HIT)', { 
+        instanceId,
+        sourceLength: source?.length || 0,
+        timestamp: new Date().toISOString()
+      });
+      return cached;
+    }
+    
+    console.log('🎵 ChordPro: Parsing content (cache MISS)', { 
+      instanceId,
+      sourceLength: source?.length || 0,
+      timestamp: new Date().toISOString()
     });
-  };
+    
+    const parseChordPro = (text: string): ParsedLine[] => {
+      if (!text) return [];
+      const lines = text.split('\n');
 
-  const parsedSong = parseChordPro(source);
+      return lines.map(line => {
+        if (line.trim().startsWith('{')) {
+          const match = line.match(/\{(.*?):(.*)\}/);
+          if (match) {
+            const [, directive, value] = match;
+            const trimmedDirective = directive.trim().toLowerCase();
+            if (trimmedDirective === 'c' || trimmedDirective === 'comment') {
+              return { type: 'directive', directive: 'comment', value: value.trim() };
+            }
+            if (trimmedDirective === 't' || trimmedDirective === 'title') {
+              return { type: 'directive', directive: 'title', value: value.trim() };
+            }
+          }
+        }
+
+        const parts = line.split(/(\[[^\]]+\])/g).filter(p => p);
+        if (parts.length === 0) {
+          return { type: 'lyrics', segments: [{ chord: null, lyric: '' }] };
+        }
+
+        const segments: Segment[] = [];
+        for (let i = 0; i < parts.length; i++) {
+          const part = parts[i];
+          if (part.startsWith('[')) {
+            const chord = part.substring(1, part.length - 1);
+            const lyric = (parts[i + 1] && !parts[i + 1].startsWith('[')) ? parts[i + 1] : '';
+            segments.push({ chord, lyric });
+            if (lyric) {
+              i++;
+            }
+          } else {
+            segments.push({ chord: null, lyric: part });
+          }
+        }
+        return { type: 'lyrics', segments };
+      });
+    };
+
+    const parsed = parseChordPro(source);
+    
+    // Store in global cache for other instances
+    globalChordProCache.set(source, parsed);
+    
+    return parsed;
+  }, [source, instanceId]); // Only re-parse when source content changes
 
   if (!source) {
     return <div className="chord-pro-viewer">{t('chordProViewer.noContent')}</div>;

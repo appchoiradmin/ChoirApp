@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { createContext, useContext, useState, useEffect, ReactNode, useMemo } from 'react';
 import { PlaylistSection, PlaylistTemplate } from '../types/playlist';
 import { getPlaylistsByChoirId, getPlaylistTemplatesByChoirId } from '../services/playlistService';
 import { useTranslation } from '../hooks/useTranslation';
@@ -65,6 +65,11 @@ export const PlaylistProvider = ({
   // isPlaylistReady: true only if playlist is persisted and not initializing
   const isPlaylistReady = isPersisted && !isInitializing && !!playlistId;
 
+  // Memoize stable date string to prevent unnecessary effect runs
+  const stableDateStr = useMemo(() => {
+    return date?.toISOString().split('T')[0] || null;
+  }, [date]);
+
   // Only fetch playlists and templates, do not auto-create playlist
   useEffect(() => {
     async function initialize() {
@@ -82,11 +87,12 @@ export const PlaylistProvider = ({
       setIsInitializing(true);
       setIsInitialized(false);
       try {
-        // 1. Try to fetch persisted playlists for choir with cache-busting on initial load
-        const playlists = await getPlaylistsByChoirId(choirId, token, true);
+        // 1. Try to fetch persisted playlists for choir (only bust cache on true initial load)
+        const shouldBustCache = !isInitialized;
+        const playlists = await getPlaylistsByChoirId(choirId, token, shouldBustCache);
         // Find playlist for the requested date (or next Sunday)
         const targetDate = date || getToday();
-        const targetDateStr = targetDate.toISOString().split('T')[0]; // YYYY-MM-DD
+        const targetDateStr = stableDateStr || targetDate.toISOString().split('T')[0]; // YYYY-MM-DD
 
         // Find playlist for the exact target date only
         const persisted = playlists.find(p => {
@@ -165,7 +171,7 @@ export const PlaylistProvider = ({
     }
     initialize();
     return () => {};
-  }, [choirId, date, token]);
+  }, [choirId, stableDateStr, token]);
 
   // Debug: Track when dependencies change and template state
   useEffect(() => {
