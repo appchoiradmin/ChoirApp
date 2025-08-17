@@ -25,6 +25,7 @@ import EditPlaylistTemplatePage from './pages/EditPlaylistTemplatePage.tsx';
 import ChoirDashboardPage from './pages/ChoirDashboardPage.tsx';
 import SettingsPage from './pages/SettingsPage.tsx';
 import InviteLinkPage from './pages/InviteLinkPage.tsx';
+import PlaylistSharePage from './pages/PlaylistSharePage.tsx';
 
 const PUBLIC_ROUTES = ['/', '/auth/callback', '/auth/error', '/invite'];
 
@@ -32,11 +33,15 @@ function App() {
   const { user, loading } = useUser();
   const navigate = useNavigate();
   const location = useLocation();
+  
 
   useEffect(() => {
     if (loading) return;
 
-    const isPublicRoute = PUBLIC_ROUTES.includes(location.pathname);
+    const isPublicRoute = PUBLIC_ROUTES.includes(location.pathname) || 
+                         location.pathname.startsWith('/invite/') ||
+                         location.pathname.startsWith('/share/');
+
 
     if (!user && !isPublicRoute) {
       // If user is not logged in and on a private route, redirect to home
@@ -83,6 +88,7 @@ function App() {
       <Route path="/playlist-templates/new" element={<CreatePlaylistTemplatePage />} />
       <Route path="/playlist-templates/:templateId" element={<PlaylistTemplateDetailPage />} />
       <Route path="/playlist-templates/:templateId/edit" element={<EditPlaylistTemplatePage />} />
+      <Route path="/share/:playlistId" element={<PlaylistSharePage />} />
       <Route path="/settings" element={<SettingsPage />} />
     </Routes>
   );

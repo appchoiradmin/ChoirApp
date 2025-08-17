@@ -1,7 +1,7 @@
-const CACHE_NAME = 'choirapp-v1.6';
-const STATIC_CACHE = 'choirapp-static-v1.6';
-const DYNAMIC_CACHE = 'choirapp-dynamic-v1.6';
-const PLAYLIST_SONGS_CACHE = 'choirapp-playlist-songs-v1.6';
+const CACHE_NAME = 'choirapp-v1.7';
+const STATIC_CACHE = 'choirapp-static-v1.7';
+const DYNAMIC_CACHE = 'choirapp-dynamic-v1.7';
+const PLAYLIST_SONGS_CACHE = 'choirapp-playlist-songs-v1.7';
 
 // Static resources that rarely change
 const staticAssets = [
@@ -16,7 +16,8 @@ const staticAssets = [
 const networkFirstPatterns = [
   /\/$/, // Root path
   /\.html$/, // HTML files
-  /\/api\//  // API calls (except cached playlist songs)
+  /\/api\//,  // API calls (except cached playlist songs)
+  /\/share\// // Share routes should always be fresh
 ];
 
 // Playlist-related API patterns for special handling

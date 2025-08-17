@@ -25,10 +25,9 @@ const SharePlaylistModal: React.FC<SharePlaylistModalProps> = ({
 
   useEffect(() => {
     if (isOpen && playlistId) {
-      // Generate the PDF share URL using the API base URL
-      const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
-      const pdfUrl = `${API_BASE_URL}/api/playlists/${playlistId}/pdf`;
-      setShareUrl(pdfUrl);
+      // Generate a branded, user-friendly share URL
+      const shareUrl = `${window.location.origin}/share/${playlistId}`;
+      setShareUrl(shareUrl);
     }
   }, [isOpen, playlistId]);
 
@@ -43,7 +42,10 @@ const SharePlaylistModal: React.FC<SharePlaylistModalProps> = ({
   };
 
   const handleDownloadPdf = () => {
-    window.open(shareUrl, '_blank');
+    // For direct PDF download, use the API endpoint
+    const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+    const pdfUrl = `${API_BASE_URL}/api/playlists/${playlistId}/pdf`;
+    window.open(pdfUrl, '_blank');
   };
 
   if (!isOpen) return null;

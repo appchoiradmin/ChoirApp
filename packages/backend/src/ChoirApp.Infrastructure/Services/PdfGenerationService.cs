@@ -230,8 +230,8 @@ public class PdfGenerationService : IPdfGenerationService
                                         {
                                             if (playlistSong.Song != null)
                                             {
-                                                // Song title
-                                                column.Item().PaddingTop(0.5f, Unit.Centimetre).Text(playlistSong.Song.Title).SemiBold().FontSize(13);
+                                                // Song title - larger and more prominent
+                                                column.Item().PaddingTop(0.8f, Unit.Centimetre).Text(playlistSong.Song.Title).SemiBold().FontSize(16).FontColor(Colors.Black);
                                                 
                                                 // Artist info
                                                 if (!string.IsNullOrEmpty(playlistSong.Song.Artist))

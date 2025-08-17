@@ -1003,5 +1003,19 @@
   },
   "shareableInvitation": {
     "expiresIn24Hours": "Los enlaces de invitación expiran automáticamente después de 24 horas."
+  },
+  "share": {
+    "preparing": "Preparando tu lista de reproducción...",
+    "downloading": "Descargando PDF...",
+    "completed": "¡Descarga Completa!",
+    "downloadError": "Error al descargar el PDF de la lista",
+    "noPlaylistId": "No se proporcionó ID de lista de reproducción",
+    "checkLink": "Por favor, verifica el enlace de la lista e inténtalo de nuevo.",
+    "completedNote": "Tu PDF de lista de reproducción debería estar ahora en tu carpeta de Descargas.",
+    "preparingDesc": "Estamos preparando tu lista de reproducción para descargar.",
+    "downloadingDesc": "Tu PDF se está generando y descargando.",
+    "completedDesc": "¡Tu lista de reproducción se ha descargado exitosamente!",
+    "poweredBy": "Desarrollado por AppChoir",
+    "joinApp": "Prueba AppChoir Gratis"
   }
 }
