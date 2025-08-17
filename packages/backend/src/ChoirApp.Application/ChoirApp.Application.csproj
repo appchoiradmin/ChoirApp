@@ -8,6 +8,7 @@
     <PackageReference Include="FluentResults" Version="3.16.0" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="9.0.0-preview.5.24306.7" />
     <PackageReference Include="Microsoft.Extensions.Localization.Abstractions" Version="9.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="8.0.0" />
   </ItemGroup>
 
   <PropertyGroup>

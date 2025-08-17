@@ -3,6 +3,7 @@ using ChoirApp.Application.Dtos;
 using ChoirApp.Domain.Entities;
 using FluentResults;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -20,6 +21,17 @@ namespace ChoirApp.Application.Services
         private readonly IPlaylistTemplateRepository _playlistTemplateRepository;
         private readonly ISongRepository _songRepository;
         private readonly IGlobalPlaylistTemplateService _globalTemplateService;
+        private static readonly ConcurrentDictionary<string, (List<Playlist> Data, DateTime CachedAt)> _playlistCache = new();
+        private static readonly TimeSpan CacheExpiry = TimeSpan.FromMinutes(5);
+
+        private static void InvalidateChoirPlaylistCache(Guid choirId)
+        {
+            var cacheKey = $"playlists_choir_{choirId}";
+            if (_playlistCache.TryRemove(cacheKey, out _))
+            {
+                // Console.WriteLine($"🗑️ Cache invalidated for choir {choirId}");
+            }
+        }
 
         public PlaylistService(
             IPlaylistRepository playlistRepository,
@@ -135,6 +147,10 @@ namespace ChoirApp.Application.Services
 
             await _playlistRepository.AddAsync(playlist);
             await _playlistRepository.SaveChangesAsync();
+            
+            // Invalidate cache for this choir
+            InvalidateChoirPlaylistCache(playlistDto.ChoirId);
+            
             return Result.Ok(playlist);
         }
 
@@ -149,7 +165,34 @@ namespace ChoirApp.Application.Services
 
         public async Task<Result<IEnumerable<Playlist>>> GetPlaylistsByChoirIdAsync(Guid choirId)
         {
+            // Console.WriteLine($"🔥 PlaylistService.GetPlaylistsByChoirIdAsync called for choir: {choirId}");
+            
+            var cacheKey = $"playlists_choir_{choirId}";
+            
+            // Check cache first
+            if (_playlistCache.TryGetValue(cacheKey, out var cached))
+            {
+                if (DateTime.UtcNow - cached.CachedAt < CacheExpiry)
+                {
+                    // Console.WriteLine($"🚀 Cache HIT for choir {choirId} - returning {cached.Data.Count} cached playlists");
+                    return Result.Ok(cached.Data.AsEnumerable());
+                }
+                else
+                {
+                    // Console.WriteLine($"🕒 Cache EXPIRED for choir {choirId} - fetching fresh data");
+                    _playlistCache.TryRemove(cacheKey, out _);
+                }
+            }
+            
+            // Cache miss - fetch from database
+            // Console.WriteLine($"💾 Cache MISS for choir {choirId} - querying database");
             var playlists = await _playlistRepository.GetByChoirIdAsync(choirId);
+            // Console.WriteLine($"🔥 PlaylistService got {playlists.Count} playlists from repository");
+            
+            // Cache the results
+            _playlistCache.TryAdd(cacheKey, (playlists, DateTime.UtcNow));
+            // Console.WriteLine($"📦 Cached {playlists.Count} playlists for choir {choirId}");
+            
             return Result.Ok(playlists.AsEnumerable());
         }
 
@@ -276,6 +319,10 @@ namespace ChoirApp.Application.Services
 
             await _playlistRepository.UpdateAsync(playlist);
             await _playlistRepository.SaveChangesAsync();
+            
+            // Invalidate cache for this choir
+            InvalidateChoirPlaylistCache(playlist.ChoirId ?? Guid.Empty);
+            
             return Result.Ok();
         }
 

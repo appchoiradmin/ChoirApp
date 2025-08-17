@@ -2,6 +2,7 @@ using ChoirApp.Application.Contracts;
 using ChoirApp.Application.Dtos;
 using ChoirApp.Domain.Entities;
 using FluentResults;
+using System.Collections.Concurrent;
 
 namespace ChoirApp.Application.Services
 {
@@ -10,6 +11,13 @@ namespace ChoirApp.Application.Services
         private readonly ISongRepository _songRepository;
         private readonly IUserRepository _userRepository;
         private readonly ITagRepository _tagRepository;
+        private static readonly ConcurrentDictionary<Guid, (Song Data, DateTime CachedAt)> _songCache = new();
+        private static readonly TimeSpan CacheExpiry = TimeSpan.FromMinutes(10);
+
+        private static void InvalidateSongCache(Guid songId)
+        {
+            _songCache.TryRemove(songId, out _);
+        }
 
         public SongService(
             ISongRepository songRepository,
@@ -31,7 +39,7 @@ namespace ChoirApp.Application.Services
             }
 
             // Business rule: If visibility is PublicChoirs, visibleToChoirs must be provided
-            if (visibility == Domain.Entities.SongVisibilityType.PublicChoirs && (visibleToChoirs == null || !visibleToChoirs.Any()))
+            if (visibility == Domain.Entities.SongVisibilityType.PublicChoirs && (visibleToChoirs == null || visibleToChoirs.Count == 0))
             {
                 return Result.Fail("When visibility is PublicChoirs, at least one choir must be specified.");
             }
@@ -62,7 +70,7 @@ namespace ChoirApp.Application.Services
             }
 
             // Add tags if provided
-            if (tags != null && tags.Any())
+            if (tags != null && tags.Count > 0)
             {
                 foreach (var tagName in tags)
                 {
@@ -97,7 +105,7 @@ namespace ChoirApp.Application.Services
             }
 
             // Business rule: If visibility is PublicChoirs, visibleToChoirs must be provided
-            if (visibility == Domain.Entities.SongVisibilityType.PublicChoirs && (visibleToChoirs == null || !visibleToChoirs.Any()))
+            if (visibility == Domain.Entities.SongVisibilityType.PublicChoirs && (visibleToChoirs == null || visibleToChoirs.Count == 0))
             {
                 return Result.Fail("When visibility is PublicChoirs, at least one choir must be specified.");
             }
@@ -128,7 +136,7 @@ namespace ChoirApp.Application.Services
             }
 
             // Add tags if provided
-            if (tags != null && tags.Any())
+            if (tags != null && tags.Count > 0)
             {
                 foreach (var tagName in tags)
                 {
@@ -148,11 +156,28 @@ namespace ChoirApp.Application.Services
 
         public async Task<Result<SongDto>> GetSongByIdAsync(Guid songId)
         {
+            // Check cache first
+            if (_songCache.TryGetValue(songId, out var cached))
+            {
+                if (DateTime.UtcNow - cached.CachedAt < CacheExpiry)
+                {
+                    return Result.Ok(MapToSongDto(cached.Data));
+                }
+                else
+                {
+                    _songCache.TryRemove(songId, out _);
+                }
+            }
+
+            // Cache miss - fetch from database
             var song = await _songRepository.GetByIdWithTagsAsync(songId);
             if (song == null)
             {
                 return Result.Fail("Song not found.");
             }
+
+            // Cache the result
+            _songCache.TryAdd(songId, (song, DateTime.UtcNow));
 
             return Result.Ok(MapToSongDto(song));
         }
@@ -198,6 +223,9 @@ namespace ChoirApp.Application.Services
 
             await _songRepository.SaveChangesAsync();
 
+            // Invalidate cache after update
+            InvalidateSongCache(songId);
+
             // Handle tags if provided - replace all existing tags
             if (tags != null)
             {
@@ -238,6 +266,10 @@ namespace ChoirApp.Application.Services
             }
 
             await _songRepository.SaveChangesAsync();
+            
+            // Invalidate cache after visibility update
+            InvalidateSongCache(songId);
+            
             return Result.Ok();
         }
 
@@ -366,25 +398,25 @@ namespace ChoirApp.Application.Services
                 Artist = song.Artist,
                 Content = song.Content,
                 CreatorId = song.CreatorId,
-                Visibility = (Application.Dtos.SongVisibilityType)(int)song.Visibility,
+                Visibility = (Dtos.SongVisibilityType)(int)song.Visibility,
                 BaseSongId = song.BaseSongId,
                 CreatedAt = song.CreatedAt,
                 Tags = song.Tags?.Where(st => st.Tag != null).Select(st => new TagDto
                 {
-                    TagId = st.Tag.TagId,
-                    TagName = st.Tag.TagName
-                }).ToList() ?? new List<TagDto>()
+                    TagId = st.Tag!.TagId,
+                    TagName = st.Tag!.TagName
+                }).ToList() ?? []
             };
         }
 
-        private string NormalizeTagName(string tagName)
+        private static string NormalizeTagName(string tagName)
         {
             if (string.IsNullOrWhiteSpace(tagName))
                 return string.Empty;
                 
             // Convert to Pascal case: "christmas" -> "Christmas", "HYMN" -> "Hymn"
             var trimmed = tagName.Trim();
-            return char.ToUpper(trimmed[0]) + trimmed.Substring(1).ToLower();
+            return char.ToUpper(trimmed[0]) + trimmed[1..].ToLower();
         }
     }
 }

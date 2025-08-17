@@ -18,8 +18,14 @@ public static class DependencyInjection
         {
             services.AddDbContext<ApplicationDbContext>(
                 options => options.UseNpgsql(configuration.GetConnectionString("DefaultConnection"))
+                    .EnableSensitiveDataLogging(environment.IsDevelopment())
+                    .LogTo(Console.WriteLine, Microsoft.Extensions.Logging.LogLevel.Information)
+                    .EnableDetailedErrors(environment.IsDevelopment())
             );
         }
+
+        // Add in-memory caching
+        services.AddMemoryCache();
 
         // Register Infrastructure-specific services (external concerns)
         services.AddScoped<ITokenService, TokenService>();

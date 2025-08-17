@@ -2,8 +2,10 @@ using ChoirApp.Application.Contracts;
 using ChoirApp.Domain.Entities;
 using ChoirApp.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -12,10 +14,12 @@ namespace ChoirApp.Infrastructure.Repositories
     public class PlaylistRepository : IPlaylistRepository
     {
         private readonly ApplicationDbContext _context;
+        private readonly ILogger<PlaylistRepository> _logger;
 
-        public PlaylistRepository(ApplicationDbContext context)
+        public PlaylistRepository(ApplicationDbContext context, ILogger<PlaylistRepository> logger)
         {
-            _context = context;
+            _context = context ?? throw new ArgumentNullException(nameof(context));
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
         public async Task<Playlist?> GetByIdAsync(Guid playlistId)
@@ -45,19 +49,28 @@ namespace ChoirApp.Infrastructure.Repositories
 
         public async Task<List<Playlist>> GetByChoirIdAsync(Guid choirId)
         {
-            return await _context.Playlists
+            _logger.LogInformation("🚀 GetByChoirIdAsync called for choir: {ChoirId}", choirId);
+            var stopwatch = Stopwatch.StartNew();
+            
+            var result = await _context.Playlists
                 .Include(p => p.Sections)
-                .ThenInclude(s => s.PlaylistSongs)
-                .ThenInclude(ps => ps.Song)
-                .ThenInclude(s => s.Tags)
-                .ThenInclude(st => st.Tag)
+                    .ThenInclude(s => s.PlaylistSongs)
+                    .ThenInclude(ps => ps.Song!)
+                    .ThenInclude(s => s.Tags)
+                    .ThenInclude(st => st.Tag)
                 .Include(p => p.Sections)
-                .ThenInclude(s => s.PlaylistSongs)
-                .ThenInclude(ps => ps.Song)
-                .ThenInclude(s => s.Creator)
+                    .ThenInclude(s => s.PlaylistSongs)
+                    .ThenInclude(ps => ps.Song!)
+                    .ThenInclude(s => s.Creator)
                 .Where(p => p.ChoirId == choirId)
                 .OrderByDescending(p => p.CreatedAt)
                 .ToListAsync();
+
+            stopwatch.Stop();
+            _logger.LogInformation("GetByChoirIdAsync for choir {ChoirId} took {ElapsedMs}ms, returned {PlaylistCount} playlists", 
+                choirId, stopwatch.ElapsedMilliseconds, result.Count);
+            
+            return result;
         }
 
         public async Task<Playlist?> GetByChoirIdAndDateAsync(Guid choirId, DateTimeOffset date)
