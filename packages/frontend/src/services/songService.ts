@@ -8,6 +8,7 @@ import type {
   UpdateSongVisibilityDto,
   SongTagDto
 } from '../types/song';
+import { globalSongCache } from '../utils/songCache';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
@@ -31,7 +32,12 @@ export const createSong = async (songDto: CreateSongDto, token: string): Promise
     throw new Error(`Failed to create song: ${response.statusText}`);
   }
 
-  return await response.json();
+  const createdSong = await response.json();
+  
+  // Cache the newly created song
+  globalSongCache.set(createdSong.songId, createdSong);
+  
+  return createdSong;
 };
 
 /**
@@ -55,16 +61,28 @@ export const createSongVersion = async (baseSongId: string, versionDto: CreateSo
     throw new Error(`Failed to create song version: ${response.statusText}`);
   }
 
-  return await response.json();
+  const createdVersion = await response.json();
+  
+  // Cache the newly created song version
+  globalSongCache.set(createdVersion.songId, createdVersion);
+  
+  return createdVersion;
 };
 
 /**
- * Gets a song by its ID
+ * Gets a song by its ID with client-side caching
  * @param id Song ID
  * @param token Authentication token
  * @returns The song
  */
 export const getSongById = async (id: string, token: string): Promise<SongDto> => {
+  // Check cache first
+  const cached = globalSongCache.get(id);
+  if (cached) {
+    return cached;
+  }
+
+  // Cache miss - fetch from API
   const response = await fetch(`${API_BASE_URL}/api/songs/${id}`, {
     headers: {
       'Authorization': `Bearer ${token}`
@@ -75,7 +93,12 @@ export const getSongById = async (id: string, token: string): Promise<SongDto> =
     throw new Error(`Failed to get song: ${response.statusText}`);
   }
 
-  return await response.json();
+  const song = await response.json();
+  
+  // Store in cache for future requests
+  globalSongCache.set(id, song);
+  
+  return song;
 };
 
 /**
@@ -204,7 +227,12 @@ export const updateSong = async (songId: string, updateDto: UpdateSongDto, token
     throw new Error(`Failed to update song: ${response.statusText}`);
   }
 
-  return await response.json();
+  const updatedSong = await response.json();
+  
+  // Invalidate cache to ensure fresh data on next request
+  globalSongCache.delete(songId);
+  
+  return updatedSong;
 };
 
 /**
@@ -228,7 +256,12 @@ export const updateSongVisibility = async (songId: string, visibilityDto: Update
     throw new Error(`Failed to update song visibility: ${response.statusText}`);
   }
 
-  return await response.json();
+  const updatedSong = await response.json();
+  
+  // Invalidate cache to ensure fresh data on next request
+  globalSongCache.delete(songId);
+  
+  return updatedSong;
 };
 
 /**
@@ -247,6 +280,9 @@ export const deleteSong = async (songId: string, token: string): Promise<void> =
   if (!response.ok) {
     throw new Error(`Failed to delete song: ${response.statusText}`);
   }
+  
+  // Remove from cache since song no longer exists
+  globalSongCache.delete(songId);
 };
 
 /**
