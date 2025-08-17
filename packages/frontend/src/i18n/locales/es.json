@@ -963,7 +963,12 @@
   "chordProViewer": {
     "noContent": "No hay contenido de canción para mostrar.",
     "fontSettings": "Configuración de Fuente",
+    "fontSize": "Tamaño de Fuente:",
     "fontWeight": "Peso de Fuente:",
+    "small": "Pequeño",
+    "medium": "Mediano",
+    "large": "Grande",
+    "extraLarge": "Extra Grande",
     "normal": "Normal",
     "bold": "Negrita",
     "extraBold": "Extra Negrita"

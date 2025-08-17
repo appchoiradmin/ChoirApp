@@ -4,6 +4,7 @@ import { globalChordProCache, ParsedLine, Segment } from '../utils/chordProCache
 import './ChordProViewer.css';
 
 type ChordFontWeight = 'normal' | 'bold' | 'extra-bold';
+type FontSize = 'small' | 'medium' | 'large' | 'extra-large';
 
 interface ChordProViewerProps {
   source: string;
@@ -26,6 +27,19 @@ const ChordProViewer: React.FC<ChordProViewerProps> = ({ source, showFontControl
     return 'bold';
   });
   
+  // Initialize font size from localStorage or default to 'medium'
+  const [fontSize, setFontSize] = useState<FontSize>(() => {
+    try {
+      const saved = localStorage.getItem('choirapp-font-size');
+      if (saved && ['small', 'medium', 'large', 'extra-large'].includes(saved)) {
+        return saved as FontSize;
+      }
+    } catch (error) {
+      console.warn('Failed to load font size preference:', error);
+    }
+    return 'medium';
+  });
+  
   // State for toggling font controls visibility
   const [showControls, setShowControls] = useState(false);
   
@@ -37,6 +51,15 @@ const ChordProViewer: React.FC<ChordProViewerProps> = ({ source, showFontControl
       console.warn('Failed to save font weight preference:', error);
     }
   }, [fontWeight]);
+  
+  // Save font size preference to localStorage whenever it changes
+  useEffect(() => {
+    try {
+      localStorage.setItem('choirapp-font-size', fontSize);
+    } catch (error) {
+      console.warn('Failed to save font size preference:', error);
+    }
+  }, [fontSize]);
   
   // Generate unique instance ID to track component lifecycle
   const instanceId = useMemo(() => Math.random().toString(36).substr(2, 9), []);
@@ -129,9 +152,19 @@ const ChordProViewer: React.FC<ChordProViewerProps> = ({ source, showFontControl
       default: return 'font-weight-bold';
     }
   };
+  
+  const getFontSizeClass = (size: FontSize): string => {
+    switch (size) {
+      case 'small': return 'font-size-small';
+      case 'medium': return 'font-size-medium';
+      case 'large': return 'font-size-large';
+      case 'extra-large': return 'font-size-extra-large';
+      default: return 'font-size-medium';
+    }
+  };
 
   return (
-    <div className="chord-pro-viewer" data-testid="chord-pro-viewer">
+    <div className={`chord-pro-viewer ${getFontSizeClass(fontSize)}`} data-testid="chord-pro-viewer">
       {showFontControls && (
         <div className="font-controls-container">
           <button 
@@ -146,29 +179,65 @@ const ChordProViewer: React.FC<ChordProViewerProps> = ({ source, showFontControl
           
           {showControls && (
             <div className="font-controls">
-              <span className="control-label">{t('chordProViewer.fontWeight')}</span>
-              <div className="weight-buttons">
-                <button 
-                  className={`weight-btn ${fontWeight === 'normal' ? 'active' : ''}`}
-                  onClick={() => setFontWeight('normal')}
-                  type="button"
-                >
-                  {t('chordProViewer.normal')}
-                </button>
-                <button 
-                  className={`weight-btn ${fontWeight === 'bold' ? 'active' : ''}`}
-                  onClick={() => setFontWeight('bold')}
-                  type="button"
-                >
-                  {t('chordProViewer.bold')}
-                </button>
-                <button 
-                  className={`weight-btn ${fontWeight === 'extra-bold' ? 'active' : ''}`}
-                  onClick={() => setFontWeight('extra-bold')}
-                  type="button"
-                >
-                  {t('chordProViewer.extraBold')}
-                </button>
+              <div className="control-group">
+                <span className="control-label">{t('chordProViewer.fontSize')}</span>
+                <div className="size-buttons">
+                  <button 
+                    className={`size-btn ${fontSize === 'small' ? 'active' : ''}`}
+                    onClick={() => setFontSize('small')}
+                    type="button"
+                  >
+                    {t('chordProViewer.small')}
+                  </button>
+                  <button 
+                    className={`size-btn ${fontSize === 'medium' ? 'active' : ''}`}
+                    onClick={() => setFontSize('medium')}
+                    type="button"
+                  >
+                    {t('chordProViewer.medium')}
+                  </button>
+                  <button 
+                    className={`size-btn ${fontSize === 'large' ? 'active' : ''}`}
+                    onClick={() => setFontSize('large')}
+                    type="button"
+                  >
+                    {t('chordProViewer.large')}
+                  </button>
+                  <button 
+                    className={`size-btn ${fontSize === 'extra-large' ? 'active' : ''}`}
+                    onClick={() => setFontSize('extra-large')}
+                    type="button"
+                  >
+                    {t('chordProViewer.extraLarge')}
+                  </button>
+                </div>
+              </div>
+              
+              <div className="control-group">
+                <span className="control-label">{t('chordProViewer.fontWeight')}</span>
+                <div className="weight-buttons">
+                  <button 
+                    className={`weight-btn ${fontWeight === 'normal' ? 'active' : ''}`}
+                    onClick={() => setFontWeight('normal')}
+                    type="button"
+                  >
+                    {t('chordProViewer.normal')}
+                  </button>
+                  <button 
+                    className={`weight-btn ${fontWeight === 'bold' ? 'active' : ''}`}
+                    onClick={() => setFontWeight('bold')}
+                    type="button"
+                  >
+                    {t('chordProViewer.bold')}
+                  </button>
+                  <button 
+                    className={`weight-btn ${fontWeight === 'extra-bold' ? 'active' : ''}`}
+                    onClick={() => setFontWeight('extra-bold')}
+                    type="button"
+                  >
+                    {t('chordProViewer.extraBold')}
+                  </button>
+                </div>
               </div>
             </div>
           )}

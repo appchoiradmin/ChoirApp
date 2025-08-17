@@ -966,7 +966,12 @@
   "chordProViewer": {
     "noContent": "No song content to display.",
     "fontSettings": "Font Settings",
+    "fontSize": "Font Size:",
     "fontWeight": "Font Weight:",
+    "small": "Small",
+    "medium": "Medium",
+    "large": "Large",
+    "extraLarge": "Extra Large",
     "normal": "Normal",
     "bold": "Bold",
     "extraBold": "Extra Bold"
