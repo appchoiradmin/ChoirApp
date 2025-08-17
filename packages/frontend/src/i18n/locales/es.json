@@ -961,7 +961,12 @@
     "placeholder": "Agregar una etiqueta"
   },
   "chordProViewer": {
-    "noContent": "No hay contenido de canción para mostrar."
+    "noContent": "No hay contenido de canción para mostrar.",
+    "fontSettings": "Configuración de Fuente",
+    "fontWeight": "Peso de Fuente:",
+    "normal": "Normal",
+    "bold": "Negrita",
+    "extraBold": "Extra Negrita"
   },
   "invitation": {
     "title": "¡Estás Invitado!",

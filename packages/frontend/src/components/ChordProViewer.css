@@ -1,6 +1,6 @@
 .chord-pro-viewer {
   font-family: 'Courier New', Courier, monospace;
-  line-height: 2.2em;
+  line-height: 2.4em;
 }
 
 .line {
@@ -16,10 +16,38 @@
 .chord {
   position: absolute;
   transform: translateY(-1.2em);
-  font-weight: bold;
   color: #d9534f;
-  font-size: 0.9em;
+  font-size: 1em;
   white-space: nowrap;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+/* Font weight classes for all text elements */
+.font-weight-normal {
+  font-weight: 400;
+}
+
+.font-weight-normal .chord,
+.font-weight-normal .lyric {
+  font-weight: 400;
+}
+
+.font-weight-bold {
+  font-weight: 700;
+}
+
+.font-weight-bold .chord,
+.font-weight-bold .lyric {
+  font-weight: 700;
+}
+
+.font-weight-extra-bold {
+  font-weight: 900;
+}
+
+.font-weight-extra-bold .chord,
+.font-weight-extra-bold .lyric {
+  font-weight: 900;
 }
 
 .lyric {
@@ -38,4 +66,145 @@
   color: #5bc0de;
   font-style: italic;
   margin-bottom: 1em;
+}
+
+/* Font controls styling */
+.font-controls-container {
+  margin-bottom: 1rem;
+}
+
+.toggle-controls-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  background-color: #f8f9fa;
+  border: 1px solid #dee2e6;
+  border-radius: 6px;
+  color: #495057;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  width: 100%;
+  text-align: left;
+}
+
+.toggle-controls-btn:hover {
+  background-color: #e9ecef;
+  border-color: #adb5bd;
+}
+
+.toggle-controls-btn:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(217, 83, 79, 0.2);
+}
+
+.toggle-icon {
+  font-size: 0.8rem;
+  color: #6c757d;
+  transition: transform 0.2s ease;
+}
+
+.font-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-top: 0.5rem;
+  padding: 0.75rem;
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  border: 1px solid #e9ecef;
+}
+
+.control-label {
+  font-weight: 600;
+  color: #495057;
+  font-size: 0.9rem;
+  white-space: nowrap;
+}
+
+.weight-buttons {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.weight-btn {
+  padding: 0.5rem 0.75rem;
+  border: 2px solid #dee2e6;
+  background-color: #fff;
+  color: #495057;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-width: 60px;
+  text-align: center;
+}
+
+.weight-btn:hover {
+  border-color: #d9534f;
+  color: #d9534f;
+  background-color: #fff5f5;
+}
+
+.weight-btn.active {
+  background-color: #d9534f;
+  border-color: #d9534f;
+  color: white;
+  font-weight: 600;
+}
+
+.weight-btn:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(217, 83, 79, 0.2);
+}
+
+/* Mobile optimizations */
+@media (max-width: 768px) {
+  .chord {
+    font-size: 1.1em;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+  }
+  
+  .font-weight-bold,
+  .font-weight-bold .chord,
+  .font-weight-bold .lyric {
+    font-weight: 800;
+  }
+  
+  .font-weight-extra-bold,
+  .font-weight-extra-bold .chord,
+  .font-weight-extra-bold .lyric {
+    font-weight: 900;
+    text-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
+  }
+  
+  .font-controls {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.5rem;
+  }
+  
+  .toggle-controls-btn {
+    padding: 0.75rem;
+    font-size: 1rem;
+  }
+  
+  .control-label {
+    text-align: center;
+    font-size: 1rem;
+  }
+  
+  .weight-buttons {
+    justify-content: center;
+  }
+  
+  .weight-btn {
+    flex: 1;
+    padding: 0.75rem;
+    font-size: 0.9rem;
+    min-height: 44px; /* Touch-friendly minimum */
+  }
 }

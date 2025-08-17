@@ -964,7 +964,12 @@
     "placeholder": "Add a tag"
   },
   "chordProViewer": {
-    "noContent": "No song content to display."
+    "noContent": "No song content to display.",
+    "fontSettings": "Font Settings",
+    "fontWeight": "Font Weight:",
+    "normal": "Normal",
+    "bold": "Bold",
+    "extraBold": "Extra Bold"
   },
   "invitation": {
     "title": "You're Invited!",
