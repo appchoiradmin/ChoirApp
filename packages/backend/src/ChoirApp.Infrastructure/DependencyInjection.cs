@@ -1,4 +1,5 @@
 using ChoirApp.Application.Contracts;
+using ChoirApp.Application.Services;
 using ChoirApp.Domain.Services;
 using ChoirApp.Infrastructure.Persistence;
 using ChoirApp.Infrastructure.Repositories;
@@ -42,6 +43,7 @@ public static class DependencyInjection
         services.AddScoped<IShareableInvitationRepository, ShareableInvitationRepository>();
         services.AddScoped<ITagRepository, TagRepository>();
         services.AddScoped<IInvitationPolicy, InvitationPolicy>();
+        services.AddScoped<IPdfGenerationService, PdfGenerationService>();
         services.AddScoped<IPushSubscriptionRepository, PushSubscriptionRepository>();
         services.AddScoped<IPushNotificationProvider, WebPushNotificationProvider>();
 

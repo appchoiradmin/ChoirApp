@@ -25,7 +25,9 @@
     "none": "None",
     "all": "All",
     "clear": "Clear",
-    "selectAll": "Select All"
+    "selectAll": "Select All",
+    "copy": "Copy",
+    "copied": "Copied!"
   },
   "navigation": {
     "home": "Home",
@@ -555,6 +557,13 @@
     "songs": "songs",
     "duration": "Duration",
     "saving": "Saving...",
+    "sharePlaylist": "Share Playlist",
+    "shareDescription": "Share this playlist as a PDF with anyone. They don't need the app to view it.",
+    "showQR": "Show QR Code",
+    "hideQR": "Hide QR Code",
+    "qrInstructions": "Scan this QR code with any device to download the playlist PDF",
+    "shareUrl": "Share URL",
+    "downloadPdf": "Download PDF",
     "globalTemplates": {
       "generic": "Generic Template",
       "mass": "Mass Template",

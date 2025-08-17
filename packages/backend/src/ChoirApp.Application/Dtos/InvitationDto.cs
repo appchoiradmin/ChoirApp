@@ -4,11 +4,11 @@ namespace ChoirApp.Application.Dtos
 {
     public class InvitationDto
     {
-        public string InvitationToken { get; set; }
+        public required string InvitationToken { get; set; }
         public Guid ChoirId { get; set; }
-        public string ChoirName { get; set; }
-        public string Email { get; set; }
-        public string Status { get; set; }
+        public required string ChoirName { get; set; }
+        public required string Email { get; set; }
+        public required string Status { get; set; }
         public DateTimeOffset SentAt { get; set; }
     }
 }

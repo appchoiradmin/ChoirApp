@@ -25,7 +25,9 @@
     "none": "Ninguno",
     "all": "Todos",
     "selectAll": "Seleccionar Todo",
-    "clear": "Limpiar"
+    "clear": "Limpiar",
+    "copy": "Copiar",
+    "copied": "¡Copiado!"
   },
   "navigation": {
     "home": "Inicio",
@@ -550,6 +552,13 @@
     "emptyPlaylistMessage": "Esta lista aún no tiene canciones. Comienza a construir tu lista agregando canciones a las secciones.",
     "song": "canción",
     "songs": "canciones",
+    "sharePlaylist": "Compartir Lista",
+    "shareDescription": "Comparte esta lista como PDF con cualquier persona. No necesitan la aplicación para verla.",
+    "showQR": "Mostrar Código QR",
+    "hideQR": "Ocultar Código QR",
+    "qrInstructions": "Escanea este código QR con cualquier dispositivo para descargar el PDF de la lista",
+    "shareUrl": "URL para Compartir",
+    "downloadPdf": "Descargar PDF",
     "saving": "Guardando...",
     "duration": "Duración",
     "globalTemplates": {

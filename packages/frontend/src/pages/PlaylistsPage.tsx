@@ -12,6 +12,7 @@ import { removeSongFromPlaylist, moveSongInPlaylist } from '../services/playlist
 import { getSongById } from '../services/songService';
 import { Button, Card, LoadingSpinner } from '../components/ui';
 import Layout from '../components/ui/Layout';
+import SharePlaylistModal from '../components/SharePlaylistModal';
 import toast from 'react-hot-toast';
 import { 
   PlusIcon, 
@@ -20,7 +21,8 @@ import {
   ClockIcon,
   UserGroupIcon,
   CalendarIcon,
-  TrashIcon
+  TrashIcon,
+  ShareIcon
 } from '@heroicons/react/24/outline';
 import './PlaylistsPage.scss';
 
@@ -35,7 +37,9 @@ const PlaylistHeader: React.FC<{
   showDeleteButton?: boolean;
   onDeleteClick?: () => void;
   isDeleting?: boolean;
-}> = ({ title, date, totalSongs, totalSections, duration, isPrivate = true, showDeleteButton = false, onDeleteClick, isDeleting = false }) => {
+  playlistId?: string;
+  onShareClick?: () => void;
+}> = ({ title, date, totalSongs, totalSections, duration, isPrivate = true, showDeleteButton = false, onDeleteClick, isDeleting = false, playlistId, onShareClick }) => {
   const { t, getCurrentLanguage } = useTranslation();
   
   // Get current language for reactive updates
@@ -92,6 +96,17 @@ const PlaylistHeader: React.FC<{
           </div>
         </div>
         <div className="header-actions">
+          {playlistId && onShareClick && (
+            <Button
+              variant="outlined"
+              size="sm"
+              leftIcon={<ShareIcon />}
+              onClick={onShareClick}
+              className="share-playlist-btn"
+            >
+              {t('playlists.sharePlaylist')}
+            </Button>
+          )}
           {showDeleteButton && (
             <Button
               variant="outlined"
@@ -144,6 +159,7 @@ const PlaylistsPage: React.FC = () => {
   const dropdownRef = useRef<HTMLDivElement>(null);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [showShareModal, setShowShareModal] = useState(false);
 
   // Get current language for reactive updates
   const currentLanguage = getCurrentLanguage();
@@ -449,6 +465,8 @@ const PlaylistsPage: React.FC = () => {
           showDeleteButton={isPersisted && !!playlistId}
           onDeleteClick={confirmDeletePlaylist}
           isDeleting={isDeleting}
+          playlistId={isPersisted && playlistId ? playlistId : undefined}
+          onShareClick={() => setShowShareModal(true)}
         />
 
         {/* Content Section */}
@@ -562,6 +580,16 @@ const PlaylistsPage: React.FC = () => {
             </footer>
           </div>
         </div>
+      )}
+
+      {/* Share Playlist Modal */}
+      {showShareModal && playlistId && (
+        <SharePlaylistModal
+          isOpen={showShareModal}
+          onClose={() => setShowShareModal(false)}
+          playlistId={playlistId}
+          playlistTitle={formatDateTitle(selectedDate)}
+        />
       )}
     </Layout>
   );

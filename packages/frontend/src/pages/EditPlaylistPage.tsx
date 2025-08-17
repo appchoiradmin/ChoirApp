@@ -13,6 +13,7 @@ import { PlaylistProvider } from '../context/PlaylistContext';
 import MovableSongItem from '../components/MovableSongItem';
 import { Button, Card, LoadingSpinner, LoadingState } from '../components/ui';
 import Layout from '../components/ui/Layout';
+import SharePlaylistModal from '../components/SharePlaylistModal';
 import toast from 'react-hot-toast';
 import {
   ArrowLeftIcon,
@@ -25,7 +26,8 @@ import {
   UserGroupIcon,
   CheckIcon,
   ChevronDownIcon,
-  ChevronUpIcon
+  ChevronUpIcon,
+  ShareIcon
 } from '@heroicons/react/24/outline';
 import './EditPlaylistPage.scss';
 
@@ -52,6 +54,7 @@ const EditPlaylistPage: React.FC = () => {
   
   // UI State
   const [playlistSelectorOpen, setPlaylistSelectorOpen] = useState(false);
+  const [showShareModal, setShowShareModal] = useState(false);
 
   // Fetch all playlists for the choir and select the target playlist
   useEffect(() => {
@@ -427,6 +430,24 @@ const EditPlaylistPage: React.FC = () => {
               <span className="stat-label">Template</span>
             </div>
           </div>
+          
+          {/* Share Button */}
+          {(() => {
+            console.log('Share button debug:', { selectedPlaylistId, condition: selectedPlaylistId && selectedPlaylistId !== 'draft' });
+            return selectedPlaylistId && selectedPlaylistId !== 'draft';
+          })() && (
+            <div className="share-section">
+              <Button
+                variant="secondary"
+                size="sm"
+                leftIcon={<ShareIcon />}
+                onClick={() => setShowShareModal(true)}
+                className="share-button"
+              >
+                {t('playlists.sharePlaylist')}
+              </Button>
+            </div>
+          )}
         </div>
 
         {/* Playlist Selector */}
@@ -551,6 +572,14 @@ const EditPlaylistPage: React.FC = () => {
           )}
         </div>
       </div>
+
+      {/* Share Modal */}
+      <SharePlaylistModal
+        isOpen={showShareModal}
+        onClose={() => setShowShareModal(false)}
+        playlistId={selectedPlaylistId || ''}
+        playlistTitle={selectedPlaylist?.title || title || 'Playlist'}
+      />
     </Layout>
   );
 }
