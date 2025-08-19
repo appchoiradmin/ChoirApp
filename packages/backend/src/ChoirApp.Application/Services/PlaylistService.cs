@@ -738,6 +738,10 @@ namespace ChoirApp.Application.Services
 
             await _playlistRepository.UpdatePlaylistSongAsync(songToMove);
             await _playlistRepository.SaveChangesAsync();
+            
+            // CRITICAL FIX: Invalidate cache after moving song between sections
+            InvalidateChoirPlaylistCache(playlist.ChoirId ?? Guid.Empty);
+            
             return Result.Ok();
         }
 
