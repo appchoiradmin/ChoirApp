@@ -49,6 +49,7 @@ const SongDetailPage: React.FC = () => {
   const [selectedChoirsForCreate, setSelectedChoirsForCreate] = useState<string[]>([]);
   const [editTags, setEditTags] = useState<string[]>([]);
   const [versionTags, setVersionTags] = useState<string[]>([]);
+  const [versionAudioUrl, setVersionAudioUrl] = useState<string>('');
   const [choirFilter, setChoirFilter] = useState<string>('');
   const [editChoirFilter, setEditChoirFilter] = useState<string>('');
   const [createChoirFilter, setCreateChoirFilter] = useState<string>('');
@@ -127,6 +128,7 @@ const SongDetailPage: React.FC = () => {
     try {
       const versionDto: CreateSongVersionDto = {
         content: editContent || song?.content || '',
+        audioUrl: versionAudioUrl || undefined,
         visibility: editVisibility,
         visibleToChoirs: selectedChoirsForVersion,
         tags: versionTags.length > 0 ? versionTags : undefined
@@ -292,6 +294,7 @@ const SongDetailPage: React.FC = () => {
   const handleStartVersionCreation = () => {
     setIsVersionMode(true);
     setEditContent(song?.content || '');
+    setVersionAudioUrl(song?.audioUrl || '');
     setEditVisibility(SongVisibilityType.PublicChoirs);
     setSelectedChoirsForVersion([]);
     // Load existing tags into version mode
@@ -880,6 +883,20 @@ const SongDetailPage: React.FC = () => {
             )}
           </div>
         )}
+        
+        <div className={styles.formGroup}>
+          <label htmlFor="versionAudioUrl" className={styles.label}>{t('songs.audioUrl')}</label>
+          <input
+            id="versionAudioUrl"
+            type="url"
+            value={versionAudioUrl}
+            onChange={(e) => setVersionAudioUrl(e.target.value)}
+            className={styles.input}
+            placeholder={t('songs.audioUrlPlaceholder')}
+            pattern="https?://.*"
+            title="Please enter a valid URL starting with http:// or https://"
+          />
+        </div>
         
         <div className={styles.formGroup}>
           <label className={styles.label}>{t('songs.tags')}</label>
