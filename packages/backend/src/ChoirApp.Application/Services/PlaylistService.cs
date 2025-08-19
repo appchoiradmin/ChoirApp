@@ -666,6 +666,10 @@ namespace ChoirApp.Application.Services
 
             await _playlistRepository.AddPlaylistSongAsync(songResult.Value);
             await _playlistRepository.SaveChangesAsync();
+            
+            // CRITICAL FIX: Invalidate cache after adding song to playlist
+            InvalidateChoirPlaylistCache(playlist.ChoirId ?? Guid.Empty);
+            
             return Result.Ok();
         }
 
@@ -689,6 +693,9 @@ namespace ChoirApp.Application.Services
 
             await _playlistRepository.RemovePlaylistSongAsync(songToRemove);
             await _playlistRepository.SaveChangesAsync();
+            
+            // CRITICAL FIX: Invalidate cache after removing song from playlist
+            InvalidateChoirPlaylistCache(playlist.ChoirId ?? Guid.Empty);
 
             return Result.Ok();
         }

@@ -55,6 +55,11 @@ self.addEventListener('fetch', (event) => {
     return;
   }
   
+  // CRITICAL FIX: Skip API requests - let them go directly to backend with authentication
+  if (url.pathname.startsWith('/api/')) {
+    return; // Let the request go through normally to the backend
+  }
+  
   // Check if this is a playlist detail request
   const playlistMatch = url.pathname.match(playlistPatterns.playlistDetail);
   if (playlistMatch) {
