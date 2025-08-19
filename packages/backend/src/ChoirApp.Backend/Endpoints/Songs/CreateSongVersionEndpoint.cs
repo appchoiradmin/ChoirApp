@@ -43,6 +43,7 @@ namespace ChoirApp.Backend.Endpoints.Songs
                 req.Content,
                 userId,
                 (Domain.Entities.SongVisibilityType)req.Visibility,
+                req.AudioUrl,
                 req.VisibleToChoirs,
                 req.Tags);
 

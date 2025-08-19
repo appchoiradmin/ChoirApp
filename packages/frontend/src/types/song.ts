@@ -30,6 +30,7 @@ export interface SongDto {
   title: string;
   artist: string | null;
   content: string;
+  audioUrl: string | null;
   creatorId: string;
   creatorName: string;
   createdAt: string;
@@ -47,6 +48,7 @@ export interface CreateSongDto {
   title: string;
   artist: string | null;
   content: string;
+  audioUrl?: string | null;
   visibility: SongVisibilityType;
   visibleToChoirs?: string[]; // Choir IDs
   tags?: string[]; // Tag names
@@ -57,6 +59,7 @@ export interface CreateSongDto {
  */
 export interface CreateSongVersionDto {
   content: string;
+  audioUrl?: string | null;
   visibility: SongVisibilityType;
   visibleToChoirs?: string[]; // Choir IDs
   tags?: string[]; // Tag names
@@ -69,6 +72,7 @@ export interface UpdateSongDto {
   title?: string;
   artist?: string;
   content?: string;
+  audioUrl?: string | null;
   tags?: string[]; // Tag names
 }
 

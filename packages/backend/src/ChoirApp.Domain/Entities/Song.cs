@@ -56,12 +56,15 @@ public class Song
     [Column("visibility")]
     public SongVisibilityType Visibility { get; set; } = SongVisibilityType.Private;
 
+    [Column("audio_url")]
+    public string? AudioUrl { get; set; }
+
     public ICollection<Song> Derivatives { get; set; } = new List<Song>();
     public ICollection<SongVisibility> Visibilities { get; set; } = new List<SongVisibility>();
     public ICollection<SongTag> Tags { get; set; } = new List<SongTag>();
 
     // Factory method for creating a new song (version 1)
-    public static Result<Song> Create(string title, string? artist, string content, Guid creatorId, SongVisibilityType visibility)
+    public static Result<Song> Create(string title, string? artist, string content, Guid creatorId, SongVisibilityType visibility, string? audioUrl = null)
     {
         if (string.IsNullOrWhiteSpace(title))
         {
@@ -88,14 +91,15 @@ public class Song
             CreatedAt = DateTimeOffset.UtcNow,
             VersionNumber = 1,
             BaseSongId = null,
-            Visibility = visibility
+            Visibility = visibility,
+            AudioUrl = audioUrl
         };
 
         return Result.Ok(song);
     }
 
     // Factory method for creating a new version of an existing song
-    public static Result<Song> CreateVersion(Song baseSong, string content, Guid creatorId, SongVisibilityType visibility)
+    public static Result<Song> CreateVersion(Song baseSong, string content, Guid creatorId, SongVisibilityType visibility, string? audioUrl = null)
     {
         if (baseSong == null)
         {
@@ -122,14 +126,15 @@ public class Song
             CreatedAt = DateTimeOffset.UtcNow,
             VersionNumber = baseSong.VersionNumber + 1,
             BaseSongId = baseSong.SongId,
-            Visibility = visibility
+            Visibility = visibility,
+            AudioUrl = audioUrl ?? baseSong.AudioUrl // Inherit from base song if not provided
         };
 
         return Result.Ok(song);
     }
 
     // Method to update song content (only allowed for the creator)
-    public Result Update(string title, string? artist, string content, Guid userId)
+    public Result Update(string title, string? artist, string content, Guid userId, string? audioUrl = null)
     {
         if (userId != CreatorId)
         {
@@ -149,6 +154,7 @@ public class Song
         Title = title;
         Artist = artist;
         Content = content;
+        AudioUrl = audioUrl;
 
         return Result.Ok();
     }

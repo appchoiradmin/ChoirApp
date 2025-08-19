@@ -11,6 +11,7 @@ namespace ChoirApp.Backend.Endpoints.Songs.Responses
         public string Title { get; set; } = string.Empty;
         public string? Artist { get; set; }
         public string Content { get; set; } = string.Empty;
+        public string? AudioUrl { get; set; }
         public Guid CreatorId { get; set; }
         public string CreatorName { get; set; } = string.Empty;
         public DateTimeOffset CreatedAt { get; set; }
@@ -31,6 +32,7 @@ namespace ChoirApp.Backend.Endpoints.Songs.Responses
                 Title = songDto.Title,
                 Artist = songDto.Artist,
                 Content = songDto.Content,
+                AudioUrl = songDto.AudioUrl,
                 CreatorId = songDto.CreatorId,
                 CreatorName = songDto.CreatorName,
                 CreatedAt = songDto.CreatedAt,

@@ -22,6 +22,7 @@ namespace ChoirApp.Application.Dtos
         public int VersionNumber { get; set; }
         public Guid? BaseSongId { get; set; }
         public SongVisibilityType Visibility { get; set; }
+        public string? AudioUrl { get; set; }
         public List<ChoirDto> VisibleToChoirs { get; set; } = new List<ChoirDto>();
         public List<TagDto> Tags { get; set; } = new List<TagDto>();
     }

@@ -28,6 +28,42 @@
   margin-bottom: 1.2rem;
 }
 
+.audioLinkContainer {
+  margin: 1rem 0;
+}
+
+.audioLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  background: linear-gradient(135deg, $primary, color.adjust($primary, $lightness: 10%));
+  color: white;
+  text-decoration: none;
+  border-radius: 0.5rem;
+  font-weight: 600;
+  font-size: 1rem;
+  transition: all 0.2s ease;
+  
+  &:hover {
+    background: linear-gradient(135deg, color.adjust($primary, $lightness: -5%), $primary);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba($primary, 0.3);
+    color: white;
+    text-decoration: none;
+  }
+  
+  &:focus {
+    outline: 2px solid color.adjust($primary, $alpha: -0.5);
+    outline-offset: 2px;
+  }
+  
+  @media (max-width: 768px) {
+    font-size: 0.95rem;
+    padding: 0.6rem 0.8rem;
+  }
+}
+
 .tags {
   display: flex;
   flex-wrap: wrap;

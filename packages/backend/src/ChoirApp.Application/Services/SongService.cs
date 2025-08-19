@@ -38,7 +38,7 @@ namespace ChoirApp.Application.Services
             _tagRepository = tagRepository;
         }
 
-        public async Task<Result<SongDto>> CreateSongAsync(string title, string? artist, string content, Guid creatorId, Domain.Entities.SongVisibilityType visibility, List<Guid>? visibleToChoirs = null, List<string>? tags = null)
+        public async Task<Result<SongDto>> CreateSongAsync(string title, string? artist, string content, Guid creatorId, Domain.Entities.SongVisibilityType visibility, string? audioUrl = null, List<Guid>? visibleToChoirs = null, List<string>? tags = null)
         {
             // Business rule: Creator must exist
             var user = await _userRepository.GetByIdAsync(creatorId);
@@ -54,7 +54,7 @@ namespace ChoirApp.Application.Services
             }
 
             // Create song using domain logic
-            var songResult = Song.Create(title, artist, content, creatorId, visibility);
+            var songResult = Song.Create(title, artist, content, creatorId, visibility, audioUrl);
             if (songResult.IsFailed)
             {
                 return Result.Fail(songResult.Errors);
@@ -106,7 +106,7 @@ namespace ChoirApp.Application.Services
             return Result.Ok(MapToSongDto(song));
         }
 
-        public async Task<Result<SongDto>> CreateSongVersionAsync(Guid baseSongId, string content, Guid creatorId, Domain.Entities.SongVisibilityType visibility, List<Guid>? visibleToChoirs = null, List<string>? tags = null)
+        public async Task<Result<SongDto>> CreateSongVersionAsync(Guid baseSongId, string content, Guid creatorId, Domain.Entities.SongVisibilityType visibility, string? audioUrl = null, List<Guid>? visibleToChoirs = null, List<string>? tags = null)
         {
             // Business rule: Base song must exist
             var baseSong = await _songRepository.GetByIdAsync(baseSongId);
@@ -129,7 +129,7 @@ namespace ChoirApp.Application.Services
             }
 
             // Create version using domain logic
-            var versionResult = Song.CreateVersion(baseSong, content, creatorId, visibility);
+            var versionResult = Song.CreateVersion(baseSong, content, creatorId, visibility, audioUrl);
             if (versionResult.IsFailed)
             {
                 return Result.Fail(versionResult.Errors);
@@ -255,7 +255,7 @@ namespace ChoirApp.Application.Services
             return Result.Ok(songs.Select(MapToSongDto).ToList());
         }
 
-        public async Task<Result<SongDto>> UpdateSongAsync(Guid songId, string title, string? artist, string content, Guid userId, List<string>? tags = null)
+        public async Task<Result<SongDto>> UpdateSongAsync(Guid songId, string title, string? artist, string content, Guid userId, string? audioUrl = null, List<string>? tags = null)
         {
             var song = await _songRepository.GetByIdAsync(songId);
             if (song == null)
@@ -264,7 +264,7 @@ namespace ChoirApp.Application.Services
             }
 
             // Update using domain logic (includes authorization check)
-            var updateResult = song.Update(title, artist, content, userId);
+            var updateResult = song.Update(title, artist, content, userId, audioUrl);
             if (updateResult.IsFailed)
             {
                 return Result.Fail(updateResult.Errors);
@@ -466,6 +466,7 @@ namespace ChoirApp.Application.Services
                 Content = song.Content,
                 CreatorId = song.CreatorId,
                 Visibility = (Dtos.SongVisibilityType)(int)song.Visibility,
+                AudioUrl = song.AudioUrl,
                 BaseSongId = song.BaseSongId,
                 CreatedAt = song.CreatedAt,
                 Tags = song.Tags?.Where(st => st.Tag != null).Select(st => new TagDto

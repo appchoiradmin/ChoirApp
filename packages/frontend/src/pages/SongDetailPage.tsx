@@ -31,6 +31,7 @@ const SongDetailPage: React.FC = () => {
   const [title, setTitle] = useState('');
   const [artist, setArtist] = useState('');
   const [chordProContent, setChordProContent] = useState('');
+  const [audioUrl, setAudioUrl] = useState('');
   const [visibility, setVisibility] = useState<SongVisibilityType>(SongVisibilityType.PublicAll);
   const [tags, setTags] = useState<string[]>([]);
   
@@ -40,6 +41,7 @@ const SongDetailPage: React.FC = () => {
   const [editTitle, setEditTitle] = useState('');
   const [editArtist, setEditArtist] = useState('');
   const [editContent, setEditContent] = useState('');
+  const [editAudioUrl, setEditAudioUrl] = useState('');
   const [editVisibility, setEditVisibility] = useState<SongVisibilityType>(SongVisibilityType.PublicAll);
   const [selectedChoirsForVersion, setSelectedChoirsForVersion] = useState<string[]>([]);
   const [selectedChoirsForEdit, setSelectedChoirsForEdit] = useState<string[]>([]);
@@ -65,12 +67,14 @@ const SongDetailPage: React.FC = () => {
       try {
         const data = await getSongById(songId, user.token);
         console.log('Song data:', data);
+        console.log('AudioUrl in song data:', data.audioUrl);
         setSong(data);
         
         // Initialize edit form with current song data
         setEditTitle(data.title);
         setEditArtist(data.artist || '');
         setEditContent(data.content);
+        setEditAudioUrl(data.audioUrl || '');
         setEditVisibility(data.visibility);
       } catch (err) {
         if (err instanceof Error && err.message === 'Song not found') {
@@ -148,6 +152,7 @@ const SongDetailPage: React.FC = () => {
         title: editTitle,
         artist: editArtist,
         content: editContent,
+        audioUrl: editAudioUrl || undefined,
         tags: editTags.length > 0 ? editTags : undefined
       };
       
@@ -207,6 +212,7 @@ const SongDetailPage: React.FC = () => {
     setEditTitle(song?.title || '');
     setEditArtist(song?.artist || '');
     setEditContent(song?.content || '');
+    setEditAudioUrl(song?.audioUrl || '');
     setEditVisibility(song?.visibility || SongVisibilityType.PublicAll);
     // Load existing tags into edit mode
     setEditTags(song?.tags?.map(tag => tag.tagName) || []);
@@ -244,6 +250,7 @@ const SongDetailPage: React.FC = () => {
         title,
         artist,
         content: chordProContent,
+        audioUrl: audioUrl || undefined,
         visibility,
         visibleToChoirs: visibility === SongVisibilityType.PublicChoirs ? selectedChoirsForCreate : undefined,
         tags: tags.length > 0 ? tags : undefined
@@ -284,6 +291,18 @@ const SongDetailPage: React.FC = () => {
             onChange={(e) => setArtist(e.target.value)}
             className={styles.input}
             placeholder={t('songs.enterArtistNameOptional')}
+          />
+        </div>
+
+        <div className={styles.formGroup}>
+          <label htmlFor="audioUrl" className={styles.label}>{t('songs.audioUrl')}</label>
+          <input
+            id="audioUrl"
+            type="url"
+            value={audioUrl}
+            onChange={(e) => setAudioUrl(e.target.value)}
+            className={styles.input}
+            placeholder={t('songs.enterAudioUrlOptional')}
           />
         </div>
 
@@ -513,10 +532,6 @@ const SongDetailPage: React.FC = () => {
             className={styles.input}
             placeholder={t('songs.enterArtistName')}
           />
-        </div>
-        
-        <div className={styles.formGroup}>
-          <label htmlFor="editVisibility" className={styles.label}>{t('songs.visibility')}</label>
           <select
             id="editVisibility"
             value={editVisibility}
@@ -622,6 +637,20 @@ const SongDetailPage: React.FC = () => {
         )}
         
         <div className={styles.formGroup}>
+          <label htmlFor="editAudioUrl" className={styles.label}>{t('songs.audioUrl')}</label>
+          <input
+            id="editAudioUrl"
+            type="url"
+            value={editAudioUrl}
+            onChange={(e) => setEditAudioUrl(e.target.value)}
+            className={styles.input}
+            placeholder={t('songs.audioUrlPlaceholder')}
+            pattern="https?://.*"
+            title="Please enter a valid URL starting with http:// or https://"
+          />
+        </div>
+
+        <div className={styles.formGroup}>
           <label className={styles.label}>{t('songs.tags')}</label>
           <TagInput
             tags={editTags}
@@ -648,14 +677,14 @@ const SongDetailPage: React.FC = () => {
             disabled={isProcessing}
             className={`${styles.button} ${styles.primaryButton}`}
           >
-            {isProcessing ? 'Updating...' : 'Update Song'}
+            {isProcessing ? t('songs.saving') : t('songs.save')}
           </button>
           <button
             onClick={handleCancelEdit}
             disabled={isProcessing}
             className={`${styles.button} ${styles.secondaryButton}`}
           >
-            Cancel
+{t('common.cancel')}
           </button>
         </div>
       </div>
@@ -800,14 +829,14 @@ const SongDetailPage: React.FC = () => {
             disabled={isProcessing}
             className={`${styles.button} ${styles.primaryButton}`}
           >
-            {isProcessing ? 'Creating...' : 'Create Version'}
+            {isProcessing ? t('songs.creating') : t('songs.createVersion')}
           </button>
           <button
             onClick={handleCancelEdit}
             disabled={isProcessing}
             className={`${styles.button} ${styles.secondaryButton}`}
           >
-            Cancel
+{t('common.cancel')}
           </button>
         </div>
       </div>
@@ -818,7 +847,7 @@ const SongDetailPage: React.FC = () => {
     <Layout 
       navigation={
         <Navigation 
-          title={isEditMode ? 'Edit Song' : isVersionMode ? 'Create Version' : song?.title || 'Song Details'} 
+          title={isEditMode ? t('songs.editSong') : isVersionMode ? t('songs.createVersion') : song?.title || t('songs.songDetail')} 
           showBackButton={true}
           onBackClick={() => navigate(-1)}
         />
@@ -835,6 +864,20 @@ const SongDetailPage: React.FC = () => {
               <h1 className={styles.title}>{song?.title}</h1>
               <p className={styles.artist}>{song?.artist || 'Unknown Artist'}</p>
               
+              {/* Audio link display */}
+              {song?.audioUrl && (
+                <div className={styles.audioLinkContainer}>
+                  <a 
+                    href={song.audioUrl} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className={styles.audioLink}
+                  >
+                    🎵 {t('songs.listenToSong')}
+                  </a>
+                </div>
+              )}
+              
               {/* Mobile-first action buttons */}
               <div className={styles.actionButtons}>
                 {canEdit && (
@@ -843,7 +886,7 @@ const SongDetailPage: React.FC = () => {
                     className={`${styles.actionButton} ${styles.editButton}`}
                     disabled={isProcessing}
                   >
-                    Edit Song
+                    {t('songs.editSong')}
                   </button>
                 )}
                 
@@ -853,7 +896,7 @@ const SongDetailPage: React.FC = () => {
                     className={`${styles.actionButton} ${styles.versionButton}`}
                     disabled={isProcessing}
                   >
-                    Create Version
+                    {t('songs.createVersion')}
                   </button>
                 )}
               </div>
@@ -884,7 +927,7 @@ const SongDetailPage: React.FC = () => {
                     disabled={!selectedChoirId || isProcessing}
                     className={styles.legacyCreateButton}
                   >
-                    {isProcessing ? 'Creating...' : 'Create Version for My Choir'}
+                    {isProcessing ? t('songs.creating') : t('songs.createVersionForChoir')}
                   </button>
                 </div>
               )}

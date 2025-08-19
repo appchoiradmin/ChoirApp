@@ -44,6 +44,7 @@ namespace ChoirApp.Backend.Endpoints.Songs
                 req.Artist,
                 req.Content,
                 userId,
+                req.AudioUrl,
                 req.Tags);
 
             if (result.IsFailed)

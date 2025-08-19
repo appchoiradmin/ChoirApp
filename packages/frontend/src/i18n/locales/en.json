@@ -27,7 +27,8 @@
     "clear": "Clear",
     "selectAll": "Select All",
     "copy": "Copy",
-    "copied": "Copied!"
+    "copied": "Copied!",
+    "optional": "optional"
   },
   "navigation": {
     "home": "Home",
@@ -237,6 +238,10 @@
     "deleteSong": "Delete Song",
     "songTitle": "Song Title",
     "artistLabel": "Artist",
+    "audioUrl": "Audio Link",
+    "audioUrlPlaceholder": "Enter Spotify, YouTube, or other audio URL",
+    "enterAudioUrlOptional": "Enter audio URL (optional)",
+    "listenToSong": "Listen to Song",
     "key": "Key",
     "tempo": "Tempo",
     "lyrics": "Lyrics",
@@ -307,6 +312,7 @@
     "save": "Save",
     "cancel": "Cancel",
     "createVersion": "Create Version",
+    "createVersionForChoir": "Create Version for My Choir",
     "createSongVersion": "Create Song Version",
     "originalSong": "Original Song",
     "songCreatedSuccessfully": "Song created successfully!",
