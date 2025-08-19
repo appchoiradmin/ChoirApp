@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { getSongById, createSongVersion, getSongsForChoir, createSong, updateSong, updateSongVisibility } from '../services/songService';
+import { globalSongCache } from '../utils/songCache';
 import type { SongDto, CreateSongDto, UpdateSongDto, UpdateSongVisibilityDto, CreateSongVersionDto } from '../types/song';
 import { SongVisibilityType } from '../types/song';
 import { useUser } from '../hooks/useUser';
@@ -66,8 +67,6 @@ const SongDetailPage: React.FC = () => {
 
       try {
         const data = await getSongById(songId, user.token);
-        console.log('Song data:', data);
-        console.log('AudioUrl in song data:', data.audioUrl);
         setSong(data);
         
         // Initialize edit form with current song data
@@ -76,6 +75,11 @@ const SongDetailPage: React.FC = () => {
         setEditContent(data.content);
         setEditAudioUrl(data.audioUrl || '');
         setEditVisibility(data.visibility);
+        setEditTags(data.tags?.map(tag => tag.tagName) || []);
+        
+        // Initialize choir selection for edit
+        const choirIds = data.visibleToChoirs?.map(choir => choir.choirId.toString()) || [];
+        setSelectedChoirsForEdit(choirIds);
       } catch (err) {
         if (err instanceof Error && err.message === 'Song not found') {
           setSong(null);
@@ -178,22 +182,57 @@ const SongDetailPage: React.FC = () => {
         }
       }
       
-      // Update visibility if it changed
-      if (editVisibility !== song?.visibility) {
+      // Validate PublicChoirs visibility requires at least one choir
+      if (editVisibility === SongVisibilityType.PublicChoirs && selectedChoirsForEdit.length === 0) {
+        setError('Please select at least one choir when setting visibility to "Public to Choirs".');
+        return;
+      }
+
+      // Update visibility if it changed (including choir selection changes for PublicChoirs)
+      const hasVisibilityChange = editVisibility !== song?.visibility;
+      const originalChoirIds = song?.visibleToChoirs?.map(choir => choir.choirId.toString()).sort() || [];
+      const currentChoirIds = selectedChoirsForEdit.slice().sort();
+      const hasChoirSelectionChange = JSON.stringify(originalChoirIds) !== JSON.stringify(currentChoirIds);
+      
+      
+      if (hasVisibilityChange || (editVisibility === SongVisibilityType.PublicChoirs && hasChoirSelectionChange)) {
         try {
           const visibilityDto: UpdateSongVisibilityDto = {
             visibility: editVisibility,
             visibleToChoirs: editVisibility === SongVisibilityType.PublicChoirs ? selectedChoirsForEdit : undefined
           };
           await updateSongVisibility(songId, visibilityDto, user.token);
+          
         } catch (visibilityError) {
           console.warn('Visibility update failed:', visibilityError);
           // Don't fail the entire operation if only visibility update fails
           setError('Song updated, but visibility change may have failed. Please refresh to verify.');
         }
+      } else {
+        // If no visibility update, just update with the basic song data
+        setSong({ ...updatedSong, visibility: editVisibility });
       }
       
-      setSong({ ...updatedSong, visibility: editVisibility });
+      // Always refresh song data after any save operation
+      try {
+        globalSongCache.delete(songId);
+        const refreshedSong = await getSongById(songId, user.token);
+        setSong(refreshedSong);
+        
+        // Update ALL edit form state to match the refreshed song data
+        setEditTitle(refreshedSong.title);
+        setEditArtist(refreshedSong.artist || '');
+        setEditContent(refreshedSong.content);
+        setEditAudioUrl(refreshedSong.audioUrl || '');
+        setEditVisibility(refreshedSong.visibility);
+        setEditTags(refreshedSong.tags?.map(tag => tag.tagName) || []);
+        
+        const updatedChoirIds = refreshedSong?.visibleToChoirs?.map(choir => choir.choirId.toString()) || [];
+        setSelectedChoirsForEdit(updatedChoirIds);
+      } catch (refreshError) {
+        console.warn('Failed to refresh song data after save:', refreshError);
+      }
+      
       setIsEditMode(false);      
    
       setError(null);
@@ -213,9 +252,41 @@ const SongDetailPage: React.FC = () => {
     setEditArtist(song?.artist || '');
     setEditContent(song?.content || '');
     setEditAudioUrl(song?.audioUrl || '');
-    setEditVisibility(song?.visibility || SongVisibilityType.PublicAll);
-    // Load existing tags into edit mode
+    setEditVisibility(song?.visibility ?? SongVisibilityType.PublicAll);
     setEditTags(song?.tags?.map(tag => tag.tagName) || []);
+    
+    // Load choir IDs for edit
+    const choirIds = song?.visibleToChoirs?.map(choir => choir.choirId.toString()) || [];
+    setSelectedChoirsForEdit(choirIds);
+  };
+
+  // Check if save button should be disabled
+  const isSaveDisabled = () => {
+    // Always disabled if processing
+    if (isProcessing) return true;
+    
+    // If visibility is PublicChoirs but no choirs selected, disable
+    if (editVisibility === SongVisibilityType.PublicChoirs && selectedChoirsForEdit.length === 0) {
+      return true;
+    }
+    
+    // Check if any changes were made
+    const hasContentChanges = 
+      editTitle !== (song?.title || '') ||
+      editArtist !== (song?.artist || '') ||
+      editContent !== (song?.content || '') ||
+      editAudioUrl !== (song?.audioUrl || '');
+    
+    const hasVisibilityChanges = editVisibility !== (song?.visibility ?? SongVisibilityType.PublicAll);
+    
+    const hasTagChanges = JSON.stringify(editTags.sort()) !== JSON.stringify((song?.tags?.map(tag => tag.tagName) || []).sort());
+    
+    const originalChoirIds = song?.visibleToChoirs?.map(choir => choir.choirId.toString()).sort() || [];
+    const currentChoirIds = selectedChoirsForEdit.slice().sort();
+    const hasChoirChanges = JSON.stringify(originalChoirIds) !== JSON.stringify(currentChoirIds);
+    
+    // Enable save only if there are changes
+    return !(hasContentChanges || hasVisibilityChanges || hasTagChanges || hasChoirChanges);
   };
 
   const handleStartVersionCreation = () => {
@@ -342,7 +413,7 @@ const SongDetailPage: React.FC = () => {
             {selectedChoirsForCreate.length > 0 && (
               <div className={styles.selectedSummary}>
                 <span className={styles.selectedCount}>
-                  {selectedChoirsForCreate.length} {t('songs.choirsSelected')}
+                  {t('songs.choirsSelected', { count: selectedChoirsForCreate.length })}
                 </span>
                 <button
                   type="button"
@@ -547,7 +618,15 @@ const SongDetailPage: React.FC = () => {
         {/* Choir selection for edit form */}
         {editVisibility === SongVisibilityType.PublicChoirs && user?.choirs && (
           <div className={styles.formGroup}>
-            <label className={styles.label}>Share with Choirs ({user.choirs.length} available)</label>
+            <label className={styles.label}>
+              Share with Choirs ({user.choirs.length} available)
+              <span style={{ color: 'red', marginLeft: '4px' }}>*</span>
+            </label>
+            {selectedChoirsForEdit.length === 0 && (
+              <div style={{ color: 'red', fontSize: '0.875rem', marginBottom: '8px' }}>
+                At least one choir must be selected
+              </div>
+            )}
             
             {/* Filter input for large choir lists */}
             {user.choirs.length > 5 && (
@@ -566,7 +645,7 @@ const SongDetailPage: React.FC = () => {
             {selectedChoirsForEdit.length > 0 && (
               <div className={styles.selectedSummary}>
                 <span className={styles.selectedCount}>
-                  {selectedChoirsForEdit.length} {t('songs.choirsSelected')}
+                  {t('songs.choirsSelected', { count: selectedChoirsForEdit.length })}
                 </span>
                 <button
                   type="button"
@@ -674,7 +753,7 @@ const SongDetailPage: React.FC = () => {
         <div className={styles.buttonGroup}>
           <button
             onClick={handleUpdateSong}
-            disabled={isProcessing}
+            disabled={isSaveDisabled()}
             className={`${styles.button} ${styles.primaryButton}`}
           >
             {isProcessing ? t('songs.saving') : t('songs.save')}
@@ -732,7 +811,7 @@ const SongDetailPage: React.FC = () => {
             {selectedChoirsForVersion.length > 0 && (
               <div className={styles.selectedSummary}>
                 <span className={styles.selectedCount}>
-                  {selectedChoirsForVersion.length} choir{selectedChoirsForVersion.length !== 1 ? 's' : ''} selected
+                  {t('songs.choirsSelected', { count: selectedChoirsForVersion.length })}
                 </span>
                 <button
                   type="button"

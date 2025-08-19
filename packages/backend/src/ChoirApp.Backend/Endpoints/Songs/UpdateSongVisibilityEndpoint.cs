@@ -1,8 +1,4 @@
-using System;
-using System.Linq;
 using System.Security.Claims;
-using System.Threading;
-using System.Threading.Tasks;
 using ChoirApp.Application.Contracts;
 using ChoirApp.Backend.Endpoints.Songs.Requests;
 using ChoirApp.Domain.Entities;
@@ -37,10 +33,12 @@ namespace ChoirApp.Backend.Endpoints.Songs
                 return;
             }
 
+
             var result = await _songService.UpdateSongVisibilityAsync(
                 songId,
                 (Domain.Entities.SongVisibilityType)req.Visibility,
-                userId);
+                userId,
+                req.VisibleToChoirs);
 
             if (result.IsFailed)
             {

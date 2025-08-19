@@ -196,8 +196,8 @@ namespace ChoirApp.Application.Services
                 }
             }
 
-            // Cache miss - fetch from database
-            var song = await _songRepository.GetByIdWithTagsAsync(songId);
+            // Cache miss - fetch from database with choir visibility relationships
+            var song = await _songRepository.GetByIdWithChoirsAsync(songId);
             if (song == null)
             {
                 return Result.Fail("Song not found.");
@@ -206,7 +206,9 @@ namespace ChoirApp.Application.Services
             // Cache the result
             _songCache.TryAdd(songId, (song, DateTime.UtcNow));
 
-            return Result.Ok(MapToSongDto(song));
+            var dto = MapToSongDto(song);
+
+            return Result.Ok(dto);
         }
 
         public async Task<Result<List<SongDto>>> GetSongsByUserIdAsync(Guid userId)
@@ -308,12 +310,19 @@ namespace ChoirApp.Application.Services
             return Result.Ok(MapToSongDto(song));
         }
 
-        public async Task<Result> UpdateSongVisibilityAsync(Guid songId, Domain.Entities.SongVisibilityType visibility, Guid userId)
+        public async Task<Result> UpdateSongVisibilityAsync(Guid songId, Domain.Entities.SongVisibilityType visibility, Guid userId, List<Guid>? visibleToChoirs = null)
         {
+            
             var song = await _songRepository.GetByIdAsync(songId);
             if (song == null)
             {
                 return Result.Fail("Song not found.");
+            }
+
+            // Business rule: If visibility is PublicChoirs, visibleToChoirs must be provided
+            if (visibility == Domain.Entities.SongVisibilityType.PublicChoirs && (visibleToChoirs == null || visibleToChoirs.Count == 0))
+            {
+                return Result.Fail("When visibility is PublicChoirs, at least one choir must be specified.");
             }
 
             // Update using domain logic (includes authorization check)
@@ -323,17 +332,38 @@ namespace ChoirApp.Application.Services
                 return Result.Fail(updateResult.Errors);
             }
 
+            // Clear existing choir visibility records
+            var existingVisibilities = await _songRepository.GetSongVisibilitiesAsync(songId);
+            foreach (var existingVisibility in existingVisibilities)
+            {
+                await _songRepository.RemoveSongVisibilityAsync(existingVisibility);
+            }
+
+            // Create new SongVisibility records for PublicChoirs visibility
+            if (visibility == Domain.Entities.SongVisibilityType.PublicChoirs && visibleToChoirs != null)
+            {
+                foreach (var choirId in visibleToChoirs)
+                {
+                    var songVisibility = new SongVisibility
+                    {
+                        SongId = songId,
+                        ChoirId = choirId
+                    };
+                    await _songRepository.AddSongVisibilityAsync(songVisibility);
+                }
+            }
+
             await _songRepository.SaveChangesAsync();
             
             // Invalidate cache after visibility update
             InvalidateSongCache(songId);
             
             // Invalidate choir songs cache for all choirs that might be affected
-            if (song.Visibility == Domain.Entities.SongVisibilityType.PublicChoirs)
+            if (visibility == Domain.Entities.SongVisibilityType.PublicChoirs && visibleToChoirs != null)
             {
-                foreach (var songVisibility in song.Visibilities)
+                foreach (var choirId in visibleToChoirs)
                 {
-                    InvalidateChoirSongsCache(songVisibility.ChoirId);
+                    InvalidateChoirSongsCache(choirId);
                 }
             }
             
@@ -469,6 +499,11 @@ namespace ChoirApp.Application.Services
                 AudioUrl = song.AudioUrl,
                 BaseSongId = song.BaseSongId,
                 CreatedAt = song.CreatedAt,
+                VisibleToChoirs = song.Visibilities?.Select(sv => new ChoirDto
+                {
+                    Id = sv.ChoirId,
+                    Name = sv.Choir?.ChoirName ?? "Unknown Choir"
+                }).ToList() ?? [],
                 Tags = song.Tags?.Where(st => st.Tag != null).Select(st => new TagDto
                 {
                     TagId = st.Tag!.TagId,

@@ -16,7 +16,7 @@ namespace ChoirApp.Application.Contracts
         Task<Result<List<SongDto>>> GetAllPublicSongsAsync();
         Task<Result<List<SongDto>>> SearchSongsAsync(string searchTerm, Guid? userId, Guid? choirId);
         Task<Result<SongDto>> UpdateSongAsync(Guid songId, string title, string? artist, string content, Guid userId, string? audioUrl = null, List<string>? tags = null);
-        Task<Result> UpdateSongVisibilityAsync(Guid songId, Domain.Entities.SongVisibilityType visibility, Guid userId);
+        Task<Result> UpdateSongVisibilityAsync(Guid songId, Domain.Entities.SongVisibilityType visibility, Guid userId, List<Guid>? visibleToChoirs = null);
         Task<Result> AddSongVisibilityToChoirAsync(Guid songId, Guid choirId, Guid userId);
         Task<Result> RemoveSongVisibilityFromChoirAsync(Guid songId, Guid choirId, Guid userId);
         Task<Result> AddTagToSongAsync(Guid songId, string tagName);

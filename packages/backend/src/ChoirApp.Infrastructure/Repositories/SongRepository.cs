@@ -2,10 +2,6 @@ using ChoirApp.Application.Contracts;
 using ChoirApp.Domain.Entities;
 using ChoirApp.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace ChoirApp.Infrastructure.Repositories
 {
@@ -28,6 +24,16 @@ namespace ChoirApp.Infrastructure.Repositories
             return await _context.Songs
                 .Include(s => s.Tags)
                     .ThenInclude(st => st.Tag)
+                .FirstOrDefaultAsync(s => s.SongId == songId);
+        }
+
+        public async Task<Song?> GetByIdWithChoirsAsync(Guid songId)
+        {
+            return await _context.Songs
+                .Include(s => s.Tags)
+                    .ThenInclude(st => st.Tag)
+                .Include(s => s.Visibilities)
+                    .ThenInclude(sv => sv.Choir)
                 .FirstOrDefaultAsync(s => s.SongId == songId);
         }
 
@@ -226,6 +232,24 @@ namespace ChoirApp.Infrastructure.Repositories
         public Task DeleteAsync(Song song)
         {
             _context.Songs.Remove(song);
+            return Task.CompletedTask;
+        }
+
+        public async Task<List<SongVisibility>> GetSongVisibilitiesAsync(Guid songId)
+        {
+            return await _context.SongVisibilities
+                .Where(sv => sv.SongId == songId)
+                .ToListAsync();
+        }
+
+        public async Task AddSongVisibilityAsync(SongVisibility songVisibility)
+        {
+            await _context.SongVisibilities.AddAsync(songVisibility);
+        }
+
+        public Task RemoveSongVisibilityAsync(SongVisibility songVisibility)
+        {
+            _context.SongVisibilities.Remove(songVisibility);
             return Task.CompletedTask;
         }
 

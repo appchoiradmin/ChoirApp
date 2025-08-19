@@ -17,7 +17,7 @@ namespace ChoirApp.Backend.Endpoints.Songs.Responses
         public DateTimeOffset CreatedAt { get; set; }
         public int VersionNumber { get; set; }
         public Guid? BaseSongId { get; set; }
-        public string Visibility { get; set; } = string.Empty;
+        public int Visibility { get; set; }
         public List<ChoirResponse> VisibleToChoirs { get; set; } = new List<ChoirResponse>();
         public List<TagResponse> Tags { get; set; } = new List<TagResponse>();
 
@@ -38,7 +38,7 @@ namespace ChoirApp.Backend.Endpoints.Songs.Responses
                 CreatedAt = songDto.CreatedAt,
                 VersionNumber = songDto.VersionNumber,
                 BaseSongId = songDto.BaseSongId,
-                Visibility = songDto.Visibility.ToString(),
+                Visibility = (int)songDto.Visibility,
                 VisibleToChoirs = songDto.VisibleToChoirs.Select(c => new ChoirResponse
                 {
                     ChoirId = c.Id,
