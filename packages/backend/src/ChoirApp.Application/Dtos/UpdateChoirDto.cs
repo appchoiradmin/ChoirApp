@@ -2,7 +2,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace ChoirApp.Application.Dtos
 {
-    public class CreateChoirDto
+    public class UpdateChoirDto
     {
         [Required]
         [StringLength(100, MinimumLength = 3)]

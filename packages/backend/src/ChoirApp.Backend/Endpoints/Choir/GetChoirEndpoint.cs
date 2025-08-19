@@ -38,6 +38,8 @@ namespace ChoirApp.Backend.Endpoints.Choir
             {
                 Id = choir.ChoirId,
                 Name = choir.ChoirName,
+                Address = choir.Address,
+                Notes = choir.Notes,
                 AdminId = choir.AdminUserId,
                 Members = choir.UserChoirs.Select(uc => new ChoirMemberDto
                 {

@@ -46,7 +46,7 @@ namespace ChoirApp.Application.Services
             }
 
             // Create choir using domain logic
-            var choirResult = Choir.Create(choirDto.Name, adminId);
+            var choirResult = Choir.Create(choirDto.Name, adminId, choirDto.Address, choirDto.Notes);
             if (choirResult.IsFailed)
             {
                 return Result.Fail(choirResult.Errors);
@@ -104,8 +104,13 @@ namespace ChoirApp.Application.Services
             return Result.Ok(choir);
         }
 
-        public async Task<Result> UpdateChoirAsync(Guid choirId, CreateChoirDto choirDto, Guid adminId)
+        public async Task<Result> UpdateChoirAsync(Guid choirId, UpdateChoirDto choirDto, Guid adminId)
         {
+            if (choirDto == null)
+            {
+                return Result.Fail("Choir data is required.");
+            }
+
             var choir = await _choirRepository.GetByIdAsync(choirId);
             if (choir == null)
             {
@@ -133,7 +138,7 @@ namespace ChoirApp.Application.Services
             }
 
             // Update using domain logic
-            var updateResult = choir.UpdateName(choirDto.Name);
+            var updateResult = choir.UpdateDetails(choirDto.Name, choirDto.Address, choirDto.Notes);
             if (updateResult.IsFailed)
             {
                 return Result.Fail(updateResult.Errors);

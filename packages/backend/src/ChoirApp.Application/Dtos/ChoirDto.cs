@@ -7,6 +7,8 @@ namespace ChoirApp.Application.Dtos
     {
         public Guid Id { get; set; }
         public string Name { get; set; } = string.Empty;
+        public string? Address { get; set; }
+        public string? Notes { get; set; }
         public Guid AdminId { get; set; }
         public List<ChoirMemberDto> Members { get; set; } = new();
     }

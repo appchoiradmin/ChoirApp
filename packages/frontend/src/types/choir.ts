@@ -5,6 +5,8 @@ export type ChoirRole = typeof UserRole.ChoirAdmin | typeof UserRole.ChoirMember
 export interface Choir {
   id: string;
   name: string;
+  address?: string;
+  notes?: string;
   role: ChoirRole;
 }
 

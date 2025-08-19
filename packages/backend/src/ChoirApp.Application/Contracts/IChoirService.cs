@@ -11,7 +11,7 @@ namespace ChoirApp.Application.Contracts
         Task<Result<Choir>> CreateChoirAsync(CreateChoirDto choirDto, Guid adminId);
         Task<Result> RemoveMemberAsync(Guid choirId, Guid memberId, Guid adminId);
         Task<Result<Choir>> GetChoirByIdAsync(Guid choirId);
-        Task<Result> UpdateChoirAsync(Guid choirId, CreateChoirDto choirDto, Guid adminId);
+        Task<Result> UpdateChoirAsync(Guid choirId, UpdateChoirDto choirDto, Guid adminId);
         Task<Result> DeleteChoirAsync(Guid choirId, Guid adminId);
         Task<Result> UpdateMemberRoleAsync(Guid choirId, Guid memberId, string role, Guid adminId);
     }

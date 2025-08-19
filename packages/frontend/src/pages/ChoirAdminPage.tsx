@@ -34,6 +34,8 @@ const ChoirAdminPage: React.FC = () => {
   const [isAdmin, setIsAdmin] = useState(false);
   const [isEditingName, setIsEditingName] = useState(false);
   const [editedChoirName, setEditedChoirName] = useState('');
+  const [editedAddress, setEditedAddress] = useState('');
+  const [editedNotes, setEditedNotes] = useState('');
   const [isUpdatingName, setIsUpdatingName] = useState(false);
   const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -63,6 +65,11 @@ const ChoirAdminPage: React.FC = () => {
         
         setChoir(details);
         setInvitations(invitationsList);
+        
+        // Initialize edit form with current values
+        setEditedChoirName(details.name);
+        setEditedAddress(details.address || '');
+        setEditedNotes(details.notes || '');
       } catch (err) {
         console.error('Error fetching choir details:', err);
         setError(t('choirAdmin.failedToFetchChoirDetails'));
@@ -142,9 +149,12 @@ const ChoirAdminPage: React.FC = () => {
 
     try {
       setIsUpdatingName(true);
-      await updateChoir(choirId, editedChoirName.trim(), token);
+      await updateChoir(choirId, {
+        name: editedChoirName.trim(),
+        address: editedAddress.trim() || undefined,
+        notes: editedNotes.trim() || undefined
+      }, token);
       setIsEditingName(false);
-      setEditedChoirName('');
       fetchChoirDetails(); // Refresh to get updated choir name
       alert(t('choirAdmin.choirNameUpdated'));
     } catch (error: any) {
@@ -220,14 +230,14 @@ const ChoirAdminPage: React.FC = () => {
               {isEditingName && isAdmin ? (
                 <div className="box" style={{ backgroundColor: '#f8f9fa', border: '1px solid #e9ecef', padding: '1.5rem', marginBottom: '1rem' }}>
                   <div className="field">
-                    <label className="label is-size-6 has-text-weight-semibold">{t('choirAdmin.choirName')}</label>
+                    <label className="label is-size-6 has-text-weight-semibold">{t('choir.choirName')}</label>
                     <div className="control">
                       <input
                         className="input is-medium"
                         type="text"
                         value={editedChoirName}
                         onChange={(e) => setEditedChoirName(e.target.value)}
-                        placeholder={t('choirAdmin.choirNamePlaceholder')}
+                        placeholder={t('choir.choirNamePlaceholder')}
                         maxLength={100}
                         disabled={isUpdatingName}
                         autoFocus
@@ -242,8 +252,38 @@ const ChoirAdminPage: React.FC = () => {
                       />
                     </div>
                     <p className="help is-size-7 has-text-grey">
-                      {editedChoirName.length}/100 caracteres
+                      {editedChoirName.length}/100 characters
                     </p>
+                  </div>
+
+                  <div className="field">
+                    <label className="label is-size-6 has-text-weight-semibold">{t('choir.address')}</label>
+                    <div className="control">
+                      <input
+                        className="input"
+                        type="text"
+                        value={editedAddress}
+                        onChange={(e) => setEditedAddress(e.target.value)}
+                        placeholder={t('choir.addressPlaceholder')}
+                        maxLength={500}
+                        disabled={isUpdatingName}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="field">
+                    <label className="label is-size-6 has-text-weight-semibold">{t('choir.notes')}</label>
+                    <div className="control">
+                      <textarea
+                        className="textarea"
+                        value={editedNotes}
+                        onChange={(e) => setEditedNotes(e.target.value)}
+                        placeholder={t('choir.notesPlaceholder')}
+                        maxLength={1000}
+                        disabled={isUpdatingName}
+                        rows={3}
+                      />
+                    </div>
                   </div>
                   <div className="field is-grouped is-grouped-right" style={{ marginTop: '1rem', marginBottom: '0' }}>
                     <div className="control">
@@ -285,28 +325,42 @@ const ChoirAdminPage: React.FC = () => {
                   </div>
                 </div>
               ) : (
-                <div className="is-flex is-align-items-center is-justify-content-space-between mb-1">
-                  <h1 className="title is-3 mb-0">{choir.name}</h1>
-                  {isAdmin && (
-                    <button
-                      className="button is-small is-outlined is-primary"
-                      onClick={handleEditChoirName}
-                      title={t('choirAdmin.editChoirName')}
-                      style={{
-                        marginLeft: '1rem',
-                        fontWeight: '500',
-                        display: 'flex !important',
-                        alignItems: 'center !important',
-                        justifyContent: 'center !important',
-                        gap: '0.25rem',
-                        textAlign: 'center',
-                        width: 'auto',
-                        padding: '0.375rem 0.75rem'
-                      }}
-                    >
-                      <i className="fas fa-edit" style={{ marginRight: '0.25rem' }}></i>
-                      <span>Editar</span>
-                    </button>
+                <div>
+                  <div className="is-flex is-align-items-center is-justify-content-space-between mb-1">
+                    <h1 className="title is-3 mb-0">{choir.name}</h1>
+                    {isAdmin && (
+                      <button
+                        className="button is-small is-outlined is-primary"
+                        onClick={handleEditChoirName}
+                        title={t('choirAdmin.editChoirName')}
+                        style={{
+                          marginLeft: '1rem',
+                          fontWeight: '500',
+                          display: 'flex !important',
+                          alignItems: 'center !important',
+                          justifyContent: 'center !important',
+                          gap: '0.25rem',
+                          textAlign: 'center',
+                          width: 'auto',
+                          padding: '0.375rem 0.75rem'
+                        }}
+                      >
+                        <i className="fas fa-edit" style={{ marginRight: '0.25rem' }}></i>
+                        <span>Editar</span>
+                      </button>
+                    )}
+                  </div>
+                  {choir.address && (
+                    <div className="mb-2">
+                      <span className="has-text-weight-semibold">{t('choir.address')}: </span>
+                      <span className="has-text-grey-dark">{choir.address}</span>
+                    </div>
+                  )}
+                  {choir.notes && (
+                    <div className="mb-2">
+                      <span className="has-text-weight-semibold">{t('choir.notes')}: </span>
+                      <span className="has-text-grey-dark">{choir.notes}</span>
+                    </div>
                   )}
                 </div>
               )}

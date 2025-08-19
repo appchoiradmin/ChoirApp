@@ -6,7 +6,7 @@ if (!API_URL) {
 }
 
 export const createChoir = async (
-  choirName: string,
+  choirData: { name: string; address?: string; notes?: string },
   token: string
 ): Promise<Choir> => {
   const response = await fetch(`${API_URL}/api/choirs`, {
@@ -15,7 +15,7 @@ export const createChoir = async (
       'Content-Type': 'application/json',
       Authorization: `Bearer ${token}`,
     },
-    body: JSON.stringify({ name: choirName }),
+    body: JSON.stringify(choirData),
   });
 
   if (!response.ok) {
@@ -108,7 +108,7 @@ export const updateMemberRole = async (
 
 export const updateChoir = async (
   choirId: string,
-  choirName: string,
+  choirData: { name: string; address?: string; notes?: string },
   token: string
 ): Promise<void> => {
   const response = await fetch(`${API_URL}/api/choirs/${choirId}`, {
@@ -117,7 +117,7 @@ export const updateChoir = async (
       'Content-Type': 'application/json',
       Authorization: `Bearer ${token}`,
     },
-    body: JSON.stringify({ name: choirName }),
+    body: JSON.stringify(choirData),
   });
 
   if (!response.ok) {

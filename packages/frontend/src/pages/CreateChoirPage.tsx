@@ -8,6 +8,8 @@ import Layout from '../components/ui/Layout';
 
 const CreateChoirPage: React.FC = () => {
   const [choirName, setChoirName] = useState('');
+  const [address, setAddress] = useState('');
+  const [notes, setNotes] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
@@ -23,7 +25,7 @@ const CreateChoirPage: React.FC = () => {
     setIsLoading(true);
     setError(null);
     try {
-      await createChoir(choirName, token);
+      await createChoir({ name: choirName, address, notes }, token);
       
       // After creating a choir, the user becomes a choir admin
       // Refresh the token to update the role claim
@@ -77,6 +79,38 @@ const CreateChoirPage: React.FC = () => {
                 />
               </div>
               {error && <p className="help is-danger">{error}</p>}
+            </div>
+
+            <div className="field">
+              <label className="label" htmlFor="address">
+                {t('choir.address')}
+              </label>
+              <div className="control">
+                <input
+                  id="address"
+                  className="input"
+                  type="text"
+                  placeholder={t('choir.addressPlaceholder')}
+                  value={address}
+                  onChange={(e) => setAddress(e.target.value)}
+                />
+              </div>
+            </div>
+
+            <div className="field">
+              <label className="label" htmlFor="notes">
+                {t('choir.notes')}
+              </label>
+              <div className="control">
+                <textarea
+                  id="notes"
+                  className="textarea"
+                  placeholder={t('choir.notesPlaceholder')}
+                  value={notes}
+                  onChange={(e) => setNotes(e.target.value)}
+                  rows={4}
+                />
+              </div>
             </div>
             <div className="field is-grouped">
               <div className="control">

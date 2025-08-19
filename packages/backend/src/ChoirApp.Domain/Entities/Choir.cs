@@ -26,6 +26,12 @@ public class Choir
     [Column("admin_user_id")]
     public Guid AdminUserId { get; private set; }
 
+    [Column("address")]
+    public string? Address { get; private set; }
+
+    [Column("notes")]
+    public string? Notes { get; private set; }
+
     [ForeignKey("AdminUserId")]
     public User? Admin { get; private set; }
 
@@ -40,15 +46,17 @@ public class Choir
         ChoirName = string.Empty;
     }
 
-    private Choir(string choirName, Guid adminUserId)
+    private Choir(string choirName, Guid adminUserId, string? address = null, string? notes = null)
     {
         ChoirId = Guid.NewGuid();
         ChoirName = choirName;
         AdminUserId = adminUserId;
+        Address = address;
+        Notes = notes;
         CreationDate = DateTimeOffset.UtcNow;
     }
 
-    public static Result<Choir> Create(string choirName, Guid adminUserId)
+    public static Result<Choir> Create(string choirName, Guid adminUserId, string? address = null, string? notes = null)
     {
         if (string.IsNullOrWhiteSpace(choirName))
         {
@@ -60,7 +68,7 @@ public class Choir
             return Result.Fail("A choir must have an admin.");
         }
 
-        var choir = new Choir(choirName, adminUserId);
+        var choir = new Choir(choirName, adminUserId, address, notes);
         return Result.Ok(choir);
     }
 
@@ -72,6 +80,19 @@ public class Choir
         }
         
         ChoirName = newName;
+        return Result.Ok();
+    }
+
+    public Result UpdateDetails(string newName, string? address = null, string? notes = null)
+    {
+        if (string.IsNullOrWhiteSpace(newName))
+        {
+            return Result.Fail("Choir name cannot be empty.");
+        }
+        
+        ChoirName = newName;
+        Address = address;
+        Notes = notes;
         return Result.Ok();
     }
 

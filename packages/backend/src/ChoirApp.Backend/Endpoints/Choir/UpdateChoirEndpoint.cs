@@ -12,7 +12,9 @@ namespace ChoirApp.Backend.Endpoints.Choir
     public class UpdateChoirRequest
     {
         public Guid ChoirId { get; set; }
-        public CreateChoirDto Dto { get; set; } = null!;
+        public string Name { get; set; } = string.Empty;
+        public string? Address { get; set; }
+        public string? Notes { get; set; }
     }
 
     public class UpdateChoirEndpoint : Endpoint<UpdateChoirRequest>
@@ -40,7 +42,14 @@ namespace ChoirApp.Backend.Endpoints.Choir
                 return;
             }
 
-            var result = await _choirService.UpdateChoirAsync(req.ChoirId, req.Dto, adminId);
+            var dto = new UpdateChoirDto
+            {
+                Name = req.Name,
+                Address = req.Address,
+                Notes = req.Notes
+            };
+
+            var result = await _choirService.UpdateChoirAsync(req.ChoirId, dto, adminId);
 
             if (result.IsFailed)
             {
