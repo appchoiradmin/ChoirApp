@@ -44,6 +44,24 @@ const UserProfileDropdown: React.FC<UserProfileDropdownProps> = ({ className = '
   }, [isOpen]); // Re-run when dropdown opens/closes
 
   const handleSignOut = () => {
+    // Store current URL with parameters to restore after re-authentication
+    let currentUrl = window.location.pathname + window.location.search;
+    
+    // For general dashboard context (songs page without choir), remove showAll parameter
+    // so users default back to "My Songs" after re-authentication
+    if (window.location.pathname === '/songs') {
+      const urlParams = new URLSearchParams(window.location.search);
+      // Check if we're in general dashboard context (no choir context)
+      const hasChoirContext = urlParams.has('choirId') || window.location.pathname.includes('/choir/');
+      
+      if (!hasChoirContext && urlParams.has('showAll')) {
+        urlParams.delete('showAll');
+        currentUrl = window.location.pathname + (urlParams.toString() ? '?' + urlParams.toString() : '');
+      }
+    }
+    
+    sessionStorage.setItem('redirectAfterAuth', currentUrl);
+    
     signOut();
     setIsOpen(false);
   };

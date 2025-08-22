@@ -14,6 +14,7 @@ namespace ChoirApp.Backend.Endpoints.Songs.Requests
         public Guid? UserId { get; set; }
         public Guid? ChoirId { get; set; }
         public SongVisibilityType? Visibility { get; set; }
+        public bool? OnlyUserCreated { get; set; }
         public int? Skip { get; set; }
         public int? Take { get; set; }
     }

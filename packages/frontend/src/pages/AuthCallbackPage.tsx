@@ -23,14 +23,10 @@ const AuthCallbackPage: React.FC = () => {
     const inviteTokenFromSession = sessionStorage.getItem('inviteToken');
     const inviteToken = inviteTokenFromUrl || inviteTokenFromSession;
 
-    console.log('🟢 AuthCallback - URL invite token:', inviteTokenFromUrl);
-    console.log('🟢 AuthCallback - Session invite token:', inviteTokenFromSession);
-    console.log('🟢 AuthCallback - Using invite token:', inviteToken);
 
     // Store invitation token for later use if present
     if (inviteToken) {
       sessionStorage.setItem('inviteToken', inviteToken);
-      console.log('🟢 AuthCallback - Stored invite token in session:', inviteToken);
     }
 
     if (error) {
@@ -62,18 +58,16 @@ const AuthCallbackPage: React.FC = () => {
         // Handle invitation acceptance for existing users
         if (!isNewUser && inviteToken && user.token) {
           try {
-            console.log('🟢 AuthCallback - Accepting invitation for existing user:', inviteToken);
             await acceptShareableInvitation({ invitationToken: inviteToken }, user.token);
             sessionStorage.removeItem('inviteToken');
             
             // Refresh user data to show the new choir in dashboard
             await refetchUser();
             
-            console.log('🟢 AuthCallback - Invitation accepted, redirecting to dashboard');
             navigate('/dashboard', { replace: true });
             return;
           } catch (error: any) {
-            console.error('🔴 AuthCallback - Failed to accept invitation:', error);
+            console.error('Failed to accept invitation:', error);
             // Continue to normal flow even if invitation fails
           }
         }
@@ -83,39 +77,39 @@ const AuthCallbackPage: React.FC = () => {
           // If new user has an invitation token, skip onboarding and accept invitation directly
           if (inviteToken && user.token) {
             try {
-              console.log('🟢 AuthCallback - New user with invitation token, skipping onboarding and accepting invitation:', inviteToken);
-              console.log('🟢 AuthCallback - User token available:', !!user.token);
-              console.log('🟢 AuthCallback - About to call acceptShareableInvitation API...');
-              
-              const result = await acceptShareableInvitation({ invitationToken: inviteToken }, user.token);
-              console.log('🟢 AuthCallback - API call result:', result);
-              
+              await acceptShareableInvitation({ invitationToken: inviteToken }, user.token);
               sessionStorage.removeItem('inviteToken');
-              console.log('🟢 AuthCallback - Removed invitation token from session storage');
               
               // Refresh user data to show the new choir in dashboard
-              console.log('🟢 AuthCallback - About to refresh user data...');
               await refetchUser();
-              console.log('🟢 AuthCallback - User data refreshed');
               
-              console.log('🟢 AuthCallback - Invitation accepted for new user, redirecting to dashboard');
               navigate('/dashboard', { replace: true });
               return;
             } catch (error: any) {
-              console.error('🔴 AuthCallback - Failed to accept invitation for new user:', error);
-              console.error('🔴 AuthCallback - Error details:', error.response?.data || error.message);
+              console.error('Failed to accept invitation for new user:', error);
               // Fall back to onboarding if invitation fails
-              console.log('🟡 AuthCallback - Falling back to onboarding due to invitation error');
               navigate('/onboarding', { replace: true });
               return;
             }
           }
           
           // For new users without invitation token, go through normal onboarding
-          console.log('🟢 AuthCallback - New user without invitation, redirecting to onboarding');
           navigate('/onboarding', { replace: true });
         } else {
-          navigate('/dashboard', { replace: true });
+          // Preserve URL parameters when redirecting to dashboard after authentication
+          let redirectUrl = sessionStorage.getItem('redirectAfterAuth') || '/dashboard';
+          
+          // CRITICAL FIX: Ensure My Songs default for dashboard context after sign-in
+          if (redirectUrl.includes('/songs') && !redirectUrl.includes('/choir/')) {
+            const url = new URL(redirectUrl, window.location.origin);
+            if (url.searchParams.has('showAll')) {
+              url.searchParams.delete('showAll');
+              redirectUrl = url.pathname + (url.search || '');
+            }
+          }
+          
+          sessionStorage.removeItem('redirectAfterAuth'); // Clean up
+          navigate(redirectUrl, { replace: true });
         }
       }, 1500);
     }

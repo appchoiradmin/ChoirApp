@@ -10,7 +10,8 @@ namespace ChoirApp.Application.Contracts
         Task<List<Song>> GetByUserIdAsync(Guid userId);
         Task<List<Song>> GetByChoirIdAsync(Guid choirId);
         Task<List<Song>> GetAllPublicAsync();
-        Task<List<Song>> SearchAsync(string searchTerm, Guid? userId, Guid? choirId);
+        Task<List<Song>> SearchAsync(string searchTerm, Guid? userId, Guid? choirId, bool? onlyUserCreated = null);
+        Task<(List<Song> songs, int totalCount)> SearchWithCountAsync(string searchTerm, Guid? userId, Guid? choirId, int skip, int take, bool? onlyUserCreated = null);
         Task<Song> AddAsync(Song song);
         Task UpdateAsync(Song song);
         Task DeleteAsync(Song song);

@@ -57,6 +57,15 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({
   const signOut = useCallback(() => {
     setUser(null);
     setToken(null); // This will now clear state and localStorage
+    
+    // Clear browser caches to ensure fresh API calls after re-authentication
+    if ('caches' in window) {
+      caches.keys().then(names => {
+        names.forEach(name => {
+          caches.delete(name);
+        });
+      });
+    }
   }, []);
 
   const refreshUserToken = useCallback(async () => {

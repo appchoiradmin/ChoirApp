@@ -4,6 +4,7 @@ import { searchSongs } from '../services/songService';
 import { addSongToPlaylist } from '../services/playlistService';
 import { useUser } from '../hooks/useUser';
 import { useTranslation } from '../hooks/useTranslation';
+import { useBackNavigation } from '../hooks/useBackNavigation';
 import { useDisplayedPlaylistSections } from '../hooks/useDisplayedPlaylistSections';
 import { usePlaylistContext } from '../context/PlaylistContext';
 import { toast } from 'react-hot-toast';
@@ -69,7 +70,14 @@ const SongsListPage: FC<SongsListPageProps> = ({ playlistId, refreshPlaylist }) 
   const { token, user } = useUser();
   const isGeneralUser = !user?.choirId;
 
+  // Handle phone back button navigation - only intercept when not in choir context
+  useBackNavigation({
+    backRoute: '/dashboard',
+    shouldIntercept: !choirId // Only intercept back navigation when in dashboard context
+  });
+
   const [songs, setSongs] = useState<SongDto[]>([]);
+  const [totalCount, setTotalCount] = useState<number>(0);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedSongs, setSelectedSongs] = useState<Set<string>>(new Set());
@@ -133,6 +141,11 @@ const SongsListPage: FC<SongsListPageProps> = ({ playlistId, refreshPlaylist }) 
   
   // Function to reorder songs - playlist songs at top, then remaining songs in original order
   const getReorderedSongs = (songsToProcess: SongDto[]): SongDto[] => {
+    // Safety check: ensure songsToProcess is an array
+    if (!Array.isArray(songsToProcess)) {
+      return [];
+    }
+    
     // Separate songs that are in playlist vs not in playlist
     const playlistSongs = songsToProcess.filter(song => playlistSongIds.has(song.songId));
     const nonPlaylistSongs = songsToProcess.filter(song => !playlistSongIds.has(song.songId));
@@ -266,22 +279,15 @@ const SongsListPage: FC<SongsListPageProps> = ({ playlistId, refreshPlaylist }) 
   }, [songs, playlistSongIds]);
 
   // Consolidated fetch function that handles both initial load and search
-  const fetchSongs = async (searchTerm: string = '', resetPagination: boolean = true, explicitTags?: string[]) => {
+  const fetchSongs = async (searchTerm: string = '', resetPagination: boolean = false, explicitTags?: string[], clearAllFilters: boolean = false) => {
     try {
-      if (resetPagination) {
-        setLoading(true);
-        setPage(0);
-        setSongs([]);
-        setHasMore(true);
-      }
-      
       if (!token) {
-        setError(t('songs.authTokenNotFound'));
+        console.log('No token available, skipping song fetch');
         return;
       }
       
       // Use explicit tags if provided, otherwise get current tags from URL parameters
-      const currentTags = explicitTags !== undefined ? explicitTags : (searchParams.getAll('tags') || []);
+      const currentTags = explicitTags !== undefined ? explicitTags : filters.tags;
       
       // DEBUG: Log what we're about to send to the API
       console.log('🔍 fetchSongs DEBUG:', {
@@ -289,7 +295,12 @@ const SongsListPage: FC<SongsListPageProps> = ({ playlistId, refreshPlaylist }) 
         explicitTags,
         currentTags,
         urlTags: searchParams.getAll('tags'),
-        resetPagination
+        resetPagination,
+        clearAllFilters,
+        choirId,
+        hasShowAll: searchParams.has('showAll'),
+        showAllValue: searchParams.get('showAll'),
+        willApplyOnlyUserCreated: (!choirId && !clearAllFilters && !searchParams.has('showAll'))
       });
       
       // Prepare search parameters
@@ -301,13 +312,17 @@ const SongsListPage: FC<SongsListPageProps> = ({ playlistId, refreshPlaylist }) 
         userId: user?.id,
         choirId: choirId || undefined,
         // Include selected tags for filtering - use explicit tags or current URL tags
-        tags: currentTags.length > 0 ? currentTags : undefined
+        tags: currentTags.length > 0 ? currentTags : undefined,
+        // Apply "My Songs" filter when showAll is NOT set (default dashboard behavior)
+        // Set to undefined when showAll=true (All Songs mode) or when in choir context
+        onlyUserCreated: (!choirId && !clearAllFilters && !searchParams.has('showAll')) ? true : undefined
         // Don't specify visibility - let backend handle visibility logic based on user context
       };
       
-      console.log('🚀 API Request Parameters:', apiSearchParams);
       
-      const fetchedSongs = await searchSongs(apiSearchParams, token);
+      const searchResponse = await searchSongs(apiSearchParams, token);
+      const fetchedSongs = searchResponse.songs;
+      
       
       if (resetPagination) {
         setSongs(fetchedSongs || []);
@@ -323,7 +338,11 @@ const SongsListPage: FC<SongsListPageProps> = ({ playlistId, refreshPlaylist }) 
         setPage(prev => prev + 1);
       }
       
-      setHasMore((fetchedSongs?.length || 0) === songsPerPage);
+      // Use the hasMore flag from the backend response
+      setHasMore(searchResponse.hasMore);
+      
+      // Update the total count display
+      setTotalCount(searchResponse.totalCount);
     } catch (error) {
       console.error('Fetch songs error:', error);
       setError(t('songs.failedToLoadSongs'));
@@ -336,6 +355,14 @@ const SongsListPage: FC<SongsListPageProps> = ({ playlistId, refreshPlaylist }) 
 
   // Initial fetch effect with URL-based search term
   useEffect(() => {
+    // Ensure "My Songs" default when coming from dashboard (no choir context)
+    // Check if showAll=true was automatically added and remove it for dashboard context
+    if (!choirId && searchParams.has('showAll') && user?.id) {
+      const cleanParams = new URLSearchParams(searchParams);
+      cleanParams.delete('showAll');
+      setSearchParams(cleanParams, { replace: true });
+    }
+    
     fetchSongs(filters.search, true); // Initial load with search term from URL
     
     // Add scroll event listener for back to top button
@@ -352,27 +379,22 @@ const SongsListPage: FC<SongsListPageProps> = ({ playlistId, refreshPlaylist }) 
     
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
-  }, [token, user?.choirId, songsPerPage]); // Search handled separately by debounced handleSearchChange
+  }, [token, user?.id, user?.choirId, songsPerPage]); // Include user.id to ensure fetch happens after user is loaded
 
   // Use a ref to track previous search parameters to avoid infinite loops
   const prevSearchParamsRef = useRef<string>('');
   
-  // Separate effect to watch for filter changes (including tags) and trigger automatic refetch
+  // Separate effect to watch for filter changes (including tags and showAll) and trigger automatic refetch
   useEffect(() => {
     const currentTags = searchParams.getAll('tags');
     const currentSearch = searchParams.get('search') || '';
+    const currentShowAll = searchParams.get('showAll') || '';
     
     // Create a string representation of current search params for comparison
-    const currentParamsString = `search:${currentSearch}|tags:${currentTags.sort().join(',')}`;
+    const currentParamsString = `search:${currentSearch}|tags:${currentTags.sort().join(',')}|showAll:${currentShowAll}`;
     
     // Only refetch if search parameters actually changed and we have a token
     if (token && prevSearchParamsRef.current !== '' && prevSearchParamsRef.current !== currentParamsString) {
-      console.log('🏷️ Search parameters changed, refetching songs:', {
-        tags: currentTags,
-        search: currentSearch,
-        previousParams: prevSearchParamsRef.current,
-        currentParams: currentParamsString
-      });
       
       // Use a small delay to avoid conflicts with the main useEffect
       const timeoutId = setTimeout(() => {
@@ -663,8 +685,37 @@ const SongsListPage: FC<SongsListPageProps> = ({ playlistId, refreshPlaylist }) 
     fetchSongs(filters.search, true);
   };
 
+  // Handle My Songs filter toggle
+  const handleMySongsToggle = () => {
+    
+    // Check if we're currently showing "My Songs" (no explicit showAll param means default is active in dashboard)
+    const currentlyShowingMySongs = !choirId && !searchParams.has('showAll');
+    
+    if (currentlyShowingMySongs) {
+      // Currently showing "My Songs", switch to "All Songs"
+      const newParams = new URLSearchParams(searchParams);
+      newParams.set('showAll', 'true');
+      setSearchParams(newParams);
+    } else {
+      // Currently showing "All Songs", switch back to "My Songs"
+      // Remove the showAll parameter to restore default behavior
+      const newParams = new URLSearchParams(searchParams);
+      newParams.delete('showAll');
+      setSearchParams(newParams);
+    }
+    
+    // Trigger search with current search term
+    fetchSongs(filters.search, true);
+  };
+
   // Handle filter reset/clear
   const handleClearFilters = () => {
+    console.log('🧹 CLEAR FILTERS CLICKED - Before clear:', {
+      choirId,
+      currentFilters: filters,
+      urlParams: searchParams.toString()
+    });
+    
     // Clear all URL parameters to reset filters
     setSearchParams(new URLSearchParams());
     
@@ -673,8 +724,10 @@ const SongsListPage: FC<SongsListPageProps> = ({ playlistId, refreshPlaylist }) 
       clearTimeout(searchTimeoutRef.current);
     }
     
+    
     // Fetch songs without any filters - explicitly pass empty tags array
-    fetchSongs('', true, []);
+    // When clearing filters in dashboard context, we want to see ALL songs, not just user-created ones
+    fetchSongs('', true, [], true);
   };
 
   // Handle tag filter changes
@@ -719,13 +772,13 @@ const SongsListPage: FC<SongsListPageProps> = ({ playlistId, refreshPlaylist }) 
 
   
   return (
-    <Layout navigation={!choirId ? <Navigation title={t('songs.songsLibrary')} showBackButton={true} /> : undefined}>
+    <Layout navigation={!choirId ? <Navigation title={t('songs.songsLibrary')} showBackButton={true} onBackClick={() => navigate('/dashboard')} /> : undefined}>
       <div className="songs-page">
         <div className="songs-page__header">
           <h1 className="songs-page__title">
             {t('songs.songsLibrary')}
           </h1>
-          {(filters.search || filters.tags.length > 0) && (
+          {(filters.search || filters.tags.length > 0 || (!choirId)) && (
             <div className="songs-page__search-indicator">
               {filters.search && (
                 <span>
@@ -738,7 +791,20 @@ const SongsListPage: FC<SongsListPageProps> = ({ playlistId, refreshPlaylist }) 
                   <span className="tag-indicator__count">{filters.tags.length}</span>
                 </div>
               )}
-              <span>({songs.length} {t('songs.results')})</span>
+              {!choirId && (
+                <button 
+                  className="my-songs-indicator clickable"
+                  onClick={handleMySongsToggle}
+                  title={searchParams.has('showAll') ? t('songs.showMySongs') : t('songs.clearMySongsFilter')}
+                  aria-label={searchParams.has('showAll') ? t('songs.showMySongs') : t('songs.clearMySongsFilter')}
+                >
+                  <span className="my-songs-indicator__label">
+                    {searchParams.has('showAll') ? t('songs.showAllSongs') : t('songs.mySongsFilter')}
+                  </span>
+                  <XMarkIcon className="my-songs-indicator__close" />
+                </button>
+              )}
+              <span>({totalCount} {t('songs.results')})</span>
             </div>
           )}
           
@@ -754,7 +820,7 @@ const SongsListPage: FC<SongsListPageProps> = ({ playlistId, refreshPlaylist }) 
                 />
               </form>
               
-              {/* Clear filter button - only show when there's an active filter */}
+              {/* Clear filter button - only show when there are search or tag filters */}
               {(filters.search || filters.tags.length > 0) && (
                 <button 
                   className="songs-page__clear-filter"
@@ -762,7 +828,7 @@ const SongsListPage: FC<SongsListPageProps> = ({ playlistId, refreshPlaylist }) 
                   title={t('songs.clearFilter')}
                   aria-label={t('songs.clearFilter')}
                 >
-                  {t('common.clear')}
+                  <XMarkIcon />
                 </button>
               )}
             </div>

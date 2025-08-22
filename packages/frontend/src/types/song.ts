@@ -100,10 +100,22 @@ export interface SongSearchParams {
   title?: string;
   artist?: string;
   content?: string;
-  tags?: string[];
   userId?: string;
   choirId?: string;
   visibility?: SongVisibilityType;
   skip?: number;
   take?: number;
+  tags?: string[];
+  onlyUserCreated?: boolean;
+}
+
+/**
+ * Response for searching songs
+ */
+export interface SearchSongsResponse {
+  songs: SongDto[];
+  totalCount: number;
+  skip: number;
+  take: number;
+  hasMore: boolean;
 }

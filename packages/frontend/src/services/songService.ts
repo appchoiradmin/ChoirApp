@@ -4,6 +4,7 @@ import type {
   UpdateSongDto, 
   CreateSongVersionDto, 
   SongSearchParams,
+  SearchSongsResponse,
   TagDto,
   UpdateSongVisibilityDto,
   SongTagDto
@@ -172,7 +173,7 @@ export const getTagSuggestions = async (query: string = '', maxResults: number =
   return await response.json();
 };
 
-export const searchSongs = async (params: SongSearchParams, token: string): Promise<SongDto[]> => {
+export const searchSongs = async (params: SongSearchParams, token: string): Promise<SearchSongsResponse> => {
   // Build query string from params
   const queryParams = new URLSearchParams();
   
@@ -192,10 +193,18 @@ export const searchSongs = async (params: SongSearchParams, token: string): Prom
   if (params.tags && params.tags.length > 0) {
     params.tags.forEach(tag => queryParams.append('tags', tag));
   }
+  
+  // Add onlyUserCreated parameter
+  if (params.onlyUserCreated !== undefined) {
+    queryParams.append('onlyUserCreated', params.onlyUserCreated.toString());
+  }
 
   const response = await fetch(`${API_BASE_URL}/api/songs/search?${queryParams.toString()}`, {
     headers: {
-      'Authorization': `Bearer ${token}`
+      'Authorization': `Bearer ${token}`,
+      'Cache-Control': 'no-cache, no-store, must-revalidate',
+      'Pragma': 'no-cache',
+      'Expires': '0'
     }
   });
 

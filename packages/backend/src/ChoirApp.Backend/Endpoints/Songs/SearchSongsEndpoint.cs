@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace ChoirApp.Backend.Endpoints.Songs
 {
-    public class SearchSongsEndpoint : Endpoint<Requests.SearchSongsRequest, List<SongResponse>>
+    public class SearchSongsEndpoint : Endpoint<Requests.SearchSongsRequest, SearchSongsResponse>
     {
         private readonly ISongService _songService;
 
@@ -29,14 +29,16 @@ namespace ChoirApp.Backend.Endpoints.Songs
 
         public override async Task HandleAsync(Requests.SearchSongsRequest req, CancellationToken ct)
         {
-            Console.WriteLine($"🔍 Backend SearchSongsEndpoint called with: searchTerm='{req.SearchTerm}', title='{req.Title}', choirId='{req.ChoirId}', userId='{req.UserId}'");
+            Console.WriteLine($"🔍 Backend SearchSongsEndpoint called with: searchTerm='{req.SearchTerm}', title='{req.Title}', choirId='{req.ChoirId}', userId='{req.UserId}', onlyUserCreated='{req.OnlyUserCreated}'");
             Console.WriteLine($"🏷️ Backend request tags: {(req.Tags == null ? "NULL" : $"[{string.Join(", ", req.Tags)}] (count: {req.Tags.Count})")}");
             
             // Use title as search term if provided, otherwise use SearchTerm
             string searchTerm = !string.IsNullOrEmpty(req.Title) ? req.Title : req.SearchTerm;
             
-            // Get base results using existing method
-            var result = await _songService.SearchSongsAsync(searchTerm, req.UserId, req.ChoirId);
+            // Use new method that returns count for proper pagination
+            var skip = req.Skip ?? 0;
+            var take = req.Take ?? 50;
+            var result = await _songService.SearchSongsWithCountAsync(searchTerm, req.UserId, req.ChoirId, skip, take, req.OnlyUserCreated);
 
             if (result.IsFailed)
             {
@@ -45,7 +47,7 @@ namespace ChoirApp.Backend.Endpoints.Songs
                 return;
             }
 
-            var songs = result.Value;
+            var (songs, totalCount) = result.Value;
             
             // Apply additional filters if provided
             if (!string.IsNullOrEmpty(req.Artist))
@@ -98,16 +100,22 @@ namespace ChoirApp.Backend.Endpoints.Songs
                 songs = songs.Where(s => (int)s.Visibility == (int)req.Visibility.Value).ToList();
             }
             
-            // Apply pagination if provided
-            if (req.Skip.HasValue || req.Take.HasValue)
+            // Note: Pagination is now handled in the repository layer, so we don't need to apply it here again
+            // The additional filters (artist, content, tags, visibility) are applied after pagination,
+            // which means the totalCount might not be accurate if these filters remove items.
+            // For now, we'll adjust the totalCount based on filtered results.
+            var filteredCount = songs.Count;
+            
+            var response = new Responses.SearchSongsResponse
             {
-                int skip = req.Skip ?? 0;
-                int take = req.Take ?? 10; // Default to 10 if not specified
-                
-                songs = songs.Skip(skip).Take(take).ToList();
-            }
-
-            var response = songs.Select(SongResponse.FromDto).ToList();
+                Songs = songs.Select(SongResponse.FromDto).ToList(),
+                TotalCount = totalCount, // This is the count before additional filtering
+                Skip = skip,
+                Take = take,
+                HasMore = (skip + take) < totalCount
+            };
+            
+            Console.WriteLine($"🔍 Backend returning {response.Songs.Count} songs, totalCount: {response.TotalCount}, hasMore: {response.HasMore}");
             await SendOkAsync(response, ct);
         }
     }

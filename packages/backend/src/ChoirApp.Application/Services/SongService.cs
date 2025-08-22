@@ -251,10 +251,20 @@ namespace ChoirApp.Application.Services
             return Result.Ok(songs.Select(MapToSongDto).ToList());
         }
 
-        public async Task<Result<List<SongDto>>> SearchSongsAsync(string searchTerm, Guid? userId, Guid? choirId)
+        public async Task<Result<List<SongDto>>> SearchSongsAsync(string searchTerm, Guid? userId, Guid? choirId, bool? onlyUserCreated = null)
         {
-            var songs = await _songRepository.SearchAsync(searchTerm, userId, choirId);
+            Console.WriteLine($"🔍 SongService.SearchSongsAsync called with onlyUserCreated: {onlyUserCreated}, userId: {userId}, choirId: {choirId}");
+            var songs = await _songRepository.SearchAsync(searchTerm, userId, choirId, onlyUserCreated);
+            Console.WriteLine($"🔍 SongService found {songs.Count} songs after repository search");
             return Result.Ok(songs.Select(MapToSongDto).ToList());
+        }
+
+        public async Task<Result<(List<SongDto> songs, int totalCount)>> SearchSongsWithCountAsync(string searchTerm, Guid? userId, Guid? choirId, int skip, int take, bool? onlyUserCreated = null)
+        {
+            Console.WriteLine($"🔍 SongService.SearchSongsWithCountAsync called with onlyUserCreated: {onlyUserCreated}, userId: {userId}, choirId: {choirId}, skip: {skip}, take: {take}");
+            var (songs, totalCount) = await _songRepository.SearchWithCountAsync(searchTerm, userId, choirId, skip, take, onlyUserCreated);
+            Console.WriteLine($"🔍 SongService found {songs.Count} songs (page) out of {totalCount} total songs");
+            return Result.Ok((songs.Select(MapToSongDto).ToList(), totalCount));
         }
 
         public async Task<Result<SongDto>> UpdateSongAsync(Guid songId, string title, string? artist, string content, Guid userId, string? audioUrl = null, List<string>? tags = null)
